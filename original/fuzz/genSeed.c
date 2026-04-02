@@ -17,9 +17,9 @@
 #endif
 
 #include <libxml/parser.h>
-#include <libxml/parserInternals.h>
 #include <libxml/HTMLparser.h>
 #include <libxml/xinclude.h>
+#include <libxml/xmlIO.h>
 #include <libxml/xmlschemas.h>
 #include "fuzz.h"
 
@@ -42,6 +42,25 @@ static struct {
     int counter;
     char cwd[PATH_SIZE];
 } globalData;
+
+static void
+fuzzFreeParserInput(xmlParserInputPtr input) {
+    if (input == NULL)
+        return;
+    if (input->filename != NULL)
+        xmlFree((char *) input->filename);
+    if (input->directory != NULL)
+        xmlFree((char *) input->directory);
+    if (input->encoding != NULL)
+        xmlFree((char *) input->encoding);
+    if (input->version != NULL)
+        xmlFree((char *) input->version);
+    if ((input->free != NULL) && (input->base != NULL))
+        input->free((xmlChar *) input->base);
+    if (input->buf != NULL)
+        xmlFreeParserInputBuffer(input->buf);
+    xmlFree(input);
+}
 
 /*
  * A custom entity loader that writes all external DTDs or entities to a
@@ -69,7 +88,7 @@ fuzzEntityRecorder(const char *URL, const char *ID,
         len = xmlParserInputBufferGrow(in->buf, chunkSize);
         if (len < 0) {
             fprintf(stderr, "Error reading %s\n", URL);
-            xmlFreeInputStream(in);
+            fuzzFreeParserInput(in);
             return(NULL);
         }
     } while (len > 0);
@@ -78,7 +97,7 @@ fuzzEntityRecorder(const char *URL, const char *ID,
     xmlFuzzWriteString(globalData.out,
                        (char *) xmlBufContent(in->buf->buffer));
 
-    xmlFreeInputStream(in);
+    fuzzFreeParserInput(in);
 
     xmlHashAddEntry(globalData.entities, (const xmlChar *) URL, NULL);
 
@@ -424,4 +443,3 @@ main(int argc, const char **argv) {
 
     return(ret);
 }
-

@@ -1152,6 +1152,9 @@ Schematrontests: xmllint$(EXEEXT)
 
 RelaxNGPythonTests:
 	@(if [ -x $(PYTHON) ] ; then \
+	    if [ "$(PYTHON_SUBDIR)" != "" ] ; then cd python ; \
+		$(MAKE) -s all ; \
+		cd .. ; fi ; \
 	    PYTHONPATH=$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH ; \
 	    export PYTHONPATH; \
 	    LD_LIBRARY_PATH="$(top_builddir)/.libs:$$LD_LIBRARY_PATH" ; \
@@ -1164,6 +1167,9 @@ RelaxNGPythonTests:
 
 SchemasPythonTests:
 	@(if [ -x $(PYTHON) ] ; then \
+	    if [ "$(PYTHON_SUBDIR)" != "" ] ; then cd python ; \
+		$(MAKE) -s all ; \
+		cd .. ; fi ; \
 	    PYTHONPATH=$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH; \
 	    export PYTHONPATH; \
 	    LD_LIBRARY_PATH="$(top_builddir)/.libs:$$LD_LIBRARY_PATH" ; \
@@ -1322,4 +1328,3 @@ cov: clean-cov
 
 clean-cov:
 	rm -rf $(top_builddir)/coverage
-

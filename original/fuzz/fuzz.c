@@ -11,7 +11,6 @@
 
 #include <libxml/hash.h>
 #include <libxml/parser.h>
-#include <libxml/parserInternals.h>
 #include <libxml/tree.h>
 #include <libxml/xmlIO.h>
 #include "fuzz.h"
@@ -262,6 +261,7 @@ xmlParserInputPtr
 xmlFuzzEntityLoader(const char *URL, const char *ID ATTRIBUTE_UNUSED,
                     xmlParserCtxtPtr ctxt) {
     xmlParserInputPtr input;
+    xmlParserInputBufferPtr buf;
     xmlFuzzEntityInfo *entity;
 
     if (URL == NULL)
@@ -270,16 +270,16 @@ xmlFuzzEntityLoader(const char *URL, const char *ID ATTRIBUTE_UNUSED,
     if (entity == NULL)
         return(NULL);
 
-    input = xmlNewInputStream(ctxt);
-    input->filename = NULL;
-    input->buf = xmlParserInputBufferCreateMem(entity->data, entity->size,
-                                               XML_CHAR_ENCODING_NONE);
-    if (input->buf == NULL) {
-        xmlFreeInputStream(input);
+    buf = xmlParserInputBufferCreateMem(entity->data, entity->size,
+                                        XML_CHAR_ENCODING_NONE);
+    if (buf == NULL)
+        return(NULL);
+
+    input = xmlNewIOInputStream(ctxt, buf, XML_CHAR_ENCODING_NONE);
+    if (input == NULL) {
+        xmlFreeParserInputBuffer(buf);
         return(NULL);
     }
-    input->base = input->cur = xmlBufContent(input->buf->buffer);
-    input->end = input->base + entity->size;
 
     return input;
 }
@@ -353,4 +353,3 @@ xmlSlurpFile(const char *path, size_t *sizeRet) {
 
     return(data);
 }
-
