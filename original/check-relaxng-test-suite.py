@@ -19,10 +19,6 @@ CONF=os.path.join(os.path.dirname(__file__), "test/relaxng/OASIS/spectest.xml")
 LOG="check-relaxng-test-suite.log"
 RES="relaxng-test-results.xml"
 
-if not os.path.exists(CONF):
-    print("Skipping Relax-NG Python suite 1: %s is missing" % CONF)
-    sys.exit(0)
-
 log = open(LOG, "w")
 nb_schemas_tests = 0
 nb_schemas_success = 0

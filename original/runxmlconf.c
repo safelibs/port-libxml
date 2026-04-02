@@ -89,20 +89,9 @@ static int nb_leaks = 0;
  * and not rely on any external resources.
  */
 static xmlParserInputPtr
-testExternalEntityLoader(const char *URL, const char *ID ATTRIBUTE_UNUSED,
+testExternalEntityLoader(const char *URL, const char *ID,
 			 xmlParserCtxtPtr ctxt) {
-    xmlParserInputBufferPtr input;
-    xmlParserInputPtr ret;
-
-    input = xmlParserInputBufferCreateFilename((const char *) URL,
-                                               XML_CHAR_ENCODING_NONE);
-    if (input == NULL)
-        return(NULL);
-    ret = xmlNewIOInputStream(ctxt, input, XML_CHAR_ENCODING_NONE);
-    if (ret == NULL)
-        xmlFreeParserInputBuffer(input);
-
-    return(ret);
+    return(xmlNoNetExternalEntityLoader(URL, ID, ctxt));
 }
 
 /*
@@ -518,7 +507,7 @@ xmlconfInfo(void) {
 
 static int
 xmlconfTest(void) {
-    const char *confxml = "xmlconf/xmlconf.xml";
+    const char *confxml = "xml-test-suite/xmlconf/xmlconf.xml";
     xmlDocPtr doc;
     xmlNodePtr cur;
     int ret = 0;
@@ -528,7 +517,7 @@ xmlconfTest(void) {
 	xmlconfInfo();
 	return(-1);
     }
-    doc = xmlReadFile(confxml, NULL, XML_PARSE_NOENT);
+    doc = xmlReadFile(confxml, NULL, XML_PARSE_NOENT | XML_PARSE_DTDLOAD);
     if (doc == NULL) {
         fprintf(stderr, "%s is corrupted \n", confxml);
 	xmlconfInfo();

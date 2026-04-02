@@ -1,7 +1,7 @@
 # Makefile for libxml2 python library
 AUTOMAKE_OPTIONS = 1.4 foreign
 
-SUBDIRS = . tests
+SUBDIRS = tests
 
 docsdir = $(datadir)/doc/libxml2-python-$(LIBXML_VERSION)
 dist_docs_DATA = TODO

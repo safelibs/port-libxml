@@ -2,9 +2,9 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS = include . doc example fuzz xstc $(PYTHON_SUBDIR)
+SUBDIRS = include doc example fuzz xstc $(PYTHON_SUBDIR)
 
-DIST_SUBDIRS = include . doc example fuzz python xstc
+DIST_SUBDIRS = include doc example fuzz python xstc
 
 AM_CPPFLAGS = -I$(top_builddir)/include -I$(srcdir)/include
 
@@ -202,6 +202,7 @@ runtests: runtest$(EXEEXT) testrecurse$(EXEEXT) testapi$(EXEEXT) \
           testchar$(EXEEXT) testdict$(EXEEXT) runxmlconf$(EXEEXT)
 	[ -d test   ] || $(LN_S) $(srcdir)/test   .
 	[ -d result ] || $(LN_S) $(srcdir)/result .
+	[ -d xml-test-suite ] || $(LN_S) $(srcdir)/xml-test-suite .
 	$(CHECKER) ./runtest$(EXEEXT) && \
 	    $(CHECKER) ./testrecurse$(EXEEXT) && \
 	    ASAN_OPTIONS="$$ASAN_OPTIONS:detect_leaks=0" $(CHECKER) ./testapi$(EXEEXT) && \

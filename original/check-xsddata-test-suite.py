@@ -18,10 +18,6 @@ quiet = 1
 CONF=os.path.join(os.path.dirname(__file__), "test/xsdtest/xsdtestsuite.xml")
 LOG="check-xsddata-test-suite.log"
 
-if not os.path.exists(CONF):
-    print("Skipping XML Schemas datatypes Python suite: %s is missing" % CONF)
-    sys.exit(0)
-
 log = open(LOG, "w")
 nb_schemas_tests = 0
 nb_schemas_success = 0

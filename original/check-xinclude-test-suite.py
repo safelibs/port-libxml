@@ -12,11 +12,6 @@ DIR=os.path.join(os.path.dirname(__file__), "xinclude-test-suite")
 CONF="testdescr.xml"
 LOG="check-xinclude-test-suite.log"
 
-if not os.path.exists(os.path.join(DIR, CONF)):
-    print("Skipping XInclude Python suite: %s is missing" %
-          os.path.join(DIR, CONF))
-    sys.exit(0)
-
 log = open(LOG, "w")
 
 os.chdir(DIR)
@@ -158,8 +153,8 @@ def runTest(test, basedir):
     if res != 1:
         log.write("Test ID %s\n" % (id))
         log.write("   File: %s\n" % (URI))
-        content = string.strip(test.content)
-        while content[-1] == '\n':
+        content = (test.content or "").strip()
+        while content.endswith('\n'):
             content = content[0:-1]
         log.write("   %s:%s\n\n" % (type, content))
         if error_msg != '':

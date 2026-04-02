@@ -2,6 +2,7 @@
 import sys
 import time
 import os
+import subprocess
 sys.path.insert(0, "python")
 import libxml2
 
@@ -16,9 +17,26 @@ test_error = 0
 CONF=os.path.join(os.path.dirname(__file__), "xml-test-suite/xmlconf/xmlconf.xml")
 LOG="check-xml-test-suite.log"
 
-if not os.path.exists(CONF):
-    print("Skipping XML Python suite: %s is missing" % CONF)
-    sys.exit(0)
+
+def maybeRunXmlConf():
+    runner = os.path.join(os.getcwd(), "runxmlconf")
+    suite_dir = os.path.join(os.path.dirname(__file__), "xml-test-suite")
+
+    if not (os.path.isfile(runner) and os.access(runner, os.X_OK)):
+        return None
+
+    if not os.path.exists("xml-test-suite"):
+        try:
+            os.symlink(suite_dir, "xml-test-suite")
+        except FileExistsError:
+            pass
+
+    return subprocess.call([runner])
+
+
+runxmlconf_status = maybeRunXmlConf()
+if runxmlconf_status is not None:
+    sys.exit(runxmlconf_status)
 
 log = open(LOG, "w")
 
@@ -55,19 +73,11 @@ libxml2.registerErrorHandler(errorHandler, None)
 # Used to load the XML testsuite description
 #
 def loadNoentDoc(filename):
-    ctxt = libxml2.createFileParserCtxt(filename)
-    if ctxt == None:
-        return None
-    ctxt.replaceEntities(1)
-    ctxt.parseDocument()
+    options = libxml2.XML_PARSE_NOENT | libxml2.XML_PARSE_DTDLOAD
     try:
-        doc = ctxt.doc()
+        return libxml2.readFile(filename, None, options)
     except:
-        doc = None
-    if ctxt.wellFormed() != 1:
-        doc.freeDoc()
         return None
-    return doc
 
 #
 # The conformance testing routines
@@ -348,8 +358,8 @@ def runTest(test):
     # Log the ontext
     if res != 1:
         log.write("   File: %s\n" % (URI))
-        content = string.strip(test.content)
-        while content[-1] == '\n':
+        content = (test.content or "").strip()
+        while content.endswith('\n'):
             content = content[0:-1]
         if extra != None:
             log.write("   %s:%s:%s\n" % (type, extra, content))
