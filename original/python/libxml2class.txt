@@ -231,6 +231,7 @@ regexpCompile()
 # functions from module xmlschemas
 schemaNewMemParserCtxt()
 schemaNewParserCtxt()
+schemaNewValidCtxt()
 
 # functions from module xmlschemastypes
 schemaCleanupTypes()

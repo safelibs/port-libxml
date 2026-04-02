@@ -933,6 +933,17 @@ def buildWrappers():
         func = nameFixup(name, "None", file, file)
         info = (0, func, name, ret, args, file)
         function_classes['None'].append(info)
+
+    #
+    # Keep a top-level schemaNewValidCtxt(schema) helper in addition to the
+    # Schema.schemaNewValidCtxt() method. The XSTC runner uses the global form
+    # for dynamic validation, where passing None is meaningful.
+    #
+    if "xmlSchemaNewValidCtxt" in functions:
+        (desc, ret, args, file, cond) = functions["xmlSchemaNewValidCtxt"]
+        func = nameFixup("xmlSchemaNewValidCtxt", "None", file, file)
+        info = (0, func, "xmlSchemaNewValidCtxt", ret, args, file)
+        function_classes["None"].append(info)
    
     classes = open("libxml2class.py", "w")
     txt = open("libxml2class.txt", "w")
