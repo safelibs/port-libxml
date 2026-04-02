@@ -4371,19 +4371,6 @@ static xmlThreadParams threadParams[] = {
 static const unsigned int num_threads = sizeof(threadParams) /
                                         sizeof(threadParams[0]);
 
-static int
-threadFixturesAvailable(void) {
-    unsigned int i;
-
-    if (!checkTestFile(catalog))
-        return(0);
-    for (i = 0; i < num_threads; i++) {
-        if (!checkTestFile(threadParams[i].filename))
-            return(0);
-    }
-    return(1);
-}
-
 #ifndef xmlDoValidityCheckingDefaultValue
 #error xmlDoValidityCheckingDefaultValue is not a macro
 #endif
@@ -4629,8 +4616,6 @@ threadsTest(const char *filename ATTRIBUTE_UNUSED,
 	    const char *resul ATTRIBUTE_UNUSED,
 	    const char *err ATTRIBUTE_UNUSED,
 	    int options ATTRIBUTE_UNUSED) {
-    if (!threadFixturesAvailable())
-        return(0);
     return(testThread());
 }
 #endif

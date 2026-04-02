@@ -4,21 +4,22 @@
 # this extract the Dragon bibliography entries from the XML specification
 #
 import libxml2
+import os
 import sys
-try:
-    import StringIO
-    str_io = StringIO.StringIO
-except:
-    import io
-    str_io = io.StringIO
 
 # Memory debug specific
 libxml2.debugMemory(1)
 
-doc="""<spec><bibl id="Aho" key="Aho/Ullman">Aho<emph>Compilers</emph></bibl><bibl id="Knu">Knuth</bibl></spec>"""
-expect="""<bibl id="Aho" key="Aho/Ullman">Aho<emph>Compilers</emph></bibl>"""
+expect="""<bibl id="Aho" key="Aho/Ullman">Aho, Alfred V., 
+Ravi Sethi, and Jeffrey D. Ullman.
+<emph>Compilers:  Principles, Techniques, and Tools</emph>.
+Reading:  Addison-Wesley, 1986, rpt. corr. 1988.</bibl>"""
 
-input = libxml2.inputBuffer(str_io(doc))
+data_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                         "..", "..", "test", "valid",
+                         "REC-xml-19980210.xml")
+f = open(data_path, 'rb')
+input = libxml2.inputBuffer(f)
 reader = input.newTextReader("REC")
 res=""
 while reader.Read() > 0:
