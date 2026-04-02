@@ -40,6 +40,27 @@ structured_errors(void *userData ATTRIBUTE_UNUSED,
     generic_errors++;
 }
 
+static const char api_schema[] =
+    "<xs:schema xmlns:xs='http://www.w3.org/2001/XMLSchema'>"
+    "<xs:element name='root'>"
+    "<xs:complexType>"
+    "<xs:anyAttribute processContents='lax'/>"
+    "</xs:complexType>"
+    "</xs:element>"
+    "</xs:schema>";
+
+#ifdef LIBXML_SCHEMAS_ENABLED
+static void
+test_schema_error(void *ctx ATTRIBUTE_UNUSED,
+                  const char *msg ATTRIBUTE_UNUSED, ...) {
+}
+
+static void
+test_schema_warning(void *ctx ATTRIBUTE_UNUSED,
+                    const char *msg ATTRIBUTE_UNUSED, ...) {
+}
+#endif
+
 static void
 free_api_doc(void) {
     xmlFreeDoc(api_doc);
@@ -634,6 +655,81 @@ struct xpathObjectOwner {
 
 static xpathObjectOwner *xpathObjectOwners;
 
+#ifdef LIBXML_SCHEMAS_ENABLED
+typedef struct schemaValidCtxtOwner schemaValidCtxtOwner;
+struct schemaValidCtxtOwner {
+    xmlSchemaValidCtxtPtr ctxt;
+    xmlSchemaPtr schema;
+    schemaValidCtxtOwner *next;
+};
+
+static schemaValidCtxtOwner *schemaValidCtxtOwners;
+
+static xmlSchemaParserCtxtPtr
+make_api_schema_parser_ctxt(void) {
+    return(xmlSchemaNewMemParserCtxt(api_schema, sizeof(api_schema) - 1));
+}
+
+static xmlSchemaPtr
+make_api_schema(void) {
+    xmlSchemaParserCtxtPtr ctxt;
+    xmlSchemaPtr schema;
+
+    ctxt = make_api_schema_parser_ctxt();
+    if (ctxt == NULL)
+        return(NULL);
+    schema = xmlSchemaParse(ctxt);
+    xmlSchemaFreeParserCtxt(ctxt);
+    return(schema);
+}
+
+static xmlSchemaValidCtxtPtr
+make_api_schema_valid_ctxt(void) {
+    schemaValidCtxtOwner *owner;
+    xmlSchemaValidCtxtPtr ctxt;
+    xmlSchemaPtr schema;
+
+    schema = make_api_schema();
+    if (schema == NULL)
+        return(NULL);
+    ctxt = xmlSchemaNewValidCtxt(schema);
+    if (ctxt == NULL) {
+        xmlSchemaFree(schema);
+        return(NULL);
+    }
+    owner = xmlMalloc(sizeof(*owner));
+    if (owner == NULL) {
+        xmlSchemaFreeValidCtxt(ctxt);
+        xmlSchemaFree(schema);
+        return(NULL);
+    }
+    owner->ctxt = ctxt;
+    owner->schema = schema;
+    owner->next = schemaValidCtxtOwners;
+    schemaValidCtxtOwners = owner;
+    return(ctxt);
+}
+
+static void
+desOwned_xmlSchemaValidCtxtPtr(xmlSchemaValidCtxtPtr val) {
+    schemaValidCtxtOwner **link = &schemaValidCtxtOwners;
+
+    while (*link != NULL) {
+        schemaValidCtxtOwner *owner = *link;
+
+        if (owner->ctxt == val) {
+            *link = owner->next;
+            xmlSchemaFreeValidCtxt(val);
+            xmlSchemaFree(owner->schema);
+            xmlFree(owner);
+            return;
+        }
+        link = &owner->next;
+    }
+    xmlSchemaFreeValidCtxt(val);
+}
+#endif
+
 static xmlXPathObjectPtr
 gen_xmlXPathObjectFromExpr(const xmlChar *expr) {
     xpathObjectOwner *owner;
@@ -702,6 +798,19 @@ desOwned_xmlXPathObjectPtr(xmlXPathObjectPtr val) {
 
     xmlXPathFreeObject(val);
 }
+
+#ifdef LIBXML_XPATH_ENABLED
+static xmlXPathContextPtr
+make_api_xpath_context(void) {
+    xmlXPathContextPtr ctxt;
+
+    ctxt = xmlXPathNewContext(get_api_doc());
+    if (ctxt == NULL)
+        return(NULL);
+    ctxt->node = get_api_root();
+    return(ctxt);
+}
+#endif
 
 #ifdef LIBXML_XPATH_ENABLED
 #define gen_nb_xmlXPathObjectPtr 5
@@ -940,6 +1049,12 @@ static void desret_xmlBufferPtr(xmlBufferPtr val) {
 #ifdef LIBXML_SCHEMAS_ENABLED
 static void desret_xmlSchemaParserCtxtPtr(xmlSchemaParserCtxtPtr val) {
     xmlSchemaFreeParserCtxt(val);
+}
+static void desret_xmlSchemaPtr(xmlSchemaPtr val) {
+    xmlSchemaFree(val);
+}
+static void desret_xmlSchemaValidCtxtPtr(xmlSchemaValidCtxtPtr val) {
+    desOwned_xmlSchemaValidCtxtPtr(val);
 }
 static void desret_xmlSchemaTypePtr(xmlSchemaTypePtr val ATTRIBUTE_UNUSED) {
 }
@@ -1326,6 +1441,7 @@ static int test_xmlSchemaParse(void);
 static int test_xmlSchemaSetParserErrors(void);
 static int test_xmlSchemaValidateDoc(void);
 static int test_xmlSchemaValidatePredefinedType(void);
+static int test_schemasInternalsValidateDoc(void);
 static int test_xmlschemas(void);
 static int test_xmlschemastypes(void);
 static int test_xmlstring(void);
@@ -18174,7 +18290,7 @@ test_schemasInternals(void) {
     test_ret += test_xmlSchemaNewValidCtxt();
     test_ret += test_xmlSchemaParse();
     test_ret += test_xmlSchemaSetParserErrors();
-    test_ret += test_xmlSchemaValidateDoc();
+    test_ret += test_schemasInternalsValidateDoc();
     test_ret += test_xmlSchemaGetPredefinedType();
     test_ret += test_xmlSchemaValidatePredefinedType();
 
@@ -34715,8 +34831,29 @@ static int
 test_xmlSchemaNewValidCtxt(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMAS_ENABLED)
+    int mem_base;
+    xmlSchemaValidCtxtPtr ret_val;
+    xmlSchemaPtr schema;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    schema = make_api_schema();
+
+    ret_val = xmlSchemaNewValidCtxt(schema);
+    desret_xmlSchemaValidCtxtPtr(ret_val);
+    if (schema != NULL)
+        xmlSchemaFree(schema);
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchemaNewValidCtxt",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
     return(test_ret);
 }
 
@@ -34725,8 +34862,29 @@ static int
 test_xmlSchemaParse(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMAS_ENABLED)
+    int mem_base;
+    xmlSchemaPtr ret_val;
+    xmlSchemaParserCtxtPtr ctxt;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_schema_parser_ctxt();
+
+    ret_val = xmlSchemaParse(ctxt);
+    desret_xmlSchemaPtr(ret_val);
+    if (ctxt != NULL)
+        xmlSchemaFreeParserCtxt(ctxt);
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchemaParse",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
     return(test_ret);
 }
 
@@ -34789,8 +34947,28 @@ static int
 test_xmlSchemaSetParserErrors(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMAS_ENABLED)
+    int mem_base;
+    xmlSchemaParserCtxtPtr ctxt;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_schema_parser_ctxt();
+
+    xmlSchemaSetParserErrors(ctxt, test_schema_error, test_schema_warning,
+                             NULL);
+    if (ctxt != NULL)
+        xmlSchemaFreeParserCtxt(ctxt);
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchemaSetParserErrors",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
     return(test_ret);
 }
 
@@ -34799,8 +34977,27 @@ static int
 test_xmlSchemaSetParserStructuredErrors(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMAS_ENABLED)
+    int mem_base;
+    xmlSchemaParserCtxtPtr ctxt;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_schema_parser_ctxt();
+
+    xmlSchemaSetParserStructuredErrors(ctxt, structured_errors, NULL);
+    if (ctxt != NULL)
+        xmlSchemaFreeParserCtxt(ctxt);
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchemaSetParserStructuredErrors",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
     return(test_ret);
 }
 
@@ -34809,8 +35006,28 @@ static int
 test_xmlSchemaSetValidErrors(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMAS_ENABLED)
+    int mem_base;
+    xmlSchemaValidCtxtPtr ctxt;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_schema_valid_ctxt();
+
+    xmlSchemaSetValidErrors(ctxt, test_schema_error, test_schema_warning,
+                            NULL);
+    if (ctxt != NULL)
+        desOwned_xmlSchemaValidCtxtPtr(ctxt);
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchemaSetValidErrors",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
     return(test_ret);
 }
 
@@ -34860,8 +35077,60 @@ static int
 test_xmlSchemaSetValidStructuredErrors(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMAS_ENABLED)
+    int mem_base;
+    xmlSchemaValidCtxtPtr ctxt;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_schema_valid_ctxt();
+
+    xmlSchemaSetValidStructuredErrors(ctxt, structured_errors, NULL);
+    if (ctxt != NULL)
+        desOwned_xmlSchemaValidCtxtPtr(ctxt);
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchemaSetValidStructuredErrors",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
+    return(test_ret);
+}
+
+static int
+test_schemasInternalsValidateDoc(void) {
+    int test_ret = 0;
+
+#if defined(LIBXML_SCHEMAS_ENABLED)
+    int mem_base;
+    int ret_val;
+    xmlSchemaValidCtxtPtr ctxt;
+    xmlDocPtr doc;
+
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_schema_valid_ctxt();
+    doc = get_api_doc();
+
+    ret_val = xmlSchemaValidateDoc(ctxt, doc);
+    desret_int(ret_val);
+    if (ctxt != NULL)
+        desOwned_xmlSchemaValidCtxtPtr(ctxt);
+    free_api_doc();
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in schemasInternals validate doc",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
     return(test_ret);
 }
 
@@ -46639,8 +46908,25 @@ static int
 test_xmlXPathCompile(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    xmlXPathCompExprPtr ret_val;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    ret_val = xmlXPathCompile(BAD_CAST "count(/root)");
+    if (ret_val != NULL)
+        xmlXPathFreeCompExpr(ret_val);
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlXPathCompile",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
     return(test_ret);
 }
 
@@ -46911,8 +47197,33 @@ static int
 test_xmlXPathCtxtCompile(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    xmlXPathCompExprPtr ret_val;
+    xmlXPathContextPtr ctxt;
+    int n_ctxt;
 
-    /* missing type support */
+    for (n_ctxt = 0;n_ctxt < gen_nb_xmlXPathContextPtr;n_ctxt++) {
+        mem_base = xmlMemBlocks();
+        ctxt = gen_xmlXPathContextPtr(n_ctxt, 0);
+
+        ret_val = xmlXPathCtxtCompile(ctxt, BAD_CAST "string(/root/@h:foo)");
+        if (ret_val != NULL)
+            xmlXPathFreeCompExpr(ret_val);
+        call_tests++;
+        des_xmlXPathContextPtr(n_ctxt, ctxt, 0);
+        xmlResetLastError();
+        if (mem_base != xmlMemBlocks()) {
+            printf("Leak of %d blocks found in xmlXPathCtxtCompile",
+                   xmlMemBlocks() - mem_base);
+            test_ret++;
+            printf(" %d", n_ctxt);
+            printf("\n");
+        }
+    }
+    function_tests++;
+#endif
+
     return(test_ret);
 }
 
@@ -47137,8 +47448,293 @@ static int
 test_xmlXPathNewContext(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    xmlXPathContextPtr ret_val;
+    xmlDocPtr doc;
+    int n_doc;
 
-    /* missing type support */
+    for (n_doc = 0;n_doc < gen_nb_xmlDocPtr;n_doc++) {
+        mem_base = xmlMemBlocks();
+        doc = gen_xmlDocPtr(n_doc, 0);
+
+        ret_val = xmlXPathNewContext(doc);
+        if (ret_val != NULL)
+            xmlXPathFreeContext(ret_val);
+        call_tests++;
+        des_xmlDocPtr(n_doc, doc, 0);
+        xmlResetLastError();
+        if (mem_base != xmlMemBlocks()) {
+            printf("Leak of %d blocks found in xmlXPathNewContext",
+                   xmlMemBlocks() - mem_base);
+            test_ret++;
+            printf(" %d", n_doc);
+            printf("\n");
+        }
+    }
+    function_tests++;
+#endif
+
+    return(test_ret);
+}
+
+static int
+test_xpathInternalsCompiledEval(void) {
+    int test_ret = 0;
+
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    xmlXPathObjectPtr ret_val;
+    xmlXPathContextPtr ctxt;
+    xmlXPathCompExprPtr comp;
+
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_xpath_context();
+    comp = xmlXPathCompile(BAD_CAST "count(/root)");
+    ret_val = xmlXPathCompiledEval(comp, ctxt);
+    if (ret_val != NULL)
+        xmlXPathFreeObject(ret_val);
+    if (comp != NULL)
+        xmlXPathFreeCompExpr(comp);
+    if (ctxt != NULL)
+        xmlXPathFreeContext(ctxt);
+    free_api_doc();
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xpathInternals compiled eval",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
+    return(test_ret);
+}
+
+static int
+test_xpathInternalsCompiledEvalToBoolean(void) {
+    int test_ret = 0;
+
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    int ret_val;
+    xmlXPathContextPtr ctxt;
+    xmlXPathCompExprPtr comp;
+
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_xpath_context();
+    comp = xmlXPathCompile(BAD_CAST "count(/root)");
+    ret_val = xmlXPathCompiledEvalToBoolean(comp, ctxt);
+    desret_int(ret_val);
+    if (comp != NULL)
+        xmlXPathFreeCompExpr(comp);
+    if (ctxt != NULL)
+        xmlXPathFreeContext(ctxt);
+    free_api_doc();
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xpathInternals compiled eval to boolean",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
+    return(test_ret);
+}
+
+static int
+test_xpathInternalsContextSetCache(void) {
+    int test_ret = 0;
+
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    int ret_val;
+    xmlXPathContextPtr ctxt;
+
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_xpath_context();
+    ret_val = xmlXPathContextSetCache(ctxt, 1, 0, 0);
+    desret_int(ret_val);
+    if (ctxt != NULL)
+        xmlXPathFreeContext(ctxt);
+    free_api_doc();
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xpathInternals context cache",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
+    return(test_ret);
+}
+
+static int
+test_xpathInternalsEval(void) {
+    int test_ret = 0;
+
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    xmlXPathObjectPtr ret_val;
+    xmlXPathContextPtr ctxt;
+
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_xpath_context();
+    ret_val = xmlXPathEval(BAD_CAST "count(/root)", ctxt);
+    if (ret_val != NULL)
+        xmlXPathFreeObject(ret_val);
+    if (ctxt != NULL)
+        xmlXPathFreeContext(ctxt);
+    free_api_doc();
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xpathInternals eval",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
+    return(test_ret);
+}
+
+static int
+test_xpathInternalsEvalExpression(void) {
+    int test_ret = 0;
+
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    xmlXPathObjectPtr ret_val;
+    xmlXPathContextPtr ctxt;
+
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_xpath_context();
+    ret_val = xmlXPathEvalExpression(BAD_CAST "count(/root)", ctxt);
+    if (ret_val != NULL)
+        xmlXPathFreeObject(ret_val);
+    if (ctxt != NULL)
+        xmlXPathFreeContext(ctxt);
+    free_api_doc();
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xpathInternals eval expression",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
+    return(test_ret);
+}
+
+static int
+test_xpathInternalsEvalPredicate(void) {
+    int test_ret = 0;
+
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    int ret_val;
+    xmlXPathContextPtr ctxt;
+    xmlXPathObjectPtr obj;
+
+    mem_base = xmlMemBlocks();
+    ctxt = make_api_xpath_context();
+    obj = gen_xmlXPathObjectFromExpr(BAD_CAST "1");
+    ret_val = xmlXPathEvalPredicate(ctxt, obj);
+    desret_int(ret_val);
+    if (obj != NULL)
+        desOwned_xmlXPathObjectPtr(obj);
+    if (ctxt != NULL)
+        xmlXPathFreeContext(ctxt);
+    free_api_doc();
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xpathInternals eval predicate",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
+    return(test_ret);
+}
+
+static int
+test_xpathInternalsNodeEval(void) {
+    int test_ret = 0;
+
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    xmlXPathObjectPtr ret_val;
+    xmlXPathContextPtr ctxt;
+    xmlNodePtr node;
+
+    mem_base = xmlMemBlocks();
+    node = get_api_root();
+    ctxt = make_api_xpath_context();
+    ret_val = xmlXPathNodeEval(node, BAD_CAST "count(/root)", ctxt);
+    if (ret_val != NULL)
+        xmlXPathFreeObject(ret_val);
+    if (ctxt != NULL)
+        xmlXPathFreeContext(ctxt);
+    free_api_doc();
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xpathInternals node eval",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
+    return(test_ret);
+}
+
+static int
+test_xpathInternalsSetContextNode(void) {
+    int test_ret = 0;
+
+#if defined(LIBXML_XPATH_ENABLED)
+    int mem_base;
+    int ret_val;
+    xmlXPathContextPtr ctxt;
+    xmlNodePtr node;
+
+    mem_base = xmlMemBlocks();
+    node = get_api_root();
+    ctxt = make_api_xpath_context();
+    ret_val = xmlXPathSetContextNode(node, ctxt);
+    desret_int(ret_val);
+    if (ctxt != NULL)
+        xmlXPathFreeContext(ctxt);
+    free_api_doc();
+    call_tests++;
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xpathInternals set context node",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+        printf("\n");
+    }
+    function_tests++;
+#endif
+
     return(test_ret);
 }
 
@@ -51548,16 +52144,16 @@ test_xpathInternals(void) {
         printf("Testing xpathInternals replacement coverage : 12 public functions ...\n");
     test_ret += test_xmlXPathCmpNodes();
     test_ret += test_xmlXPathCompile();
-    test_ret += test_xmlXPathCompiledEval();
-    test_ret += test_xmlXPathCompiledEvalToBoolean();
-    test_ret += test_xmlXPathContextSetCache();
+    test_ret += test_xpathInternalsCompiledEval();
+    test_ret += test_xpathInternalsCompiledEvalToBoolean();
+    test_ret += test_xpathInternalsContextSetCache();
     test_ret += test_xmlXPathCtxtCompile();
-    test_ret += test_xmlXPathEval();
-    test_ret += test_xmlXPathEvalExpression();
-    test_ret += test_xmlXPathEvalPredicate();
+    test_ret += test_xpathInternalsEval();
+    test_ret += test_xpathInternalsEvalExpression();
+    test_ret += test_xpathInternalsEvalPredicate();
     test_ret += test_xmlXPathNewContext();
-    test_ret += test_xmlXPathNodeEval();
-    test_ret += test_xmlXPathSetContextNode();
+    test_ret += test_xpathInternalsNodeEval();
+    test_ret += test_xpathInternalsSetContextNode();
 
     if (test_ret != 0)
 	printf("Module xpathInternals: %d errors\n", test_ret);

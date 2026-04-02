@@ -1155,7 +1155,7 @@ RelaxNGPythonTests:
 	    if [ "$(PYTHON_SUBDIR)" != "" ] ; then cd python ; \
 		$(MAKE) -s all ; \
 		cd .. ; fi ; \
-	    PYTHONPATH=$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH ; \
+	    PYTHONPATH=$(top_srcdir)/python:$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH ; \
 	    export PYTHONPATH; \
 	    LD_LIBRARY_PATH="$(top_builddir)/.libs:$$LD_LIBRARY_PATH" ; \
 	    export LD_LIBRARY_PATH; \
@@ -1170,7 +1170,7 @@ SchemasPythonTests:
 	    if [ "$(PYTHON_SUBDIR)" != "" ] ; then cd python ; \
 		$(MAKE) -s all ; \
 		cd .. ; fi ; \
-	    PYTHONPATH=$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH; \
+	    PYTHONPATH=$(top_srcdir)/python:$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH; \
 	    export PYTHONPATH; \
 	    LD_LIBRARY_PATH="$(top_builddir)/.libs:$$LD_LIBRARY_PATH" ; \
 	    export LD_LIBRARY_PATH; \
