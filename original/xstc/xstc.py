@@ -515,10 +515,10 @@ class XSTCTestRunner:
 	def updateCounters(self, test, counters):
 		if test.memLeak != 0:
 			counters[self.CNT_MEMLEAK] += 1
-			if (not test.failed) and (not test.noSchemaErr):
-				counters[self.CNT_SUCCEEDED] +=1
-			if test.failed:
-				counters[self.CNT_FAILED] += 1
+		if (not test.failed) and (not test.noSchemaErr):
+			counters[self.CNT_SUCCEEDED] +=1
+		if test.failed:
+			counters[self.CNT_FAILED] += 1
 		if test.bad:
 			counters[self.CNT_BAD] += 1
 		if test.unimplemented:
