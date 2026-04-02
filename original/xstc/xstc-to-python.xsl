@@ -45,7 +45,7 @@ r.run()
 		<!-- group -->
 		<xsl:value-of select="@name"/><xsl:text>", "</xsl:text>
 		<!-- main schema -->
-		<xsl:value-of select="ts:schemaTest[1]/ts:schemaDocument/@xl:href"/><xsl:text>", """</xsl:text>
+		<xsl:value-of select="ts:schemaTest[1]/ts:schemaDocument/@xl:href"/><xsl:text>", r"""</xsl:text>
 		<!-- group-description -->
 		<xsl:call-template name="str">
 			<xsl:with-param name="str" select="ts:annotation/ts:documentation/text()"/>
@@ -87,9 +87,9 @@ r.run()
 			<!-- filename -->			
 			<xsl:value-of select="ts:schemaDocument/@xl:href"/><xsl:text>", </xsl:text>
 			<!-- validity -->
-			<xsl:value-of select="number(ts:expected/@validity = 'valid')"/><xsl:text>, "</xsl:text>
+			<xsl:value-of select="number(ts:expected/@validity = 'valid')"/><xsl:text>, r"""</xsl:text>
 			<!-- test-description -->
-			<xsl:value-of select="ts:annotation/ts:documentation/text()"/><xsl:text>"))
+			<xsl:value-of select="ts:annotation/ts:documentation/text()"/><xsl:text>"""))
 </xsl:text>
 		</xsl:for-each>
 		<xsl:for-each select="ts:instanceTest">
@@ -104,9 +104,9 @@ r.run()
 			<!-- filename -->			
 			<xsl:value-of select="ts:instanceDocument/@xl:href"/><xsl:text>", </xsl:text>
 			<!-- validity -->
-			<xsl:value-of select="number(ts:expected/@validity = 'valid')"/><xsl:text>, "</xsl:text>
+			<xsl:value-of select="number(ts:expected/@validity = 'valid')"/><xsl:text>, r"""</xsl:text>
 			<!-- test-description -->
-			<xsl:value-of select="ts:annotation/ts:documentation/text()"/><xsl:text>"))
+			<xsl:value-of select="ts:annotation/ts:documentation/text()"/><xsl:text>"""))
 </xsl:text>
 		</xsl:for-each>
 	</xsl:template>                     
