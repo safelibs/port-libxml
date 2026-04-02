@@ -191,16 +191,16 @@ EOF
 test_postgresql() {
   log_step "postgresql-16"
   pg_ctlcluster 16 main start
-  runuser -u postgres -- psql -At <<'SQL' > /tmp/postgresql.log
-SELECT xpath($$//item/text()$$, xmlparse(document $$<root><item>one</item><item>two</item></root>$$));
-SELECT xmlexists($$//item[text()="two"]$$ PASSING BY REF xmlparse(document $$<root><item>one</item><item>two</item></root>$$));
-SELECT xmlelement(name library, xmlattributes('2' AS version), xmlforest('libxml' AS name));
+  runuser -u postgres -- psql -v ON_ERROR_STOP=1 -At <<'SQL' > /tmp/postgresql.log
+SELECT 'xpath=' || xpath($$//item/text()$$, xmlparse(document $$<root><item>one</item><item>two</item></root>$$))::text;
+SELECT 'xmlexists=' || xmlexists($$//item[text()="two"]$$ PASSING BY REF xmlparse(document $$<root><item>one</item><item>two</item></root>$$))::text;
+SELECT 'xmlelement=' || xmlelement(name library, xmlattributes('2' AS version), xmlforest('libxml' AS name));
 SQL
   pg_ctlcluster 16 main stop
 
-  require_contains /tmp/postgresql.log "{one,two}"
-  require_contains /tmp/postgresql.log "t"
-  require_contains /tmp/postgresql.log '<library version="2"><name>libxml</name></library>'
+  require_contains /tmp/postgresql.log "xpath={one,two}"
+  require_contains /tmp/postgresql.log "xmlexists=true"
+  require_contains /tmp/postgresql.log 'xmlelement=<library version="2"><name>libxml</name></library>'
 }
 
 test_php_xml() {
