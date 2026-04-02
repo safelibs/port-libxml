@@ -3020,15 +3020,8 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
                         xmlFree(local);
                     if (prefix != NULL)
                         xmlFree(prefix);
-                }
-                if ((node == NULL) || (node->doc == NULL))
-                    ret = 3;
-                if (ret == 0) {
-                    ret = xmlValidateNotationUse(NULL, node->doc, value);
-                    if (ret == 1)
-                        ret = 0;
-                    else
-                        ret = 1;
+                } else if ((ret == 0) && (xmlStrchr(cur, ':') != NULL)) {
+                    ret = 1;
                 }
                 if ((ret == 0) && (val != NULL)) {
                     v = xmlSchemaNewValue(XML_SCHEMAS_NOTATION);
@@ -3036,7 +3029,7 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
                         if (local != NULL)
                             v->value.qname.name = local;
                         else
-                            v->value.qname.name = xmlStrdup(value);
+                            v->value.qname.name = xmlStrdup(cur);
                         if (uri != NULL)
                             v->value.qname.uri = uri;
 
