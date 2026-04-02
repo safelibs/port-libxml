@@ -842,7 +842,6 @@ testModule_LDADD = $(LDADDS)
 noinst_LTLIBRARIES = testdso.la
 testdso_la_SOURCES = testdso.c
 testdso_la_LDFLAGS = -module -no-undefined -avoid-version -rpath $(libdir)
-BUILT_SOURCES = testapi.c
 testapi_SOURCES = testapi.c
 testapi_LDFLAGS = 
 testapi_DEPENDENCIES = $(DEPS)
@@ -886,7 +885,7 @@ EXAMPLES_DIR = $(docdir)/examples
 #
 LCOV = /usr/bin/lcov
 GENHTML = /usr/bin/genhtml
-all: $(BUILT_SOURCES) config.h
+all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
 .SUFFIXES:
@@ -894,18 +893,18 @@ all: $(BUILT_SOURCES) config.h
 am--refresh: Makefile
 	@:
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
-	@for dep in $?; do \
-	  case '$(am__configure_deps)' in \
-	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign'; \
-	      $(am__cd) $(srcdir) && $(AUTOMAKE) --foreign \
-		&& exit 0; \
-	      exit 1;; \
-	  esac; \
-	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile'; \
-	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign Makefile
+	@MAINTAINER_MODE_FALSE@@:
+	@MAINTAINER_MODE_TRUE@@for dep in $?; do \
+	@MAINTAINER_MODE_TRUE@  case '$(am__configure_deps)' in \
+	@MAINTAINER_MODE_TRUE@    *$$dep*) \
+	@MAINTAINER_MODE_TRUE@      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign'; \
+	@MAINTAINER_MODE_TRUE@      $(am__cd) $(srcdir) && $(AUTOMAKE) --foreign \
+	@MAINTAINER_MODE_TRUE@	&& exit 0; \
+	@MAINTAINER_MODE_TRUE@      exit 1;; \
+	@MAINTAINER_MODE_TRUE@  esac; \
+	@MAINTAINER_MODE_TRUE@done; \
+	@MAINTAINER_MODE_TRUE@echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Makefile'; \
+	@MAINTAINER_MODE_TRUE@$(am__cd) $(top_srcdir) && $(AUTOMAKE) --foreign Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
 	  *config.status*) \
@@ -920,9 +919,11 @@ $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENC
 	$(SHELL) ./config.status --recheck
 
 $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
-	$(am__cd) $(srcdir) && $(AUTOCONF)
+	@MAINTAINER_MODE_FALSE@@:
+	@MAINTAINER_MODE_TRUE@$(am__cd) $(srcdir) && $(AUTOCONF)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
-	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
+	@MAINTAINER_MODE_FALSE@@:
+	@MAINTAINER_MODE_TRUE@$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
 
 config.h: stamp-h1
@@ -933,9 +934,10 @@ stamp-h1: $(srcdir)/config.h.in $(top_builddir)/config.status
 	@rm -f stamp-h1
 	cd $(top_builddir) && $(SHELL) ./config.status config.h
 $(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
-	($(am__cd) $(top_srcdir) && $(AUTOHEADER))
-	rm -f stamp-h1
-	touch $@
+	@MAINTAINER_MODE_FALSE@@:
+	@MAINTAINER_MODE_TRUE@($(am__cd) $(top_srcdir) && $(AUTOHEADER))
+	@MAINTAINER_MODE_TRUE@rm -f stamp-h1
+	@MAINTAINER_MODE_TRUE@touch $@
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
@@ -1572,7 +1574,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 	-rm -f cscope.out cscope.in.out cscope.po.out cscope.files
 
-distdir: $(BUILT_SOURCES)
+distdir:
 	$(MAKE) $(AM_MAKEFLAGS) distdir-am
 
 distdir-am: $(DISTFILES)
@@ -1767,7 +1769,7 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
-check: $(BUILT_SOURCES)
+check:
 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
 all-am: Makefile $(PROGRAMS) $(LTLIBRARIES) $(SCRIPTS) $(MANS) $(DATA) \
 		config.h
@@ -1778,7 +1780,7 @@ installdirs-am:
 	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(libdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(man3dir)" "$(DESTDIR)$(cmakedir)" "$(DESTDIR)$(confexecdir)" "$(DESTDIR)$(m4datadir)" "$(DESTDIR)$(pkgconfigdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: $(BUILT_SOURCES)
+install:
 	$(MAKE) $(AM_MAKEFLAGS) install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
@@ -1811,7 +1813,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-recursive
 
 clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
@@ -2067,12 +2068,6 @@ uninstall-man: uninstall-man1 uninstall-man3
 
 # that one forces the rebuild when "make rebuild" is run on doc/
 rebuild_testapi:
-	-@(if [ "$(PYTHON)" != "" ] ; then \
-	    $(PYTHON) $(srcdir)/gentest.py $(srcdir) ; fi )
-
-# that one is just to make sure it is rebuilt if missing
-# but adding the dependances generate mess
-testapi.c: $(srcdir)/gentest.py
 	-@(if [ "$(PYTHON)" != "" ] ; then \
 	    $(PYTHON) $(srcdir)/gentest.py $(srcdir) ; fi )
 

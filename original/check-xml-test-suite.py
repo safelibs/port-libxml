@@ -79,6 +79,21 @@ def loadNoentDoc(filename):
     except:
         return None
 
+def parseWithOptions(filename, options):
+    ctxt = libxml2.newParserCtxt()
+    doc = None
+
+    try:
+        doc = ctxt.ctxtReadFile(filename, None, options)
+        ret = 0
+    except:
+        ret = -1
+        try:
+            doc = ctxt.doc()
+        except:
+            doc = None
+    return ctxt, doc, ret
+
 #
 # The conformance testing routines
 #
@@ -91,15 +106,7 @@ def testNotWf(filename, id):
     error_nr = 0
     error_msg = ''
 
-    ctxt = libxml2.createFileParserCtxt(filename)
-    if ctxt == None:
-        return -1
-    ret = ctxt.parseDocument()
-
-    try:
-        doc = ctxt.doc()
-    except:
-        doc = None
+    ctxt, doc, ret = parseWithOptions(filename, 0)
     if doc != None:
         doc.freeDoc()
     if ret == 0 or ctxt.wellFormed() != 0:
@@ -116,16 +123,7 @@ def testNotWfEnt(filename, id):
     error_nr = 0
     error_msg = ''
 
-    ctxt = libxml2.createFileParserCtxt(filename)
-    if ctxt == None:
-        return -1
-    ctxt.replaceEntities(1)
-    ret = ctxt.parseDocument()
-
-    try:
-        doc = ctxt.doc()
-    except:
-        doc = None
+    ctxt, doc, ret = parseWithOptions(filename, libxml2.XML_PARSE_NOENT)
     if doc != None:
         doc.freeDoc()
     if ret == 0 or ctxt.wellFormed() != 0:
@@ -142,17 +140,8 @@ def testNotWfEntDtd(filename, id):
     error_nr = 0
     error_msg = ''
 
-    ctxt = libxml2.createFileParserCtxt(filename)
-    if ctxt == None:
-        return -1
-    ctxt.replaceEntities(1)
-    ctxt.loadSubset(1)
-    ret = ctxt.parseDocument()
-
-    try:
-        doc = ctxt.doc()
-    except:
-        doc = None
+    options = libxml2.XML_PARSE_NOENT | libxml2.XML_PARSE_DTDLOAD
+    ctxt, doc, ret = parseWithOptions(filename, options)
     if doc != None:
         doc.freeDoc()
     if ret == 0 or ctxt.wellFormed() != 0:
@@ -169,17 +158,8 @@ def testWfEntDtd(filename, id):
     error_nr = 0
     error_msg = ''
 
-    ctxt = libxml2.createFileParserCtxt(filename)
-    if ctxt == None:
-        return -1
-    ctxt.replaceEntities(1)
-    ctxt.loadSubset(1)
-    ret = ctxt.parseDocument()
-
-    try:
-        doc = ctxt.doc()
-    except:
-        doc = None
+    options = libxml2.XML_PARSE_NOENT | libxml2.XML_PARSE_DTDLOAD
+    ctxt, doc, ret = parseWithOptions(filename, options)
     if doc == None or ret != 0 or ctxt.wellFormed() == 0:
         print("%s: error: wrongly failed to parse the document" % (id))
         log.write("%s: error: wrongly failed to parse the document\n" % (id))
@@ -202,17 +182,8 @@ def testError(filename, id):
     error_nr = 0
     error_msg = ''
 
-    ctxt = libxml2.createFileParserCtxt(filename)
-    if ctxt == None:
-        return -1
-    ctxt.replaceEntities(1)
-    ctxt.loadSubset(1)
-    ret = ctxt.parseDocument()
-
-    try:
-        doc = ctxt.doc()
-    except:
-        doc = None
+    options = libxml2.XML_PARSE_NOENT | libxml2.XML_PARSE_DTDLOAD
+    ctxt, doc, ret = parseWithOptions(filename, options)
     if doc != None:
         doc.freeDoc()
     if ctxt.wellFormed() == 0:
@@ -233,16 +204,8 @@ def testInvalid(filename, id):
     error_nr = 0
     error_msg = ''
 
-    ctxt = libxml2.createFileParserCtxt(filename)
-    if ctxt == None:
-        return -1
-    ctxt.validate(1)
-    ret = ctxt.parseDocument()
-
-    try:
-        doc = ctxt.doc()
-    except:
-        doc = None
+    options = libxml2.XML_PARSE_DTDLOAD | libxml2.XML_PARSE_DTDVALID
+    ctxt, doc, ret = parseWithOptions(filename, options)
     valid = ctxt.isValid()
     if doc == None:
         print("%s: error: wrongly failed to parse the document" % (id))
@@ -269,16 +232,8 @@ def testValid(filename, id):
     error_nr = 0
     error_msg = ''
 
-    ctxt = libxml2.createFileParserCtxt(filename)
-    if ctxt == None:
-        return -1
-    ctxt.validate(1)
-    ctxt.parseDocument()
-
-    try:
-        doc = ctxt.doc()
-    except:
-        doc = None
+    options = libxml2.XML_PARSE_DTDLOAD | libxml2.XML_PARSE_DTDVALID
+    ctxt, doc, ret = parseWithOptions(filename, options)
     valid = ctxt.isValid()
     if doc == None:
         print("%s: error: wrongly failed to parse the document" % (id))
