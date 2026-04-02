@@ -249,7 +249,6 @@ class XSTCTestCase:
 
 	def failNoSchema(self):
 		global options
-		self.failed = True
 		self.noSchemaErr = True
 		if not options.silent:
 			self.log.append("'%s' X NO-SCHEMA\n" % (self.name))
@@ -401,6 +400,7 @@ class XSTCInstanceTest(XSTCTestCase):
 		# os.path.join(options.baseDir, self.fileName)
 
 		if self.group.schemaTried and (not self.group.schemaExpectedValid):
+			self.failNoSchema()
 			return
 		if not self.group.schemaParsed and self.group.schemaTried:
 			self.failNoSchema()
@@ -515,10 +515,10 @@ class XSTCTestRunner:
 	def updateCounters(self, test, counters):
 		if test.memLeak != 0:
 			counters[self.CNT_MEMLEAK] += 1
-		if not test.failed:
-			counters[self.CNT_SUCCEEDED] +=1
-		if test.failed:
-			counters[self.CNT_FAILED] += 1
+			if (not test.failed) and (not test.noSchemaErr):
+				counters[self.CNT_SUCCEEDED] +=1
+			if test.failed:
+				counters[self.CNT_FAILED] += 1
 		if test.bad:
 			counters[self.CNT_BAD] += 1
 		if test.unimplemented:
@@ -548,7 +548,7 @@ class XSTCTestRunner:
 			out.write("    (schemata)    : %d\n" % counters[self.CNT_SCHEMA_TEST])
 		# out.write("    succeeded       : %d\n" % counters[self.CNT_SUCCEEDED])
 		out.write("  not accepted    : %d\n" % counters[self.CNT_NOTACCEPTED])
-		if counters[self.CNT_FAILED] > 0:		    
+		if counters[self.CNT_FAILED] > 0 or counters[self.CNT_NOSCHEMA] > 0:
 			out.write("    failed                  : %d\n" % counters[self.CNT_FAILED])
 			out.write("     -> internal            : %d\n" % counters[self.CNT_INTERNAL])
 			out.write("     -> unimpl.             : %d\n" % counters[self.CNT_UNIMPLEMENTED])
@@ -563,7 +563,8 @@ class XSTCTestRunner:
 		# out.write("    succeeded       : %d\n" % counters[self.CNT_SUCCEEDED])
 		if counters[self.CNT_NOTACCEPTED] > 0:
 			out.write(" %d not accepted" % (counters[self.CNT_NOTACCEPTED]))
-		if counters[self.CNT_FAILED] > 0 or counters[self.CNT_MEMLEAK] > 0:
+		if counters[self.CNT_FAILED] > 0 or counters[self.CNT_MEMLEAK] > 0 or \
+		   counters[self.CNT_NOSCHEMA] > 0:
 			if counters[self.CNT_FAILED] > 0:
 				out.write(" %d failed" % (counters[self.CNT_FAILED]))
 				out.write(" (")
@@ -578,8 +579,10 @@ class XSTCTestRunner:
 				if counters[self.CNT_EXCEPTED] > 0:
 					out.write(" %d exception" % (counters[self.CNT_EXCEPTED]))
 				out.write(" )")
+			elif counters[self.CNT_NOSCHEMA] > 0:
+				out.write(" %d skip-invalid-schema" % (counters[self.CNT_NOSCHEMA]))
 			if counters[self.CNT_MEMLEAK] > 0:
-				out.write(" %d leaks" % (counters[self.CNT_MEMLEAK]))			
+				out.write(" %d leaks" % (counters[self.CNT_MEMLEAK]))
 			out.write("\n")
 		else:
 			out.write(" all passed\n")
