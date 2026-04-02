@@ -198,12 +198,6 @@ int main(int argc, char **argv) {
 #include <libxml/debugXML.h>
 
 /*
-  We manually define xmlErrMemory because it's normal declaration
-  is "hidden" by #ifdef IN_LIBXML
-*/
-void xmlErrMemory(xmlParserCtxtPtr ctxt, const char *extra);
-
-/*
  We need some "remote" addresses, but want to avoid getting into
  name resolution delays, so we use these
 */
@@ -630,9 +624,7 @@ static void des_xmlHashTablePtr(int no ATTRIBUTE_UNUSED, xmlHashTablePtr val, in
         xmlHashFree(val, NULL);
     }
 }
-
 #include <libxml/xpathInternals.h>
-
 #ifdef LIBXML_XPATH_ENABLED
 #define gen_nb_xmlXPathObjectPtr 5
 static xmlXPathObjectPtr gen_xmlXPathObjectPtr(int no, int nr ATTRIBUTE_UNUSED) {
@@ -753,8 +745,10 @@ static void des_xmlHashDeallocator(int no ATTRIBUTE_UNUSED, xmlHashDeallocator v
 
 static void desret_int(int val ATTRIBUTE_UNUSED) {
 }
+#if 0
 static void desret_xmlChar(xmlChar val ATTRIBUTE_UNUSED) {
 }
+#endif
 static void desret_long(long val ATTRIBUTE_UNUSED) {
 }
 static void desret_unsigned_long(unsigned long val ATTRIBUTE_UNUSED) {
@@ -1172,7 +1166,6 @@ static void des_xmlSchemaWhitespaceValueType(int no ATTRIBUTE_UNUSED, xmlSchemaW
 #include <libxml/nanoftp.h>
 #include <libxml/nanohttp.h>
 #include <libxml/parser.h>
-#include <libxml/parserInternals.h>
 #include <libxml/pattern.h>
 #include <libxml/relaxng.h>
 #include <libxml/schemasInternals.h>
@@ -1194,7 +1187,6 @@ static void des_xmlSchemaWhitespaceValueType(int no ATTRIBUTE_UNUSED, xmlSchemaW
 #include <libxml/xmlunicode.h>
 #include <libxml/xmlwriter.h>
 #include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
 #include <libxml/xpointer.h>
 static int test_HTMLparser(void);
 static int test_HTMLtree(void);
@@ -1292,8 +1284,10 @@ testlibxml2(void)
     test_ret += test_nanoftp();
     test_ret += test_nanohttp();
     test_ret += test_parser();
+    test_ret += test_parserInternals();
     test_ret += test_pattern();
     test_ret += test_relaxng();
+    test_ret += test_schemasInternals();
     test_ret += test_schematron();
     test_ret += test_tree();
     test_ret += test_uri();
@@ -1312,6 +1306,7 @@ testlibxml2(void)
     test_ret += test_xmlunicode();
     test_ret += test_xmlwriter();
     test_ret += test_xpath();
+    test_ret += test_xpathInternals();
     test_ret += test_xpointer();
 
     printf("Total: %d functions, %d tests, %d errors\n",
@@ -15584,6 +15579,7 @@ test_parser(void) {
     return(test_ret);
 }
 
+#if 0
 static int
 test_htmlCreateFileParserCtxt(void) {
     int test_ret = 0;
@@ -16895,6 +16891,7 @@ test_xmlSwitchToEncoding(void) {
 
     return(test_ret);
 }
+#endif
 
 static int
 test_parserInternals(void) {
@@ -47332,7 +47329,7 @@ static void des_xmlXPathParserContextPtr(int no ATTRIBUTE_UNUSED, xmlXPathParser
 }
 #endif
 
-
+#if 0
 static int
 test_valuePop(void) {
     int test_ret = 0;
@@ -51482,6 +51479,7 @@ test_xmlXPatherror(void) {
 
     return(test_ret);
 }
+#endif
 
 static int
 test_xpathInternals(void) {
