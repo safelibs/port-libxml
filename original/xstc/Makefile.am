@@ -14,6 +14,7 @@ MSTESTDEF=MSXMLSchema1-0-20020116.testSet
 SUNTESTDEF=SunXMLSchema1-0-20020116.testSet
 NISTTESTDEF=NISTXMLSchema1-0-20020116.testSet
 NISTTESTDEF_2=NISTXMLSchemaDatatypes.testSet
+TESTSUITE_STAMP=$(TESTDIR)/.stamp
 
 #
 # The local data and scripts
@@ -28,7 +29,7 @@ all:
 #
 # Rule to load the test description and extract the information
 #
-$(TESTDIRS) Tests/Metadata/$(NISTTESTDEF_2) Tests/Metadata/$(MSTESTDEF) Tests/Metadata/$(SUNTESTDEF):
+$(TESTSUITE_STAMP):
 	-@(if [ ! -d Tests ] ; then \
 	   mkdir Tests ; \
 	   fi)
@@ -61,6 +62,9 @@ $(TESTDIRS) Tests/Metadata/$(NISTTESTDEF_2) Tests/Metadata/$(MSTESTDEF) Tests/Me
 	   rm -r Tests/xmlschema2002-01-16 ; \
 	   echo "done" ; \
 	   fi)
+	@touch $@
+
+$(TESTDIRS) Tests/Metadata/$(NISTTESTDEF_2) Tests/Metadata/$(MSTESTDEF) Tests/Metadata/$(SUNTESTDEF): $(TESTSUITE_STAMP)
 
 #
 # The python tests are generated via XSLT

@@ -563,7 +563,7 @@ $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
 $(top_builddir)/libxml2.la:
-	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) -j1 all-am
+	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) -j1 libxml2.la
 setup.py: $(top_builddir)/config.status $(srcdir)/setup.py.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 

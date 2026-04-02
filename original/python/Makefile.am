@@ -53,7 +53,7 @@ $(GENERATED): $(srcdir)/generator.py $(API_DESC)
 endif
 
 $(top_builddir)/libxml2.la:
-	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) -j1 all-am
+	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) -j1 libxml2.la
 
 tests test: all
 	cd tests && $(MAKE) tests

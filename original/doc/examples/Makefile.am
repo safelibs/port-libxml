@@ -96,6 +96,9 @@ xpath1_SOURCES = xpath1.c
 
 xpath2_SOURCES = xpath2.c
 
+$(top_builddir)/libxml2.la:
+	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) -j1 libxml2.la
+
 valgrind: 
 	$(MAKE) CHECKER='valgrind' tests
 

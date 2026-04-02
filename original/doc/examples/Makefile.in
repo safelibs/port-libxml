@@ -566,6 +566,10 @@ tree1_SOURCES = tree1.c
 tree2_SOURCES = tree2.c
 xpath1_SOURCES = xpath1.c
 xpath2_SOURCES = xpath2.c
+
+$(top_builddir)/libxml2.la:
+	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) -j1 libxml2.la
+
 all: all-am
 
 .SUFFIXES:
