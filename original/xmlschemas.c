@@ -8724,8 +8724,7 @@ declaration_part:
 		    (!xmlStrEqual(attr->name, BAD_CAST "default")) &&
 		    (!xmlStrEqual(attr->name, BAD_CAST "fixed")) &&
 		    (!xmlStrEqual(attr->name, BAD_CAST "block")) &&
-		    (!xmlStrEqual(attr->name, BAD_CAST "nillable")) &&
-		    (!xmlStrEqual(attr->name, BAD_CAST "abstract")))
+		    (!xmlStrEqual(attr->name, BAD_CAST "nillable")))
 		{
 		    if (topLevel == 0) {
 			if ((!xmlStrEqual(attr->name, BAD_CAST "maxOccurs")) &&
@@ -8816,8 +8815,6 @@ declaration_part:
 		    NULL, NULL, NULL);
 	    }
 	}
-	if (xmlGetBooleanProp(ctxt, node, "abstract", 0))
-	    decl->flags |= XML_SCHEMAS_ELEM_ABSTRACT;
 	if (xmlGetBooleanProp(ctxt, node, "nillable", 0))
 	    decl->flags |= XML_SCHEMAS_ELEM_NILLABLE;
 
@@ -9466,8 +9463,6 @@ xmlSchemaParseModelGroupDefRef(xmlSchemaParserCtxtPtr ctxt,
     min = xmlGetMinOccurs(ctxt, node, 0, -1, 1, "xs:nonNegativeInteger");
     max = xmlGetMaxOccurs(ctxt, node, 0, UNBOUNDED, 1,
 	"(xs:nonNegativeInteger | unbounded)");
-    if ((max == 0) && (xmlSchemaGetPropNode(node, "minOccurs") == NULL))
-	min = 0;
     /*
     * Check for illegal attributes.
     */
@@ -18584,7 +18579,47 @@ xmlSchemaFixupComplexType(xmlSchemaParserCtxtPtr pctxt,
 		    * "A model group whose {compositor} is sequence and whose
 		    * {particles} are..."
 		    */
-		if ((!dummySequence) && (baseType->subtypes != NULL)) {
+		if ((WXS_TYPE_PARTICLE(type) != NULL) &&
+		    (WXS_TYPE_PARTICLE_TERM(type) != NULL) &&
+		    ((WXS_TYPE_PARTICLE_TERM(type))->type ==
+			XML_SCHEMA_TYPE_ALL))
+		{
+		    /*
+		    * SPEC cos-all-limited (1)
+		    */
+		    xmlSchemaCustomErr(ACTXT_CAST pctxt,
+			/* TODO: error code */
+			XML_SCHEMAP_COS_ALL_LIMITED,
+			WXS_ITEM_NODE(type), NULL,
+			"The type has an 'all' model group in its "
+			"{content type} and thus cannot be derived from "
+			"a non-empty type, since this would produce a "
+			"'sequence' model group containing the 'all' "
+			"model group; 'all' model groups are not "
+			"allowed to appear inside other model groups",
+			NULL, NULL);
+
+		} else if ((WXS_TYPE_PARTICLE(baseType) != NULL) &&
+		    (WXS_TYPE_PARTICLE_TERM(baseType) != NULL) &&
+		    ((WXS_TYPE_PARTICLE_TERM(baseType))->type ==
+			XML_SCHEMA_TYPE_ALL))
+		{
+		    /*
+		    * SPEC cos-all-limited (1)
+		    */
+		    xmlSchemaCustomErr(ACTXT_CAST pctxt,
+			/* TODO: error code */
+			XML_SCHEMAP_COS_ALL_LIMITED,
+			WXS_ITEM_NODE(type), NULL,
+			"A type cannot be derived by extension from a type "
+			"which has an 'all' model group in its "
+			"{content type}, since this would produce a "
+			"'sequence' model group containing the 'all' "
+			"model group; 'all' model groups are not "
+			"allowed to appear inside other model groups",
+			NULL, NULL);
+
+		} else if ((!dummySequence) && (baseType->subtypes != NULL)) {
 		    xmlSchemaTreeItemPtr effectiveContent =
 			(xmlSchemaTreeItemPtr) type->subtypes;
 		    /*
@@ -20166,6 +20201,29 @@ xmlSchemaResolveModelGroupParticleReferences(
 	    * that the "term" will be assigned the model group of the
 	    * model group definition.
 	    */
+	    if ((WXS_MODELGROUPDEF_MODEL(refItem))->type ==
+		    XML_SCHEMA_TYPE_ALL) {
+		/*
+		* SPEC cos-all-limited (1)
+		* SPEC cos-all-limited (1.2)
+		* "It appears only as the value of one or both of the
+		* following properties:"
+		* (1.1) "the {model group} property of a model group
+		*        definition."
+		* (1.2) "the {term} property of a particle [... of] the "
+		* {content type} of a complex type definition."
+		*/
+		xmlSchemaCustomErr(ACTXT_CAST ctxt,
+		    /* TODO: error code */
+		    XML_SCHEMAP_COS_ALL_LIMITED,
+		    WXS_ITEM_NODE(particle), NULL,
+		    "A model group definition is referenced, but "
+		    "it contains an 'all' model group, which "
+		    "cannot be contained by model groups",
+		    NULL, NULL);
+		/* TODO: remove the particle. */
+		goto next_particle;
+	    }
 	    particle->children = (xmlSchemaTreeItemPtr) refItem;
 	} else {
 	    /*
@@ -21816,78 +21874,77 @@ xmlSchemaAssembleByXSI(xmlSchemaValidCtxtPtr vctxt)
     const xmlChar *nsname = NULL, *location;
     int count = 0;
     int ret = 0;
-    int i, nbAttrs = 0;
-    xmlSchemaAttrInfoPtr attrs[2], iattr;
+    xmlSchemaAttrInfoPtr iattr;
 
-    attrs[nbAttrs] = xmlSchemaGetMetaAttrInfo(vctxt,
+    /*
+    * Parse the value; we will assume an even number of values
+    * to be given (this is how Xerces and XSV work).
+    *
+    * URGENT TODO: !! This needs to work for both
+    * @noNamespaceSchemaLocation AND @schemaLocation on the same
+    * element !!
+    */
+    iattr = xmlSchemaGetMetaAttrInfo(vctxt,
 	XML_SCHEMA_ATTR_INFO_META_XSI_SCHEMA_LOC);
-    if (attrs[nbAttrs] != NULL)
-	nbAttrs++;
-    attrs[nbAttrs] = xmlSchemaGetMetaAttrInfo(vctxt,
+    if (iattr == NULL)
+	iattr = xmlSchemaGetMetaAttrInfo(vctxt,
 	XML_SCHEMA_ATTR_INFO_META_XSI_NO_NS_SCHEMA_LOC);
-    if (attrs[nbAttrs] != NULL)
-	nbAttrs++;
-    if (nbAttrs == 0)
+    if (iattr == NULL)
 	return (0);
-
-    for (i = 0; i < nbAttrs; i++) {
-	iattr = attrs[i];
-	cur = iattr->value;
-	do {
-	    nsname = NULL;
+    cur = iattr->value;
+    do {
+	/*
+	* TODO: Move the string parsing mechanism away from here.
+	*/
+	if (iattr->metaType == XML_SCHEMA_ATTR_INFO_META_XSI_SCHEMA_LOC) {
 	    /*
-	    * TODO: Move the string parsing mechanism away from here.
-	    */
-	    if (iattr->metaType == XML_SCHEMA_ATTR_INFO_META_XSI_SCHEMA_LOC) {
-		/*
-		* Get the namespace name.
-		*/
-		while (IS_BLANK_CH(*cur))
-		    cur++;
-		end = cur;
-		while ((*end != 0) && (!(IS_BLANK_CH(*end))))
-		    end++;
-		if (end == cur)
-		    break;
-		count++; /* TODO: Don't use the schema's dict. */
-		nsname = xmlDictLookup(vctxt->schema->dict, cur, end - cur);
-		cur = end;
-	    }
-	    /*
-	    * Get the URI.
+	    * Get the namespace name.
 	    */
 	    while (IS_BLANK_CH(*cur))
 		cur++;
 	    end = cur;
 	    while ((*end != 0) && (!(IS_BLANK_CH(*end))))
 		end++;
-	    if (end == cur) {
-		if (iattr->metaType ==
-		    XML_SCHEMA_ATTR_INFO_META_XSI_SCHEMA_LOC)
-		{
-		    /*
-		    * If using @schemaLocation then tuples are expected.
-		    * I.e. the namespace name *and* the document's URI.
-		    */
-		    xmlSchemaCustomWarning(ACTXT_CAST vctxt, XML_SCHEMAV_MISC,
-			iattr->node, NULL,
-			"The value must consist of tuples: the target namespace "
-			"name and the document's URI", NULL, NULL, NULL);
-		}
+	    if (end == cur)
 		break;
-	    }
 	    count++; /* TODO: Don't use the schema's dict. */
-	    location = xmlDictLookup(vctxt->schema->dict, cur, end - cur);
+	    nsname = xmlDictLookup(vctxt->schema->dict, cur, end - cur);
 	    cur = end;
-	    ret = xmlSchemaAssembleByLocation(vctxt, vctxt->schema,
-		iattr->node, nsname, location);
-	    if (ret == -1) {
-		VERROR_INT("xmlSchemaAssembleByXSI",
-		    "assembling schemata");
-		return (-1);
+	}
+	/*
+	* Get the URI.
+	*/
+	while (IS_BLANK_CH(*cur))
+	    cur++;
+	end = cur;
+	while ((*end != 0) && (!(IS_BLANK_CH(*end))))
+	    end++;
+	if (end == cur) {
+	    if (iattr->metaType ==
+		XML_SCHEMA_ATTR_INFO_META_XSI_SCHEMA_LOC)
+	    {
+		/*
+		* If using @schemaLocation then tuples are expected.
+		* I.e. the namespace name *and* the document's URI.
+		*/
+		xmlSchemaCustomWarning(ACTXT_CAST vctxt, XML_SCHEMAV_MISC,
+		    iattr->node, NULL,
+		    "The value must consist of tuples: the target namespace "
+		    "name and the document's URI", NULL, NULL, NULL);
 	    }
-	} while (*cur != 0);
-    }
+	    break;
+	}
+	count++; /* TODO: Don't use the schema's dict. */
+	location = xmlDictLookup(vctxt->schema->dict, cur, end - cur);
+	cur = end;
+	ret = xmlSchemaAssembleByLocation(vctxt, vctxt->schema,
+	    iattr->node, nsname, location);
+	if (ret == -1) {
+	    VERROR_INT("xmlSchemaAssembleByXSI",
+		"assembling schemata");
+	    return (-1);
+	}
+    } while (*cur != 0);
     return (ret);
 }
 

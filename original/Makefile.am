@@ -206,9 +206,7 @@ tests-data:
 
 runsuite-data: tests-data
 	@(cd xstc && $(MAKE) $(AM_MAKEFLAGS) \
-	    Tests/Metadata/NISTXMLSchemaDatatypes.testSet \
-	    Tests/Metadata/SunXMLSchema1-0-20020116.testSet \
-	    Tests/Metadata/MSXMLSchema1-0-20020116.testSet)
+	    Tests/.stamp)
 
 runsuite$(EXEEXT): runsuite-data
 
