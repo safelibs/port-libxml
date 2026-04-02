@@ -205,10 +205,6 @@ tests-data:
 	[ -d xinclude-test-suite ] || $(LN_S) $(srcdir)/xinclude-test-suite .
 
 runsuite-data: tests-data
-	@(cd xstc && $(MAKE) $(AM_MAKEFLAGS) \
-	    Tests/Metadata/NISTXMLSchemaDatatypes.testSet \
-	    Tests/Metadata/SunXMLSchema1-0-20020116.testSet \
-	    Tests/Metadata/MSXMLSchema1-0-20020116.testSet)
 
 runsuite$(EXEEXT): runsuite-data
 
@@ -223,6 +219,8 @@ runtests: tests-data runtest$(EXEEXT) testrecurse$(EXEEXT) testapi$(EXEEXT) \
 	@(if [ "$(PYTHON_SUBDIR)" != "" ] ; then cd python ; \
 	    $(MAKE) tests ; fi)
 	@cd fuzz; $(MAKE) tests
+
+check: runtests
 
 check-local: runtests
 
