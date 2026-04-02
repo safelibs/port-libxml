@@ -30,8 +30,8 @@ if len(res) != 2:
 if res[0].name != "doc" or res[1].name != "foo":
     print("xpath query: wrong node set value")
     sys.exit(1)
-libxml2.registerXPathFunction(ctxt._o, "foo", None, foo)
-libxml2.registerXPathFunction(ctxt._o, "bar", None, bar)
+ctxt.registerXPathFunction("foo", None, foo)
+ctxt.registerXPathFunction("bar", None, bar)
 i = 10000
 while i > 0:
     res = ctxt.xpathEval("foo(1)")

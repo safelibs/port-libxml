@@ -24,7 +24,7 @@ def foo(ctx, str):
 
 doc = libxml2.parseFile("tst.xml")
 ctxt = doc.xpathNewContext()
-libxml2.registerXPathFunction(ctxt._o, "foo", None, foo)
+ctxt.registerXPathFunction("foo", None, foo)
 res = ctxt.xpathEval("foo('hello')")
 if type(res) != type([]):
     print("Failed to return a nodeset")

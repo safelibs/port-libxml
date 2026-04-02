@@ -1,11 +1,6 @@
 #!/usr/bin/python -u
 import libxml2
 
-try:
-    import libxml2mod
-except ModuleNotFoundError:
-    from libxmlmods import libxml2mod
-
 import sys
 
 def error(msg, data):
@@ -20,7 +15,7 @@ instance="""<?xml version="1.0"?>
 
 dtd = libxml2.parseDTD(None, 'test.dtd')
 ctxt = libxml2.newValidCtxt()
-libxml2mod.xmlSetValidErrors(ctxt._o, error, error)
+ctxt.setValidityErrorHandler(error, error)
 doc = libxml2.parseDoc(instance)
 ret = doc.validateDtd(ctxt, dtd)
 if ret != 1:
