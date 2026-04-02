@@ -2383,6 +2383,7 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
                 unsigned int len, neg, integ, hasLeadingZeroes;
 		xmlChar cval[25];
 		xmlChar *cptr = cval;
+                int unbounded = (val == NULL);
 
                 if ((cur == NULL) || (*cur == 0))
                     goto return1;
@@ -2424,20 +2425,27 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
 		    hasLeadingZeroes = 1;
 		}
 		if (*cur != 0) {
-		    do {
+		    while (1) {
 			if ((*cur >= '0') && (*cur <= '9')) {
-			    *cptr++ = *cur++;
-			    len++;
+                            if (len < 24) {
+			        *cptr++ = *cur;
+			        len++;
+                            } else if (!unbounded) {
+                                break;
+                            }
+			    cur++;
 			} else if (*cur == '.') {
 			    cur++;
 			    integ = len;
-			    do {
-				if ((*cur >= '0') && (*cur <= '9')) {
-				    *cptr++ = *cur++;
-				    len++;
-				} else
-				    break;
-			    } while (len < 24);
+			    while ((*cur >= '0') && (*cur <= '9')) {
+                                    if (len < 24) {
+				        *cptr++ = *cur;
+				        len++;
+                                    } else if (!unbounded) {
+                                        break;
+                                    }
+				    cur++;
+                                }
 			    /*
 			    * Disallow "." but allow "00."
 			    */
@@ -2446,7 +2454,7 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
 			    break;
 			} else
 			    break;
-		    } while (len < 24);
+		    }
 		}
 		if (normOnTheFly)
 		    while IS_WSP_BLANK_CH(*cur) cur++;
@@ -2807,15 +2815,21 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
         case XML_SCHEMAS_QNAME:{
                 const xmlChar *uri = NULL;
                 xmlChar *local = NULL;
+                const xmlChar *cur = value;
 
-                ret = xmlValidateQName(value, 1);
+                if ((norm == NULL) && (normOnTheFly)) {
+                    norm = xmlSchemaCollapseString(value);
+                    if (norm != NULL)
+                        cur = norm;
+                }
+                ret = xmlValidateQName(cur, 1);
 		if (ret != 0)
 		    goto done;
                 if (node != NULL) {
                     xmlChar *prefix;
 		    xmlNsPtr ns;
 
-                    local = xmlSplitQName2(value, &prefix);
+                    local = xmlSplitQName2(cur, &prefix);
 		    ns = xmlSearchNs(node->doc, node, prefix);
 		    if ((ns == NULL) && (prefix != NULL)) {
 			xmlFree(prefix);
@@ -2827,6 +2841,8 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
 			uri = ns->href;
                     if (prefix != NULL)
                         xmlFree(prefix);
+                } else if (xmlStrchr(cur, ':') != NULL) {
+                    goto return1;
                 }
                 if (val != NULL) {
                     v = xmlSchemaNewValue(XML_SCHEMAS_QNAME);
@@ -2838,7 +2854,7 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
 		    if (local != NULL)
 			v->value.qname.name = local;
 		    else
-			v->value.qname.name = xmlStrdup(value);
+			v->value.qname.name = xmlStrdup(cur);
 		    if (uri != NULL)
 			v->value.qname.uri = xmlStrdup(uri);
 		    *val = v;
@@ -2983,12 +2999,18 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
         case XML_SCHEMAS_NOTATION:{
                 xmlChar *uri = NULL;
                 xmlChar *local = NULL;
+                const xmlChar *cur = value;
 
-                ret = xmlValidateQName(value, 1);
+                if ((norm == NULL) && (normOnTheFly)) {
+                    norm = xmlSchemaCollapseString(value);
+                    if (norm != NULL)
+                        cur = norm;
+                }
+                ret = xmlValidateQName(cur, 1);
                 if ((ret == 0) && (node != NULL)) {
                     xmlChar *prefix;
 
-                    local = xmlSplitQName2(value, &prefix);
+                    local = xmlSplitQName2(cur, &prefix);
                     if (prefix != NULL) {
                         xmlNsPtr ns;
 
@@ -3002,15 +3024,8 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
                         xmlFree(local);
                     if (prefix != NULL)
                         xmlFree(prefix);
-                }
-                if ((node == NULL) || (node->doc == NULL))
-                    ret = 3;
-                if (ret == 0) {
-                    ret = xmlValidateNotationUse(NULL, node->doc, value);
-                    if (ret == 1)
-                        ret = 0;
-                    else
-                        ret = 1;
+                } else if ((ret == 0) && (xmlStrchr(cur, ':') != NULL)) {
+                    ret = 1;
                 }
                 if ((ret == 0) && (val != NULL)) {
                     v = xmlSchemaNewValue(XML_SCHEMAS_NOTATION);
@@ -3018,7 +3033,7 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
                         if (local != NULL)
                             v->value.qname.name = local;
                         else
-                            v->value.qname.name = xmlStrdup(value);
+                            v->value.qname.name = xmlStrdup(cur);
                         if (uri != NULL)
                             v->value.qname.uri = uri;
 
@@ -3254,7 +3269,7 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
         case XML_SCHEMAS_NINTEGER:
         case XML_SCHEMAS_NNINTEGER:{
                 const xmlChar *cur = value;
-                unsigned long lo, mi, hi;
+                unsigned long lo = 0, mi = 0, hi = 0;
                 int sign = 0;
 
                 if (cur == NULL)
@@ -3267,12 +3282,28 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
                 } else if (*cur == '+')
                     cur++;
                 ret = xmlSchemaParseUInt(&cur, &lo, &mi, &hi);
-                if (ret < 0)
+                if ((ret < 0) && !((ret == -1) && (val == NULL)))
                     goto return1;
 		if (normOnTheFly)
 		    while IS_WSP_BLANK_CH(*cur) cur++;
                 if (*cur != 0)
                     goto return1;
+                if (ret == -1) {
+                    if (type->builtInType == XML_SCHEMAS_NPINTEGER) {
+                        if (sign == 0)
+                            goto return1;
+                    } else if (type->builtInType == XML_SCHEMAS_PINTEGER) {
+                        if (sign == 1)
+                            goto return1;
+                    } else if (type->builtInType == XML_SCHEMAS_NINTEGER) {
+                        if (sign == 0)
+                            goto return1;
+                    } else if (type->builtInType == XML_SCHEMAS_NNINTEGER) {
+                        if (sign == 1)
+                            goto return1;
+                    }
+                    goto return0;
+                }
                 if (type->builtInType == XML_SCHEMAS_NPINTEGER) {
                     if ((sign == 0) &&
                         ((hi != 0) || (mi != 0) || (lo != 0)))
@@ -3386,13 +3417,19 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
         case XML_SCHEMAS_USHORT:
         case XML_SCHEMAS_UBYTE:{
                 const xmlChar *cur = value;
-                unsigned long lo, mi, hi;
+                unsigned long lo = 0, mi = 0, hi = 0;
 
                 if (cur == NULL)
                     goto return1;
+                if (normOnTheFly)
+                    while IS_WSP_BLANK_CH(*cur) cur++;
+                if (*cur == '+')
+                    cur++;
                 ret = xmlSchemaParseUInt(&cur, &lo, &mi, &hi);
                 if (ret < 0)
                     goto return1;
+                if (normOnTheFly)
+                    while IS_WSP_BLANK_CH(*cur) cur++;
                 if (*cur != 0)
                     goto return1;
                 if (type->builtInType == XML_SCHEMAS_ULONG) {
@@ -3429,6 +3466,8 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
                 if (val != NULL) {
                     v = xmlSchemaNewValue(type->builtInType);
                     if (v != NULL) {
+                        if (ret == 0)
+                            ret++;
                         v->value.decimal.lo = lo;
                         v->value.decimal.mi = mi;
                         v->value.decimal.hi = hi;

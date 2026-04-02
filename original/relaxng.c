@@ -2502,6 +2502,11 @@ xmlRelaxNGSchemaTypeCheck(void *data ATTRIBUTE_UNUSED,
                                      "http://www.w3.org/2001/XMLSchema");
     if (typ == NULL)
         return (-1);
+    if (((xmlStrEqual(type, BAD_CAST "QName")) ||
+         (xmlStrEqual(type, BAD_CAST "NOTATION"))) &&
+        (xmlStrchr(value, ':') == NULL)) {
+        node = NULL;
+    }
     ret = xmlSchemaValPredefTypeNode(typ, value,
                                      (xmlSchemaValPtr *) result, node);
     if (ret == 2)               /* special ID error code */
@@ -2635,6 +2640,11 @@ xmlRelaxNGSchemaTypeCompare(void *data ATTRIBUTE_UNUSED,
                                      "http://www.w3.org/2001/XMLSchema");
     if (typ == NULL)
         return (-1);
+    if (((xmlStrEqual(type, BAD_CAST "QName")) ||
+         (xmlStrEqual(type, BAD_CAST "NOTATION"))) &&
+        (xmlStrchr(value1, ':') == NULL)) {
+        ctxt1 = NULL;
+    }
     if (comp1 == NULL) {
         ret = xmlSchemaValPredefTypeNode(typ, value1, &res1, ctxt1);
         if (ret != 0)
@@ -2643,6 +2653,11 @@ xmlRelaxNGSchemaTypeCompare(void *data ATTRIBUTE_UNUSED,
             return (-1);
     } else {
         res1 = (xmlSchemaValPtr) comp1;
+    }
+    if (((xmlStrEqual(type, BAD_CAST "QName")) ||
+         (xmlStrEqual(type, BAD_CAST "NOTATION"))) &&
+        (xmlStrchr(value2, ':') == NULL)) {
+        ctxt2 = NULL;
     }
     ret = xmlSchemaValPredefTypeNode(typ, value2, &res2, ctxt2);
     if (ret != 0) {
@@ -3876,8 +3891,17 @@ xmlRelaxNGCompareNameClasses(xmlRelaxNGDefinePtr def1,
 	    ret = 1;
 	else if (ret == 1)
 	    ret = 0;
+    } else if (def1->type == XML_RELAXNG_CHOICE) {
+        xmlRelaxNGDefinePtr list = def1->nameClass;
+
+        while (list != NULL) {
+            if (xmlRelaxNGCompareNameClasses(list, def2) == 0)
+                return (0);
+            list = list->next;
+        }
+        ret = 1;
     } else {
-        TODO ret = 0;
+        ret = 1;
     }
     if (ret == 0)
         return (ret);
@@ -3907,8 +3931,17 @@ xmlRelaxNGCompareNameClasses(xmlRelaxNGDefinePtr def1,
         } else {
             ret = 1;
         }
+    } else if (def2->type == XML_RELAXNG_CHOICE) {
+        xmlRelaxNGDefinePtr list = def2->nameClass;
+
+        while (list != NULL) {
+            if (xmlRelaxNGCompareNameClasses(def1, list) == 0)
+                return (0);
+            list = list->next;
+        }
+        ret = 1;
     } else {
-        TODO ret = 0;
+        ret = 1;
     }
 
     return (ret);
@@ -5428,6 +5461,21 @@ xmlRelaxNGParseNameClass(xmlRelaxNGParserCtxtPtr ctxt, xmlNodePtr node,
                     }
                 }
                 child = child->next;
+            }
+            tmp = ret->nameClass;
+            while (tmp != NULL) {
+                xmlRelaxNGDefinePtr cur = tmp->next;
+
+                while (cur != NULL) {
+                    if (xmlRelaxNGCompareNameClasses(tmp, cur) == 0) {
+                        xmlRngPErr(ctxt, node, XML_RNGP_CHOICE_CONTENT,
+                                   "Attribute name classes in choice overlap\n",
+                                   NULL, NULL);
+                        break;
+                    }
+                    cur = cur->next;
+                }
+                tmp = tmp->next;
             }
         }
     } else {
@@ -7034,9 +7082,21 @@ xmlRelaxNGCleanupAttributes(xmlRelaxNGParserCtxtPtr ctxt, xmlNodePtr node)
                                        "Attribute %s contains invalid URI %s\n",
                                        cur->name, val);
                         } else {
-                            if (uri->scheme == NULL) {
+                            if ((uri->scheme == NULL) ||
+                                (((uri->opaque == NULL) ||
+                                  (uri->opaque[0] == 0)) &&
+                                 ((uri->authority == NULL) ||
+                                  (uri->authority[0] == 0)) &&
+                                 ((uri->server == NULL) ||
+                                  (uri->server[0] == 0)) &&
+                                 ((uri->path == NULL) ||
+                                  (uri->path[0] == 0)) &&
+                                 ((uri->query == NULL) ||
+                                  (uri->query[0] == 0)) &&
+                                 ((uri->query_raw == NULL) ||
+                                  (uri->query_raw[0] == 0)))) {
                                 xmlRngPErr(ctxt, node, XML_RNGP_URI_NOT_ABSOLUTE,
-                                           "Attribute %s URI %s is not absolute\n",
+                                           "Attribute %s URI %s is invalid or not absolute\n",
                                            cur->name, val);
                             }
                             if (uri->fragment != NULL) {

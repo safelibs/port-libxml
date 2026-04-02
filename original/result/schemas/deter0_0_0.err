@@ -1,1 +1,2 @@
-./test/schemas/deter0_0.xsd:6: element complexType: Schemas parser error : local complex type: The content model is not determinist.
+./test/schemas/deter0_0.xsd:12: element element: Schemas parser error : Element '{http://www.w3.org/2001/XMLSchema}element': The content model of element declaration 'book' is not deterministic.
+./test/schemas/deter0_0.xsd:12: element element: Schemas parser error : Element '{http://www.w3.org/2001/XMLSchema}element': The content model of complex type definition '(NULL)' is not deterministic.

@@ -380,13 +380,18 @@ if quiet == 0 or nb_instances_failed != 0:
       nb_instances_tests, nb_instances_success, nb_instances_failed)))
 
 testsuite.freeDoc()
+log.close()
 
 # Memory debug specific
 libxml2.relaxNGCleanupTypes()
 libxml2.cleanupParser()
+failed = (nb_schemas_failed != 0) or (nb_instances_failed != 0)
 if libxml2.debugMemory(1) == 0:
     if quiet == 0:
         print("OK")
+    if failed:
+        sys.exit(1)
 else:
     print(("Memory leak %d bytes" % (libxml2.debugMemory(1))))
     libxml2.dumpMemory()
+    sys.exit(1)
