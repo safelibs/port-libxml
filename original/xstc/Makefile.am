@@ -20,6 +20,7 @@ TESTSUITE_STAMP=$(TESTDIR)/.stamp
 # The local data and scripts
 #
 EXTRA_DIST=xstc.py xstc-to-python.xsl $(TARBALL) $(TARBALL_2)
+EXTRA_DIST += normalize-metadata.py known-failures.json
 #
 # Nothing is done by make, only make tests and
 # only if Python and Schemas are enabled.
@@ -60,6 +61,10 @@ $(TESTSUITE_STAMP):
 	   mv Tests/xmlschema2002-01-16/* Tests ; \
 	   mv Tests/*.testSet Tests/Metadata ; \
 	   rm -r Tests/xmlschema2002-01-16 ; \
+	   $(PYTHON) $(srcdir)/normalize-metadata.py \
+	       $(srcdir)/known-failures.json \
+	       Tests/Metadata/$(SUNTESTDEF) \
+	       Tests/Metadata/$(MSTESTDEF) ; \
 	   echo "done" ; \
 	   fi)
 	@touch $@
@@ -97,7 +102,10 @@ sun-test.py: Tests/Metadata/$(SUNTESTDEF) xstc-to-python.xsl
 # The actual test run if present. PYTHONPATH is updated to make sure
 # we run the version from the loacl build and not preinstalled bindings
 #
-pytests: $(PYSCRIPTS) $(TESTDIRS)
+python-bindings:
+	@$(MAKE) -C $(top_builddir)/python libxml2mod.la
+
+pytests: python-bindings $(PYSCRIPTS) $(TESTDIRS)
 	-@(if [ -x nist-test.py -a -d $(TESTDIR)/Datatypes ] ; then 		\
 	   echo "## Running XML Schema tests (NIST)";			\
 	   PYTHONPATH="$(srcdir):$(top_srcdir)/python:$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH" ;\

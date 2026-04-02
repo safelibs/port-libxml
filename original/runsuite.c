@@ -925,14 +925,17 @@ xstcTestGroup(xmlNodePtr cur, const char *base) {
     xmlChar *validity = NULL;
     xmlSchemaPtr schemas = NULL;
     xmlSchemaParserCtxtPtr ctxt;
+    xmlNodePtr schemaTest;
     xmlNodePtr instance;
     int ret = 0, mem;
 
     xmlResetLastError();
     testErrorsSize = 0; testErrors[0] = 0;
     mem = xmlMemUsed();
-    href = getString(cur,
-                     "string(ts:schemaTest/ts:schemaDocument/@xlink:href)");
+    schemaTest = getNext(cur, "./ts:schemaTest[1]");
+    if (schemaTest == NULL)
+        return(0);
+    href = getString(schemaTest, "string(./ts:schemaDocument/@xlink:href)");
     if ((href == NULL) || (href[0] == 0)) {
         test_log("testGroup line %ld misses href for schemaDocument\n",
 		    xmlGetLineNo(cur));
@@ -952,8 +955,7 @@ xstcTestGroup(xmlNodePtr cur, const char *base) {
 	ret = -1;
 	goto done;
     }
-    validity = getString(cur,
-                         "string(ts:schemaTest/ts:expected/@validity)");
+    validity = getString(schemaTest, "string(./ts:expected/@validity)");
     if (validity == NULL) {
         test_log("testGroup line %ld misses expected validity\n",
 	        xmlGetLineNo(cur));
@@ -1067,15 +1069,21 @@ xstcMetadata(const char *metadata, const char *base) {
     xmlFree(contributor);
     xmlFree(name);
 
-    cur = getNext(cur, "./ts:testGroup[1]");
-    if ((cur == NULL) || (!xmlStrEqual(cur->name, BAD_CAST "testGroup"))) {
+    cur = xmlDocGetRootElement(doc)->children;
+    while ((cur != NULL) &&
+           ((cur->type != XML_ELEMENT_NODE) ||
+            (!xmlStrEqual(cur->name, BAD_CAST "testGroup"))))
+        cur = cur->next;
+    if (cur == NULL) {
         fprintf(stderr, "Unexpected format %s\n", metadata);
 	ret = -1;
 	goto done;
     }
     while (cur != NULL) {
-        xstcTestGroup(cur, base);
-	cur = getNext(cur, "following-sibling::ts:testGroup[1]");
+        if ((cur->type == XML_ELEMENT_NODE) &&
+            (xmlStrEqual(cur->name, BAD_CAST "testGroup")))
+            xstcTestGroup(cur, base);
+	cur = cur->next;
     }
 
 done:
@@ -1093,7 +1101,6 @@ int
 main(int argc ATTRIBUTE_UNUSED, char **argv ATTRIBUTE_UNUSED) {
     int ret = 0;
     int old_errors, old_tests, old_leaks;
-    const char *run_xstc;
 
     logfile = fopen(LOGFILE, "w");
     if (logfile == NULL) {
@@ -1105,7 +1112,6 @@ main(int argc ATTRIBUTE_UNUSED, char **argv ATTRIBUTE_UNUSED) {
 
     if ((argc >= 2) && (!strcmp(argv[1], "-v")))
         verbose = 1;
-    run_xstc = getenv("LIBXML_RUN_XSTC");
 
 
     old_errors = nb_errors;
@@ -1141,59 +1147,57 @@ main(int argc ATTRIBUTE_UNUSED, char **argv ATTRIBUTE_UNUSED) {
 	       nb_tests - old_tests,
 	       nb_errors - old_errors,
 	       nb_leaks - old_leaks);
-    if ((run_xstc != NULL) && (run_xstc[0] != 0)) {
-        old_errors = nb_errors;
-        old_tests = nb_tests;
-        old_leaks = nb_leaks;
-        nb_internals = 0;
-        nb_schematas = 0;
-        xstcMetadata("xstc/Tests/Metadata/NISTXMLSchemaDatatypes.testSet",
-		     "xstc/Tests/Metadata/");
-        if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
-	    printf("Ran %d tests (%d schemata), no errors\n",
-	           nb_tests - old_tests, nb_schematas);
-        else
-	    printf("Ran %d tests (%d schemata), %d errors (%d internals), %d leaks\n",
-	           nb_tests - old_tests,
-	           nb_schematas,
-	           nb_errors - old_errors,
-	           nb_internals,
-	           nb_leaks - old_leaks);
-        old_errors = nb_errors;
-        old_tests = nb_tests;
-        old_leaks = nb_leaks;
-        nb_internals = 0;
-        nb_schematas = 0;
-        xstcMetadata("xstc/Tests/Metadata/SunXMLSchema1-0-20020116.testSet",
-		     "xstc/Tests/");
-        if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
-	    printf("Ran %d tests (%d schemata), no errors\n",
-	           nb_tests - old_tests, nb_schematas);
-        else
-	    printf("Ran %d tests (%d schemata), %d errors (%d internals), %d leaks\n",
-	           nb_tests - old_tests,
-	           nb_schematas,
-	           nb_errors - old_errors,
-	           nb_internals,
-	           nb_leaks - old_leaks);
-        old_errors = nb_errors;
-        old_tests = nb_tests;
-        old_leaks = nb_leaks;
-        nb_internals = 0;
-        nb_schematas = 0;
-        xstcMetadata("xstc/Tests/Metadata/MSXMLSchema1-0-20020116.testSet",
-		     "xstc/Tests/");
-        if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
-	    printf("Ran %d tests (%d schemata), no errors\n",
-	           nb_tests - old_tests, nb_schematas);
-        else
-	    printf("Ran %d tests (%d schemata), %d errors (%d internals), %d leaks\n",
-	           nb_tests - old_tests,
-	           nb_schematas,
-	           nb_errors - old_errors,
-	           nb_internals,
-	           nb_leaks - old_leaks);
-    }
+    old_errors = nb_errors;
+    old_tests = nb_tests;
+    old_leaks = nb_leaks;
+    nb_internals = 0;
+    nb_schematas = 0;
+    xstcMetadata("xstc/Tests/Metadata/NISTXMLSchemaDatatypes.testSet",
+		 "xstc/Tests/Metadata/");
+    if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
+	printf("Ran %d tests (%d schemata), no errors\n",
+	       nb_tests - old_tests, nb_schematas);
+    else
+	printf("Ran %d tests (%d schemata), %d errors (%d internals), %d leaks\n",
+	       nb_tests - old_tests,
+	       nb_schematas,
+	       nb_errors - old_errors,
+	       nb_internals,
+	       nb_leaks - old_leaks);
+    old_errors = nb_errors;
+    old_tests = nb_tests;
+    old_leaks = nb_leaks;
+    nb_internals = 0;
+    nb_schematas = 0;
+    xstcMetadata("xstc/Tests/Metadata/SunXMLSchema1-0-20020116.testSet",
+		 "xstc/Tests/");
+    if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
+	printf("Ran %d tests (%d schemata), no errors\n",
+	       nb_tests - old_tests, nb_schematas);
+    else
+	printf("Ran %d tests (%d schemata), %d errors (%d internals), %d leaks\n",
+	       nb_tests - old_tests,
+	       nb_schematas,
+	       nb_errors - old_errors,
+	       nb_internals,
+	       nb_leaks - old_leaks);
+    old_errors = nb_errors;
+    old_tests = nb_tests;
+    old_leaks = nb_leaks;
+    nb_internals = 0;
+    nb_schematas = 0;
+    xstcMetadata("xstc/Tests/Metadata/MSXMLSchema1-0-20020116.testSet",
+		 "xstc/Tests/");
+    if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
+	printf("Ran %d tests (%d schemata), no errors\n",
+	       nb_tests - old_tests, nb_schematas);
+    else
+	printf("Ran %d tests (%d schemata), %d errors (%d internals), %d leaks\n",
+	       nb_tests - old_tests,
+	       nb_schematas,
+	       nb_errors - old_errors,
+	       nb_internals,
+	       nb_leaks - old_leaks);
 
     if ((nb_errors == 0) && (nb_leaks == 0)) {
         ret = 0;
