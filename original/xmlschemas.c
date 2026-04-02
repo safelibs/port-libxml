@@ -9466,6 +9466,8 @@ xmlSchemaParseModelGroupDefRef(xmlSchemaParserCtxtPtr ctxt,
     min = xmlGetMinOccurs(ctxt, node, 0, -1, 1, "xs:nonNegativeInteger");
     max = xmlGetMaxOccurs(ctxt, node, 0, UNBOUNDED, 1,
 	"(xs:nonNegativeInteger | unbounded)");
+    if ((max == 0) && (xmlSchemaGetPropNode(node, "minOccurs") == NULL))
+	min = 0;
     /*
     * Check for illegal attributes.
     */
@@ -18582,47 +18584,7 @@ xmlSchemaFixupComplexType(xmlSchemaParserCtxtPtr pctxt,
 		    * "A model group whose {compositor} is sequence and whose
 		    * {particles} are..."
 		    */
-		if ((WXS_TYPE_PARTICLE(type) != NULL) &&
-		    (WXS_TYPE_PARTICLE_TERM(type) != NULL) &&
-		    ((WXS_TYPE_PARTICLE_TERM(type))->type ==
-			XML_SCHEMA_TYPE_ALL))
-		{
-		    /*
-		    * SPEC cos-all-limited (1)
-		    */
-		    xmlSchemaCustomErr(ACTXT_CAST pctxt,
-			/* TODO: error code */
-			XML_SCHEMAP_COS_ALL_LIMITED,
-			WXS_ITEM_NODE(type), NULL,
-			"The type has an 'all' model group in its "
-			"{content type} and thus cannot be derived from "
-			"a non-empty type, since this would produce a "
-			"'sequence' model group containing the 'all' "
-			"model group; 'all' model groups are not "
-			"allowed to appear inside other model groups",
-			NULL, NULL);
-
-		} else if ((WXS_TYPE_PARTICLE(baseType) != NULL) &&
-		    (WXS_TYPE_PARTICLE_TERM(baseType) != NULL) &&
-		    ((WXS_TYPE_PARTICLE_TERM(baseType))->type ==
-			XML_SCHEMA_TYPE_ALL))
-		{
-		    /*
-		    * SPEC cos-all-limited (1)
-		    */
-		    xmlSchemaCustomErr(ACTXT_CAST pctxt,
-			/* TODO: error code */
-			XML_SCHEMAP_COS_ALL_LIMITED,
-			WXS_ITEM_NODE(type), NULL,
-			"A type cannot be derived by extension from a type "
-			"which has an 'all' model group in its "
-			"{content type}, since this would produce a "
-			"'sequence' model group containing the 'all' "
-			"model group; 'all' model groups are not "
-			"allowed to appear inside other model groups",
-			NULL, NULL);
-
-		} else if ((!dummySequence) && (baseType->subtypes != NULL)) {
+		if ((!dummySequence) && (baseType->subtypes != NULL)) {
 		    xmlSchemaTreeItemPtr effectiveContent =
 			(xmlSchemaTreeItemPtr) type->subtypes;
 		    /*
@@ -20204,29 +20166,6 @@ xmlSchemaResolveModelGroupParticleReferences(
 	    * that the "term" will be assigned the model group of the
 	    * model group definition.
 	    */
-	    if ((WXS_MODELGROUPDEF_MODEL(refItem))->type ==
-		    XML_SCHEMA_TYPE_ALL) {
-		/*
-		* SPEC cos-all-limited (1)
-		* SPEC cos-all-limited (1.2)
-		* "It appears only as the value of one or both of the
-		* following properties:"
-		* (1.1) "the {model group} property of a model group
-		*        definition."
-		* (1.2) "the {term} property of a particle [... of] the "
-		* {content type} of a complex type definition."
-		*/
-		xmlSchemaCustomErr(ACTXT_CAST ctxt,
-		    /* TODO: error code */
-		    XML_SCHEMAP_COS_ALL_LIMITED,
-		    WXS_ITEM_NODE(particle), NULL,
-		    "A model group definition is referenced, but "
-		    "it contains an 'all' model group, which "
-		    "cannot be contained by model groups",
-		    NULL, NULL);
-		/* TODO: remove the particle. */
-		goto next_particle;
-	    }
 	    particle->children = (xmlSchemaTreeItemPtr) refItem;
 	} else {
 	    /*
