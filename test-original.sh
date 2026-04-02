@@ -67,6 +67,8 @@ RUN sed 's/^Types: deb$/Types: deb-src/' /etc/apt/sources.list.d/ubuntu.sources 
       python3-lxml \
       pkg-config \
       sasl2-bin \
+      xclip \
+      xdotool \
       xauth \
       xmlstarlet \
       xvfb \
@@ -111,20 +113,6 @@ require_nonempty_file() {
     printf 'expected non-empty file: %s\n' "$path" >&2
     exit 1
   fi
-}
-
-require_timeout_or_success() {
-  local status="$1"
-  local label="$2"
-
-  case "$status" in
-    0|124)
-      ;;
-    *)
-      printf '%s exited with unexpected status %s\n' "$label" "$status" >&2
-      exit 1
-      ;;
-  esac
 }
 
 validate_dependents_inventory() {
@@ -395,22 +383,125 @@ test_yelp() {
 </page>
 XML
 
-  set +e
-  timeout 12 dbus-run-session -- xvfb-run -a yelp /tmp/yelp-help/index.page >/tmp/yelp.log 2>&1
-  local_status=$?
-  set -e
+  timeout 20 dbus-run-session -- xvfb-run -a bash -lc '
+    set -euo pipefail
 
-  require_timeout_or_success "$local_status" "yelp"
+    printf "" | xclip -selection clipboard
+    yelp /tmp/yelp-help/index.page >/tmp/yelp.log 2>&1 &
+    yelp_pid=$!
+
+    cleanup() {
+      kill "$yelp_pid" 2>/dev/null || true
+      wait "$yelp_pid" 2>/dev/null || true
+    }
+
+    trap cleanup EXIT
+    xdotool search --sync --name "Help" > /tmp/yelp-window.ids
+    yelp_window="$(tail -n1 /tmp/yelp-window.ids)"
+    sleep 2
+    xdotool key --window "$yelp_window" ctrl+a
+    sleep 1
+    xdotool key --window "$yelp_window" ctrl+c
+    sleep 1
+    xclip -o -selection clipboard > /tmp/yelp-clipboard.log
+  '
+
+  require_nonempty_file /tmp/yelp-window.ids
+  require_contains /tmp/yelp-clipboard.log "Smoke Help"
+  require_contains /tmp/yelp-clipboard.log "Testing Yelp with Mallard XML."
 }
 
 test_libobt() {
   log_step "libobt2v5"
-  set +e
-  timeout 10 xvfb-run -a openbox --config-file /etc/xdg/openbox/rc.xml >/tmp/openbox.log 2>&1
-  local_status=$?
-  set -e
+  mkdir -p /tmp/openbox
+  cat > /tmp/openbox/rc.xml <<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<openbox_config xmlns="http://openbox.org/3.4/rc">
+  <resistance>
+    <strength>42</strength>
+    <screen_edge_strength>20</screen_edge_strength>
+  </resistance>
+  <focus>
+    <focusNew>yes</focusNew>
+    <followMouse>no</followMouse>
+  </focus>
+  <placement>
+    <policy>UnderMouse</policy>
+    <center>yes</center>
+    <monitor>Primary</monitor>
+    <primaryMonitor>1</primaryMonitor>
+  </placement>
+  <theme>
+    <name>Clearlooks</name>
+    <titleLayout>NLIMC</titleLayout>
+  </theme>
+  <desktops>
+    <number>5</number>
+    <firstdesk>4</firstdesk>
+    <names>
+      <name>alpha</name>
+      <name>beta</name>
+      <name>gamma</name>
+      <name>delta</name>
+      <name>epsilon</name>
+    </names>
+  </desktops>
+  <resize>
+    <drawContents>yes</drawContents>
+    <popupShow>Always</popupShow>
+    <popupPosition>Center</popupPosition>
+  </resize>
+  <margins>
+    <top>1</top>
+    <bottom>2</bottom>
+    <left>3</left>
+    <right>4</right>
+  </margins>
+  <applications/>
+  <menu>
+    <file>/var/lib/openbox/debian-menu.xml</file>
+    <hideDelay>0</hideDelay>
+    <middle>no</middle>
+    <submenuShowDelay>0</submenuShowDelay>
+    <submenuHideDelay>0</submenuHideDelay>
+    <showIcons>no</showIcons>
+    <manageDesktops>yes</manageDesktops>
+  </menu>
+  <keyboard/>
+  <mouse/>
+</openbox_config>
+XML
 
-  require_timeout_or_success "$local_status" "openbox"
+  timeout 20 xvfb-run -a bash -lc '
+    set -euo pipefail
+
+    openbox --debug --sm-disable --config-file /tmp/openbox/rc.xml >/tmp/openbox.log 2>&1 &
+    openbox_pid=$!
+
+    cleanup() {
+      kill "$openbox_pid" 2>/dev/null || true
+      wait "$openbox_pid" 2>/dev/null || true
+    }
+
+    trap cleanup EXIT
+
+    for _ in $(seq 1 40); do
+      if grep -F -- "Moving to desktop 4" /tmp/openbox.log >/dev/null 2>&1; then
+        exit 0
+      fi
+
+      if ! kill -0 "$openbox_pid" 2>/dev/null; then
+        wait "$openbox_pid"
+      fi
+
+      sleep 0.5
+    done
+
+    printf "openbox did not report the expected desktop from rc.xml\n" >&2
+    exit 1
+  '
+
+  require_contains /tmp/openbox.log "Moving to desktop 4"
 }
 
 test_kdoctools() {
