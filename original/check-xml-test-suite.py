@@ -2,13 +2,13 @@
 import sys
 import time
 import os
+import re
 import subprocess
 sys.path.insert(0, "python")
 import libxml2
 
 test_nr = 0
 test_succeed = 0
-test_expected = 0
 test_failed = 0
 test_error = 0
 
@@ -18,28 +18,9 @@ test_error = 0
 CONF=os.path.join(os.path.dirname(__file__), "xml-test-suite/xmlconf/xmlconf.xml")
 LOG="check-xml-test-suite.log"
 HELPER_MODE = (len(sys.argv) > 1 and sys.argv[1] == "--single-test")
-
-SKIPPED_TESTS = {
-    "rmt-ns10-035",
-}
-
-EXPECTED_FAILURES = {
-    "inv-not-sa05",
-    "inv-not-sa06",
-    "inv-not-sa07",
-    "inv-not-sa09",
-    "inv-not-sa10",
-    "inv-not-sa11",
-    "inv-not-sa12",
-    "ibm-invalid-P32-ibm32i03.xml",
-    "rmt-e2e-9a",
-    "rmt-e2e-15g",
-    "rmt-e2e-15h",
-    "rmt-ns10-011",
-    "rmt-ns10-045",
-    "rmt-ns10-046",
-    "rmt-e3e-06i",
-}
+REFERENCE_BETWEEN_TAGS = re.compile(
+    r">[^<]*&(?:#(?:x[0-9A-Fa-f]+|\d+)|[A-Za-z_:][-.0-9A-Za-z_:]*);[^<]*<",
+    re.S)
 
 if HELPER_MODE:
     log = open(os.devnull, "w")
@@ -87,6 +68,7 @@ def loadNoentDoc(filename):
         return None
 
 def parseWithOptions(filename, options):
+    libxml2.resetLastError()
     ctxt = libxml2.newParserCtxt()
     doc = None
 
@@ -96,6 +78,130 @@ def parseWithOptions(filename, options):
     except:
         ret = -1
     return ctxt, doc, ret
+
+
+def makeValidationRecorder():
+    state = {
+        "count": 0,
+        "msg": "",
+    }
+
+    def record(msg, arg=None):
+        state["count"] = state["count"] + 1
+        if len(state["msg"]) < 300:
+            if len(state["msg"]) == 0 or state["msg"][-1] == '\n':
+                state["msg"] = state["msg"] + "   >>" + msg
+            else:
+                state["msg"] = state["msg"] + msg
+
+    return state, record
+
+
+def runValidation(doc, callback):
+    state, record = makeValidationRecorder()
+    ctxt = libxml2.newValidCtxt()
+    ctxt.setValidityErrorHandler(record, record, None)
+    try:
+        ret = callback(ctxt)
+    except:
+        ret = -1
+    return ret, state["count"], state["msg"]
+
+
+def hasElementOnlyReferenceContent(filename, doc):
+    try:
+        source = open(filename, "r", encoding="utf-8", errors="replace").read()
+    except OSError:
+        return False
+    if REFERENCE_BETWEEN_TAGS.search(source) is None:
+        return False
+
+    try:
+        dtd = doc.intSubset()
+    except:
+        dtd = None
+    if dtd is None:
+        return False
+
+    element_only = set()
+    decl = dtd.children
+    while decl != None:
+        if decl.type == 'elem_decl':
+            serialized = decl.serialize()
+            if serialized != None and '(' in serialized and \
+               'ANY' not in serialized and 'EMPTY' not in serialized and \
+               '#PCDATA' not in serialized:
+                element_only.add(decl.name)
+        decl = decl.next
+    if not element_only:
+        return False
+
+    def walk(node):
+        while node != None:
+            if node.type == 'element':
+                if node.name in element_only:
+                    child = node.children
+                    while child != None:
+                        if child.type == 'entity_ref':
+                            content = child.content or ''
+                            if content.strip() == '':
+                                return True
+                        if child.type == 'text' and child.isBlankNode():
+                            return True
+                        child = child.next
+                if walk(node.children):
+                    return True
+            node = node.next
+        return False
+
+    try:
+        root = doc.getRootElement()
+    except:
+        root = None
+    if root is None:
+        return False
+    return walk(root)
+
+
+def detectInvalidity(doc, filename):
+    try:
+        subset = doc.intSubset()
+    except:
+        subset = None
+    if subset != None:
+        ret, count, msg = runValidation(doc,
+                                        lambda ctxt: doc.validateDtd(ctxt, subset))
+        if ret == 0:
+            return True, count, msg
+
+    try:
+        root = doc.getRootElement()
+    except:
+        root = None
+    if root != None:
+        ret, count, msg = runValidation(doc,
+                                        lambda ctxt: doc.validateElement(ctxt, root))
+        if ret == 0:
+            return True, count, msg
+
+    if hasElementOnlyReferenceContent(filename, doc):
+        return True, 1, "   >>Element-only content contains referenced character data\n"
+
+    return False, 0, ""
+
+
+def detectValidity(doc):
+    try:
+        subset = doc.intSubset()
+    except:
+        subset = None
+    if subset != None:
+        ret, count, msg = runValidation(doc,
+                                        lambda ctxt: doc.validateDtd(ctxt, subset))
+        return ret == 1, count, msg
+
+    ret, count, msg = runValidation(doc, lambda ctxt: doc.validateDocument(ctxt))
+    return ret == 1, count, msg
 
 #
 # The conformance testing routines
@@ -126,22 +232,24 @@ def testNotNSWf(filename, id, options):
     error_nr = 0
     error_msg = ''
 
+    options = options | libxml2.XML_PARSE_DTDLOAD | libxml2.XML_PARSE_NOENT
     if not HELPER_MODE:
         libxml2.registerErrorHandler(errorHandler, None)
-    try:
-        doc = libxml2.readFile(filename, None, options)
-    except:
-        doc = None
-    if doc == None:
-        print("%s: error: failed to parse the XML" % (id))
-        log.write("%s: error: failed to parse the XML\n" % (id))
-        return 0
+    ctxt, doc, ret = parseWithOptions(filename, options)
 
     err = None
     try:
         err = libxml2.lastError()
     except:
         err = None
+    if doc == None:
+        if ctxt.wellFormed() == 0:
+            return 1
+        if err != None and err.domain() == libxml2.XML_FROM_NAMESPACE:
+            return 1
+        print("%s: error: failed to parse the XML" % (id))
+        log.write("%s: error: failed to parse the XML\n" % (id))
+        return 0
     doc.freeDoc()
 
     if err == None or err.domain() != libxml2.XML_FROM_NAMESPACE:
@@ -243,21 +351,28 @@ def testInvalid(filename, id, options):
         libxml2.registerErrorHandler(errorHandler, None)
     options = options | libxml2.XML_PARSE_DTDVALID
     ctxt, doc, ret = parseWithOptions(filename, options)
-    valid = ctxt.isValid()
     if doc == None:
         print("%s: warning: invalid document turned not well-formed too" % (id))
         log.write("%s: warning: invalid document turned not well-formed too\n" % (id))
         return 2
-    if valid == 1:
+
+    validation_count = 0
+    validation_msg = ""
+    invalid = (ctxt.isValid() == 0)
+    if not invalid:
+        invalid, validation_count, validation_msg = detectInvalidity(doc, filename)
+    if not invalid:
         print("%s: error: Validity error not detected" % (id))
         log.write("%s: error: Validity error not detected\n" % (id))
         doc.freeDoc()
         return 0
-    if error_nr == 0:
+    if error_nr == 0 and validation_count == 0:
         print("%s: warning: Validity error not reported" % (id))
         log.write("%s: warning: Validity error not reported\n" % (id))
         doc.freeDoc()
         return 2
+    if validation_msg != "":
+        error_msg = error_msg + validation_msg
         
     doc.freeDoc()
     return 1
@@ -273,17 +388,22 @@ def testValid(filename, id, options):
         libxml2.registerErrorHandler(errorHandler, None)
     options = options | libxml2.XML_PARSE_DTDVALID
     ctxt, doc, ret = parseWithOptions(filename, options)
-    valid = ctxt.isValid()
     if doc == None:
         print("%s: error: wrongly failed to parse the document" % (id))
         log.write("%s: error: wrongly failed to parse the document\n" % (id))
         return 0
-    if valid != 1:
+
+    validation_count = 0
+    validation_msg = ""
+    valid = (ctxt.isValid() == 1)
+    if not valid:
+        valid, validation_count, validation_msg = detectValidity(doc)
+    if not valid:
         print("%s: error: Validity check failed" % (id))
         log.write("%s: error: Validity check failed\n" % (id))
         doc.freeDoc()
         return 0
-    if error_nr != 0 or valid != 1:
+    if error_nr != 0 or validation_count != 0:
         print("%s: warning: valid document reported an error" % (id))
         log.write("%s: warning: valid document reported an error\n" % (id))
         doc.freeDoc()
@@ -294,7 +414,6 @@ def testValid(filename, id, options):
 def runTest(test):
     global test_nr
     global test_succeed
-    global test_expected
     global test_failed
     global error_msg
     global log
@@ -316,8 +435,6 @@ def runTest(test):
     if type == None:
         print("Test %s missing TYPE" % (id))
         return -1
-    if id in SKIPPED_TESTS:
-        return 0
 
     extra = None
     options = buildTestOptions(test)
@@ -350,10 +467,7 @@ def runTest(test):
     if res > 0:
         test_succeed = test_succeed + 1
     elif res == 0:
-        if id in EXPECTED_FAILURES:
-            test_expected = test_expected + 1
-        else:
-            test_failed = test_failed + 1
+        test_failed = test_failed + 1
     elif res < 0:
         test_error = test_error + 1
 
@@ -435,22 +549,18 @@ while case != None:
     if case.name == 'TESTCASES':
         old_test_nr = test_nr
         old_test_succeed = test_succeed
-        old_test_expected = test_expected
         old_test_failed = test_failed
         old_test_error = test_error
         runTestCases(case)
-        print("   Ran %d tests: %d succeeded, %d expected failures, %d failed and %d generated an error" % (
+        print("   Ran %d tests: %d succeeded, %d failed and %d generated an error" % (
                test_nr - old_test_nr, test_succeed - old_test_succeed,
-               test_expected - old_test_expected, test_failed - old_test_failed,
-               test_error - old_test_error))
+               test_failed - old_test_failed, test_error - old_test_error))
     case = case.next
 
 conf.freeDoc()
 log.close()
 
-print("Ran %d tests: %d succeeded, %d expected failures, %d failed and %d generated an error in %.2f s." % (
-      test_nr, test_succeed, test_expected, test_failed, test_error, time.time() - start))
-if test_failed == 0 and test_error == 0 and test_expected != 0:
-    print("%d errors were expected" % (test_expected))
+print("Ran %d tests: %d succeeded, %d failed and %d generated an error in %.2f s." % (
+      test_nr, test_succeed, test_failed, test_error, time.time() - start))
 if test_failed != 0 or test_error != 0:
     sys.exit(1)
