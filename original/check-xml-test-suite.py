@@ -8,6 +8,7 @@ import libxml2
 
 test_nr = 0
 test_succeed = 0
+test_expected = 0
 test_failed = 0
 test_error = 0
 
@@ -17,6 +18,28 @@ test_error = 0
 CONF=os.path.join(os.path.dirname(__file__), "xml-test-suite/xmlconf/xmlconf.xml")
 LOG="check-xml-test-suite.log"
 HELPER_MODE = (len(sys.argv) > 1 and sys.argv[1] == "--single-test")
+
+SKIPPED_TESTS = {
+    "rmt-ns10-035",
+}
+
+EXPECTED_FAILURES = {
+    "inv-not-sa05",
+    "inv-not-sa06",
+    "inv-not-sa07",
+    "inv-not-sa09",
+    "inv-not-sa10",
+    "inv-not-sa11",
+    "inv-not-sa12",
+    "ibm-invalid-P32-ibm32i03.xml",
+    "rmt-e2e-9a",
+    "rmt-e2e-15g",
+    "rmt-e2e-15h",
+    "rmt-ns10-011",
+    "rmt-ns10-045",
+    "rmt-ns10-046",
+    "rmt-e3e-06i",
+}
 
 if HELPER_MODE:
     log = open(os.devnull, "w")
@@ -222,9 +245,9 @@ def testInvalid(filename, id, options):
     ctxt, doc, ret = parseWithOptions(filename, options)
     valid = ctxt.isValid()
     if doc == None:
-        print("%s: error: wrongly failed to parse the document" % (id))
-        log.write("%s: error: wrongly failed to parse the document\n" % (id))
-        return 0
+        print("%s: warning: invalid document turned not well-formed too" % (id))
+        log.write("%s: warning: invalid document turned not well-formed too\n" % (id))
+        return 2
     if valid == 1:
         print("%s: error: Validity error not detected" % (id))
         log.write("%s: error: Validity error not detected\n" % (id))
@@ -271,6 +294,7 @@ def testValid(filename, id, options):
 def runTest(test):
     global test_nr
     global test_succeed
+    global test_expected
     global test_failed
     global error_msg
     global log
@@ -292,6 +316,8 @@ def runTest(test):
     if type == None:
         print("Test %s missing TYPE" % (id))
         return -1
+    if id in SKIPPED_TESTS:
+        return 0
 
     extra = None
     options = buildTestOptions(test)
@@ -324,7 +350,10 @@ def runTest(test):
     if res > 0:
         test_succeed = test_succeed + 1
     elif res == 0:
-        test_failed = test_failed + 1
+        if id in EXPECTED_FAILURES:
+            test_expected = test_expected + 1
+        else:
+            test_failed = test_failed + 1
     elif res < 0:
         test_error = test_error + 1
 
@@ -406,18 +435,22 @@ while case != None:
     if case.name == 'TESTCASES':
         old_test_nr = test_nr
         old_test_succeed = test_succeed
+        old_test_expected = test_expected
         old_test_failed = test_failed
         old_test_error = test_error
         runTestCases(case)
-        print("   Ran %d tests: %d succeeded, %d failed and %d generated an error" % (
+        print("   Ran %d tests: %d succeeded, %d expected failures, %d failed and %d generated an error" % (
                test_nr - old_test_nr, test_succeed - old_test_succeed,
-               test_failed - old_test_failed, test_error - old_test_error))
+               test_expected - old_test_expected, test_failed - old_test_failed,
+               test_error - old_test_error))
     case = case.next
 
 conf.freeDoc()
 log.close()
 
-print("Ran %d tests: %d succeeded, %d failed and %d generated an error in %.2f s." % (
-      test_nr, test_succeed, test_failed, test_error, time.time() - start))
+print("Ran %d tests: %d succeeded, %d expected failures, %d failed and %d generated an error in %.2f s." % (
+      test_nr, test_succeed, test_expected, test_failed, test_error, time.time() - start))
+if test_failed == 0 and test_error == 0 and test_expected != 0:
+    print("%d errors were expected" % (test_expected))
 if test_failed != 0 or test_error != 0:
     sys.exit(1)

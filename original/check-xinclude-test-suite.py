@@ -217,3 +217,5 @@ log.close()
 
 print("Ran %d tests: %d succeeded, %d failed and %d generated an error in %.2f s." % (
       test_nr, test_succeed, test_failed, test_error, time.time() - start))
+if test_failed != 0 or test_error != 0:
+    sys.exit(1)
