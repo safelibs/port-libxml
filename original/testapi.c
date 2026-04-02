@@ -1220,29 +1220,49 @@ static int test_tree(void);
 static int test_uri(void);
 static int test_valid(void);
 static int test_xinclude(void);
+static int test_xmlCreatePushParserCtxt(void);
+static int test_xmlCtxtReadFile(void);
+static int test_xmlGetCharEncodingHandler(void);
+static int test_xmlGetUTF8Char(void);
 static int test_xmlIO(void);
+static int test_xmlLoadExternalEntity(void);
+static int test_xmlNewIOInputStream(void);
+static int test_xmlParserInputBufferCreateFilename(void);
+static int test_xmlParserInputBufferCreateStatic(void);
 static int test_xmlautomata(void);
 static int test_xmlerror(void);
 static int test_xmlmodule(void);
 static int test_xmlreader(void);
 static int test_xmlregexp(void);
 static int test_xmlsave(void);
+static int test_xmlSchemaGetPredefinedType(void);
+static int test_xmlSchemaNewMemParserCtxt(void);
+static int test_xmlSchemaNewParserCtxt(void);
+static int test_xmlSchemaNewValidCtxt(void);
+static int test_xmlSchemaParse(void);
+static int test_xmlSchemaSetParserErrors(void);
+static int test_xmlSchemaValidateDoc(void);
+static int test_xmlSchemaValidatePredefinedType(void);
 static int test_xmlschemas(void);
 static int test_xmlschemastypes(void);
 static int test_xmlstring(void);
 static int test_xmlunicode(void);
 static int test_xmlwriter(void);
 static int test_xpath(void);
+static int test_xmlXPathCmpNodes(void);
+static int test_xmlXPathCompile(void);
+static int test_xmlXPathCompiledEval(void);
+static int test_xmlXPathCompiledEvalToBoolean(void);
+static int test_xmlXPathContextSetCache(void);
+static int test_xmlXPathCtxtCompile(void);
+static int test_xmlXPathEval(void);
+static int test_xmlXPathEvalExpression(void);
+static int test_xmlXPathEvalPredicate(void);
+static int test_xmlXPathNewContext(void);
+static int test_xmlXPathNodeEval(void);
+static int test_xmlXPathSetContextNode(void);
 static int test_xpathInternals(void);
 static int test_xpointer(void);
-
-static int
-skip_private_module(const char *module) {
-    if (quiet == 0)
-        printf("Skipping %s: no public API equivalent in this test harness\n",
-               module);
-    return(0);
-}
 
 /**
  * testlibxml2:
@@ -16880,41 +16900,16 @@ static int
 test_parserInternals(void) {
     int test_ret = 0;
 
-    if (quiet == 0) printf("Testing parserInternals : 33 of 90 functions ...\n");
-    test_ret += test_htmlCreateFileParserCtxt();
-    test_ret += test_htmlInitAutoClose();
-    test_ret += test_inputPop();
-    test_ret += test_inputPush();
-    test_ret += test_namePop();
-    test_ret += test_namePush();
-    test_ret += test_nodePop();
-    test_ret += test_nodePush();
-    test_ret += test_xmlCheckLanguageID();
-    test_ret += test_xmlCopyChar();
-    test_ret += test_xmlCopyCharMultiByte();
-    test_ret += test_xmlCreateEntityParserCtxt();
-    test_ret += test_xmlCreateFileParserCtxt();
-    test_ret += test_xmlCreateMemoryParserCtxt();
-    test_ret += test_xmlCreateURLParserCtxt();
-    test_ret += test_xmlCurrentChar();
-    test_ret += test_xmlErrMemory();
-    test_ret += test_xmlIsLetter();
-    test_ret += test_xmlNewEntityInputStream();
-    test_ret += test_xmlNewInputFromFile();
-    test_ret += test_xmlNewInputStream();
-    test_ret += test_xmlNewStringInputStream();
-    test_ret += test_xmlNextChar();
-    test_ret += test_xmlParserInputShrink();
-    test_ret += test_xmlPopInput();
-    test_ret += test_xmlPushInput();
-    test_ret += test_xmlSetEntityReferenceFunc();
-    test_ret += test_xmlSplitQName();
-    test_ret += test_xmlStringCurrentChar();
-    test_ret += test_xmlStringDecodeEntities();
-    test_ret += test_xmlStringLenDecodeEntities();
-    test_ret += test_xmlSwitchEncoding();
-    test_ret += test_xmlSwitchInputEncoding();
-    test_ret += test_xmlSwitchToEncoding();
+    if (quiet == 0)
+        printf("Testing parserInternals replacement coverage : 8 public functions ...\n");
+    test_ret += test_xmlCreatePushParserCtxt();
+    test_ret += test_xmlCtxtReadFile();
+    test_ret += test_xmlLoadExternalEntity();
+    test_ret += test_xmlNewIOInputStream();
+    test_ret += test_xmlParserInputBufferCreateFilename();
+    test_ret += test_xmlParserInputBufferCreateStatic();
+    test_ret += test_xmlGetUTF8Char();
+    test_ret += test_xmlGetCharEncodingHandler();
 
     if (test_ret != 0)
 	printf("Module parserInternals: %d errors\n", test_ret);
@@ -18116,7 +18111,16 @@ static int
 test_schemasInternals(void) {
     int test_ret = 0;
 
-    if (quiet == 0) printf("Testing schemasInternals : 0 of 2 functions ...\n");
+    if (quiet == 0)
+        printf("Testing schemasInternals replacement coverage : 8 public functions ...\n");
+    test_ret += test_xmlSchemaNewMemParserCtxt();
+    test_ret += test_xmlSchemaNewParserCtxt();
+    test_ret += test_xmlSchemaNewValidCtxt();
+    test_ret += test_xmlSchemaParse();
+    test_ret += test_xmlSchemaSetParserErrors();
+    test_ret += test_xmlSchemaValidateDoc();
+    test_ret += test_xmlSchemaGetPredefinedType();
+    test_ret += test_xmlSchemaValidatePredefinedType();
 
     if (test_ret != 0)
 	printf("Module schemasInternals: %d errors\n", test_ret);
@@ -51483,120 +51487,20 @@ static int
 test_xpathInternals(void) {
     int test_ret = 0;
 
-    if (quiet == 0) printf("Testing xpathInternals : 106 of 117 functions ...\n");
-    test_ret += test_valuePop();
-    test_ret += test_valuePush();
-    test_ret += test_xmlXPathAddValues();
-    test_ret += test_xmlXPathBooleanFunction();
-    test_ret += test_xmlXPathCeilingFunction();
-    test_ret += test_xmlXPathCompareValues();
-    test_ret += test_xmlXPathConcatFunction();
-    test_ret += test_xmlXPathContainsFunction();
-    test_ret += test_xmlXPathCountFunction();
-    test_ret += test_xmlXPathDebugDumpCompExpr();
-    test_ret += test_xmlXPathDebugDumpObject();
-    test_ret += test_xmlXPathDifference();
-    test_ret += test_xmlXPathDistinct();
-    test_ret += test_xmlXPathDistinctSorted();
-    test_ret += test_xmlXPathDivValues();
-    test_ret += test_xmlXPathEqualValues();
-    test_ret += test_xmlXPathErr();
-    test_ret += test_xmlXPathEvalExpr();
-    test_ret += test_xmlXPathEvaluatePredicateResult();
-    test_ret += test_xmlXPathFalseFunction();
-    test_ret += test_xmlXPathFloorFunction();
-    test_ret += test_xmlXPathFunctionLookup();
-    test_ret += test_xmlXPathFunctionLookupNS();
-    test_ret += test_xmlXPathHasSameNodes();
-    test_ret += test_xmlXPathIdFunction();
-    test_ret += test_xmlXPathIntersection();
-    test_ret += test_xmlXPathIsNodeType();
-    test_ret += test_xmlXPathLangFunction();
-    test_ret += test_xmlXPathLastFunction();
-    test_ret += test_xmlXPathLeading();
-    test_ret += test_xmlXPathLeadingSorted();
-    test_ret += test_xmlXPathLocalNameFunction();
-    test_ret += test_xmlXPathModValues();
-    test_ret += test_xmlXPathMultValues();
-    test_ret += test_xmlXPathNamespaceURIFunction();
-    test_ret += test_xmlXPathNewBoolean();
-    test_ret += test_xmlXPathNewCString();
-    test_ret += test_xmlXPathNewFloat();
-    test_ret += test_xmlXPathNewNodeSet();
-    test_ret += test_xmlXPathNewNodeSetList();
-    test_ret += test_xmlXPathNewParserContext();
-    test_ret += test_xmlXPathNewString();
-    test_ret += test_xmlXPathNextAncestor();
-    test_ret += test_xmlXPathNextAncestorOrSelf();
-    test_ret += test_xmlXPathNextAttribute();
-    test_ret += test_xmlXPathNextChild();
-    test_ret += test_xmlXPathNextDescendant();
-    test_ret += test_xmlXPathNextDescendantOrSelf();
-    test_ret += test_xmlXPathNextFollowing();
-    test_ret += test_xmlXPathNextFollowingSibling();
-    test_ret += test_xmlXPathNextNamespace();
-    test_ret += test_xmlXPathNextParent();
-    test_ret += test_xmlXPathNextPreceding();
-    test_ret += test_xmlXPathNextPrecedingSibling();
-    test_ret += test_xmlXPathNextSelf();
-    test_ret += test_xmlXPathNodeLeading();
-    test_ret += test_xmlXPathNodeLeadingSorted();
-    test_ret += test_xmlXPathNodeSetAdd();
-    test_ret += test_xmlXPathNodeSetAddNs();
-    test_ret += test_xmlXPathNodeSetAddUnique();
-    test_ret += test_xmlXPathNodeSetContains();
-    test_ret += test_xmlXPathNodeSetDel();
-    test_ret += test_xmlXPathNodeSetMerge();
-    test_ret += test_xmlXPathNodeSetRemove();
-    test_ret += test_xmlXPathNodeSetSort();
-    test_ret += test_xmlXPathNodeTrailing();
-    test_ret += test_xmlXPathNodeTrailingSorted();
-    test_ret += test_xmlXPathNormalizeFunction();
-    test_ret += test_xmlXPathNotEqualValues();
-    test_ret += test_xmlXPathNotFunction();
-    test_ret += test_xmlXPathNsLookup();
-    test_ret += test_xmlXPathNumberFunction();
-    test_ret += test_xmlXPathParseNCName();
-    test_ret += test_xmlXPathParseName();
-    test_ret += test_xmlXPathPopBoolean();
-    test_ret += test_xmlXPathPopExternal();
-    test_ret += test_xmlXPathPopNodeSet();
-    test_ret += test_xmlXPathPopNumber();
-    test_ret += test_xmlXPathPopString();
-    test_ret += test_xmlXPathPositionFunction();
-    test_ret += test_xmlXPathRegisterAllFunctions();
-    test_ret += test_xmlXPathRegisterFunc();
-    test_ret += test_xmlXPathRegisterFuncLookup();
-    test_ret += test_xmlXPathRegisterFuncNS();
-    test_ret += test_xmlXPathRegisterNs();
-    test_ret += test_xmlXPathRegisterVariable();
-    test_ret += test_xmlXPathRegisterVariableLookup();
-    test_ret += test_xmlXPathRegisterVariableNS();
-    test_ret += test_xmlXPathRegisteredFuncsCleanup();
-    test_ret += test_xmlXPathRegisteredNsCleanup();
-    test_ret += test_xmlXPathRegisteredVariablesCleanup();
-    test_ret += test_xmlXPathRoot();
-    test_ret += test_xmlXPathRoundFunction();
-    test_ret += test_xmlXPathStartsWithFunction();
-    test_ret += test_xmlXPathStringEvalNumber();
-    test_ret += test_xmlXPathStringFunction();
-    test_ret += test_xmlXPathStringLengthFunction();
-    test_ret += test_xmlXPathSubValues();
-    test_ret += test_xmlXPathSubstringAfterFunction();
-    test_ret += test_xmlXPathSubstringBeforeFunction();
-    test_ret += test_xmlXPathSubstringFunction();
-    test_ret += test_xmlXPathSumFunction();
-    test_ret += test_xmlXPathTrailing();
-    test_ret += test_xmlXPathTrailingSorted();
-    test_ret += test_xmlXPathTranslateFunction();
-    test_ret += test_xmlXPathTrueFunction();
-    test_ret += test_xmlXPathValueFlipSign();
-    test_ret += test_xmlXPathVariableLookup();
-    test_ret += test_xmlXPathVariableLookupNS();
-    test_ret += test_xmlXPathWrapCString();
-    test_ret += test_xmlXPathWrapExternal();
-    test_ret += test_xmlXPathWrapNodeSet();
-    test_ret += test_xmlXPatherror();
+    if (quiet == 0)
+        printf("Testing xpathInternals replacement coverage : 12 public functions ...\n");
+    test_ret += test_xmlXPathCmpNodes();
+    test_ret += test_xmlXPathCompile();
+    test_ret += test_xmlXPathCompiledEval();
+    test_ret += test_xmlXPathCompiledEvalToBoolean();
+    test_ret += test_xmlXPathContextSetCache();
+    test_ret += test_xmlXPathCtxtCompile();
+    test_ret += test_xmlXPathEval();
+    test_ret += test_xmlXPathEvalExpression();
+    test_ret += test_xmlXPathEvalPredicate();
+    test_ret += test_xmlXPathNewContext();
+    test_ret += test_xmlXPathNodeEval();
+    test_ret += test_xmlXPathSetContextNode();
 
     if (test_ret != 0)
 	printf("Module xpathInternals: %d errors\n", test_ret);
@@ -52355,12 +52259,10 @@ test_module(const char *module) {
     if (!strcmp(module, "nanoftp")) return(test_nanoftp());
     if (!strcmp(module, "nanohttp")) return(test_nanohttp());
     if (!strcmp(module, "parser")) return(test_parser());
-    if (!strcmp(module, "parserInternals"))
-        return(skip_private_module(module));
+    if (!strcmp(module, "parserInternals")) return(test_parserInternals());
     if (!strcmp(module, "pattern")) return(test_pattern());
     if (!strcmp(module, "relaxng")) return(test_relaxng());
-    if (!strcmp(module, "schemasInternals"))
-        return(skip_private_module(module));
+    if (!strcmp(module, "schemasInternals")) return(test_schemasInternals());
     if (!strcmp(module, "schematron")) return(test_schematron());
     if (!strcmp(module, "tree")) return(test_tree());
     if (!strcmp(module, "uri")) return(test_uri());
@@ -52379,8 +52281,7 @@ test_module(const char *module) {
     if (!strcmp(module, "xmlunicode")) return(test_xmlunicode());
     if (!strcmp(module, "xmlwriter")) return(test_xmlwriter());
     if (!strcmp(module, "xpath")) return(test_xpath());
-    if (!strcmp(module, "xpathInternals"))
-        return(skip_private_module(module));
+    if (!strcmp(module, "xpathInternals")) return(test_xpathInternals());
     if (!strcmp(module, "xpointer")) return(test_xpointer());
     return(0);
 }

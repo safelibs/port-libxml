@@ -29,15 +29,9 @@ corpus: seed/html.stamp seed/regexp.stamp seed/schema.stamp seed/uri.stamp \
     seed/xml.stamp seed/xpath.stamp
 
 tests: testFuzzer$(EXEEXT)
-	@if test ! -d $(top_srcdir)/test/HTML || \
-	    test ! -d $(top_srcdir)/test/XPath || \
-	    test ! -d $(top_srcdir)/test/xmlid; then \
-	    echo "## Skipping fuzzer tests: seed corpus sources missing"; \
-	else \
-	    $(MAKE) corpus && \
-	    echo "## Running fuzzer tests" && \
-	    ./testFuzzer$(EXEEXT); \
-	fi
+	$(MAKE) corpus
+	@echo "## Running fuzzer tests"
+	./testFuzzer$(EXEEXT)
 
 clean-corpus:
 	rm -rf seed
@@ -53,6 +47,10 @@ genSeed_SOURCES = genSeed.c fuzz.c
 seed/xml.stamp: genSeed$(EXEEXT)
 	@mkdir -p seed/xml
 	./genSeed$(EXEEXT) xml $(XML_SEED_CORPUS_SRC)
+	@set -- seed/xml/*; \
+	if test "$$1" = 'seed/xml/*'; then \
+	    printf '\\000\\000\\000\\000doc.xml\\\\\\n<doc/>\\\\\\n' > seed/xml/minimal.xml; \
+	fi
 	@touch seed/xml.stamp
 
 xml_SOURCES = xml.c fuzz.c
@@ -71,6 +69,10 @@ fuzz-xml: xml$(EXEEXT) seed/xml.stamp
 seed/html.stamp: genSeed$(EXEEXT)
 	@mkdir -p seed/html
 	./genSeed$(EXEEXT) html '$(top_srcdir)/test/HTML/*'
+	@set -- seed/html/*; \
+	if test "$$1" = 'seed/html/*'; then \
+	    printf '\\000\\000\\000\\000<html><body>seed</body></html>' > seed/html/minimal.html; \
+	fi
 	@touch seed/html.stamp
 
 html_SOURCES = html.c fuzz.c
@@ -142,6 +144,10 @@ fuzz-schema: schema$(EXEEXT) seed/schema.stamp
 seed/xpath.stamp: genSeed$(EXEEXT)
 	@mkdir -p seed/xpath
 	./genSeed$(EXEEXT) xpath '$(top_srcdir)/test/XPath'
+	@set -- seed/xpath/*; \
+	if test "$$1" = 'seed/xpath/*'; then \
+	    printf 'xpointer(/d)\\\\\\n<d/>\\\\\\n' > seed/xpath/minimal.xpath; \
+	fi
 	@touch seed/xpath.stamp
 
 xpath_SOURCES = xpath.c fuzz.c

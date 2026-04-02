@@ -32,6 +32,13 @@
 static int verbose = 0;
 static int tests_quiet = 0;
 
+/*
+ * Mirror the parser's public-facing size limits without depending on
+ * parserInternals.h in this test.
+ */
+#define TEST_MAX_TEXT_LENGTH 10000000
+#define TEST_MAX_LOOKUP_LIMIT 10000000
+
 /************************************************************************
  *									*
  *		time handling                                           *
@@ -1382,21 +1389,21 @@ struct limitDesc {
 
 static limitDesc limitDescriptions[] = {
     /* max length of a text node in content */
-    {"huge:textNode", XML_MAX_TEXT_LENGTH - CHUNK, 0, 0},
-    {"huge:textNode", XML_MAX_TEXT_LENGTH + CHUNK, 0, 1},
-    {"huge:textNode", XML_MAX_TEXT_LENGTH + CHUNK, XML_PARSE_HUGE, 0},
+    {"huge:textNode", TEST_MAX_TEXT_LENGTH - CHUNK, 0, 0},
+    {"huge:textNode", TEST_MAX_TEXT_LENGTH + CHUNK, 0, 1},
+    {"huge:textNode", TEST_MAX_TEXT_LENGTH + CHUNK, XML_PARSE_HUGE, 0},
     /* max length of a text node in content */
-    {"huge:attrNode", XML_MAX_TEXT_LENGTH - CHUNK, 0, 0},
-    {"huge:attrNode", XML_MAX_TEXT_LENGTH + CHUNK, 0, 1},
-    {"huge:attrNode", XML_MAX_TEXT_LENGTH + CHUNK, XML_PARSE_HUGE, 0},
+    {"huge:attrNode", TEST_MAX_TEXT_LENGTH - CHUNK, 0, 0},
+    {"huge:attrNode", TEST_MAX_TEXT_LENGTH + CHUNK, 0, 1},
+    {"huge:attrNode", TEST_MAX_TEXT_LENGTH + CHUNK, XML_PARSE_HUGE, 0},
     /* max length of a comment node */
-    {"huge:commentNode", XML_MAX_TEXT_LENGTH - CHUNK, 0, 0},
-    {"huge:commentNode", XML_MAX_TEXT_LENGTH + CHUNK, 0, 1},
-    {"huge:commentNode", XML_MAX_TEXT_LENGTH + CHUNK, XML_PARSE_HUGE, 0},
+    {"huge:commentNode", TEST_MAX_TEXT_LENGTH - CHUNK, 0, 0},
+    {"huge:commentNode", TEST_MAX_TEXT_LENGTH + CHUNK, 0, 1},
+    {"huge:commentNode", TEST_MAX_TEXT_LENGTH + CHUNK, XML_PARSE_HUGE, 0},
     /* max length of a PI node */
-    {"huge:piNode", XML_MAX_TEXT_LENGTH - CHUNK, 0, 0},
-    {"huge:piNode", XML_MAX_TEXT_LENGTH + CHUNK, 0, 1},
-    {"huge:piNode", XML_MAX_TEXT_LENGTH + CHUNK, XML_PARSE_HUGE, 0},
+    {"huge:piNode", TEST_MAX_TEXT_LENGTH - CHUNK, 0, 0},
+    {"huge:piNode", TEST_MAX_TEXT_LENGTH + CHUNK, 0, 1},
+    {"huge:piNode", TEST_MAX_TEXT_LENGTH + CHUNK, XML_PARSE_HUGE, 0},
 };
 
 typedef struct testDesc testDesc;
@@ -1427,7 +1434,7 @@ struct testException {
 
 static
 testException testExceptions[] = {
-    /* the SAX parser doesn't hit a limit of XML_MAX_TEXT_LENGTH text nodes */
+    /* the SAX parser doesn't hit a limit of TEST_MAX_TEXT_LENGTH text nodes */
     { 0, 1, 0, 0},
 };
 
@@ -1498,7 +1505,7 @@ launchCrazySAX(unsigned int test, int fail) {
 
     crazy_indx = test;
 
-    res = saxTest("crazy::test", XML_MAX_LOOKUP_LIMIT - CHUNK, 0, fail);
+    res = saxTest("crazy::test", TEST_MAX_LOOKUP_LIMIT - CHUNK, 0, fail);
     if (res != 0) {
         nb_errors++;
         err++;
@@ -1516,7 +1523,7 @@ launchCrazy(unsigned int test, int fail) {
 
     crazy_indx = test;
 
-    res = readerTest("crazy::test", XML_MAX_LOOKUP_LIMIT - CHUNK, 0, fail);
+    res = readerTest("crazy::test", TEST_MAX_LOOKUP_LIMIT - CHUNK, 0, fail);
     if (res != 0) {
         nb_errors++;
         err++;
