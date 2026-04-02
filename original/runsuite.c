@@ -76,39 +76,11 @@ static xmlChar *composeDir(const xmlChar *dir, const xmlChar *path) {
 
 static int nb_tests = 0;
 static int nb_errors = 0;
-static int nb_deviations = 0;
 static int nb_internals = 0;
 static int nb_schematas = 0;
 static int nb_unimplemented = 0;
 static int nb_leaks = 0;
 static int extraMemoryFromResolver = 0;
-
-static void
-printSuiteSummary(int tests, int schemata, int deviations, int errors,
-                  int internals, int leaks) {
-    if ((deviations == 0) && (errors == 0) && (leaks == 0)) {
-        if (schemata >= 0)
-            printf("Ran %d tests (%d schemata), no errors\n", tests, schemata);
-        else
-            printf("Ran %d tests, no errors\n", tests);
-        return;
-    }
-    if ((errors == 0) && (leaks == 0)) {
-        if (schemata >= 0)
-            printf("Ran %d tests (%d schemata), %d deviations, no harness errors\n",
-                   tests, schemata, deviations);
-        else
-            printf("Ran %d tests, %d deviations, no harness errors\n",
-                   tests, deviations);
-        return;
-    }
-    if (schemata >= 0)
-        printf("Ran %d tests (%d schemata), %d deviations, %d errors (%d internals), %d leaks\n",
-               tests, schemata, deviations, errors, internals, leaks);
-    else
-        printf("Ran %d tests, %d deviations, %d errors (%d internals), %d leaks\n",
-               tests, deviations, errors, internals, leaks);
-}
 
 static int
 fatalError(void) {
@@ -523,7 +495,7 @@ xsdTestCase(xmlNodePtr tst) {
     if (rng == NULL) {
         test_log("Failed to parse RNGtest line %ld\n",
 	        xmlGetLineNo(test));
-	nb_deviations++;
+	nb_errors++;
         ret = 1;
 	goto done;
     }
@@ -554,7 +526,7 @@ xsdTestCase(xmlNodePtr tst) {
 	    if (doc == NULL) {
 		test_log("Failed to parse valid instance line %ld\n",
 			xmlGetLineNo(tmp));
-		nb_deviations++;
+		nb_errors++;
 	    } else {
 		nb_tests++;
 	        ctxt = xmlRelaxNGNewValidCtxt(rng);
@@ -565,7 +537,7 @@ xsdTestCase(xmlNodePtr tst) {
 		if (ret > 0) {
 		    test_log("Failed to validate valid instance line %ld\n",
 				xmlGetLineNo(tmp));
-		    nb_deviations++;
+		    nb_errors++;
 		} else if (ret < 0) {
 		    test_log("Internal error validating instance line %ld\n",
 			    xmlGetLineNo(tmp));
@@ -610,7 +582,7 @@ xsdTestCase(xmlNodePtr tst) {
 	    if (doc == NULL) {
 		test_log("Failed to parse valid instance line %ld\n",
 			xmlGetLineNo(tmp));
-		nb_deviations++;
+		nb_errors++;
 	    } else {
 		nb_tests++;
 	        ctxt = xmlRelaxNGNewValidCtxt(rng);
@@ -621,7 +593,7 @@ xsdTestCase(xmlNodePtr tst) {
 		if (ret == 0) {
 		    test_log("Failed to detect invalid instance line %ld\n",
 				xmlGetLineNo(tmp));
-		    nb_deviations++;
+		    nb_errors++;
 		} else if (ret < 0) {
 		    test_log("Internal error validating instance line %ld\n",
 			    xmlGetLineNo(tmp));
@@ -867,7 +839,7 @@ xstcTestInstance(xmlNodePtr cur, xmlSchemaPtr schemas,
     if (doc == NULL) {
         fprintf(stderr, "instance %s fails to parse\n", path);
 	ret = -1;
-	nb_deviations++;
+	nb_errors++;
 	goto done;
     }
 
@@ -879,7 +851,7 @@ xstcTestInstance(xmlNodePtr cur, xmlSchemaPtr schemas,
 	if (ret > 0) {
 	    test_log("valid instance %s failed to validate against %s\n",
 			path, spath);
-	    nb_deviations++;
+	    nb_errors++;
 	} else if (ret < 0) {
 	    test_log("valid instance %s got internal error validating %s\n",
 			path, spath);
@@ -890,7 +862,7 @@ xstcTestInstance(xmlNodePtr cur, xmlSchemaPtr schemas,
 	if (ret == 0) {
 	    test_log("Failed to detect invalid instance %s against %s\n",
 			path, spath);
-	    nb_deviations++;
+	    nb_errors++;
 	}
     } else {
         test_log("instanceDocument line %ld has unexpected validity value%s\n",
@@ -968,14 +940,14 @@ xstcTestGroup(xmlNodePtr cur, const char *base) {
 	    test_log("valid schemas %s failed to parse\n",
 			path);
 	    ret = 1;
-	    nb_deviations++;
+	    nb_errors++;
 	}
 	if ((ret == 0) && (strstr(testErrors, "nimplemented") != NULL)) {
 	    test_log("valid schemas %s hit an unimplemented block\n",
 			path);
 	    ret = 1;
 	    nb_unimplemented++;
-	    nb_deviations++;
+	    nb_errors++;
 	}
 	instance = getNext(cur, "./ts:instanceTest[1]");
 	while (instance != NULL) {
@@ -986,7 +958,7 @@ xstcTestGroup(xmlNodePtr cur, const char *base) {
 		* We'll automatically mark the instances as failed
 		* if the schema was broken.
 		*/
-		nb_deviations++;
+		nb_errors++;
 	    }
 	    instance = getNext(instance,
 		"following-sibling::ts:instanceTest[1]");
@@ -1001,7 +973,7 @@ xstcTestGroup(xmlNodePtr cur, const char *base) {
 	if (schemas != NULL) {
 	    test_log("Failed to detect error in schemas %s\n",
 			path);
-	    nb_deviations++;
+	    nb_errors++;
 	    ret = 1;
 	}
 	if ((ret == 0) && (strstr(testErrors, "nimplemented") != NULL)) {
@@ -1009,7 +981,7 @@ xstcTestGroup(xmlNodePtr cur, const char *base) {
 	    test_log("invalid schemas %s hit an unimplemented block\n",
 			path);
 	    ret = 1;
-	    nb_deviations++;
+	    nb_errors++;
 	}
     } else {
         test_log("testGroup line %ld misses unexpected validity value%s\n",
@@ -1088,7 +1060,7 @@ done:
 int
 main(int argc ATTRIBUTE_UNUSED, char **argv ATTRIBUTE_UNUSED) {
     int ret = 0;
-    int old_errors, old_tests, old_leaks, old_deviations, old_internals;
+    int old_errors, old_tests, old_leaks;
 
     logfile = fopen(LOGFILE, "w");
     if (logfile == NULL) {
@@ -1105,88 +1077,96 @@ main(int argc ATTRIBUTE_UNUSED, char **argv ATTRIBUTE_UNUSED) {
     old_errors = nb_errors;
     old_tests = nb_tests;
     old_leaks = nb_leaks;
-    old_deviations = nb_deviations;
-    old_internals = nb_internals;
     xsdTest();
-    printSuiteSummary(nb_tests - old_tests, -1,
-                      nb_deviations - old_deviations,
-                      nb_errors - old_errors,
-                      nb_internals - old_internals,
-                      nb_leaks - old_leaks);
+    if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
+	printf("Ran %d tests, no errors\n", nb_tests - old_tests);
+    else
+	printf("Ran %d tests, %d errors, %d leaks\n",
+	       nb_tests - old_tests,
+	       nb_errors - old_errors,
+	       nb_leaks - old_leaks);
     old_errors = nb_errors;
     old_tests = nb_tests;
     old_leaks = nb_leaks;
-    old_deviations = nb_deviations;
-    old_internals = nb_internals;
     rngTest1();
-    printSuiteSummary(nb_tests - old_tests, -1,
-                      nb_deviations - old_deviations,
-                      nb_errors - old_errors,
-                      nb_internals - old_internals,
-                      nb_leaks - old_leaks);
+    if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
+	printf("Ran %d tests, no errors\n", nb_tests - old_tests);
+    else
+	printf("Ran %d tests, %d errors, %d leaks\n",
+	       nb_tests - old_tests,
+	       nb_errors - old_errors,
+	       nb_leaks - old_leaks);
     old_errors = nb_errors;
     old_tests = nb_tests;
     old_leaks = nb_leaks;
-    old_deviations = nb_deviations;
-    old_internals = nb_internals;
     rngTest2();
-    printSuiteSummary(nb_tests - old_tests, -1,
-                      nb_deviations - old_deviations,
-                      nb_errors - old_errors,
-                      nb_internals - old_internals,
-                      nb_leaks - old_leaks);
+    if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
+	printf("Ran %d tests, no errors\n", nb_tests - old_tests);
+    else
+	printf("Ran %d tests, %d errors, %d leaks\n",
+	       nb_tests - old_tests,
+	       nb_errors - old_errors,
+	       nb_leaks - old_leaks);
     old_errors = nb_errors;
     old_tests = nb_tests;
     old_leaks = nb_leaks;
-    old_deviations = nb_deviations;
     nb_internals = 0;
     nb_schematas = 0;
     xstcMetadata("xstc/Tests/Metadata/NISTXMLSchemaDatatypes.testSet",
 		 "xstc/Tests/Metadata/");
-    printSuiteSummary(nb_tests - old_tests, nb_schematas,
-                      nb_deviations - old_deviations,
-                      nb_errors - old_errors,
-                      nb_internals,
-                      nb_leaks - old_leaks);
+    if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
+	printf("Ran %d tests (%d schemata), no errors\n",
+	       nb_tests - old_tests, nb_schematas);
+    else
+	printf("Ran %d tests (%d schemata), %d errors (%d internals), %d leaks\n",
+	       nb_tests - old_tests,
+	       nb_schematas,
+	       nb_errors - old_errors,
+	       nb_internals,
+	       nb_leaks - old_leaks);
     old_errors = nb_errors;
     old_tests = nb_tests;
     old_leaks = nb_leaks;
-    old_deviations = nb_deviations;
     nb_internals = 0;
     nb_schematas = 0;
     xstcMetadata("xstc/Tests/Metadata/SunXMLSchema1-0-20020116.testSet",
 		 "xstc/Tests/");
-    printSuiteSummary(nb_tests - old_tests, nb_schematas,
-                      nb_deviations - old_deviations,
-                      nb_errors - old_errors,
-                      nb_internals,
-                      nb_leaks - old_leaks);
+    if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
+	printf("Ran %d tests (%d schemata), no errors\n",
+	       nb_tests - old_tests, nb_schematas);
+    else
+	printf("Ran %d tests (%d schemata), %d errors (%d internals), %d leaks\n",
+	       nb_tests - old_tests,
+	       nb_schematas,
+	       nb_errors - old_errors,
+	       nb_internals,
+	       nb_leaks - old_leaks);
     old_errors = nb_errors;
     old_tests = nb_tests;
     old_leaks = nb_leaks;
-    old_deviations = nb_deviations;
     nb_internals = 0;
     nb_schematas = 0;
     xstcMetadata("xstc/Tests/Metadata/MSXMLSchema1-0-20020116.testSet",
 		 "xstc/Tests/");
-    printSuiteSummary(nb_tests - old_tests, nb_schematas,
-                      nb_deviations - old_deviations,
-                      nb_errors - old_errors,
-                      nb_internals,
-                      nb_leaks - old_leaks);
+    if ((nb_errors == old_errors) && (nb_leaks == old_leaks))
+	printf("Ran %d tests (%d schemata), no errors\n",
+	       nb_tests - old_tests, nb_schematas);
+    else
+	printf("Ran %d tests (%d schemata), %d errors (%d internals), %d leaks\n",
+	       nb_tests - old_tests,
+	       nb_schematas,
+	       nb_errors - old_errors,
+	       nb_internals,
+	       nb_leaks - old_leaks);
 
     if ((nb_errors == 0) && (nb_leaks == 0)) {
         ret = 0;
-        if (nb_deviations == 0)
-	    printf("Total %d tests, no errors\n",
-	           nb_tests);
-        else
-	    printf("Total %d tests, %d deviations, no harness errors\n",
-	           nb_tests, nb_deviations);
+	printf("Total %d tests, no errors\n",
+	       nb_tests);
     } else {
         ret = 1;
-	printf("Total %d tests, %d deviations, %d errors, %d leaks\n",
-	       nb_tests, nb_deviations, nb_errors, nb_leaks);
+	printf("Total %d tests, %d errors, %d leaks\n",
+	       nb_tests, nb_errors, nb_leaks);
     }
     xmlXPathFreeContext(ctxtXPath);
     xmlCleanupParser();
