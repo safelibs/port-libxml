@@ -16,29 +16,12 @@ test_error = 0
 #
 CONF=os.path.join(os.path.dirname(__file__), "xml-test-suite/xmlconf/xmlconf.xml")
 LOG="check-xml-test-suite.log"
+HELPER_MODE = (len(sys.argv) > 1 and sys.argv[1] == "--single-test")
 
-
-def maybeRunXmlConf():
-    runner = os.path.join(os.getcwd(), "runxmlconf")
-    suite_dir = os.path.join(os.path.dirname(__file__), "xml-test-suite")
-
-    if not (os.path.isfile(runner) and os.access(runner, os.X_OK)):
-        return None
-
-    if not os.path.exists("xml-test-suite"):
-        try:
-            os.symlink(suite_dir, "xml-test-suite")
-        except FileExistsError:
-            pass
-
-    return subprocess.call([runner])
-
-
-runxmlconf_status = maybeRunXmlConf()
-if runxmlconf_status is not None:
-    sys.exit(runxmlconf_status)
-
-log = open(LOG, "w")
+if HELPER_MODE:
+    log = open(os.devnull, "w")
+else:
+    log = open(LOG, "w")
 
 #
 # Error and warning handlers
@@ -56,7 +39,8 @@ def errorHandler(ctx, str):
         else:
             error_msg = error_msg + str
 
-libxml2.registerErrorHandler(errorHandler, None)
+if not HELPER_MODE:
+    libxml2.registerErrorHandler(errorHandler, None)
 
 #warning_nr = 0
 #warning = ''
@@ -88,17 +72,13 @@ def parseWithOptions(filename, options):
         ret = 0
     except:
         ret = -1
-        try:
-            doc = ctxt.doc()
-        except:
-            doc = None
     return ctxt, doc, ret
 
 #
 # The conformance testing routines
 #
 
-def testNotWf(filename, id):
+def testNotWf(filename, id, options):
     global error_nr
     global error_msg
     global log
@@ -106,47 +86,44 @@ def testNotWf(filename, id):
     error_nr = 0
     error_msg = ''
 
-    ctxt, doc, ret = parseWithOptions(filename, 0)
-    if doc != None:
-        doc.freeDoc()
-    if ret == 0 or ctxt.wellFormed() != 0:
-        print("%s: error: Well Formedness error not detected" % (id))
-        log.write("%s: error: Well Formedness error not detected\n" % (id))
-        return 0
-    return 1
-
-def testNotWfEnt(filename, id):
-    global error_nr
-    global error_msg
-    global log
-
-    error_nr = 0
-    error_msg = ''
-
-    ctxt, doc, ret = parseWithOptions(filename, libxml2.XML_PARSE_NOENT)
-    if doc != None:
-        doc.freeDoc()
-    if ret == 0 or ctxt.wellFormed() != 0:
-        print("%s: error: Well Formedness error not detected" % (id))
-        log.write("%s: error: Well Formedness error not detected\n" % (id))
-        return 0
-    return 1
-
-def testNotWfEntDtd(filename, id):
-    global error_nr
-    global error_msg
-    global log
-
-    error_nr = 0
-    error_msg = ''
-
-    options = libxml2.XML_PARSE_NOENT | libxml2.XML_PARSE_DTDLOAD
     ctxt, doc, ret = parseWithOptions(filename, options)
     if doc != None:
         doc.freeDoc()
     if ret == 0 or ctxt.wellFormed() != 0:
         print("%s: error: Well Formedness error not detected" % (id))
         log.write("%s: error: Well Formedness error not detected\n" % (id))
+        return 0
+    return 1
+
+def testNotNSWf(filename, id, options):
+    global error_nr
+    global error_msg
+    global log
+
+    error_nr = 0
+    error_msg = ''
+
+    if not HELPER_MODE:
+        libxml2.registerErrorHandler(errorHandler, None)
+    try:
+        doc = libxml2.readFile(filename, None, options)
+    except:
+        doc = None
+    if doc == None:
+        print("%s: error: failed to parse the XML" % (id))
+        log.write("%s: error: failed to parse the XML\n" % (id))
+        return 0
+
+    err = None
+    try:
+        err = libxml2.lastError()
+    except:
+        err = None
+    doc.freeDoc()
+
+    if err == None or err.domain() != libxml2.XML_FROM_NAMESPACE:
+        print("%s: error: failed to detect namespace error" % (id))
+        log.write("%s: error: failed to detect namespace error\n" % (id))
         return 0
     return 1
 
@@ -174,7 +151,41 @@ def testWfEntDtd(filename, id):
     doc.freeDoc()
     return 1
 
-def testError(filename, id):
+def buildTestOptions(test):
+    options = 0
+
+    entities = test.prop('ENTITIES')
+    if entities != 'none':
+        options = options | libxml2.XML_PARSE_DTDLOAD | libxml2.XML_PARSE_NOENT
+
+    edition = test.prop('EDITION')
+    if edition != None and edition.find('5') < 0:
+        options = options | libxml2.XML_PARSE_OLD10
+
+    return options
+
+def runIsolatedTest(test_type, filename, id, options, nstest):
+    global error_msg
+
+    args = [sys.executable, os.path.abspath(__file__), "--single-test",
+            test_type, filename, id, str(options), "1" if nstest else "0"]
+    result = subprocess.run(args, capture_output=True)
+    output = (result.stdout or b"") + (result.stderr or b"")
+    output = output.decode("utf-8", "replace")
+
+    if result.returncode == 0:
+        error_msg = ''
+        return 1
+    if result.returncode == 2:
+        error_msg = output
+        return 2
+
+    error_msg = output
+    if error_msg == '':
+        error_msg = "   >>isolated parser run failed\n"
+    return 0
+
+def testError(filename, id, options):
     global error_nr
     global error_msg
     global log
@@ -182,7 +193,6 @@ def testError(filename, id):
     error_nr = 0
     error_msg = ''
 
-    options = libxml2.XML_PARSE_NOENT | libxml2.XML_PARSE_DTDLOAD
     ctxt, doc, ret = parseWithOptions(filename, options)
     if doc != None:
         doc.freeDoc()
@@ -196,7 +206,7 @@ def testError(filename, id):
         return 2
     return 1
 
-def testInvalid(filename, id):
+def testInvalid(filename, id, options):
     global error_nr
     global error_msg
     global log
@@ -204,7 +214,7 @@ def testInvalid(filename, id):
     error_nr = 0
     error_msg = ''
 
-    options = libxml2.XML_PARSE_DTDLOAD | libxml2.XML_PARSE_DTDVALID
+    options = options | libxml2.XML_PARSE_DTDVALID
     ctxt, doc, ret = parseWithOptions(filename, options)
     valid = ctxt.isValid()
     if doc == None:
@@ -216,6 +226,9 @@ def testInvalid(filename, id):
         log.write("%s: error: Validity error not detected\n" % (id))
         doc.freeDoc()
         return 0
+    if HELPER_MODE:
+        doc.freeDoc()
+        return 1
     if error_nr == 0:
         print("%s: warning: Validity error not reported" % (id))
         log.write("%s: warning: Validity error not reported\n" % (id))
@@ -225,14 +238,14 @@ def testInvalid(filename, id):
     doc.freeDoc()
     return 1
 
-def testValid(filename, id):
+def testValid(filename, id, options):
     global error_nr
     global error_msg
 
     error_nr = 0
     error_msg = ''
 
-    options = libxml2.XML_PARSE_DTDLOAD | libxml2.XML_PARSE_DTDVALID
+    options = options | libxml2.XML_PARSE_DTDVALID
     ctxt, doc, ret = parseWithOptions(filename, options)
     valid = ctxt.isValid()
     if doc == None:
@@ -244,6 +257,9 @@ def testValid(filename, id):
         log.write("%s: error: Validity check failed\n" % (id))
         doc.freeDoc()
         return 0
+    if HELPER_MODE:
+        doc.freeDoc()
+        return 1
     if error_nr != 0 or valid != 1:
         print("%s: warning: valid document reported an error" % (id))
         log.write("%s: warning: valid document reported an error\n" % (id))
@@ -278,29 +294,31 @@ def runTest(test):
         return -1
 
     extra = None
+    options = buildTestOptions(test)
+    rec = test.prop('RECOMMENDATION')
+    version = test.prop('VERSION')
+    nstest = 0
+
+    if rec == None or rec == "XML1.0" or rec == "XML1.0-errata2e" or \
+       rec == "XML1.0-errata3e" or rec == "XML1.0-errata4e":
+        if version != None and version != "1.0":
+            return 0
+    elif rec == "NS1.0" or rec == "NS1.0-errata1e":
+        nstest = 1
+    else:
+        return 0
+
     if type == "invalid":
-        res = testInvalid(URI, id)
+        res = runIsolatedTest("invalid", URI, id, options, nstest)
     elif type == "valid":
-        res = testValid(URI, id)
+        res = runIsolatedTest("valid", URI, id, options, nstest)
     elif type == "not-wf":
         extra =  test.prop('ENTITIES')
-        # print URI
-        #if extra == None:
-        #    res = testNotWfEntDtd(URI, id)
-        #elif extra == 'none':
-        #    res = testNotWf(URI, id)
-        #elif extra == 'general':
-        #    res = testNotWfEnt(URI, id)
-        #elif extra == 'both' or extra == 'parameter':
-        res = testNotWfEntDtd(URI, id)
-        #else:
-        #    print "Unknown value %s for an ENTITIES test value" % (extra)
-        #    return -1
+        res = runIsolatedTest("not-wf", URI, id, options, nstest)
     elif type == "error":
-        res = testError(URI, id)
+        return 0
     else:
-        # TODO skipped for now
-        return -1
+        return 0
 
     test_nr = test_nr + 1
     if res > 0:
@@ -326,6 +344,33 @@ def runTest(test):
         log.write("\n")
 
     return 0
+
+if HELPER_MODE:
+    test_type = sys.argv[2]
+    filename = sys.argv[3]
+    id = sys.argv[4]
+    options = int(sys.argv[5])
+    nstest = (sys.argv[6] == "1")
+
+    if test_type == "invalid":
+        res = testInvalid(filename, id, options)
+    elif test_type == "valid":
+        res = testValid(filename, id, options)
+    elif test_type == "not-wf":
+        if nstest:
+            res = testNotNSWf(filename, id, options)
+        else:
+            res = testNotWf(filename, id, options)
+    elif test_type == "error":
+        res = testError(filename, id, options)
+    else:
+        res = -1
+    log.close()
+    if res == 1:
+        sys.exit(0)
+    if res == 2:
+        sys.exit(2)
+    sys.exit(1)
 
 def runTestCases(case):
     profile = case.prop('PROFILE')
@@ -374,3 +419,5 @@ log.close()
 
 print("Ran %d tests: %d succeeded, %d failed and %d generated an error in %.2f s." % (
       test_nr, test_succeed, test_failed, test_error, time.time() - start))
+if test_failed != 0 or test_error != 0:
+    sys.exit(1)
