@@ -176,10 +176,9 @@ int main(int argc, char **argv) {
 #include <libxml/nanoftp.h>
 #include <libxml/nanohttp.h>
 #include <libxml/parser.h>
-#include <libxml/parserInternals.h>
 #include <libxml/pattern.h>
 #include <libxml/relaxng.h>
-#include <libxml/schemasInternals.h>
+#include <libxml/xmlschemastypes.h>
 #include <libxml/schematron.h>
 #include <libxml/tree.h>
 #include <libxml/uri.h>
@@ -438,7 +437,7 @@ static void des_fileoutput(int no ATTRIBUTE_UNUSED, const char *val ATTRIBUTE_UN
 #define gen_nb_xmlParserCtxtPtr 3
 static xmlParserCtxtPtr gen_xmlParserCtxtPtr(int no, int nr ATTRIBUTE_UNUSED) {
     if (no == 0) return(xmlNewParserCtxt());
-    if (no == 1) return(xmlCreateMemoryParserCtxt("<doc/>", 6));
+    if (no == 1) return(xmlNewParserCtxt());
     return(NULL);
 }
 static void des_xmlParserCtxtPtr(int no ATTRIBUTE_UNUSED, xmlParserCtxtPtr val, int nr ATTRIBUTE_UNUSED) {
@@ -624,20 +623,98 @@ static void des_xmlHashTablePtr(int no ATTRIBUTE_UNUSED, xmlHashTablePtr val, in
         xmlHashFree(val, NULL);
     }
 }
-#include <libxml/xpathInternals.h>
+
+typedef struct xpathObjectOwner xpathObjectOwner;
+struct xpathObjectOwner {
+    xmlXPathObjectPtr obj;
+    xmlXPathContextPtr ctxt;
+    xmlDocPtr doc;
+    xpathObjectOwner *next;
+};
+
+static xpathObjectOwner *xpathObjectOwners;
+
+static xmlXPathObjectPtr
+gen_xmlXPathObjectFromExpr(const xmlChar *expr) {
+    xpathObjectOwner *owner;
+    xmlXPathObjectPtr obj;
+    xmlXPathContextPtr ctxt;
+    xmlNodePtr root;
+    xmlDocPtr doc;
+
+    doc = xmlNewDoc(BAD_CAST "1.0");
+    if (doc == NULL)
+        return(NULL);
+    root = xmlNewDocNode(doc, NULL, BAD_CAST "doc", BAD_CAST "node");
+    if (root == NULL) {
+        xmlFreeDoc(doc);
+        return(NULL);
+    }
+    xmlDocSetRootElement(doc, root);
+
+    ctxt = xmlXPathNewContext(doc);
+    if (ctxt == NULL) {
+        xmlFreeDoc(doc);
+        return(NULL);
+    }
+    ctxt->node = root;
+
+    obj = xmlXPathEvalExpression(expr, ctxt);
+    if (obj == NULL) {
+        xmlXPathFreeContext(ctxt);
+        xmlFreeDoc(doc);
+        return(NULL);
+    }
+
+    owner = xmlMalloc(sizeof(*owner));
+    if (owner == NULL) {
+        xmlXPathFreeObject(obj);
+        xmlXPathFreeContext(ctxt);
+        xmlFreeDoc(doc);
+        return(NULL);
+    }
+    owner->obj = obj;
+    owner->ctxt = ctxt;
+    owner->doc = doc;
+    owner->next = xpathObjectOwners;
+    xpathObjectOwners = owner;
+
+    return(obj);
+}
+
+static void
+desOwned_xmlXPathObjectPtr(xmlXPathObjectPtr val) {
+    xpathObjectOwner **link = &xpathObjectOwners;
+
+    while (*link != NULL) {
+        xpathObjectOwner *owner = *link;
+
+        if (owner->obj == val) {
+            *link = owner->next;
+            xmlXPathFreeObject(val);
+            xmlXPathFreeContext(owner->ctxt);
+            xmlFreeDoc(owner->doc);
+            xmlFree(owner);
+            return;
+        }
+        link = &owner->next;
+    }
+
+    xmlXPathFreeObject(val);
+}
+
 #ifdef LIBXML_XPATH_ENABLED
 #define gen_nb_xmlXPathObjectPtr 5
 static xmlXPathObjectPtr gen_xmlXPathObjectPtr(int no, int nr ATTRIBUTE_UNUSED) {
-    if (no == 0) return(xmlXPathNewString(BAD_CAST "string object"));
-    if (no == 1) return(xmlXPathNewFloat(1.1));
-    if (no == 2) return(xmlXPathNewBoolean(1));
-    if (no == 3) return(xmlXPathNewNodeSet(NULL));
+    if (no == 0) return(gen_xmlXPathObjectFromExpr(BAD_CAST "'string object'"));
+    if (no == 1) return(gen_xmlXPathObjectFromExpr(BAD_CAST "1.1"));
+    if (no == 2) return(gen_xmlXPathObjectFromExpr(BAD_CAST "true()"));
+    if (no == 3) return(gen_xmlXPathObjectFromExpr(BAD_CAST "/doc"));
     return(NULL);
 }
 static void des_xmlXPathObjectPtr(int no ATTRIBUTE_UNUSED, xmlXPathObjectPtr val, int nr ATTRIBUTE_UNUSED) {
-    if (val != NULL) {
-        xmlXPathFreeObject(val);
-    }
+    if (val != NULL)
+        desOwned_xmlXPathObjectPtr(val);
 }
 #endif
 
@@ -823,7 +900,7 @@ static void desret_xmlDtdPtr(xmlDtdPtr val) {
 }
 #ifdef LIBXML_XPATH_ENABLED
 static void desret_xmlXPathObjectPtr(xmlXPathObjectPtr val) {
-    xmlXPathFreeObject(val);
+    desOwned_xmlXPathObjectPtr(val);
 }
 static void desret_xmlNodeSetPtr(xmlNodeSetPtr val) {
     xmlXPathFreeNodeSet(val);
@@ -836,7 +913,21 @@ static void desret_xmlParserInputBufferPtr(xmlParserInputBufferPtr val) {
     xmlFreeParserInputBuffer(val);
 }
 static void desret_xmlParserInputPtr(xmlParserInputPtr val) {
-    xmlFreeInputStream(val);
+    if (val == NULL)
+        return;
+    if (val->filename != NULL)
+        xmlFree((char *) val->filename);
+    if (val->directory != NULL)
+        xmlFree((char *) val->directory);
+    if (val->encoding != NULL)
+        xmlFree((char *) val->encoding);
+    if (val->version != NULL)
+        xmlFree((char *) val->version);
+    if ((val->free != NULL) && (val->base != NULL))
+        val->free((xmlChar *) val->base);
+    if (val->buf != NULL)
+        xmlFreeParserInputBuffer(val->buf);
+    xmlFree(val);
 }
 #ifdef LIBXML_WRITER_ENABLED
 static void desret_xmlTextWriterPtr(xmlTextWriterPtr val) {
@@ -1168,7 +1259,7 @@ static void des_xmlSchemaWhitespaceValueType(int no ATTRIBUTE_UNUSED, xmlSchemaW
 #include <libxml/parser.h>
 #include <libxml/pattern.h>
 #include <libxml/relaxng.h>
-#include <libxml/schemasInternals.h>
+#include <libxml/xmlschemastypes.h>
 #include <libxml/schematron.h>
 #include <libxml/tree.h>
 #include <libxml/uri.h>
