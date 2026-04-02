@@ -217,6 +217,45 @@ int main(int argc, char **argv) {
 #include <libxml/xpointer.h>
 #include <libxml/debugXML.h>
 
+#ifdef LIBXML_SCHEMATRON_ENABLED
+static const char schematron_api_schema[] =
+    "<schema xmlns='http://purl.oclc.org/dsdl/schematron'>"
+    "<pattern id='root-pattern'>"
+    "<rule context='root'>"
+    "<assert test='child'>root requires child</assert>"
+    "</rule>"
+    "</pattern>"
+    "</schema>";
+static const char schematron_api_valid_doc[] = "<root><child/></root>";
+static const char schematron_api_invalid_doc[] = "<root/>";
+static const char schematron_api_file[] = "test/schematron/zvon2.sct";
+
+static void
+test_schematron_structured_error(void *userData,
+                                 xmlErrorPtr error ATTRIBUTE_UNUSED) {
+    int *count = (int *) userData;
+
+    if (count != NULL)
+        (*count)++;
+}
+
+static xmlDocPtr
+read_schematron_test_doc(const char *buffer, const char *url) {
+    return(xmlReadMemory(buffer, (int) strlen(buffer), url, NULL, 0));
+}
+
+static xmlSchematronPtr
+parse_schematron_with_ctxt(xmlSchematronParserCtxtPtr ctxt) {
+    xmlSchematronPtr schema = NULL;
+
+    if (ctxt != NULL) {
+        schema = xmlSchematronParse(ctxt);
+        xmlSchematronFreeParserCtxt(ctxt);
+    }
+    return(schema);
+}
+#endif
+
 /*
  We need some "remote" addresses, but want to avoid getting into
  name resolution delays, so we use these
@@ -17044,8 +17083,35 @@ static int
 test_xmlSchematronNewDocParserCtxt(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMATRON_ENABLED)
+    int mem_base;
+    xmlDocPtr doc;
+    xmlSchematronParserCtxtPtr ctxt;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    doc = read_schematron_test_doc(schematron_api_schema, "schematron-doc.sch");
+    ctxt = NULL;
+    if (doc != NULL)
+        ctxt = xmlSchematronNewDocParserCtxt(doc);
+
+    if (doc == NULL) {
+        printf("xmlSchematronNewDocParserCtxt failed to parse the schema document\n");
+        test_ret++;
+    } else if (ctxt == NULL) {
+        printf("xmlSchematronNewDocParserCtxt failed to create a parser context\n");
+        test_ret++;
+    }
+    call_tests++;
+    xmlSchematronFreeParserCtxt(ctxt);
+    xmlFreeDoc(doc);
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchematronNewDocParserCtxt\n",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+    }
+    function_tests++;
+#endif
     return(test_ret);
 }
 
@@ -17054,8 +17120,28 @@ static int
 test_xmlSchematronNewMemParserCtxt(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMATRON_ENABLED)
+    int mem_base;
+    xmlSchematronParserCtxtPtr ctxt;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    ctxt = xmlSchematronNewMemParserCtxt(schematron_api_schema,
+                                         (int) strlen(schematron_api_schema));
+
+    if (ctxt == NULL) {
+        printf("xmlSchematronNewMemParserCtxt failed to create a parser context\n");
+        test_ret++;
+    }
+    call_tests++;
+    xmlSchematronFreeParserCtxt(ctxt);
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchematronNewMemParserCtxt\n",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+    }
+    function_tests++;
+#endif
     return(test_ret);
 }
 
@@ -17064,8 +17150,27 @@ static int
 test_xmlSchematronNewParserCtxt(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMATRON_ENABLED)
+    int mem_base;
+    xmlSchematronParserCtxtPtr ctxt;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    ctxt = xmlSchematronNewParserCtxt(schematron_api_file);
+
+    if (ctxt == NULL) {
+        printf("xmlSchematronNewParserCtxt failed to create a parser context\n");
+        test_ret++;
+    }
+    call_tests++;
+    xmlSchematronFreeParserCtxt(ctxt);
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchematronNewParserCtxt\n",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+    }
+    function_tests++;
+#endif
     return(test_ret);
 }
 
@@ -17074,8 +17179,37 @@ static int
 test_xmlSchematronNewValidCtxt(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMATRON_ENABLED)
+    int mem_base;
+    xmlSchematronPtr schema;
+    xmlSchematronValidCtxtPtr ctxt;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    schema = parse_schematron_with_ctxt(
+        xmlSchematronNewMemParserCtxt(schematron_api_schema,
+                                      (int) strlen(schematron_api_schema)));
+    ctxt = NULL;
+    if (schema != NULL)
+        ctxt = xmlSchematronNewValidCtxt(schema, XML_SCHEMATRON_OUT_QUIET);
+
+    if (schema == NULL) {
+        printf("xmlSchematronNewValidCtxt failed to compile the schema\n");
+        test_ret++;
+    } else if (ctxt == NULL) {
+        printf("xmlSchematronNewValidCtxt failed to create a validation context\n");
+        test_ret++;
+    }
+    call_tests++;
+    xmlSchematronFreeValidCtxt(ctxt);
+    xmlSchematronFree(schema);
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchematronNewValidCtxt\n",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+    }
+    function_tests++;
+#endif
     return(test_ret);
 }
 
@@ -17084,8 +17218,55 @@ static int
 test_xmlSchematronParse(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMATRON_ENABLED)
+    int mem_base;
+    xmlDocPtr doc;
+    xmlSchematronPtr schema;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+
+    schema = parse_schematron_with_ctxt(
+        xmlSchematronNewMemParserCtxt(schematron_api_schema,
+                                      (int) strlen(schematron_api_schema)));
+    if (schema == NULL) {
+        printf("xmlSchematronParse failed for an in-memory schema\n");
+        test_ret++;
+    }
+    call_tests++;
+    xmlSchematronFree(schema);
+
+    doc = read_schematron_test_doc(schematron_api_schema, "schematron-doc.sch");
+    schema = NULL;
+    if (doc != NULL)
+        schema = parse_schematron_with_ctxt(xmlSchematronNewDocParserCtxt(doc));
+    if (doc == NULL) {
+        printf("xmlSchematronParse failed to load the schema document input\n");
+        test_ret++;
+    } else if (schema == NULL) {
+        printf("xmlSchematronParse failed for a document-backed schema\n");
+        test_ret++;
+    }
+    call_tests++;
+    xmlSchematronFree(schema);
+    xmlFreeDoc(doc);
+
+    schema = parse_schematron_with_ctxt(
+        xmlSchematronNewParserCtxt(schematron_api_file));
+    if (schema == NULL) {
+        printf("xmlSchematronParse failed for a file-backed schema\n");
+        test_ret++;
+    }
+    call_tests++;
+    xmlSchematronFree(schema);
+
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchematronParse\n",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+    }
+    function_tests++;
+#endif
     return(test_ret);
 }
 
@@ -17094,20 +17275,64 @@ static int
 test_xmlSchematronSetValidStructuredErrors(void) {
     int test_ret = 0;
 
+#if defined(LIBXML_SCHEMATRON_ENABLED)
+    int mem_base;
+    int error_count = 0;
+    int ret_val = -1;
+    xmlDocPtr instance;
+    xmlSchematronPtr schema;
+    xmlSchematronValidCtxtPtr ctxt;
 
-    /* missing type support */
+    mem_base = xmlMemBlocks();
+    schema = parse_schematron_with_ctxt(
+        xmlSchematronNewMemParserCtxt(schematron_api_schema,
+                                      (int) strlen(schematron_api_schema)));
+    ctxt = NULL;
+    instance = NULL;
+    if (schema != NULL)
+        ctxt = xmlSchematronNewValidCtxt(schema, XML_SCHEMATRON_OUT_ERROR);
+    if (ctxt != NULL) {
+        instance = read_schematron_test_doc(schematron_api_invalid_doc,
+                                            "schematron-invalid.xml");
+        xmlSchematronSetValidStructuredErrors(ctxt,
+                                              test_schematron_structured_error,
+                                              &error_count);
+        call_tests++;
+        if (instance != NULL) {
+            ret_val = xmlSchematronValidateDoc(ctxt, instance);
+            call_tests++;
+        }
+    }
+
+    if (schema == NULL) {
+        printf("xmlSchematronSetValidStructuredErrors failed to compile the schema\n");
+        test_ret++;
+    } else if (ctxt == NULL) {
+        printf("xmlSchematronSetValidStructuredErrors failed to create a validation context\n");
+        test_ret++;
+    } else if (instance == NULL) {
+        printf("xmlSchematronSetValidStructuredErrors failed to parse the invalid test document\n");
+        test_ret++;
+    } else if (ret_val <= 0) {
+        printf("xmlSchematronSetValidStructuredErrors did not report a schematron failure\n");
+        test_ret++;
+    } else if (error_count == 0) {
+        printf("xmlSchematronSetValidStructuredErrors did not trigger the structured callback\n");
+        test_ret++;
+    }
+    xmlFreeDoc(instance);
+    xmlSchematronFreeValidCtxt(ctxt);
+    xmlSchematronFree(schema);
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchematronSetValidStructuredErrors\n",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
+    }
+    function_tests++;
+#endif
     return(test_ret);
 }
-
-#ifdef LIBXML_SCHEMATRON_ENABLED
-
-#define gen_nb_xmlSchematronValidCtxtPtr 1
-static xmlSchematronValidCtxtPtr gen_xmlSchematronValidCtxtPtr(int no ATTRIBUTE_UNUSED, int nr ATTRIBUTE_UNUSED) {
-    return(NULL);
-}
-static void des_xmlSchematronValidCtxtPtr(int no ATTRIBUTE_UNUSED, xmlSchematronValidCtxtPtr val ATTRIBUTE_UNUSED, int nr ATTRIBUTE_UNUSED) {
-}
-#endif
 
 
 static int
@@ -17115,34 +17340,74 @@ test_xmlSchematronValidateDoc(void) {
     int test_ret = 0;
 
 #if defined(LIBXML_SCHEMATRON_ENABLED)
+    int error_count = 0;
     int mem_base;
-    int ret_val;
-    xmlSchematronValidCtxtPtr ctxt; /* the schema validation context */
-    int n_ctxt;
-    xmlDocPtr instance; /* the document instance tree */
-    int n_instance;
+    int ret_invalid = -1;
+    int ret_valid = -1;
+    xmlDocPtr invalid_doc;
+    xmlDocPtr valid_doc;
+    xmlSchematronPtr schema;
+    xmlSchematronValidCtxtPtr ctxt;
 
-    for (n_ctxt = 0;n_ctxt < gen_nb_xmlSchematronValidCtxtPtr;n_ctxt++) {
-    for (n_instance = 0;n_instance < gen_nb_xmlDocPtr;n_instance++) {
-        mem_base = xmlMemBlocks();
-        ctxt = gen_xmlSchematronValidCtxtPtr(n_ctxt, 0);
-        instance = gen_xmlDocPtr(n_instance, 1);
-
-        ret_val = xmlSchematronValidateDoc(ctxt, instance);
-        desret_int(ret_val);
+    mem_base = xmlMemBlocks();
+    schema = parse_schematron_with_ctxt(
+        xmlSchematronNewMemParserCtxt(schematron_api_schema,
+                                      (int) strlen(schematron_api_schema)));
+    ctxt = NULL;
+    valid_doc = NULL;
+    invalid_doc = NULL;
+    if (schema != NULL)
+        ctxt = xmlSchematronNewValidCtxt(schema, XML_SCHEMATRON_OUT_ERROR);
+    if (ctxt != NULL) {
+        xmlSchematronSetValidStructuredErrors(ctxt,
+                                              test_schematron_structured_error,
+                                              &error_count);
         call_tests++;
-        des_xmlSchematronValidCtxtPtr(n_ctxt, ctxt, 0);
-        des_xmlDocPtr(n_instance, instance, 1);
-        xmlResetLastError();
-        if (mem_base != xmlMemBlocks()) {
-            printf("Leak of %d blocks found in xmlSchematronValidateDoc",
-	           xmlMemBlocks() - mem_base);
-	    test_ret++;
-            printf(" %d", n_ctxt);
-            printf(" %d", n_instance);
-            printf("\n");
+        valid_doc = read_schematron_test_doc(schematron_api_valid_doc,
+                                             "schematron-valid.xml");
+        invalid_doc = read_schematron_test_doc(schematron_api_invalid_doc,
+                                               "schematron-invalid.xml");
+        if (valid_doc != NULL) {
+            ret_valid = xmlSchematronValidateDoc(ctxt, valid_doc);
+            call_tests++;
+        }
+        if (invalid_doc != NULL) {
+            ret_invalid = xmlSchematronValidateDoc(ctxt, invalid_doc);
+            call_tests++;
         }
     }
+
+    if (schema == NULL) {
+        printf("xmlSchematronValidateDoc failed to compile the schema\n");
+        test_ret++;
+    } else if (ctxt == NULL) {
+        printf("xmlSchematronValidateDoc failed to create a validation context\n");
+        test_ret++;
+    } else if (valid_doc == NULL) {
+        printf("xmlSchematronValidateDoc failed to parse the valid test document\n");
+        test_ret++;
+    } else if (invalid_doc == NULL) {
+        printf("xmlSchematronValidateDoc failed to parse the invalid test document\n");
+        test_ret++;
+    } else if (ret_valid != 0) {
+        printf("xmlSchematronValidateDoc rejected a valid document\n");
+        test_ret++;
+    } else if (ret_invalid <= 0) {
+        printf("xmlSchematronValidateDoc accepted an invalid document\n");
+        test_ret++;
+    } else if (error_count == 0) {
+        printf("xmlSchematronValidateDoc did not report the invalid document via structured errors\n");
+        test_ret++;
+    }
+    xmlFreeDoc(invalid_doc);
+    xmlFreeDoc(valid_doc);
+    xmlSchematronFreeValidCtxt(ctxt);
+    xmlSchematronFree(schema);
+    xmlResetLastError();
+    if (mem_base != xmlMemBlocks()) {
+        printf("Leak of %d blocks found in xmlSchematronValidateDoc\n",
+               xmlMemBlocks() - mem_base);
+        test_ret++;
     }
     function_tests++;
 #endif
@@ -17154,7 +17419,8 @@ static int
 test_schematron(void) {
     int test_ret = 0;
 
-    if (quiet == 0) printf("Testing schematron : 1 of 10 functions ...\n");
+    if (quiet == 0)
+        printf("Testing schematron : 7 public functions ...\n");
     test_ret += test_xmlSchematronNewDocParserCtxt();
     test_ret += test_xmlSchematronNewMemParserCtxt();
     test_ret += test_xmlSchematronNewParserCtxt();
