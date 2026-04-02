@@ -1084,10 +1084,6 @@ xmlSchemaGetPredefinedType(const xmlChar *name, const xmlChar *ns) {
 	xmlSchemaInitTypes();
     if (name == NULL)
 	return(NULL);
-    if ((ns != NULL) &&
-	xmlStrEqual(ns, BAD_CAST "http://www.w3.org/2001/XMLSchema") &&
-	xmlStrEqual(name, BAD_CAST "number"))
-	return(xmlSchemaTypeDecimalDef);
     return((xmlSchemaTypePtr) xmlHashLookup2(xmlSchemaTypesBank, name, ns));
 }
 
@@ -3024,8 +3020,15 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
                         xmlFree(local);
                     if (prefix != NULL)
                         xmlFree(prefix);
-                } else if ((ret == 0) && (xmlStrchr(cur, ':') != NULL)) {
-                    ret = 1;
+                }
+                if ((node == NULL) || (node->doc == NULL))
+                    ret = 3;
+                if (ret == 0) {
+                    ret = xmlValidateNotationUse(NULL, node->doc, value);
+                    if (ret == 1)
+                        ret = 0;
+                    else
+                        ret = 1;
                 }
                 if ((ret == 0) && (val != NULL)) {
                     v = xmlSchemaNewValue(XML_SCHEMAS_NOTATION);
@@ -3033,7 +3036,7 @@ xmlSchemaValAtomicType(xmlSchemaTypePtr type, const xmlChar * value,
                         if (local != NULL)
                             v->value.qname.name = local;
                         else
-                            v->value.qname.name = xmlStrdup(cur);
+                            v->value.qname.name = xmlStrdup(value);
                         if (uri != NULL)
                             v->value.qname.uri = uri;
 
