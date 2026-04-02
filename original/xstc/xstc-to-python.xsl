@@ -33,7 +33,7 @@ r = XSTCTestRunner()
 		<xsl:apply-templates select="ts:testSet/ts:testGroup" mode="test-def"/>
         <xsl:text>
            
-r.run()    
+xstc.sys.exit(r.run())
 
 </xsl:text>
             

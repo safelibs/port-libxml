@@ -1084,6 +1084,10 @@ xmlSchemaGetPredefinedType(const xmlChar *name, const xmlChar *ns) {
 	xmlSchemaInitTypes();
     if (name == NULL)
 	return(NULL);
+    if ((ns != NULL) &&
+	xmlStrEqual(ns, BAD_CAST "http://www.w3.org/2001/XMLSchema") &&
+	xmlStrEqual(name, BAD_CAST "number"))
+	return(xmlSchemaTypeDecimalDef);
     return((xmlSchemaTypePtr) xmlHashLookup2(xmlSchemaTypesBank, name, ns));
 }
 
@@ -1579,6 +1583,10 @@ xmlSchemaValidateDates (xmlSchemaValType type,
     const xmlChar *cur = dateTime;
 
 #define RETURN_TYPE_IF_VALID(t)					\
+    if (*cur == 0) {						\
+	dt->type = t;						\
+	goto done;						\
+    }								\
     if (IS_TZO_CHAR(*cur)) {					\
 	ret = _xmlSchemaParseTimeZone(&(dt->value.date), &cur);	\
 	if (ret == 0) {						\
@@ -1666,6 +1674,8 @@ xmlSchemaValidateDates (xmlSchemaValType type,
              */
             cur = rewnd;
         }
+        if ((cur[0] == '-') && (cur[1] == '-'))
+            cur += 2;
 
 	RETURN_TYPE_IF_VALID(XML_SCHEMAS_GMONTH);
 

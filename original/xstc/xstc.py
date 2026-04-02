@@ -154,13 +154,15 @@ class XSTCTestGroup:
 		self.schemaFileName = fixFileNames(schemaFileName)
 		self.schemaParsed = False
 		self.schemaTried = False
+		self.schemaExpectedValid = True
 
-	def setSchema(self, schemaFileName, parsed):
+	def setSchema(self, schemaFileName, parsed, expectedValid):
 		if not self.mainSchema:			
 			return
 		self.mainSchema = False
 		self.schemaParsed = parsed
 		self.schemaTried = True
+		self.schemaExpectedValid = expectedValid
 
 class XSTCTestCase:
 
@@ -384,7 +386,7 @@ class XSTCSchemaTest(XSTCTestCase):
 			else:
 				self.debugMsg("schema result is OK")
 		finally:
-			self.group.setSchema(self.fileName, schema is not None)
+			self.group.setSchema(self.fileName, schema is not None, self.val == 1)
 			del schema
 
 class XSTCInstanceTest(XSTCTestCase):
@@ -398,6 +400,8 @@ class XSTCInstanceTest(XSTCTestCase):
 		filePath = self.fileName
 		# os.path.join(options.baseDir, self.fileName)
 
+		if self.group.schemaTried and (not self.group.schemaExpectedValid):
+			return
 		if not self.group.schemaParsed and self.group.schemaTried:
 			self.failNoSchema()
 			return
@@ -627,6 +631,9 @@ class XSTCTestRunner:
 			if (options.verbose or error) and (not options.reportInternalErrOnly) and (not options.reportMemLeakErrOnly) and (not options.reportUnimplErrOnly):
 				self.displayTestLog(test)
 
+	def hasFailures(self):
+		return (self.counters[self.CNT_FAILED] > 0) or \
+		       (self.counters[self.CNT_MEMLEAK] > 0)
 
 	def addToCombines(self, test):
 		found = False
@@ -706,3 +713,4 @@ class XSTCTestRunner:
 			else:
 				sys.stdout.write("===========================\n")
 				self.displayResults(sys.stdout, True, None, self.counters)
+		return 1 if self.hasFailures() else 0

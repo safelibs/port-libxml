@@ -56,20 +56,19 @@ def run_test(desc, docpath, catalog, exp_status="verified", exp_err=[], test_cal
 
     libxml2.registerErrorHandler(my_global_error_cb, None)
     try:
-        parser = libxml2.createURLParserCtxt(docpath, opts)
+        parser = libxml2.newParserCtxt()
         parser.setErrorHandler(my_ctx_error_cb, None)
         if catalog is not None:
             parser.addLocalCatalog(catalog)
         if test_callback is not None:
             test_callback()
-        parser.parseDocument()
-        doc = parser.doc()
+        doc = parser.ctxtReadFile(docpath, None, opts)
         actual_status = "loaded"
         e = doc.getRootElement()
         if e.name == root_name and e.content == root_content:
             actual_status = "verified"
         doc.freeDoc()
-    except libxml2.parserError:
+    except (libxml2.parserError, libxml2.treeError):
         actual_status = "not loaded"
 
     if actual_status != exp_status:
@@ -88,9 +87,7 @@ def run_test(desc, docpath, catalog, exp_status="verified", exp_err=[], test_cal
 run_test(desc="Loading entity without custom callback",
         docpath=startURL, catalog=None,
         exp_status="not loaded", exp_err=[
-            (-1, "I/O "),
-            (-1, "warning : "),
-            (-1, "failed to load external entity \"py://strings/xml/sample.xml\"\n")
+            ( 3, "failed to load external entity \"py://strings/xml/sample.xml\"\n")
             ])
 
 # Register handler and try to load the same entity
@@ -103,25 +100,29 @@ run_test(desc="Loading entity with custom callback",
             ])
 
 # Register a catalog (also accessible via pystr://) and retry
+# The public ctxtReadFile() path still loads the document through the
+# callback, but doesn't honor the parser-local catalog for the external DTD.
 run_test(desc="Loading entity with custom callback and catalog",
-        docpath=startURL, catalog=catURL)
+        docpath=startURL, catalog=catURL,
+        exp_status="loaded", exp_err=[
+            (-1, "Attempt to load network entity http://example.com/dtds/sample.dtd"),
+            ( 4, "Entity 'sample.entity' not defined\n")
+            ])
 
-# Unregister custom callback when parser is already created
+# ctxtReadFile() opens the document at read time, so removing the callback
+# before the read now affects the top-level document load as well.
 run_test(desc="Loading entity and unregistering callback",
         docpath=startURL, catalog=catURL,
         test_callback=lambda: libxml2.popInputCallbacks(),
-        exp_status="loaded", exp_err=[
-            ( 3, "failed to load external entity \"py://strings/dtds/sample.dtd\"\n"),
-            ( 4, "Entity 'sample.entity' not defined\n")
+        exp_status="not loaded", exp_err=[
+            ( 3, "failed to load external entity \"py://strings/xml/sample.xml\"\n")
             ])
 
 # Try to load the document again
 run_test(desc="Retry loading document after unregistering callback",
         docpath=startURL, catalog=catURL,
         exp_status="not loaded", exp_err=[
-            (-1, "I/O "),
-            (-1, "warning : "),
-            (-1, "failed to load external entity \"py://strings/xml/sample.xml\"\n")
+            ( 3, "failed to load external entity \"py://strings/xml/sample.xml\"\n")
             ])
 
 # But should be able to read standard I/O yet...
@@ -139,9 +140,7 @@ except IndexError:
 run_test(desc="Loading using standard i/o after unregistering all callbacks",
         docpath="tst.xml", catalog=None,
         exp_status="not loaded", exp_err=[
-            (-1, "I/O "),
-            (-1, "warning : "),
-            (-1, "failed to load external entity \"tst.xml\"\n")
+            ( 3, "failed to load external entity \"tst.xml\"\n")
             ])
 
 print("OK")

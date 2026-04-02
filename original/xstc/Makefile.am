@@ -4,6 +4,7 @@
 PYSCRIPTS=nist-test.py ms-test.py sun-test.py
 TESTDIR=Tests
 TESTDIRS=$(TESTDIR)/msxsdtest $(TESTDIR)/suntest $(TESTDIR)/Datatypes
+TESTOVERRIDES=$(srcdir)/Tests-overrides
 TARBALL=xsts-2002-01-16.tar.gz
 TARBALL_2=xsts-2004-01-14.tar.gz
 TSNAME=xmlschema2002-01-16
@@ -19,7 +20,7 @@ TESTSUITE_STAMP=$(TESTDIR)/.stamp
 #
 # The local data and scripts
 #
-EXTRA_DIST=xstc.py xstc-to-python.xsl $(TARBALL) $(TARBALL_2)
+EXTRA_DIST=xstc.py xstc-to-python.xsl $(TARBALL) $(TARBALL_2) Tests-overrides
 #
 # Nothing is done by make, only make tests and
 # only if Python and Schemas are enabled.
@@ -62,8 +63,8 @@ $(TESTSUITE_STAMP):
 	   rm -r Tests/xmlschema2002-01-16 ; \
 	   echo "done" ; \
 	   fi)
-	-@(if [ -d $(srcdir)/Tests ] ; then \
-	   cp -R $(srcdir)/Tests/. Tests/ ; \
+	-@(if [ -d $(TESTOVERRIDES) ] ; then \
+	   cp -R $(TESTOVERRIDES)/. Tests/ ; \
 	   fi)
 	@touch $@
 
@@ -104,21 +105,21 @@ python-bindings:
 	@$(MAKE) -C $(top_builddir)/python libxml2mod.la
 
 pytests: python-bindings $(PYSCRIPTS) $(TESTDIRS)
-	-@(if [ -x nist-test.py -a -d $(TESTDIR)/Datatypes ] ; then 		\
+	@(if [ -x nist-test.py -a -d $(TESTDIR)/Datatypes ] ; then 		\
 	   echo "## Running XML Schema tests (NIST)";			\
 	   PYTHONPATH="$(srcdir):$(top_srcdir)/python:$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH" ;\
 	   export PYTHONPATH;						\
 	   LD_LIBRARY_PATH="$(top_builddir)/.libs:$$LD_LIBRARY_PATH" ;	\
 	   export LD_LIBRARY_PATH;					\
 	   $(CHECKER) $(PYTHON) nist-test.py -s -b $(srcdir) ; fi)
-	-@(if [ -x sun-test.py -a -d $(TESTDIR)/suntest ] ; then 			\
+	@(if [ -x sun-test.py -a -d $(TESTDIR)/suntest ] ; then 			\
 	   echo "## Running Schema tests (Sun)";				\
 	   PYTHONPATH="$(srcdir):$(top_srcdir)/python:$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH" ;\
 	   export PYTHONPATH;						\
 	   LD_LIBRARY_PATH="$(top_builddir)/.libs:$$LD_LIBRARY_PATH" ;	\
 	   export LD_LIBRARY_PATH;					\
 	   $(CHECKER) $(PYTHON) sun-test.py -s -b $(srcdir) ; fi)
-	-@(if [ -x ms-test.py -a -d $(TESTDIR)/msxsdtest ] ; then 			\
+	@(if [ -x ms-test.py -a -d $(TESTDIR)/msxsdtest ] ; then 			\
 	   echo "## Running Schema tests (Microsoft)";			\
 	   PYTHONPATH="$(srcdir):$(top_srcdir)/python:$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH" ;\
 	   export PYTHONPATH;						\
