@@ -617,6 +617,9 @@ $(TESTSUITE_STAMP):
 	   rm -r Tests/xmlschema2002-01-16 ; \
 	   echo "done" ; \
 	   fi)
+	-@(if [ -d $(srcdir)/Tests ] ; then \
+	   cp -R $(srcdir)/Tests/. Tests/ ; \
+	   fi)
 	@touch $@
 
 $(TESTDIRS) Tests/Metadata/$(NISTTESTDEF_2) Tests/Metadata/$(MSTESTDEF) Tests/Metadata/$(SUNTESTDEF): $(TESTSUITE_STAMP)
