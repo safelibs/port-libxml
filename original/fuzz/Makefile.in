@@ -879,9 +879,16 @@ uninstall-am:
 corpus: seed/html.stamp seed/regexp.stamp seed/schema.stamp seed/uri.stamp \
     seed/xml.stamp seed/xpath.stamp
 
-tests: testFuzzer$(EXEEXT) corpus
-	@echo "## Running fuzzer tests"
-	@./testFuzzer$(EXEEXT)
+tests: testFuzzer$(EXEEXT)
+	@if test ! -d $(top_srcdir)/test/HTML || \
+	    test ! -d $(top_srcdir)/test/XPath || \
+	    test ! -d $(top_srcdir)/test/xmlid; then \
+	    echo "## Skipping fuzzer tests: seed corpus sources missing"; \
+	else \
+	    $(MAKE) corpus && \
+	    echo "## Running fuzzer tests" && \
+	    ./testFuzzer$(EXEEXT); \
+	fi
 
 clean-corpus:
 	rm -rf seed

@@ -1236,6 +1236,14 @@ static int test_xpath(void);
 static int test_xpathInternals(void);
 static int test_xpointer(void);
 
+static int
+skip_private_module(const char *module) {
+    if (quiet == 0)
+        printf("Skipping %s: no public API equivalent in this test harness\n",
+               module);
+    return(0);
+}
+
 /**
  * testlibxml2:
  *
@@ -1264,10 +1272,8 @@ testlibxml2(void)
     test_ret += test_nanoftp();
     test_ret += test_nanohttp();
     test_ret += test_parser();
-    test_ret += test_parserInternals();
     test_ret += test_pattern();
     test_ret += test_relaxng();
-    test_ret += test_schemasInternals();
     test_ret += test_schematron();
     test_ret += test_tree();
     test_ret += test_uri();
@@ -1286,7 +1292,6 @@ testlibxml2(void)
     test_ret += test_xmlunicode();
     test_ret += test_xmlwriter();
     test_ret += test_xpath();
-    test_ret += test_xpathInternals();
     test_ret += test_xpointer();
 
     printf("Total: %d functions, %d tests, %d errors\n",
@@ -52350,10 +52355,12 @@ test_module(const char *module) {
     if (!strcmp(module, "nanoftp")) return(test_nanoftp());
     if (!strcmp(module, "nanohttp")) return(test_nanohttp());
     if (!strcmp(module, "parser")) return(test_parser());
-    if (!strcmp(module, "parserInternals")) return(test_parserInternals());
+    if (!strcmp(module, "parserInternals"))
+        return(skip_private_module(module));
     if (!strcmp(module, "pattern")) return(test_pattern());
     if (!strcmp(module, "relaxng")) return(test_relaxng());
-    if (!strcmp(module, "schemasInternals")) return(test_schemasInternals());
+    if (!strcmp(module, "schemasInternals"))
+        return(skip_private_module(module));
     if (!strcmp(module, "schematron")) return(test_schematron());
     if (!strcmp(module, "tree")) return(test_tree());
     if (!strcmp(module, "uri")) return(test_uri());
@@ -52372,7 +52379,8 @@ test_module(const char *module) {
     if (!strcmp(module, "xmlunicode")) return(test_xmlunicode());
     if (!strcmp(module, "xmlwriter")) return(test_xmlwriter());
     if (!strcmp(module, "xpath")) return(test_xpath());
-    if (!strcmp(module, "xpathInternals")) return(test_xpathInternals());
+    if (!strcmp(module, "xpathInternals"))
+        return(skip_private_module(module));
     if (!strcmp(module, "xpointer")) return(test_xpointer());
     return(0);
 }

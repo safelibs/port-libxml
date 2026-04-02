@@ -20,13 +20,12 @@
 #include <fcntl.h>
 
 #include <libxml/parser.h>
-#include <libxml/parserInternals.h>
 #include <libxml/tree.h>
 #include <libxml/uri.h>
+#include <libxml/xmlIO.h>
 #include <libxml/xmlreader.h>
 
 #include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
 
 #define LOGFILE "runxmlconf.log"
 static FILE *logfile = NULL;
@@ -92,9 +91,16 @@ static int nb_leaks = 0;
 static xmlParserInputPtr
 testExternalEntityLoader(const char *URL, const char *ID ATTRIBUTE_UNUSED,
 			 xmlParserCtxtPtr ctxt) {
+    xmlParserInputBufferPtr input;
     xmlParserInputPtr ret;
 
-    ret = xmlNewInputFromFile(ctxt, (const char *) URL);
+    input = xmlParserInputBufferCreateFilename((const char *) URL,
+                                               XML_CHAR_ENCODING_NONE);
+    if (input == NULL)
+        return(NULL);
+    ret = xmlNewIOInputStream(ctxt, input, XML_CHAR_ENCODING_NONE);
+    if (ret == NULL)
+        xmlFreeParserInputBuffer(input);
 
     return(ret);
 }

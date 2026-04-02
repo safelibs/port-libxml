@@ -28,7 +28,6 @@
 #include <libxml/xmlmemory.h>
 #include <libxml/parser.h>
 #include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
 
 #include <libxml/c14n.h>
 
@@ -56,6 +55,24 @@ static xmlXPathObjectPtr
 load_xpath_expr (xmlDocPtr parent_doc, const char* filename);
 
 static xmlChar **parse_list(xmlChar *str);
+
+static int
+testXPathRegisterNs(xmlXPathContextPtr ctxt, const xmlChar *prefix,
+                    const xmlChar *ns_uri) {
+    if ((ctxt == NULL) || (prefix == NULL) || (prefix[0] == 0))
+        return(-1);
+
+    if (ctxt->nsHash == NULL)
+        ctxt->nsHash = xmlHashCreate(10);
+    if (ctxt->nsHash == NULL)
+        return(-1);
+    if (ns_uri == NULL)
+        return(xmlHashRemoveEntry(ctxt->nsHash, prefix,
+                                  xmlHashDefaultDeallocator));
+    return(xmlHashUpdateEntry(ctxt->nsHash, prefix,
+                              (void *) xmlStrdup(ns_uri),
+                              xmlHashDefaultDeallocator));
+}
 
 /* static void print_xpath_nodes(xmlNodeSetPtr nodes); */
 
@@ -299,7 +316,7 @@ load_xpath_expr (xmlDocPtr parent_doc, const char* filename) {
      */
     ns = node->nsDef;
     while(ns != NULL) {
-	if(xmlXPathRegisterNs(ctx, ns->prefix, ns->href) != 0) {
+	if(testXPathRegisterNs(ctx, ns->prefix, ns->href) != 0) {
 	    fprintf(stderr,"Error: unable to register NS with prefix=\"%s\" and href=\"%s\"\n", ns->prefix, ns->href);
 	    xmlFree(expr);
 	    xmlXPathFreeContext(ctx);
@@ -369,5 +386,3 @@ int main(int argc ATTRIBUTE_UNUSED, char **argv ATTRIBUTE_UNUSED) {
     return(0);
 }
 #endif /* LIBXML_C14N_ENABLED */
-
-

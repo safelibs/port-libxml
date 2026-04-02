@@ -23,10 +23,11 @@
 #include <fcntl.h>
 
 #include <libxml/parser.h>
-#include <libxml/parserInternals.h>
+#include <libxml/debugXML.h>
 #include <libxml/tree.h>
 #include <libxml/uri.h>
 #include <libxml/encoding.h>
+#include <libxml/xmlIO.h>
 
 #ifdef LIBXML_OUTPUT_ENABLED
 #ifdef LIBXML_READER_ENABLED
@@ -39,7 +40,6 @@
 
 #ifdef LIBXML_XPATH_ENABLED
 #include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
 #ifdef LIBXML_XPTR_ENABLED
 #include <libxml/xpointer.h>
 #endif
@@ -1723,12 +1723,18 @@ saxParseTest(const char *filename, const char *result,
     } else
 #endif
     {
-        xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
+        xmlDocPtr doc;
+        xmlParserCtxtPtr ctxt = xmlNewParserCtxt();
+
+        if (ctxt == NULL) {
+            ret = XML_ERR_NO_MEMORY;
+            goto done;
+        }
         memcpy(ctxt->sax, emptySAXHandler, sizeof(xmlSAXHandler));
         xmlCtxtUseOptions(ctxt, options);
-        xmlParseDocument(ctxt);
+        doc = xmlCtxtReadFile(ctxt, filename, NULL, options);
         ret = ctxt->wellFormed ? 0 : ctxt->errNo;
-        xmlFreeDoc(ctxt->myDoc);
+        xmlFreeDoc(doc);
         xmlFreeParserCtxt(ctxt);
     }
     if (ret == XML_WAR_UNDECLARED_ENTITY) {
@@ -1747,7 +1753,13 @@ saxParseTest(const char *filename, const char *result,
     } else
 #endif
     {
-        xmlParserCtxtPtr ctxt = xmlCreateFileParserCtxt(filename);
+        xmlDocPtr doc;
+        xmlParserCtxtPtr ctxt = xmlNewParserCtxt();
+
+        if (ctxt == NULL) {
+            ret = XML_ERR_NO_MEMORY;
+            goto done;
+        }
         if (options & XML_PARSE_SAX1) {
             memcpy(ctxt->sax, debugSAXHandler, sizeof(xmlSAXHandler));
             options -= XML_PARSE_SAX1;
@@ -1755,9 +1767,9 @@ saxParseTest(const char *filename, const char *result,
             memcpy(ctxt->sax, debugSAX2Handler, sizeof(xmlSAXHandler));
         }
         xmlCtxtUseOptions(ctxt, options);
-        xmlParseDocument(ctxt);
+        doc = xmlCtxtReadFile(ctxt, filename, NULL, options);
         ret = ctxt->wellFormed ? 0 : ctxt->errNo;
-        xmlFreeDoc(ctxt->myDoc);
+        xmlFreeDoc(doc);
         xmlFreeParserCtxt(ctxt);
     }
     if (ret == XML_WAR_UNDECLARED_ENTITY) {
@@ -2411,6 +2423,252 @@ streamMemParseTest(const char *filename, const char *result, const char *err,
 static FILE *xpathOutput;
 static xmlDocPtr xpathDocument;
 
+static void testXPathDebugDumpObject(FILE *output, xmlXPathObjectPtr cur,
+                                     int depth);
+
+static int
+testXPathRegisterNs(xmlXPathContextPtr ctxt, const xmlChar *prefix,
+                    const xmlChar *ns_uri) {
+    if ((ctxt == NULL) || (prefix == NULL) || (prefix[0] == 0))
+        return(-1);
+
+    if (ctxt->nsHash == NULL)
+        ctxt->nsHash = xmlHashCreate(10);
+    if (ctxt->nsHash == NULL)
+        return(-1);
+    if (ns_uri == NULL)
+        return(xmlHashRemoveEntry(ctxt->nsHash, prefix,
+                                  xmlHashDefaultDeallocator));
+    return(xmlHashUpdateEntry(ctxt->nsHash, prefix,
+                              (void *) xmlStrdup(ns_uri),
+                              xmlHashDefaultDeallocator));
+}
+
+static void
+testXPathDebugDumpNode(FILE *output, xmlNodePtr cur, int depth) {
+    int i;
+    char shift[100];
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+    if (cur == NULL) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "Node is NULL !\n");
+        return;
+    }
+
+    if ((cur->type == XML_DOCUMENT_NODE) ||
+        (cur->type == XML_HTML_DOCUMENT_NODE)) {
+        fprintf(output, "%s", shift);
+        fprintf(output, " /\n");
+    } else if (cur->type == XML_ATTRIBUTE_NODE) {
+        xmlDebugDumpAttr(output, (xmlAttrPtr) cur, depth);
+    } else {
+        xmlDebugDumpOneNode(output, cur, depth);
+    }
+}
+
+static void
+testXPathDebugDumpNodeList(FILE *output, xmlNodePtr cur, int depth) {
+    xmlNodePtr tmp;
+    int i;
+    char shift[100];
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+    if (cur == NULL) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "Node is NULL !\n");
+        return;
+    }
+
+    while (cur != NULL) {
+        tmp = cur;
+        cur = cur->next;
+        xmlDebugDumpOneNode(output, tmp, depth);
+    }
+}
+
+static void
+testXPathDebugDumpNodeSet(FILE *output, xmlNodeSetPtr cur, int depth) {
+    int i;
+    char shift[100];
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+
+    if (cur == NULL) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "NodeSet is NULL !\n");
+        return;
+    }
+
+    fprintf(output, "Set contains %d nodes:\n", cur->nodeNr);
+    for (i = 0;i < cur->nodeNr;i++) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "%d", i + 1);
+        testXPathDebugDumpNode(output, cur->nodeTab[i], depth + 1);
+    }
+}
+
+static void
+testXPathDebugDumpValueTree(FILE *output, xmlNodeSetPtr cur, int depth) {
+    int i;
+    char shift[100];
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+
+    if ((cur == NULL) || (cur->nodeNr == 0) || (cur->nodeTab[0] == NULL)) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "Value Tree is NULL !\n");
+        return;
+    }
+
+    fprintf(output, "%s", shift);
+    fprintf(output, "%d", i + 1);
+    testXPathDebugDumpNodeList(output, cur->nodeTab[0]->children, depth + 1);
+}
+
+#if defined(LIBXML_XPTR_ENABLED)
+static void
+testXPathDebugDumpLocationSet(FILE *output, xmlLocationSetPtr cur, int depth) {
+    int i;
+    char shift[100];
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+
+    if (cur == NULL) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "LocationSet is NULL !\n");
+        return;
+    }
+
+    for (i = 0;i < cur->locNr;i++) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "%d : ", i + 1);
+        testXPathDebugDumpObject(output, cur->locTab[i], depth + 1);
+    }
+}
+#endif
+
+static void
+testXPathDebugDumpObject(FILE *output, xmlXPathObjectPtr cur, int depth) {
+    int i;
+    char shift[100];
+
+    if (output == NULL)
+        return;
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+
+    fprintf(output, "%s", shift);
+
+    if (cur == NULL) {
+        fprintf(output, "Object is empty (NULL)\n");
+        return;
+    }
+    switch (cur->type) {
+        case XPATH_UNDEFINED:
+            fprintf(output, "Object is uninitialized\n");
+            break;
+        case XPATH_NODESET:
+            fprintf(output, "Object is a Node Set :\n");
+            testXPathDebugDumpNodeSet(output, cur->nodesetval, depth);
+            break;
+        case XPATH_XSLT_TREE:
+            fprintf(output, "Object is an XSLT value tree :\n");
+            testXPathDebugDumpValueTree(output, cur->nodesetval, depth);
+            break;
+        case XPATH_BOOLEAN:
+            fprintf(output, "Object is a Boolean : ");
+            if (cur->boolval)
+                fprintf(output, "true\n");
+            else
+                fprintf(output, "false\n");
+            break;
+        case XPATH_NUMBER:
+            switch (xmlXPathIsInf(cur->floatval)) {
+                case 1:
+                    fprintf(output, "Object is a number : Infinity\n");
+                    break;
+                case -1:
+                    fprintf(output, "Object is a number : -Infinity\n");
+                    break;
+                default:
+                    if (xmlXPathIsNaN(cur->floatval)) {
+                        fprintf(output, "Object is a number : NaN\n");
+                    } else if (cur->floatval == 0) {
+                        fprintf(output, "Object is a number : 0\n");
+                    } else {
+                        fprintf(output, "Object is a number : %0g\n",
+                                cur->floatval);
+                    }
+            }
+            break;
+        case XPATH_STRING:
+            fprintf(output, "Object is a string : ");
+            xmlDebugDumpString(output, cur->stringval);
+            fprintf(output, "\n");
+            break;
+        case XPATH_POINT:
+            fprintf(output, "Object is a point : index %d in node",
+                    cur->index);
+            testXPathDebugDumpNode(output, (xmlNodePtr) cur->user, depth + 1);
+            fprintf(output, "\n");
+            break;
+        case XPATH_RANGE:
+            if ((cur->user2 == NULL) ||
+                ((cur->user2 == cur->user) &&
+                 (cur->index == cur->index2))) {
+                fprintf(output, "Object is a collapsed range :\n");
+                fprintf(output, "%s", shift);
+                if (cur->index >= 0)
+                    fprintf(output, "index %d in ", cur->index);
+                fprintf(output, "node\n");
+                testXPathDebugDumpNode(output, (xmlNodePtr) cur->user,
+                                       depth + 1);
+            } else {
+                fprintf(output, "Object is a range :\n");
+                fprintf(output, "%s", shift);
+                fprintf(output, "From ");
+                if (cur->index >= 0)
+                    fprintf(output, "index %d in ", cur->index);
+                fprintf(output, "node\n");
+                testXPathDebugDumpNode(output, (xmlNodePtr) cur->user,
+                                       depth + 1);
+                fprintf(output, "%s", shift);
+                fprintf(output, "To ");
+                if (cur->index2 >= 0)
+                    fprintf(output, "index %d in ", cur->index2);
+                fprintf(output, "node\n");
+                testXPathDebugDumpNode(output, (xmlNodePtr) cur->user2,
+                                       depth + 1);
+                fprintf(output, "\n");
+            }
+            break;
+        case XPATH_LOCATIONSET:
+#if defined(LIBXML_XPTR_ENABLED)
+            fprintf(output, "Object is a Location Set:\n");
+            testXPathDebugDumpLocationSet(output,
+                                          (xmlLocationSetPtr) cur->user,
+                                          depth);
+#endif
+            break;
+        case XPATH_USERS:
+            fprintf(output, "Object is user defined\n");
+            break;
+    }
+}
+
 static void
 ignoreGenericError(void *ctx ATTRIBUTE_UNUSED,
         const char *msg ATTRIBUTE_UNUSED, ...) {
@@ -2450,7 +2708,7 @@ testXPath(const char *str, int xptr, int expr) {
 #if defined(LIBXML_XPTR_ENABLED)
     }
 #endif
-    xmlXPathDebugDumpObject(xpathOutput, res, 0);
+    testXPathDebugDumpObject(xpathOutput, res, 0);
     xmlXPathFreeObject(res);
     xmlXPathFreeContext(ctxt);
 
@@ -3832,7 +4090,7 @@ load_xpath_expr (xmlDocPtr parent_doc, const char* filename) {
      */
     ns = node->nsDef;
     while(ns != NULL) {
-	if(xmlXPathRegisterNs(ctx, ns->prefix, ns->href) != 0) {
+	if(testXPathRegisterNs(ctx, ns->prefix, ns->href) != 0) {
 	    fprintf(stderr,"Error: unable to register NS with prefix=\"%s\" and href=\"%s\"\n", ns->prefix, ns->href);
     xmlFree(expr);
 	    xmlXPathFreeContext(ctx);
@@ -4113,6 +4371,19 @@ static xmlThreadParams threadParams[] = {
 static const unsigned int num_threads = sizeof(threadParams) /
                                         sizeof(threadParams[0]);
 
+static int
+threadFixturesAvailable(void) {
+    unsigned int i;
+
+    if (!checkTestFile(catalog))
+        return(0);
+    for (i = 0; i < num_threads; i++) {
+        if (!checkTestFile(threadParams[i].filename))
+            return(0);
+    }
+    return(1);
+}
+
 #ifndef xmlDoValidityCheckingDefaultValue
 #error xmlDoValidityCheckingDefaultValue is not a macro
 #endif
@@ -4358,6 +4629,8 @@ threadsTest(const char *filename ATTRIBUTE_UNUSED,
 	    const char *resul ATTRIBUTE_UNUSED,
 	    const char *err ATTRIBUTE_UNUSED,
 	    int options ATTRIBUTE_UNUSED) {
+    if (!threadFixturesAvailable())
+        return(0);
     return(testThread());
 }
 #endif

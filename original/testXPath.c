@@ -33,8 +33,6 @@
 #include <libxml/parser.h>
 #include <libxml/debugXML.h>
 #include <libxml/xmlmemory.h>
-#include <libxml/parserInternals.h>
-#include <libxml/xpathInternals.h>
 #include <libxml/xmlerror.h>
 #include <libxml/globals.h>
 #if defined(LIBXML_XPTR_ENABLED)
@@ -74,6 +72,234 @@ static xmlChar buffer[] =
 </EXAMPLE>\n\
 ";
 
+static void testXPathDebugDumpObject(FILE *output, xmlXPathObjectPtr cur,
+                                     int depth);
+
+static void
+testXPathDebugDumpNode(FILE *output, xmlNodePtr cur, int depth) {
+    int i;
+    char shift[100];
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+    if (cur == NULL) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "Node is NULL !\n");
+        return;
+    }
+
+    if ((cur->type == XML_DOCUMENT_NODE) ||
+        (cur->type == XML_HTML_DOCUMENT_NODE)) {
+        fprintf(output, "%s", shift);
+        fprintf(output, " /\n");
+    } else if (cur->type == XML_ATTRIBUTE_NODE) {
+        xmlDebugDumpAttr(output, (xmlAttrPtr) cur, depth);
+    } else {
+        xmlDebugDumpOneNode(output, cur, depth);
+    }
+}
+
+static void
+testXPathDebugDumpNodeList(FILE *output, xmlNodePtr cur, int depth) {
+    xmlNodePtr tmp;
+    int i;
+    char shift[100];
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+    if (cur == NULL) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "Node is NULL !\n");
+        return;
+    }
+
+    while (cur != NULL) {
+        tmp = cur;
+        cur = cur->next;
+        xmlDebugDumpOneNode(output, tmp, depth);
+    }
+}
+
+static void
+testXPathDebugDumpNodeSet(FILE *output, xmlNodeSetPtr cur, int depth) {
+    int i;
+    char shift[100];
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+
+    if (cur == NULL) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "NodeSet is NULL !\n");
+        return;
+    }
+
+    fprintf(output, "Set contains %d nodes:\n", cur->nodeNr);
+    for (i = 0;i < cur->nodeNr;i++) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "%d", i + 1);
+        testXPathDebugDumpNode(output, cur->nodeTab[i], depth + 1);
+    }
+}
+
+static void
+testXPathDebugDumpValueTree(FILE *output, xmlNodeSetPtr cur, int depth) {
+    int i;
+    char shift[100];
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+
+    if ((cur == NULL) || (cur->nodeNr == 0) || (cur->nodeTab[0] == NULL)) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "Value Tree is NULL !\n");
+        return;
+    }
+
+    fprintf(output, "%s", shift);
+    fprintf(output, "%d", i + 1);
+    testXPathDebugDumpNodeList(output, cur->nodeTab[0]->children, depth + 1);
+}
+
+#if defined(LIBXML_XPTR_ENABLED)
+static void
+testXPathDebugDumpLocationSet(FILE *output, xmlLocationSetPtr cur, int depth) {
+    int i;
+    char shift[100];
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+
+    if (cur == NULL) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "LocationSet is NULL !\n");
+        return;
+    }
+
+    for (i = 0;i < cur->locNr;i++) {
+        fprintf(output, "%s", shift);
+        fprintf(output, "%d : ", i + 1);
+        testXPathDebugDumpObject(output, cur->locTab[i], depth + 1);
+    }
+}
+#endif
+
+static void
+testXPathDebugDumpObject(FILE *output, xmlXPathObjectPtr cur, int depth) {
+    int i;
+    char shift[100];
+
+    if (output == NULL)
+        return;
+
+    for (i = 0;((i < depth) && (i < 25));i++)
+        shift[2 * i] = shift[2 * i + 1] = ' ';
+    shift[2 * i] = shift[2 * i + 1] = 0;
+
+    fprintf(output, "%s", shift);
+
+    if (cur == NULL) {
+        fprintf(output, "Object is empty (NULL)\n");
+        return;
+    }
+    switch (cur->type) {
+        case XPATH_UNDEFINED:
+            fprintf(output, "Object is uninitialized\n");
+            break;
+        case XPATH_NODESET:
+            fprintf(output, "Object is a Node Set :\n");
+            testXPathDebugDumpNodeSet(output, cur->nodesetval, depth);
+            break;
+        case XPATH_XSLT_TREE:
+            fprintf(output, "Object is an XSLT value tree :\n");
+            testXPathDebugDumpValueTree(output, cur->nodesetval, depth);
+            break;
+        case XPATH_BOOLEAN:
+            fprintf(output, "Object is a Boolean : ");
+            if (cur->boolval)
+                fprintf(output, "true\n");
+            else
+                fprintf(output, "false\n");
+            break;
+        case XPATH_NUMBER:
+            switch (xmlXPathIsInf(cur->floatval)) {
+                case 1:
+                    fprintf(output, "Object is a number : Infinity\n");
+                    break;
+                case -1:
+                    fprintf(output, "Object is a number : -Infinity\n");
+                    break;
+                default:
+                    if (xmlXPathIsNaN(cur->floatval)) {
+                        fprintf(output, "Object is a number : NaN\n");
+                    } else if (cur->floatval == 0) {
+                        fprintf(output, "Object is a number : 0\n");
+                    } else {
+                        fprintf(output, "Object is a number : %0g\n",
+                                cur->floatval);
+                    }
+            }
+            break;
+        case XPATH_STRING:
+            fprintf(output, "Object is a string : ");
+            xmlDebugDumpString(output, cur->stringval);
+            fprintf(output, "\n");
+            break;
+        case XPATH_POINT:
+            fprintf(output, "Object is a point : index %d in node",
+                    cur->index);
+            testXPathDebugDumpNode(output, (xmlNodePtr) cur->user, depth + 1);
+            fprintf(output, "\n");
+            break;
+        case XPATH_RANGE:
+            if ((cur->user2 == NULL) ||
+                ((cur->user2 == cur->user) &&
+                 (cur->index == cur->index2))) {
+                fprintf(output, "Object is a collapsed range :\n");
+                fprintf(output, "%s", shift);
+                if (cur->index >= 0)
+                    fprintf(output, "index %d in ", cur->index);
+                fprintf(output, "node\n");
+                testXPathDebugDumpNode(output, (xmlNodePtr) cur->user,
+                                       depth + 1);
+            } else {
+                fprintf(output, "Object is a range :\n");
+                fprintf(output, "%s", shift);
+                fprintf(output, "From ");
+                if (cur->index >= 0)
+                    fprintf(output, "index %d in ", cur->index);
+                fprintf(output, "node\n");
+                testXPathDebugDumpNode(output, (xmlNodePtr) cur->user,
+                                       depth + 1);
+                fprintf(output, "%s", shift);
+                fprintf(output, "To ");
+                if (cur->index2 >= 0)
+                    fprintf(output, "index %d in ", cur->index2);
+                fprintf(output, "node\n");
+                testXPathDebugDumpNode(output, (xmlNodePtr) cur->user2,
+                                       depth + 1);
+                fprintf(output, "\n");
+            }
+            break;
+        case XPATH_LOCATIONSET:
+#if defined(LIBXML_XPTR_ENABLED)
+            fprintf(output, "Object is a Location Set:\n");
+            testXPathDebugDumpLocationSet(output,
+                                          (xmlLocationSetPtr) cur->user,
+                                          depth);
+#endif
+            break;
+        case XPATH_USERS:
+            fprintf(output, "Object is user defined\n");
+            break;
+    }
+}
+
 
 static void
 testXPath(const char *str) {
@@ -96,9 +322,6 @@ testXPath(const char *str) {
 
 	    comp = xmlXPathCompile(BAD_CAST str);
 	    if (comp != NULL) {
-		if (tree)
-		    xmlXPathDebugDumpCompExpr(stdout, comp, 0);
-
 		res = xmlXPathCompiledEval(comp, ctxt);
 		xmlXPathFreeCompExpr(comp);
 	    } else
@@ -107,7 +330,7 @@ testXPath(const char *str) {
 #if defined(LIBXML_XPTR_ENABLED)
     }
 #endif
-    xmlXPathDebugDumpObject(stdout, res, 0);
+    testXPathDebugDumpObject(stdout, res, 0);
     xmlXPathFreeObject(res);
     xmlXPathFreeContext(ctxt);
 }
@@ -206,7 +429,7 @@ int main(int argc, char **argv) {
 	printf("\t--xptr : expressions are XPointer expressions\n");
 #endif
 	printf("\t--expr : debug XPath expressions only\n");
-	printf("\t--tree : show the compiled XPath tree\n");
+	printf("\t--tree : reserved for the removed private compiled-tree dump\n");
 	printf("\t--nocdata : do not generate CDATA nodes\n");
 	printf("\t--input filename : or\n");
 	printf("\t-i filename      : read the document from filename\n");

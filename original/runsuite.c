@@ -18,14 +18,13 @@
 #include <fcntl.h>
 
 #include <libxml/parser.h>
-#include <libxml/parserInternals.h>
 #include <libxml/tree.h>
 #include <libxml/uri.h>
+#include <libxml/xmlIO.h>
 #if defined(LIBXML_SCHEMAS_ENABLED) && defined(LIBXML_XPATH_ENABLED)
 #include <libxml/xmlreader.h>
 
 #include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
 
 #include <libxml/relaxng.h>
 #include <libxml/xmlschemas.h>
@@ -131,11 +130,19 @@ testExternalEntityLoader(const char *URL, const char *ID,
 
     for (i = 0;i < nb_entities;i++) {
         if (!strcmp(testEntitiesName[i], URL)) {
-	    ret = xmlNewStringInputStream(ctxt,
-	                (const xmlChar *) testEntitiesValue[i]);
+            xmlParserInputBufferPtr input;
+
+            input = xmlParserInputBufferCreateStatic(testEntitiesValue[i],
+                                                     strlen(testEntitiesValue[i]),
+                                                     XML_CHAR_ENCODING_NONE);
+            if (input == NULL)
+                return(NULL);
+	    ret = xmlNewIOInputStream(ctxt, input, XML_CHAR_ENCODING_NONE);
 	    if (ret != NULL) {
 	        ret->filename = (const char *)
 		                xmlStrdup((xmlChar *)testEntitiesName[i]);
+	    } else {
+                xmlFreeParserInputBuffer(input);
 	    }
 	    return(ret);
 	}
@@ -204,6 +211,24 @@ testErrorHandler(void *ctx  ATTRIBUTE_UNUSED, const char *msg, ...) {
 
 static xmlXPathContextPtr ctxtXPath;
 
+static int
+testXPathRegisterNs(xmlXPathContextPtr ctxt, const xmlChar *prefix,
+                    const xmlChar *ns_uri) {
+    if ((ctxt == NULL) || (prefix == NULL) || (prefix[0] == 0))
+        return(-1);
+
+    if (ctxt->nsHash == NULL)
+        ctxt->nsHash = xmlHashCreate(10);
+    if (ctxt->nsHash == NULL)
+        return(-1);
+    if (ns_uri == NULL)
+        return(xmlHashRemoveEntry(ctxt->nsHash, prefix,
+                                  xmlHashDefaultDeallocator));
+    return(xmlHashUpdateEntry(ctxt->nsHash, prefix,
+                              (void *) xmlStrdup(ns_uri),
+                              xmlHashDefaultDeallocator));
+}
+
 static void
 initializeLibxml2(void) {
     xmlGetWarningsDefaultValue = 0;
@@ -224,9 +249,9 @@ initializeLibxml2(void) {
     if (ctxtXPath->cache != NULL)
 	xmlXPathContextSetCache(ctxtXPath, 0, -1, 0);
     /* used as default namespace in xstc tests */
-    xmlXPathRegisterNs(ctxtXPath, BAD_CAST "ts", BAD_CAST "TestSuite");
-    xmlXPathRegisterNs(ctxtXPath, BAD_CAST "xlink",
-                       BAD_CAST "http://www.w3.org/1999/xlink");
+    testXPathRegisterNs(ctxtXPath, BAD_CAST "ts", BAD_CAST "TestSuite");
+    testXPathRegisterNs(ctxtXPath, BAD_CAST "xlink",
+                        BAD_CAST "http://www.w3.org/1999/xlink");
     xmlSetGenericErrorFunc(NULL, testErrorHandler);
 #ifdef LIBXML_SCHEMAS_ENABLED
     xmlSchemaInitTypes();

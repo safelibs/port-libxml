@@ -28,9 +28,16 @@ testFuzzer_SOURCES = testFuzzer.c fuzz.c
 corpus: seed/html.stamp seed/regexp.stamp seed/schema.stamp seed/uri.stamp \
     seed/xml.stamp seed/xpath.stamp
 
-tests: testFuzzer$(EXEEXT) corpus
-	@echo "## Running fuzzer tests"
-	@./testFuzzer$(EXEEXT)
+tests: testFuzzer$(EXEEXT)
+	@if test ! -d $(top_srcdir)/test/HTML || \
+	    test ! -d $(top_srcdir)/test/XPath || \
+	    test ! -d $(top_srcdir)/test/xmlid; then \
+	    echo "## Skipping fuzzer tests: seed corpus sources missing"; \
+	else \
+	    $(MAKE) corpus && \
+	    echo "## Running fuzzer tests" && \
+	    ./testFuzzer$(EXEEXT); \
+	fi
 
 clean-corpus:
 	rm -rf seed
@@ -147,4 +154,3 @@ fuzz-xpath: xpath$(EXEEXT) seed/xpath.stamp
 	    -max_len=10000 \
 	    -timeout=20 \
 	    corpus/xpath seed/xpath
-

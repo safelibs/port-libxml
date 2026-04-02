@@ -23,7 +23,6 @@
 #include <time.h>
 
 #include <libxml/parser.h>
-#include <libxml/parserInternals.h>
 #include <libxml/tree.h>
 #include <libxml/uri.h>
 #ifdef LIBXML_READER_ENABLED
