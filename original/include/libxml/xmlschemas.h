@@ -70,7 +70,6 @@ typedef enum {
 	* or an element's text node on the instance.
 	*/
 } xmlSchemaValidOption;
-
 /*
     XML_SCHEMA_VAL_XSI_ASSEMBLE			= 1<<1,
 	* assemble schemata using

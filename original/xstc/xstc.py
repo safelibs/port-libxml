@@ -132,6 +132,19 @@ def fixFileNames(fileName):
 			fileName = os.path.join(fileName, dir)	
 	return fileName
 
+def needsDynamicSchemaValidation(doc):
+	root = doc.getRootElement()
+	if root is None:
+		return False
+	xsi = "http://www.w3.org/2001/XMLSchema-instance"
+	schemaLoc = root.nsProp("schemaLocation", xsi)
+	noNsSchemaLoc = root.nsProp("noNamespaceSchemaLocation", xsi)
+	if schemaLoc and noNsSchemaLoc:
+		return True
+	if schemaLoc:
+		return len(schemaLoc.split()) > 2
+	return False
+
 class XSTCTestGroup:
 	def __init__(self, name, schemaFileName, descr):
 		global vendor, vendorNIST_2
@@ -416,12 +429,15 @@ class XSTCInstanceTest(XSTCTestCase):
 			self.debugMsg("loading schema: %s" % self.group.schemaFileName)
 			schema = parseSchema(self.group.schemaFileName)
 			try:
-				validationCtxt = schema.schemaNewValidCtxt()
-				#validationCtxt = libxml2.schemaNewValidCtxt(None)
+				if needsDynamicSchemaValidation(instance):
+					validationCtxt = libxml2.schemaNewValidCtxt(None)
+				else:
+					validationCtxt = schema.schemaNewValidCtxt()
 				if (validationCtxt is None):
 					self.failCritical("Could not create the validation context.")
 					return
 				try:
+					validationCtxt.schemaValidateSetFilename(filePath)
 					self.debugMsg("validating instance")
 					if options.validationSAX:
 						instance_Err = validationCtxt.schemaValidateFile(filePath, 0)

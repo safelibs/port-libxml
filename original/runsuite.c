@@ -68,6 +68,53 @@ static xmlChar *composeDir(const xmlChar *dir, const xmlChar *path) {
     return(xmlStrdup((const xmlChar *) buf));
 }
 
+static int
+isSchemaHintBlank(xmlChar ch) {
+    return((ch == ' ') || (ch == '\t') || (ch == '\n') || (ch == '\r'));
+}
+
+static int
+needsDynamicSchemaValidation(xmlDocPtr doc) {
+    xmlNodePtr root;
+    xmlChar *schemaLoc, *noNsSchemaLoc;
+    int ret = 0;
+    const xmlChar *cur;
+    int tokens = 0;
+
+    if (doc == NULL)
+        return(0);
+    root = xmlDocGetRootElement(doc);
+    if (root == NULL)
+        return(0);
+
+    schemaLoc = xmlGetNsProp(root, BAD_CAST "schemaLocation",
+        BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
+    noNsSchemaLoc = xmlGetNsProp(root, BAD_CAST "noNamespaceSchemaLocation",
+        BAD_CAST "http://www.w3.org/2001/XMLSchema-instance");
+    if ((schemaLoc != NULL) && (schemaLoc[0] != 0) &&
+        (noNsSchemaLoc != NULL) && (noNsSchemaLoc[0] != 0)) {
+        ret = 1;
+    } else if ((schemaLoc != NULL) && (schemaLoc[0] != 0)) {
+        cur = schemaLoc;
+        while (*cur != 0) {
+            while (isSchemaHintBlank(*cur))
+                cur++;
+            if (*cur == 0)
+                break;
+            tokens++;
+            while ((*cur != 0) && (!isSchemaHintBlank(*cur)))
+                cur++;
+        }
+        if (tokens > 2)
+            ret = 1;
+    }
+    if (schemaLoc != NULL)
+        xmlFree(schemaLoc);
+    if (noNsSchemaLoc != NULL)
+        xmlFree(noNsSchemaLoc);
+    return(ret);
+}
+
 /************************************************************************
  *									*
  *		Libxml2 specific routines				*
@@ -843,8 +890,12 @@ xstcTestInstance(xmlNodePtr cur, xmlSchemaPtr schemas,
 	goto done;
     }
 
-    ctxt = xmlSchemaNewValidCtxt(schemas);
+    if (needsDynamicSchemaValidation(doc))
+        ctxt = xmlSchemaNewValidCtxt(NULL);
+    else
+        ctxt = xmlSchemaNewValidCtxt(schemas);
     xmlSchemaSetValidErrors(ctxt, testErrorHandler, testErrorHandler, ctxt);
+    xmlSchemaValidateSetFilename(ctxt, (const char *) path);
     ret = xmlSchemaValidateDoc(ctxt, doc);
 
     if (xmlStrEqual(validity, BAD_CAST "valid")) {

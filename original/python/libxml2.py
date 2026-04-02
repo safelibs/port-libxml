@@ -6389,6 +6389,19 @@ class SchemaParserCtxt:
         __tmp = Schema(_obj=ret)
         return __tmp
 
+def schemaNewValidCtxt(schema=None):
+    """Create an XML Schemas validation context for the given schema,
+       or for dynamic validation when schema is None. """
+    if schema is None:
+        schema__o = None
+    else:
+        schema__o = schema._o
+    ret = libxml2mod.xmlSchemaNewValidCtxt(schema__o)
+    if ret is None:raise treeError('xmlSchemaNewValidCtxt() failed')
+    __tmp = SchemaValidCtxt(_obj=ret)
+    __tmp.schema = schema
+    return __tmp
+
 class Schema:
     def __init__(self, _obj=None):
         if _obj != None:self._o = _obj;return
@@ -9334,4 +9347,3 @@ XML_SCHEMAS_ERR_VALUE = 22
 XML_SCHEMAS_ERR_FACET = 23
 XML_SCHEMAS_ERR_ = 24
 XML_SCHEMAS_ERR_XXX = 25
-

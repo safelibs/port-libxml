@@ -8724,7 +8724,8 @@ declaration_part:
 		    (!xmlStrEqual(attr->name, BAD_CAST "default")) &&
 		    (!xmlStrEqual(attr->name, BAD_CAST "fixed")) &&
 		    (!xmlStrEqual(attr->name, BAD_CAST "block")) &&
-		    (!xmlStrEqual(attr->name, BAD_CAST "nillable")))
+		    (!xmlStrEqual(attr->name, BAD_CAST "nillable")) &&
+		    (!xmlStrEqual(attr->name, BAD_CAST "abstract")))
 		{
 		    if (topLevel == 0) {
 			if ((!xmlStrEqual(attr->name, BAD_CAST "maxOccurs")) &&
@@ -8815,6 +8816,8 @@ declaration_part:
 		    NULL, NULL, NULL);
 	    }
 	}
+	if (xmlGetBooleanProp(ctxt, node, "abstract", 0))
+	    decl->flags |= XML_SCHEMAS_ELEM_ABSTRACT;
 	if (xmlGetBooleanProp(ctxt, node, "nillable", 0))
 	    decl->flags |= XML_SCHEMAS_ELEM_NILLABLE;
 
@@ -21874,77 +21877,78 @@ xmlSchemaAssembleByXSI(xmlSchemaValidCtxtPtr vctxt)
     const xmlChar *nsname = NULL, *location;
     int count = 0;
     int ret = 0;
-    xmlSchemaAttrInfoPtr iattr;
+    int i, nbAttrs = 0;
+    xmlSchemaAttrInfoPtr attrs[2], iattr;
 
-    /*
-    * Parse the value; we will assume an even number of values
-    * to be given (this is how Xerces and XSV work).
-    *
-    * URGENT TODO: !! This needs to work for both
-    * @noNamespaceSchemaLocation AND @schemaLocation on the same
-    * element !!
-    */
-    iattr = xmlSchemaGetMetaAttrInfo(vctxt,
+    attrs[nbAttrs] = xmlSchemaGetMetaAttrInfo(vctxt,
 	XML_SCHEMA_ATTR_INFO_META_XSI_SCHEMA_LOC);
-    if (iattr == NULL)
-	iattr = xmlSchemaGetMetaAttrInfo(vctxt,
+    if (attrs[nbAttrs] != NULL)
+	nbAttrs++;
+    attrs[nbAttrs] = xmlSchemaGetMetaAttrInfo(vctxt,
 	XML_SCHEMA_ATTR_INFO_META_XSI_NO_NS_SCHEMA_LOC);
-    if (iattr == NULL)
+    if (attrs[nbAttrs] != NULL)
+	nbAttrs++;
+    if (nbAttrs == 0)
 	return (0);
-    cur = iattr->value;
-    do {
-	/*
-	* TODO: Move the string parsing mechanism away from here.
-	*/
-	if (iattr->metaType == XML_SCHEMA_ATTR_INFO_META_XSI_SCHEMA_LOC) {
+
+    for (i = 0; i < nbAttrs; i++) {
+	iattr = attrs[i];
+	cur = iattr->value;
+	do {
+	    nsname = NULL;
 	    /*
-	    * Get the namespace name.
+	    * TODO: Move the string parsing mechanism away from here.
+	    */
+	    if (iattr->metaType == XML_SCHEMA_ATTR_INFO_META_XSI_SCHEMA_LOC) {
+		/*
+		* Get the namespace name.
+		*/
+		while (IS_BLANK_CH(*cur))
+		    cur++;
+		end = cur;
+		while ((*end != 0) && (!(IS_BLANK_CH(*end))))
+		    end++;
+		if (end == cur)
+		    break;
+		count++; /* TODO: Don't use the schema's dict. */
+		nsname = xmlDictLookup(vctxt->schema->dict, cur, end - cur);
+		cur = end;
+	    }
+	    /*
+	    * Get the URI.
 	    */
 	    while (IS_BLANK_CH(*cur))
 		cur++;
 	    end = cur;
 	    while ((*end != 0) && (!(IS_BLANK_CH(*end))))
 		end++;
-	    if (end == cur)
+	    if (end == cur) {
+		if (iattr->metaType ==
+		    XML_SCHEMA_ATTR_INFO_META_XSI_SCHEMA_LOC)
+		{
+		    /*
+		    * If using @schemaLocation then tuples are expected.
+		    * I.e. the namespace name *and* the document's URI.
+		    */
+		    xmlSchemaCustomWarning(ACTXT_CAST vctxt, XML_SCHEMAV_MISC,
+			iattr->node, NULL,
+			"The value must consist of tuples: the target namespace "
+			"name and the document's URI", NULL, NULL, NULL);
+		}
 		break;
-	    count++; /* TODO: Don't use the schema's dict. */
-	    nsname = xmlDictLookup(vctxt->schema->dict, cur, end - cur);
-	    cur = end;
-	}
-	/*
-	* Get the URI.
-	*/
-	while (IS_BLANK_CH(*cur))
-	    cur++;
-	end = cur;
-	while ((*end != 0) && (!(IS_BLANK_CH(*end))))
-	    end++;
-	if (end == cur) {
-	    if (iattr->metaType ==
-		XML_SCHEMA_ATTR_INFO_META_XSI_SCHEMA_LOC)
-	    {
-		/*
-		* If using @schemaLocation then tuples are expected.
-		* I.e. the namespace name *and* the document's URI.
-		*/
-		xmlSchemaCustomWarning(ACTXT_CAST vctxt, XML_SCHEMAV_MISC,
-		    iattr->node, NULL,
-		    "The value must consist of tuples: the target namespace "
-		    "name and the document's URI", NULL, NULL, NULL);
 	    }
-	    break;
-	}
-	count++; /* TODO: Don't use the schema's dict. */
-	location = xmlDictLookup(vctxt->schema->dict, cur, end - cur);
-	cur = end;
-	ret = xmlSchemaAssembleByLocation(vctxt, vctxt->schema,
-	    iattr->node, nsname, location);
-	if (ret == -1) {
-	    VERROR_INT("xmlSchemaAssembleByXSI",
-		"assembling schemata");
-	    return (-1);
-	}
-    } while (*cur != 0);
+	    count++; /* TODO: Don't use the schema's dict. */
+	    location = xmlDictLookup(vctxt->schema->dict, cur, end - cur);
+	    cur = end;
+	    ret = xmlSchemaAssembleByLocation(vctxt, vctxt->schema,
+		iattr->node, nsname, location);
+	    if (ret == -1) {
+		VERROR_INT("xmlSchemaAssembleByXSI",
+		    "assembling schemata");
+		return (-1);
+	    }
+	} while (*cur != 0);
+    }
     return (ret);
 }
 
@@ -28099,7 +28103,6 @@ xmlSchemaGetValidErrors(xmlSchemaValidCtxtPtr ctxt,
 int
 xmlSchemaSetValidOptions(xmlSchemaValidCtxtPtr ctxt,
 			 int options)
-
 {
     int i;
 

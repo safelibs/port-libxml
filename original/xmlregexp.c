@@ -5294,23 +5294,29 @@ xmlFAParseQuantifier(xmlRegParserCtxtPtr ctxt) {
     }
     if (cur == '{') {
 	int min = 0, max = 0;
+	int hasComma = 0;
+	int hasMax = 0;
 
 	NEXT;
-	cur = xmlFAParseQuantExact(ctxt);
-	if (cur >= 0)
-	    min = cur;
-        else {
-            ERROR("Improper quantifier");
-        }
+	if (CUR != ',') {
+	    cur = xmlFAParseQuantExact(ctxt);
+	    if (cur >= 0)
+		min = cur;
+	    else {
+		ERROR("Improper quantifier");
+	    }
+	}
 	if (CUR == ',') {
+	    hasComma = 1;
 	    NEXT;
 	    if (CUR == '}')
 	        max = INT_MAX;
 	    else {
 	        cur = xmlFAParseQuantExact(ctxt);
-	        if (cur >= 0)
+	        if (cur >= 0) {
 		    max = cur;
-		else {
+		    hasMax = 1;
+		} else {
 		    ERROR("Improper quantifier");
 		}
 	    }
@@ -5320,8 +5326,10 @@ xmlFAParseQuantifier(xmlRegParserCtxtPtr ctxt) {
 	} else {
 	    ERROR("Unterminated quantifier");
 	}
-	if (max == 0)
+	if (!hasComma)
 	    max = min;
+	else if (!hasMax)
+	    max = INT_MAX;
 	if (ctxt->atom != NULL) {
 	    ctxt->atom->quant = XML_REGEXP_QUANT_RANGE;
 	    ctxt->atom->min = min;
