@@ -198,6 +198,15 @@ runxmlconf_LDADD= $(LDADDS)
 #testOOM_DEPENDENCIES = $(DEPS)
 #testOOM_LDADD= $(LDADDS)
 
+runsuite-data:
+	[ -d test ] || $(LN_S) $(srcdir)/test .
+	@(cd xstc && $(MAKE) $(AM_MAKEFLAGS) \
+	    Tests/Metadata/NISTXMLSchemaDatatypes.testSet \
+	    Tests/Metadata/SunXMLSchema1-0-20020116.testSet \
+	    Tests/Metadata/MSXMLSchema1-0-20020116.testSet)
+
+runsuite$(EXEEXT): runsuite-data
+
 runtests: runtest$(EXEEXT) testrecurse$(EXEEXT) testapi$(EXEEXT) \
           testchar$(EXEEXT) testdict$(EXEEXT) runxmlconf$(EXEEXT)
 	[ -d test   ] || $(LN_S) $(srcdir)/test   .

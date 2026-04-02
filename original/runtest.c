@@ -950,11 +950,10 @@ resolveEntityDebug(void *ctx ATTRIBUTE_UNUSED, const xmlChar *publicId, const xm
 	fprintf(SAXdebug, ", %s)\n", (char *)systemId);
     else
 	fprintf(SAXdebug, ", )\n");
-/*********
-    if (systemId != NULL) {
-        return(xmlNewInputFromFile(ctxt, (char *) systemId));
-    }
- *********/
+    /*
+     * Keep the resolver in DOM mode for this debug callback. The actual
+     * external-entity loading paths are exercised elsewhere in runtest.
+     */
     return(NULL);
 }
 

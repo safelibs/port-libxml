@@ -377,11 +377,10 @@ resolveEntityDebug(void *ctx ATTRIBUTE_UNUSED, const xmlChar *publicId, const xm
 	fprintf(stdout, ", %s)\n", (char *)systemId);
     else
 	fprintf(stdout, ", )\n");
-/*********
-    if (systemId != NULL) {
-        return(xmlNewInputFromFile(ctxt, (char *) systemId));
-    }
- *********/
+    /*
+     * Keep the resolver in DOM mode for this debug callback. The actual
+     * external-entity loading paths are exercised elsewhere in the suite.
+     */
     return(NULL);
 }
 

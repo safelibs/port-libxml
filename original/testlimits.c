@@ -34,7 +34,7 @@ static int tests_quiet = 0;
 
 /*
  * Mirror the parser's public-facing size limits without depending on
- * parserInternals.h in this test.
+ * non-imported internal headers in this test.
  */
 #define TEST_MAX_TEXT_LENGTH 10000000
 #define TEST_MAX_LOOKUP_LIMIT 10000000

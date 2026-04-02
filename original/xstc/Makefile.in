@@ -377,7 +377,7 @@ NISTTESTDEF_2 = NISTXMLSchemaDatatypes.testSet
 #
 # The local data and scripts
 #
-EXTRA_DIST = xstc.py xstc-to-python.xsl
+EXTRA_DIST = xstc.py xstc-to-python.xsl $(TARBALL) $(TARBALL_2)
 CLEANFILES = $(PYSCRIPTS) test.log
 all: all-am
 
@@ -583,7 +583,7 @@ all:
 #
 # Rule to load the test description and extract the information
 #
-$(TESTDIRS) Tests/Metadata/$(NISTTESTDEF_2) Tests/Metadata/$(MSTTESTDEF) Tests/Metadata/$(SUNTESTDEF):
+$(TESTDIRS) Tests/Metadata/$(NISTTESTDEF_2) Tests/Metadata/$(MSTESTDEF) Tests/Metadata/$(SUNTESTDEF):
 	-@(if [ ! -d Tests ] ; then \
 	   mkdir Tests ; \
 	   fi)
@@ -625,15 +625,15 @@ nist-test.py: Tests/Metadata/$(NISTTESTDEF_2) xstc-to-python.xsl
 	  echo "Rebuilding script (NIST)" $@ ; \
 	  $(XSLTPROC) --nonet --stringparam vendor NIST-2 \
 	                     $(srcdir)/xstc-to-python.xsl \
-	                     $(srcdir)/Tests/Metadata/$(NISTTESTDEF_2) > $@ ; \
+	                     Tests/Metadata/$(NISTTESTDEF_2) > $@ ; \
 	  chmod +x $@ ; fi )
 
-ms-test.py: Tests/Metadata/$(MSTTESTDEF) xstc-to-python.xsl
+ms-test.py: Tests/Metadata/$(MSTESTDEF) xstc-to-python.xsl
 	-@(if [ -x $(XSLTPROC) ] ; then \
 	  echo "Rebuilding script (Microsoft)" $@ ; \
 	  $(XSLTPROC) --nonet --stringparam vendor MS \
 	                     $(srcdir)/xstc-to-python.xsl \
-	                     $(srcdir)/Tests/Metadata/$(MSTESTDEF) > $@ ; \
+	                     Tests/Metadata/$(MSTESTDEF) > $@ ; \
 	  chmod +x $@ ; fi )
 
 sun-test.py: Tests/Metadata/$(SUNTESTDEF) xstc-to-python.xsl
@@ -641,7 +641,7 @@ sun-test.py: Tests/Metadata/$(SUNTESTDEF) xstc-to-python.xsl
 	  echo "Rebuilding script (Sun)" $@ ; \
 	  $(XSLTPROC) --nonet --stringparam vendor SUN \
 	                     $(srcdir)/xstc-to-python.xsl \
-	                     $(srcdir)/Tests/Metadata/$(SUNTESTDEF) > $@ ; \
+	                     Tests/Metadata/$(SUNTESTDEF) > $@ ; \
 	  chmod +x $@ ; fi )
 
 #
@@ -651,21 +651,21 @@ sun-test.py: Tests/Metadata/$(SUNTESTDEF) xstc-to-python.xsl
 pytests: $(PYSCRIPTS) $(TESTDIRS)
 	-@(if [ -x nist-test.py -a -d $(TESTDIR)/Datatypes ] ; then 		\
 	   echo "## Running XML Schema tests (NIST)";			\
-	   PYTHONPATH="../python:../python/.libs:..:../.libs:$$PYTHONPATH" ;\
+	   PYTHONPATH="$(srcdir):$(top_srcdir)/python:$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH" ;\
 	   export PYTHONPATH;						\
 	   LD_LIBRARY_PATH="$(top_builddir)/.libs:$$LD_LIBRARY_PATH" ;	\
 	   export LD_LIBRARY_PATH;					\
 	   $(CHECKER) $(PYTHON) nist-test.py -s -b $(srcdir) ; fi)
 	-@(if [ -x sun-test.py -a -d $(TESTDIR)/suntest ] ; then 			\
 	   echo "## Running Schema tests (Sun)";				\
-	   PYTHONPATH="../python:../python/.libs:..:../.libs:$$PYTHONPATH" ;\
+	   PYTHONPATH="$(srcdir):$(top_srcdir)/python:$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH" ;\
 	   export PYTHONPATH;						\
 	   LD_LIBRARY_PATH="$(top_builddir)/.libs:$$LD_LIBRARY_PATH" ;	\
 	   export LD_LIBRARY_PATH;					\
 	   $(CHECKER) $(PYTHON) sun-test.py -s -b $(srcdir) ; fi)
 	-@(if [ -x ms-test.py -a -d $(TESTDIR)/msxsdtest ] ; then 			\
 	   echo "## Running Schema tests (Microsoft)";			\
-	   PYTHONPATH="../python:../python/.libs:..:../.libs:$$PYTHONPATH" ;\
+	   PYTHONPATH="$(srcdir):$(top_srcdir)/python:$(top_builddir)/python:$(top_builddir)/python/.libs:$$PYTHONPATH" ;\
 	   export PYTHONPATH;						\
 	   LD_LIBRARY_PATH="$(top_builddir)/.libs:$$LD_LIBRARY_PATH" ;	\
 	   export LD_LIBRARY_PATH;					\
