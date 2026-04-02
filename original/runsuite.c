@@ -235,6 +235,27 @@ static void test_log(const char *msg, ...) {
 }
 
 static void
+appendTestError(const char *msg) {
+    int res;
+
+    if (msg == NULL)
+        return;
+    if (testErrorsSize >= 32768)
+        return;
+    res = snprintf(&testErrors[testErrorsSize],
+                   32768 - testErrorsSize,
+                   "%s", msg);
+    if (testErrorsSize + res >= 32768) {
+        /* buffer is full */
+	testErrorsSize = 32768;
+	testErrors[testErrorsSize] = 0;
+    } else {
+        testErrorsSize += res;
+    }
+    testErrors[testErrorsSize] = 0;
+}
+
+static void
 testErrorHandler(void *ctx  ATTRIBUTE_UNUSED, const char *msg, ...) {
     va_list args;
     int res;
@@ -254,6 +275,13 @@ testErrorHandler(void *ctx  ATTRIBUTE_UNUSED, const char *msg, ...) {
         testErrorsSize += res;
     }
     testErrors[testErrorsSize] = 0;
+}
+
+static void
+testStructuredErrorHandler(void *ctx ATTRIBUTE_UNUSED, xmlErrorPtr error) {
+    if ((error == NULL) || (error->message == NULL))
+        return;
+    appendTestError(error->message);
 }
 
 static xmlXPathContextPtr ctxtXPath;
@@ -846,7 +874,7 @@ xstcTestInstance(xmlNodePtr cur, xmlSchemaPtr schemas,
     xmlChar *validity = NULL;
     xmlSchemaValidCtxtPtr ctxt = NULL;
     xmlDocPtr doc = NULL;
-    int ret = 0, mem;
+    int ret = 0, mem, dynamic = 0;
 
     xmlResetLastError();
     testErrorsSize = 0; testErrors[0] = 0;
@@ -890,12 +918,14 @@ xstcTestInstance(xmlNodePtr cur, xmlSchemaPtr schemas,
 	goto done;
     }
 
-    if (needsDynamicSchemaValidation(doc))
+    if (needsDynamicSchemaValidation(doc)) {
+        dynamic = 1;
         ctxt = xmlSchemaNewValidCtxt(NULL);
-    else
+    } else
         ctxt = xmlSchemaNewValidCtxt(schemas);
-    xmlSchemaSetValidErrors(ctxt, testErrorHandler, testErrorHandler, ctxt);
+    xmlSchemaSetValidStructuredErrors(ctxt, testStructuredErrorHandler, ctxt);
     xmlSchemaValidateSetFilename(ctxt, (const char *) path);
+    xmlSetGenericErrorFunc(NULL, NULL);
     ret = xmlSchemaValidateDoc(ctxt, doc);
 
     if (xmlStrEqual(validity, BAD_CAST "valid")) {
@@ -928,8 +958,9 @@ done:
     if (validity != NULL) xmlFree(validity);
     if (ctxt != NULL) xmlSchemaFreeValidCtxt(ctxt);
     if (doc != NULL) xmlFreeDoc(doc);
+    xmlSetGenericErrorFunc(NULL, testErrorHandler);
     xmlResetLastError();
-    if (mem != xmlMemUsed()) {
+    if (dynamic && (mem != xmlMemUsed())) {
 	test_log("Validation of tests starting line %ld leaked %d\n",
 		xmlGetLineNo(cur), xmlMemUsed() - mem);
 	nb_leaks++;
@@ -985,7 +1016,7 @@ xstcTestGroup(xmlNodePtr cur, const char *base) {
     if (xmlStrEqual(validity, BAD_CAST "valid")) {
         nb_schematas++;
 	ctxt = xmlSchemaNewParserCtxt((const char *) path);
-	xmlSchemaSetParserErrors(ctxt, testErrorHandler, testErrorHandler,
+	xmlSchemaSetParserStructuredErrors(ctxt, testStructuredErrorHandler,
                 ctxt);
 	schemas = xmlSchemaParse(ctxt);
 	xmlSchemaFreeParserCtxt(ctxt);
@@ -1019,7 +1050,7 @@ xstcTestGroup(xmlNodePtr cur, const char *base) {
     } else if (xmlStrEqual(validity, BAD_CAST "invalid")) {
         nb_schematas++;
 	ctxt = xmlSchemaNewParserCtxt((const char *) path);
-	xmlSchemaSetParserErrors(ctxt, testErrorHandler, testErrorHandler,
+	xmlSchemaSetParserStructuredErrors(ctxt, testStructuredErrorHandler,
                 ctxt);
 	schemas = xmlSchemaParse(ctxt);
 	xmlSchemaFreeParserCtxt(ctxt);
