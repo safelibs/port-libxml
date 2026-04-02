@@ -9208,9 +9208,27 @@ test_xmlFindCharEncodingHandler(void) {
 static int
 test_xmlGetCharEncodingHandler(void) {
     int test_ret = 0;
+    xmlCharEncodingHandlerPtr ret_val;
+    xmlCharEncoding enc;
+    int n_enc;
 
+    for (n_enc = 0;n_enc < gen_nb_xmlCharEncoding;n_enc++) {
+        enc = gen_xmlCharEncoding(n_enc, 0);
 
-    /* missing type support */
+        ret_val = xmlGetCharEncodingHandler(enc);
+        if (((enc == XML_CHAR_ENCODING_ERROR) ||
+             (enc == XML_CHAR_ENCODING_NONE) ||
+             (enc == XML_CHAR_ENCODING_UTF8)) &&
+            (ret_val != NULL)) {
+            printf("xmlGetCharEncodingHandler returned a handler for %d\n",
+                   enc);
+            test_ret++;
+        }
+        call_tests++;
+        des_xmlCharEncoding(n_enc, enc, 0);
+        xmlResetLastError();
+    }
+    function_tests++;
     return(test_ret);
 }
 

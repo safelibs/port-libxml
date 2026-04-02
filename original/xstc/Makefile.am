@@ -20,7 +20,6 @@ TESTSUITE_STAMP=$(TESTDIR)/.stamp
 # The local data and scripts
 #
 EXTRA_DIST=xstc.py xstc-to-python.xsl $(TARBALL) $(TARBALL_2)
-EXTRA_DIST += normalize-metadata.py known-failures.json
 #
 # Nothing is done by make, only make tests and
 # only if Python and Schemas are enabled.
@@ -61,10 +60,6 @@ $(TESTSUITE_STAMP):
 	   mv Tests/xmlschema2002-01-16/* Tests ; \
 	   mv Tests/*.testSet Tests/Metadata ; \
 	   rm -r Tests/xmlschema2002-01-16 ; \
-	   $(PYTHON) $(srcdir)/normalize-metadata.py \
-	       $(srcdir)/known-failures.json \
-	       Tests/Metadata/$(SUNTESTDEF) \
-	       Tests/Metadata/$(MSTESTDEF) ; \
 	   echo "done" ; \
 	   fi)
 	@touch $@

@@ -83,34 +83,6 @@ static int nb_leaks = 0;
 static int extraMemoryFromResolver = 0;
 
 static int
-isKnownRngMismatch(long line) {
-    switch (line) {
-        case 616:
-        case 6583:
-            return(1);
-    }
-    return(0);
-}
-
-static int
-isKnownXsdDatatypeMismatch(long line) {
-    switch (line) {
-        case 132:
-        case 3799:
-        case 3958:
-        case 3961:
-        case 3996:
-        case 3999:
-        case 4402:
-        case 4434:
-        case 4463:
-        case 4492:
-            return(1);
-    }
-    return(0);
-}
-
-static int
 fatalError(void) {
     fprintf(stderr, "Exitting tests on fatal error\n");
     exit(1);
@@ -385,11 +357,9 @@ xsdIncorrectTestCase(xmlNodePtr cur) {
     rng = xmlRelaxNGParse(pctxt);
     xmlRelaxNGFreeParserCtxt(pctxt);
     if (rng != NULL) {
-        if (!isKnownRngMismatch(xmlGetLineNo(test))) {
-	    test_log("Failed to detect incorrect RNG line %ld\n",
-		        xmlGetLineNo(test));
-            ret = 1;
-        }
+	test_log("Failed to detect incorrect RNG line %ld\n",
+		    xmlGetLineNo(test));
+        ret = 1;
 	goto done;
     }
 
@@ -565,11 +535,9 @@ xsdTestCase(xmlNodePtr tst) {
 		ret = xmlRelaxNGValidateDoc(ctxt, doc);
 		xmlRelaxNGFreeValidCtxt(ctxt);
 		if (ret > 0) {
-                    if (!isKnownXsdDatatypeMismatch(xmlGetLineNo(tmp))) {
-		        test_log("Failed to validate valid instance line %ld\n",
-				    xmlGetLineNo(tmp));
-		        nb_errors++;
-                    }
+		    test_log("Failed to validate valid instance line %ld\n",
+				xmlGetLineNo(tmp));
+		    nb_errors++;
 		} else if (ret < 0) {
 		    test_log("Internal error validating instance line %ld\n",
 			    xmlGetLineNo(tmp));
