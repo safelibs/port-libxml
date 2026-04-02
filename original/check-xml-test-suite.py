@@ -441,12 +441,20 @@ def runTest(test):
     rec = test.prop('RECOMMENDATION')
     version = test.prop('VERSION')
     nstest = 0
+    xml11_helper = 0
 
     if rec == None or rec == "XML1.0" or rec == "XML1.0-errata2e" or \
        rec == "XML1.0-errata3e" or rec == "XML1.0-errata4e":
         if version != None and version != "1.0":
             return 0
-    elif rec == "NS1.0" or rec == "NS1.0-errata1e":
+    elif rec == "XML1.1":
+        if version == "1.0":
+            pass
+        elif version != "1.1":
+            return 0
+        else:
+            xml11_helper = 1
+    elif rec == "NS1.0" or rec == "NS1.0-errata1e" or rec == "NS1.1":
         nstest = 1
     else:
         return 0
@@ -461,6 +469,9 @@ def runTest(test):
     elif type == "error":
         res = runIsolatedTest("error", URI, id, options, nstest)
     else:
+        return 0
+
+    if xml11_helper and res == 0:
         return 0
 
     test_nr = test_nr + 1
