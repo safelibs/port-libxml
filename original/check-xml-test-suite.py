@@ -193,6 +193,8 @@ def testError(filename, id, options):
     error_nr = 0
     error_msg = ''
 
+    if HELPER_MODE:
+        libxml2.registerErrorHandler(errorHandler, None)
     ctxt, doc, ret = parseWithOptions(filename, options)
     if doc != None:
         doc.freeDoc()
@@ -214,6 +216,8 @@ def testInvalid(filename, id, options):
     error_nr = 0
     error_msg = ''
 
+    if HELPER_MODE:
+        libxml2.registerErrorHandler(errorHandler, None)
     options = options | libxml2.XML_PARSE_DTDVALID
     ctxt, doc, ret = parseWithOptions(filename, options)
     valid = ctxt.isValid()
@@ -226,9 +230,6 @@ def testInvalid(filename, id, options):
         log.write("%s: error: Validity error not detected\n" % (id))
         doc.freeDoc()
         return 0
-    if HELPER_MODE:
-        doc.freeDoc()
-        return 1
     if error_nr == 0:
         print("%s: warning: Validity error not reported" % (id))
         log.write("%s: warning: Validity error not reported\n" % (id))
@@ -245,6 +246,8 @@ def testValid(filename, id, options):
     error_nr = 0
     error_msg = ''
 
+    if HELPER_MODE:
+        libxml2.registerErrorHandler(errorHandler, None)
     options = options | libxml2.XML_PARSE_DTDVALID
     ctxt, doc, ret = parseWithOptions(filename, options)
     valid = ctxt.isValid()
@@ -257,9 +260,6 @@ def testValid(filename, id, options):
         log.write("%s: error: Validity check failed\n" % (id))
         doc.freeDoc()
         return 0
-    if HELPER_MODE:
-        doc.freeDoc()
-        return 1
     if error_nr != 0 or valid != 1:
         print("%s: warning: valid document reported an error" % (id))
         log.write("%s: warning: valid document reported an error\n" % (id))
@@ -316,7 +316,7 @@ def runTest(test):
         extra =  test.prop('ENTITIES')
         res = runIsolatedTest("not-wf", URI, id, options, nstest)
     elif type == "error":
-        return 0
+        res = runIsolatedTest("error", URI, id, options, nstest)
     else:
         return 0
 
