@@ -448,15 +448,12 @@ run_fuzz_tests() {
     "$ROOT/original/test/xmlid/*"
   run_command_expect_success "fuzz-seed-xpath" "$UPSTREAM_BIN/genSeed" "$STAGE_LIBDIR" "$fuzz_root" "" xpath "$ROOT/original/test/XPath"
 
-  if ! compgen -G "$fuzz_root/seed/xml/*" >/dev/null; then
-    printf '\0\0\0\0doc.xml\\\n<doc/>\\\n' >"$fuzz_root/seed/xml/minimal.xml"
-  fi
-  if ! compgen -G "$fuzz_root/seed/html/*" >/dev/null; then
-    printf '\0\0\0\0<html><body>seed</body></html>' >"$fuzz_root/seed/html/minimal.html"
-  fi
-  if ! compgen -G "$fuzz_root/seed/xpath/*" >/dev/null; then
-    printf 'xpointer(/d)\\\n<d/>\\\n' >"$fuzz_root/seed/xpath/minimal.xpath"
-  fi
+  for seed_dir in "$fuzz_root/seed/html" "$fuzz_root/seed/schema" "$fuzz_root/seed/xml" "$fuzz_root/seed/xpath" "$fuzz_root/seed/regexp" "$fuzz_root/seed/uri"; do
+    if ! compgen -G "$seed_dir/*" >/dev/null; then
+      printf 'fuzz seed directory %s is empty; phase-1 runner must use only checked-in corpora and generated in-place seeds\n' "$seed_dir" >&2
+      exit 1
+    fi
+  done
 
   run_command_expect_success "fuzz-tests" "$UPSTREAM_BIN/testFuzzer" "$STAGE_LIBDIR" "$fuzz_root" ""
 }
