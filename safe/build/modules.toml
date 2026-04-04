@@ -222,51 +222,6 @@ source = "../original/xmlunicode.c"
 provider = "rust"
 
 [[module]]
-name = "parser_impl"
-source = "shims/parser_impl.c"
-provider = "c_shim"
-
-[[module]]
-name = "parserInternals_impl"
-source = "shims/parser_internals_impl.c"
-provider = "c_shim"
-
-[[module]]
-name = "SAX_impl"
-source = "shims/sax_impl.c"
-provider = "c_shim"
-
-[[module]]
-name = "SAX2_impl"
-source = "shims/sax2_impl.c"
-provider = "c_shim"
-
-[[module]]
-name = "HTMLparser_impl"
-source = "shims/html_parser_impl.c"
-provider = "c_shim"
-
-[[module]]
-name = "legacy_impl"
-source = "shims/legacy_impl.c"
-provider = "c_shim"
-
-[[module]]
-name = "xmlreader_impl"
-source = "shims/xmlreader_impl.c"
-provider = "c_shim"
-
-[[module]]
-name = "xmlsave_impl"
-source = "shims/xmlsave_impl.c"
-provider = "c_shim"
-
-[[module]]
-name = "xmlwriter_impl"
-source = "shims/xmlwriter_impl.c"
-provider = "c_shim"
-
-[[module]]
 name = "error_varargs"
 source = "shims/error_varargs.c"
 provider = "c_shim"

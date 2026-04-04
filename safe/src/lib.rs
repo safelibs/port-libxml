@@ -1,3 +1,4 @@
+#![feature(c_variadic, extern_types)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
 pub mod abi;
@@ -29,9 +30,15 @@ pub mod foundation {
 pub mod internal_ffi;
 #[allow(
     dead_code,
+    improper_ctypes,
+    improper_ctypes_definitions,
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
+    unused_assignments,
+    unused_mut,
+    unused_unsafe,
     unused_macros
 )]
 pub mod parser {
