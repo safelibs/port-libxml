@@ -1,6 +1,6 @@
 [package]
-name = "libxml2-safe-phase1"
-version = "0.1.0"
+name = "libxml2"
+version = "2.9.14"
 edition = "2021"
 build = "build.rs"
 publish = false

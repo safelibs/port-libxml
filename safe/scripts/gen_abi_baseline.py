@@ -75,7 +75,7 @@ def main() -> None:
         for name in missing_base:
             syms_text += f"  {name};\n"
         syms_text += "};\n"
-    SYMS.write_text(syms_text, encoding="utf-8")
+    SYMS.write_text(ensure_local_wildcard(syms_text), encoding="utf-8")
 
     version = parse_version(ORIGINAL / "libxml-2.0.pc")
     triplet = subprocess.check_output(["gcc", "-print-multiarch"], text=True).strip()
@@ -137,6 +137,19 @@ def parse_debian_symbols(path: Path) -> dict[str, str]:
         name, version = symbol.split("@", 1)
         result[name] = version
     return result
+
+
+def ensure_local_wildcard(text: str) -> str:
+    if re.search(r"^\s*local:\s*$", text, re.M):
+        return text
+
+    lines = text.rstrip().splitlines()
+    for index in range(len(lines) - 1, -1, -1):
+        stripped = lines[index].strip()
+        if stripped == "};" or stripped.startswith("} LIBXML2_"):
+            lines[index:index] = ["    local:", "      *;"]
+            return "\n".join(lines) + "\n"
+    raise SystemExit("failed to locate a final version block terminator in safe/abi/libxml2.syms")
 
 
 def parse_version(path: Path) -> str:
@@ -361,9 +374,9 @@ def resolve_install_entry(package: str, line: str, triplet: str, version: str) -
     if package == "libxml2-dev" and line == "usr/include/libxml2":
         headers = [
             f"/usr/include/libxml2/libxml/{header.name}"
-            for header in sorted((ORIGINAL / "include" / "libxml").glob("*.h"))
+            for header in sorted((SAFE / "include" / "libxml").glob("*.h"))
         ]
-        return ["/usr/include/libxml2", "/usr/include/libxml2/libxml"] + headers
+        return ["/usr/include/libxml2", "/usr/include/libxml2/config.h", "/usr/include/libxml2/libxml"] + headers
     if package == "libxml2-dev" and line == "usr/lib/*/libxml2.a":
         return ["/usr/lib", f"/usr/lib/{triplet}", f"/usr/lib/{triplet}/libxml2.a"]
     if package == "libxml2-dev" and line == "usr/lib/*/libxml2.so":

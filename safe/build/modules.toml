@@ -1,7 +1,7 @@
 version = 1
 config_header = "include/config.h"
 private_include_dir = "../original"
-public_include_dir = "../original/include"
+public_include_dir = "include"
 version_script = "abi/libxml2.syms"
 shared_object_version = "2.9.14"
 link_libs = ["z", "lzma", "m", "dl", "pthread"]

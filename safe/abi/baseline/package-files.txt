@@ -10,6 +10,7 @@
 [libxml2-dev]
 /usr/bin/xml2-config
 /usr/include/libxml2
+/usr/include/libxml2/config.h
 /usr/include/libxml2/libxml
 /usr/include/libxml2/libxml/DOCBparser.h
 /usr/include/libxml2/libxml/HTMLparser.h

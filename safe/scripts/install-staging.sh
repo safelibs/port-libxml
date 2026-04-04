@@ -43,7 +43,8 @@ source "$ARTIFACTS_ENV"
 TRIPLET="${LIBXML2_TRIPLET:-$(gcc -print-multiarch)}"
 LIBDIR="$STAGE/usr/lib/$TRIPLET"
 BINDIR="$STAGE/usr/bin"
-INCLUDEDIR="$STAGE/usr/include/libxml2/libxml"
+INCLUDEROOT="$STAGE/usr/include/libxml2"
+INCLUDEDIR="$INCLUDEROOT/libxml"
 PKGDIR="$LIBDIR/pkgconfig"
 ACLOCALDIR="$STAGE/usr/share/aclocal"
 MAN1DIR="$STAGE/usr/share/man/man1"
@@ -66,6 +67,7 @@ cc -shared \
 ln -s "libxml2.so.$LIBXML2_VERSION" "$LIBDIR/libxml2.so.2"
 ln -s "libxml2.so.2" "$LIBDIR/libxml2.so"
 
+install -m 0644 "$SOURCE_ROOT/include/config.h" "$INCLUDEROOT/config.h"
 cp -a "$SOURCE_ROOT/include/libxml/." "$INCLUDEDIR/"
 cp "$SOURCE_ROOT/share/aclocal/libxml2.m4" "$ACLOCALDIR/libxml2.m4"
 
