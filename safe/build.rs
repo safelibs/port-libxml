@@ -1,7 +1,7 @@
 use std::env;
 use std::ffi::OsString;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
 use serde::Deserialize;
@@ -54,6 +54,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     );
     println!("cargo:rerun-if-env-changed=CC");
     println!("cargo:rerun-if-env-changed=AR");
+    println!("cargo:rerun-if-env-changed=OBJCOPY");
     println!("cargo:rerun-if-env-changed=CFLAGS");
     println!(
         "cargo:rerun-if-changed={}",
@@ -62,6 +63,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     let cc = env::var_os("CC").unwrap_or_else(|| OsString::from("cc"));
     let ar = env::var_os("AR").unwrap_or_else(|| OsString::from("ar"));
+    let objcopy = env::var_os("OBJCOPY").unwrap_or_else(|| OsString::from("objcopy"));
     let profile = env::var("PROFILE")?;
 
     let native_dir = manifest_dir.join("target/native").join(&profile);
@@ -101,6 +103,8 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         })
         .unwrap_or_else(|| default_cflags.clone());
 
+    let schema_redefines = obj_dir.join("schema-internal.redefs");
+    let mut wrote_schema_redefines = false;
     let mut objects = Vec::new();
     for module in &manifest.module {
         let source = manifest_dir.join(&module.source);
@@ -125,6 +129,17 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         command.arg("-o");
         command.arg(&object);
         run_command(&mut command, &format!("compile {}", source.display()))?;
+
+        let object = if module.provider == "c_internal" {
+            if !wrote_schema_redefines {
+                write_schema_redefines(&schema_redefines)?;
+                wrote_schema_redefines = true;
+            }
+            rename_schema_object(&objcopy, &schema_redefines, &obj_dir, module, &object)?
+        } else {
+            object
+        };
+
         objects.push(object);
     }
 
@@ -168,6 +183,141 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     fs::write(manifest_dir.join("target/build-artifacts.env"), metadata)?;
 
     Ok(())
+}
+
+fn write_schema_redefines(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    let mut contents = String::new();
+    for symbol in schema_internal_symbols() {
+        contents.push_str(symbol);
+        contents.push_str(" safe_schema_internal_");
+        contents.push_str(symbol);
+        contents.push('\n');
+    }
+    fs::write(path, contents)?;
+    Ok(())
+}
+
+fn rename_schema_object(
+    objcopy: &OsString,
+    redefines: &Path,
+    obj_dir: &Path,
+    module: &ModuleEntry,
+    object: &Path,
+) -> Result<PathBuf, Box<dyn std::error::Error>> {
+    let renamed = obj_dir.join(format!("{}-internal.o", module.name));
+    let mut command = Command::new(objcopy);
+    command.arg("--redefine-syms");
+    command.arg(redefines);
+    command.arg(object);
+    command.arg(&renamed);
+    run_command(
+        &mut command,
+        &format!("rename internal schema symbols for {}", module.name),
+    )?;
+    Ok(renamed)
+}
+
+fn schema_internal_symbols() -> &'static [&'static str] {
+    &[
+        "xmlRelaxNGCleanupTypes",
+        "xmlRelaxNGDump",
+        "xmlRelaxNGDumpTree",
+        "xmlRelaxNGFree",
+        "xmlRelaxNGFreeParserCtxt",
+        "xmlRelaxNGFreeValidCtxt",
+        "xmlRelaxNGGetParserErrors",
+        "xmlRelaxNGGetValidErrors",
+        "xmlRelaxNGInitTypes",
+        "xmlRelaxNGNewDocParserCtxt",
+        "xmlRelaxNGNewMemParserCtxt",
+        "xmlRelaxNGNewParserCtxt",
+        "xmlRelaxNGNewValidCtxt",
+        "xmlRelaxNGParse",
+        "xmlRelaxNGSetParserErrors",
+        "xmlRelaxNGSetParserStructuredErrors",
+        "xmlRelaxNGSetValidErrors",
+        "xmlRelaxNGSetValidStructuredErrors",
+        "xmlRelaxNGValidateDoc",
+        "xmlRelaxNGValidateFullElement",
+        "xmlRelaxNGValidatePopElement",
+        "xmlRelaxNGValidatePushCData",
+        "xmlRelaxNGValidatePushElement",
+        "xmlRelaxParserSetFlag",
+        "xmlRelaxParserSetIncLImit",
+        "xmlSchemaCheckFacet",
+        "xmlSchemaCleanupTypes",
+        "xmlSchemaCollapseString",
+        "xmlSchemaCompareValues",
+        "xmlSchemaCompareValuesWhtsp",
+        "xmlSchemaCopyValue",
+        "xmlSchemaDump",
+        "xmlSchemaFree",
+        "xmlSchemaFreeFacet",
+        "xmlSchemaFreeParserCtxt",
+        "xmlSchemaFreeType",
+        "xmlSchemaFreeValidCtxt",
+        "xmlSchemaFreeValue",
+        "xmlSchemaFreeWildcard",
+        "xmlSchemaGetBuiltInListSimpleTypeItemType",
+        "xmlSchemaGetBuiltInType",
+        "xmlSchemaGetCanonValue",
+        "xmlSchemaGetCanonValueWhtsp",
+        "xmlSchemaGetFacetValueAsULong",
+        "xmlSchemaGetParserErrors",
+        "xmlSchemaGetPredefinedType",
+        "xmlSchemaGetValidErrors",
+        "xmlSchemaGetValType",
+        "xmlSchemaInitTypes",
+        "xmlSchemaIsBuiltInTypeFacet",
+        "xmlSchemaIsValid",
+        "xmlSchemaNewDocParserCtxt",
+        "xmlSchemaNewFacet",
+        "xmlSchemaNewMemParserCtxt",
+        "xmlSchemaNewNOTATIONValue",
+        "xmlSchemaNewParserCtxt",
+        "xmlSchemaNewQNameValue",
+        "xmlSchemaNewStringValue",
+        "xmlSchemaNewValidCtxt",
+        "xmlSchemaParse",
+        "xmlSchemaSAXPlug",
+        "xmlSchemaSAXUnplug",
+        "xmlSchemaSetParserErrors",
+        "xmlSchemaSetParserStructuredErrors",
+        "xmlSchemaSetValidErrors",
+        "xmlSchemaSetValidOptions",
+        "xmlSchemaSetValidStructuredErrors",
+        "xmlSchemaValidCtxtGetOptions",
+        "xmlSchemaValidCtxtGetParserCtxt",
+        "xmlSchemaValidateDoc",
+        "xmlSchemaValidateFacet",
+        "xmlSchemaValidateFacetWhtsp",
+        "xmlSchemaValidateFile",
+        "xmlSchemaValidateLengthFacet",
+        "xmlSchemaValidateLengthFacetWhtsp",
+        "xmlSchemaValidateListSimpleTypeFacet",
+        "xmlSchemaValidateOneElement",
+        "xmlSchemaValidatePredefinedType",
+        "xmlSchemaValidateSetFilename",
+        "xmlSchemaValidateSetLocator",
+        "xmlSchemaValidateStream",
+        "xmlSchemaValPredefTypeNode",
+        "xmlSchemaValPredefTypeNodeNoNorm",
+        "xmlSchemaValueAppend",
+        "xmlSchemaValueGetAsBoolean",
+        "xmlSchemaValueGetAsString",
+        "xmlSchemaValueGetNext",
+        "xmlSchemaWhiteSpaceReplace",
+        "xmlSchematronFree",
+        "xmlSchematronFreeParserCtxt",
+        "xmlSchematronFreeValidCtxt",
+        "xmlSchematronNewDocParserCtxt",
+        "xmlSchematronNewMemParserCtxt",
+        "xmlSchematronNewParserCtxt",
+        "xmlSchematronNewValidCtxt",
+        "xmlSchematronParse",
+        "xmlSchematronSetValidStructuredErrors",
+        "xmlSchematronValidateDoc",
+    ]
 }
 
 fn detect_multiarch(cc: &OsString) -> Result<String, Box<dyn std::error::Error>> {

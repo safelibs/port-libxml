@@ -54,7 +54,6 @@ cc -shared \
   -lz -llzma -lm -ldl -lpthread
 ln -s "libxml2.so.$LIBXML2_VERSION" "$LIBDIR/libxml2.so.2"
 ln -s "libxml2.so.2" "$LIBDIR/libxml2.so"
-cp "$ROOT/original/.libs/libxml2.so.2.9.14" "$LIBDIR/libxml2-original.so.2.9.14"
 
 cp -a "$ROOT/safe/include/libxml/." "$INCLUDEDIR/"
 cp "$ROOT/safe/share/aclocal/libxml2.m4" "$ACLOCALDIR/libxml2.m4"
