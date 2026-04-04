@@ -11518,7 +11518,7 @@ static mut xmlUnicodeCatTbl: xmlUnicodeNameTable = unsafe {
 unsafe extern "C" fn xmlUnicodeLookup(
     mut tptr: *mut xmlUnicodeNameTable,
     mut tname: *const ::core::ffi::c_char,
-) -> Option<xmlIntFunc> {
+) -> Option<xmlIntFunc> { unsafe {
     let mut low: ::core::ffi::c_int = 0;
     let mut high: ::core::ffi::c_int = 0;
     let mut mid: ::core::ffi::c_int = 0;
@@ -11543,7 +11543,7 @@ unsafe extern "C" fn xmlUnicodeLookup(
         }
     }
     return None;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUCSIsAegeanNumbers(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x10100 as ::core::ffi::c_int && code <= 0x1013f as ::core::ffi::c_int)
@@ -12324,18 +12324,18 @@ pub unsafe extern "C" fn xmlUCSIsYijingHexagramSymbols(
 pub unsafe extern "C" fn xmlUCSIsBlock(
     mut code: ::core::ffi::c_int,
     mut block: *const ::core::ffi::c_char,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     let mut func: Option<xmlIntFunc> = None;
     func = xmlUnicodeLookup(&raw mut xmlUnicodeBlockTbl, block);
     if func.is_none() {
         return -(1 as ::core::ffi::c_int);
     }
     return func.expect("non-null function pointer")(code);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatC(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatC(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlCG);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUCSIsCatCc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0 as ::core::ffi::c_int && code <= 0x1f as ::core::ffi::c_int
@@ -12343,9 +12343,9 @@ pub unsafe extern "C" fn xmlUCSIsCatCc(mut code: ::core::ffi::c_int) -> ::core::
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatCf(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatCf(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlCfG);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUCSIsCatCo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0xe000 as ::core::ffi::c_int
@@ -12363,37 +12363,37 @@ pub unsafe extern "C" fn xmlUCSIsCatCs(mut code: ::core::ffi::c_int) -> ::core::
         || code == 0xdfff as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatL(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatL(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatLl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatLl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLlG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatLm(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatLm(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLmG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatLo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatLo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLoG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatLt(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatLt(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLtG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatLu(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatLu(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLuG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatM(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatM(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlMG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatMc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatMc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlMcG);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUCSIsCatMe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x488 as ::core::ffi::c_int && code <= 0x489 as ::core::ffi::c_int
@@ -12403,17 +12403,17 @@ pub unsafe extern "C" fn xmlUCSIsCatMe(mut code: ::core::ffi::c_int) -> ::core::
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatMn(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatMn(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlMnG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatN(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatN(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlNG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatNd(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatNd(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlNdG);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUCSIsCatNl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x16ee as ::core::ffi::c_int && code <= 0x16f0 as ::core::ffi::c_int
@@ -12424,13 +12424,13 @@ pub unsafe extern "C" fn xmlUCSIsCatNl(mut code: ::core::ffi::c_int) -> ::core::
         || code == 0x1034a as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatNo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatNo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlNoG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatP(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatP(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPG);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUCSIsCatPc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0x5f as ::core::ffi::c_int
@@ -12443,13 +12443,13 @@ pub unsafe extern "C" fn xmlUCSIsCatPc(mut code: ::core::ffi::c_int) -> ::core::
         || code == 0xff65 as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPd(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatPd(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPdG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatPe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPeG);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUCSIsCatPf(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0xbb as ::core::ffi::c_int
@@ -12466,37 +12466,37 @@ pub unsafe extern "C" fn xmlUCSIsCatPi(mut code: ::core::ffi::c_int) -> ::core::
         || code == 0x2039 as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatPo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPoG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPs(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatPs(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPsG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatS(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatS(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatSc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatSc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlScG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatSk(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatSk(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSkG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatSm(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatSm(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSmG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatSo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatSo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSoG);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatZ(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlUCSIsCatZ(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlZG);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUCSIsCatZl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0x2028 as ::core::ffi::c_int) as ::core::ffi::c_int;
@@ -12520,11 +12520,11 @@ pub unsafe extern "C" fn xmlUCSIsCatZs(mut code: ::core::ffi::c_int) -> ::core::
 pub unsafe extern "C" fn xmlUCSIsCat(
     mut code: ::core::ffi::c_int,
     mut cat: *const ::core::ffi::c_char,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     let mut func: Option<xmlIntFunc> = None;
     func = xmlUnicodeLookup(&raw mut xmlUnicodeCatTbl, cat);
     if func.is_none() {
         return -(1 as ::core::ffi::c_int);
     }
     return func.expect("non-null function pointer")(code);
-}
+}}

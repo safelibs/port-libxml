@@ -1568,7 +1568,7 @@ pub type xmlMallocFunc = Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi
 pub const XML_SAX2_MAGIC: ::core::ffi::c_uint = 0xdeedbeaf as ::core::ffi::c_uint;
 pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 #[no_mangle]
-pub unsafe extern "C" fn initGenericErrorDefaultFunc(mut handler: *mut xmlGenericErrorFunc) {
+pub unsafe extern "C" fn initGenericErrorDefaultFunc(mut handler: *mut xmlGenericErrorFunc) { unsafe {
     if handler.is_null() {
         let ref mut fresh4 = *__xmlGenericError();
         *fresh4 = Some(
@@ -1583,12 +1583,12 @@ pub unsafe extern "C" fn initGenericErrorDefaultFunc(mut handler: *mut xmlGeneri
         let ref mut fresh5 = *__xmlGenericError();
         *fresh5 = *handler;
     };
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlSetGenericErrorFunc(
     mut ctx: *mut ::core::ffi::c_void,
     mut handler: xmlGenericErrorFunc,
-) {
+) { unsafe {
     let ref mut fresh0 = *__xmlGenericErrorContext();
     *fresh0 = ctx;
     if handler.is_some() {
@@ -1605,19 +1605,19 @@ pub unsafe extern "C" fn xmlSetGenericErrorFunc(
                 ) -> (),
         ) as xmlGenericErrorFunc;
     };
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlSetStructuredErrorFunc(
     mut ctx: *mut ::core::ffi::c_void,
     mut handler: xmlStructuredErrorFunc,
-) {
+) { unsafe {
     let ref mut fresh6 = *__xmlStructuredErrorContext();
     *fresh6 = ctx;
     let ref mut fresh7 = *__xmlStructuredError();
     *fresh7 = handler;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlParserPrintFileInfo(mut input: xmlParserInputPtr) {
+pub unsafe extern "C" fn xmlParserPrintFileInfo(mut input: xmlParserInputPtr) { unsafe {
     if !input.is_null() {
         if !(*input).filename.is_null() {
             (*__xmlGenericError()).expect("non-null function pointer")(
@@ -1634,12 +1634,12 @@ pub unsafe extern "C" fn xmlParserPrintFileInfo(mut input: xmlParserInputPtr) {
             );
         }
     }
-}
+}}
 unsafe extern "C" fn xmlParserPrintFileContextInternal(
     mut input: xmlParserInputPtr,
     mut channel: xmlGenericErrorFunc,
     mut data: *mut ::core::ffi::c_void,
-) {
+) { unsafe {
     let mut cur: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut base: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut n: ::core::ffi::c_uint = 0;
@@ -1720,18 +1720,18 @@ unsafe extern "C" fn xmlParserPrintFileContextInternal(
         b"%s\n\0" as *const u8 as *const ::core::ffi::c_char,
         &raw mut content as *mut xmlChar,
     );
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlParserPrintFileContext(mut input: xmlParserInputPtr) {
+pub unsafe extern "C" fn xmlParserPrintFileContext(mut input: xmlParserInputPtr) { unsafe {
     xmlParserPrintFileContextInternal(input, *__xmlGenericError(), *__xmlGenericErrorContext());
-}
+}}
 unsafe extern "C" fn xmlReportError(
     mut err: xmlErrorPtr,
     mut ctxt: xmlParserCtxtPtr,
     mut str: *const ::core::ffi::c_char,
     mut channel: xmlGenericErrorFunc,
     mut data: *mut ::core::ffi::c_void,
-) {
+) { unsafe {
     let mut file: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut line: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     let mut code: ::core::ffi::c_int = -(1 as ::core::ffi::c_int);
@@ -2063,7 +2063,7 @@ unsafe extern "C" fn xmlReportError(
             &raw mut buf as *mut xmlChar,
         );
     }
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn __xmlSimpleError(
     mut domain: ::core::ffi::c_int,
@@ -2071,7 +2071,7 @@ pub unsafe extern "C" fn __xmlSimpleError(
     mut node: xmlNodePtr,
     mut msg: *const ::core::ffi::c_char,
     mut extra: *const ::core::ffi::c_char,
-) {
+) { unsafe {
     if code == XML_ERR_NO_MEMORY as ::core::ffi::c_int {
         if !extra.is_null() {
             __xmlRaiseError(
@@ -2134,16 +2134,16 @@ pub unsafe extern "C" fn __xmlSimpleError(
             extra,
         );
     };
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlGetLastError() -> xmlErrorPtr {
+pub unsafe extern "C" fn xmlGetLastError() -> xmlErrorPtr { unsafe {
     if (*__xmlLastError()).code == XML_ERR_OK as ::core::ffi::c_int {
         return ::core::ptr::null_mut::<xmlError>();
     }
     return __xmlLastError();
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlResetError(mut err: xmlErrorPtr) {
+pub unsafe extern "C" fn xmlResetError(mut err: xmlErrorPtr) { unsafe {
     if err.is_null() {
         return;
     }
@@ -2171,16 +2171,16 @@ pub unsafe extern "C" fn xmlResetError(mut err: xmlErrorPtr) {
         ::core::mem::size_of::<xmlError>() as size_t,
     );
     (*err).code = XML_ERR_OK as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlResetLastError() {
+pub unsafe extern "C" fn xmlResetLastError() { unsafe {
     if (*__xmlLastError()).code == XML_ERR_OK as ::core::ffi::c_int {
         return;
     }
     xmlResetError(__xmlLastError());
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlCtxtGetLastError(mut ctx: *mut ::core::ffi::c_void) -> xmlErrorPtr {
+pub unsafe extern "C" fn xmlCtxtGetLastError(mut ctx: *mut ::core::ffi::c_void) -> xmlErrorPtr { unsafe {
     let mut ctxt: xmlParserCtxtPtr = ctx as xmlParserCtxtPtr;
     if ctxt.is_null() {
         return ::core::ptr::null_mut::<xmlError>();
@@ -2189,9 +2189,9 @@ pub unsafe extern "C" fn xmlCtxtGetLastError(mut ctx: *mut ::core::ffi::c_void) 
         return ::core::ptr::null_mut::<xmlError>();
     }
     return &raw mut (*ctxt).lastError;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlCtxtResetLastError(mut ctx: *mut ::core::ffi::c_void) {
+pub unsafe extern "C" fn xmlCtxtResetLastError(mut ctx: *mut ::core::ffi::c_void) { unsafe {
     let mut ctxt: xmlParserCtxtPtr = ctx as xmlParserCtxtPtr;
     if ctxt.is_null() {
         return;
@@ -2201,12 +2201,12 @@ pub unsafe extern "C" fn xmlCtxtResetLastError(mut ctx: *mut ::core::ffi::c_void
         return;
     }
     xmlResetError(&raw mut (*ctxt).lastError);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlCopyError(
     mut from: xmlErrorPtr,
     mut to: xmlErrorPtr,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     let mut message: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut file: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut str1: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -2250,4 +2250,4 @@ pub unsafe extern "C" fn xmlCopyError(
     (*to).str2 = str2;
     (*to).str3 = str3;
     return 0 as ::core::ffi::c_int;
-}
+}}

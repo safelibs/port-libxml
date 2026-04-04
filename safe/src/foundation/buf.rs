@@ -1106,7 +1106,7 @@ pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::
 pub const BASE_BUFFER_SIZE: ::core::ffi::c_int = 4096 as ::core::ffi::c_int;
 pub const XML_MAX_TEXT_LENGTH: ::core::ffi::c_int = 10000000 as ::core::ffi::c_int;
 pub const SIZE_MAX: size_t = -(1 as ::core::ffi::c_int) as size_t;
-unsafe extern "C" fn xmlBufMemoryError(mut buf: xmlBufPtr, mut extra: *const ::core::ffi::c_char) {
+unsafe extern "C" fn xmlBufMemoryError(mut buf: xmlBufPtr, mut extra: *const ::core::ffi::c_char) { unsafe {
     __xmlSimpleError(
         XML_FROM_BUFFER as ::core::ffi::c_int,
         XML_ERR_NO_MEMORY as ::core::ffi::c_int,
@@ -1117,11 +1117,11 @@ unsafe extern "C" fn xmlBufMemoryError(mut buf: xmlBufPtr, mut extra: *const ::c
     if !buf.is_null() && (*buf).error == 0 as ::core::ffi::c_int {
         (*buf).error = XML_ERR_NO_MEMORY as ::core::ffi::c_int;
     }
-}
+}}
 unsafe extern "C" fn xmlBufOverflowError(
     mut buf: xmlBufPtr,
     mut extra: *const ::core::ffi::c_char,
-) {
+) { unsafe {
     __xmlSimpleError(
         XML_FROM_BUFFER as ::core::ffi::c_int,
         XML_BUF_OVERFLOW as ::core::ffi::c_int,
@@ -1132,9 +1132,9 @@ unsafe extern "C" fn xmlBufOverflowError(
     if !buf.is_null() && (*buf).error == 0 as ::core::ffi::c_int {
         (*buf).error = XML_BUF_OVERFLOW as ::core::ffi::c_int;
     }
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufCreate() -> xmlBufPtr {
+pub unsafe extern "C" fn xmlBufCreate() -> xmlBufPtr { unsafe {
     let mut ret: xmlBufPtr = ::core::ptr::null_mut::<xmlBuf>();
     ret = xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<xmlBuf>() as size_t)
         as xmlBufPtr;
@@ -1168,9 +1168,9 @@ pub unsafe extern "C" fn xmlBufCreate() -> xmlBufPtr {
     *(*ret).content.offset(0 as ::core::ffi::c_int as isize) = 0 as xmlChar;
     (*ret).contentIO = ::core::ptr::null_mut::<xmlChar>();
     return ret;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufCreateSize(mut size: size_t) -> xmlBufPtr {
+pub unsafe extern "C" fn xmlBufCreateSize(mut size: size_t) -> xmlBufPtr { unsafe {
     let mut ret: xmlBufPtr = ::core::ptr::null_mut::<xmlBuf>();
     if size == SIZE_MAX {
         return ::core::ptr::null_mut::<xmlBuf>();
@@ -1219,9 +1219,9 @@ pub unsafe extern "C" fn xmlBufCreateSize(mut size: size_t) -> xmlBufPtr {
     }
     (*ret).contentIO = ::core::ptr::null_mut::<xmlChar>();
     return ret;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufDetach(mut buf: xmlBufPtr) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlBufDetach(mut buf: xmlBufPtr) -> *mut xmlChar { unsafe {
     let mut ret: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     if buf.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
@@ -1244,12 +1244,12 @@ pub unsafe extern "C" fn xmlBufDetach(mut buf: xmlBufPtr) -> *mut xmlChar {
     (*buf).compat_use = 0 as ::core::ffi::c_uint;
     (*buf).compat_size = 0 as ::core::ffi::c_uint;
     return ret;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufCreateStatic(
     mut mem: *mut ::core::ffi::c_void,
     mut size: size_t,
-) -> xmlBufPtr {
+) -> xmlBufPtr { unsafe {
     let mut ret: xmlBufPtr = ::core::ptr::null_mut::<xmlBuf>();
     if mem.is_null() {
         return ::core::ptr::null_mut::<xmlBuf>();
@@ -1277,19 +1277,19 @@ pub unsafe extern "C" fn xmlBufCreateStatic(
     (*ret).error = 0 as ::core::ffi::c_int;
     (*ret).buffer = ::core::ptr::null_mut::<xmlBuffer>();
     return ret;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufGetAllocationScheme(mut buf: xmlBufPtr) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlBufGetAllocationScheme(mut buf: xmlBufPtr) -> ::core::ffi::c_int { unsafe {
     if buf.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
     return (*buf).alloc as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufSetAllocationScheme(
     mut buf: xmlBufPtr,
     mut scheme: xmlBufferAllocationScheme,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     if buf.is_null() || (*buf).error != 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -1324,9 +1324,9 @@ pub unsafe extern "C" fn xmlBufSetAllocationScheme(
         (*buf).contentIO = (*buf).content;
     }
     return -(1 as ::core::ffi::c_int);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufFree(mut buf: xmlBufPtr) {
+pub unsafe extern "C" fn xmlBufFree(mut buf: xmlBufPtr) { unsafe {
     if buf.is_null() {
         return;
     }
@@ -1342,9 +1342,9 @@ pub unsafe extern "C" fn xmlBufFree(mut buf: xmlBufPtr) {
         xmlFree.expect("non-null function pointer")((*buf).content as *mut ::core::ffi::c_void);
     }
     xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufEmpty(mut buf: xmlBufPtr) {
+pub unsafe extern "C" fn xmlBufEmpty(mut buf: xmlBufPtr) { unsafe {
     if buf.is_null() || (*buf).error != 0 as ::core::ffi::c_int {
         return;
     }
@@ -1388,9 +1388,9 @@ pub unsafe extern "C" fn xmlBufEmpty(mut buf: xmlBufPtr) {
     } else {
         (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
     };
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufShrink(mut buf: xmlBufPtr, mut len: size_t) -> size_t {
+pub unsafe extern "C" fn xmlBufShrink(mut buf: xmlBufPtr, mut len: size_t) -> size_t { unsafe {
     if buf.is_null() || (*buf).error != 0 as ::core::ffi::c_int {
         return 0 as size_t;
     }
@@ -1456,8 +1456,8 @@ pub unsafe extern "C" fn xmlBufShrink(mut buf: xmlBufPtr, mut len: size_t) -> si
         (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
     }
     return len;
-}
-unsafe extern "C" fn xmlBufGrowInternal(mut buf: xmlBufPtr, mut len: size_t) -> size_t {
+}}
+unsafe extern "C" fn xmlBufGrowInternal(mut buf: xmlBufPtr, mut len: size_t) -> size_t { unsafe {
     let mut size: size_t = 0;
     let mut newbuf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     if buf.is_null() || (*buf).error != 0 as ::core::ffi::c_int {
@@ -1559,12 +1559,12 @@ unsafe extern "C" fn xmlBufGrowInternal(mut buf: xmlBufPtr, mut len: size_t) -> 
         (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
     }
     return (*buf).size.wrapping_sub((*buf).use_0);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufGrow(
     mut buf: xmlBufPtr,
     mut len: ::core::ffi::c_int,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     let mut ret: size_t = 0;
     if buf.is_null() || len < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
@@ -1577,9 +1577,9 @@ pub unsafe extern "C" fn xmlBufGrow(
         return -(1 as ::core::ffi::c_int);
     }
     return ret as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufInflate(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlBufInflate(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int { unsafe {
     if buf.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -1588,9 +1588,9 @@ pub unsafe extern "C" fn xmlBufInflate(mut buf: xmlBufPtr, mut len: size_t) -> :
         return -(1 as ::core::ffi::c_int);
     }
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufDump(mut file: *mut FILE, mut buf: xmlBufPtr) -> size_t {
+pub unsafe extern "C" fn xmlBufDump(mut file: *mut FILE, mut buf: xmlBufPtr) -> size_t { unsafe {
     let mut ret: size_t = 0;
     if buf.is_null() || (*buf).error != 0 as ::core::ffi::c_int {
         return 0 as size_t;
@@ -1618,16 +1618,16 @@ pub unsafe extern "C" fn xmlBufDump(mut file: *mut FILE, mut buf: xmlBufPtr) -> 
         file,
     ) as size_t;
     return ret;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufContent(mut buf: *const xmlBuf) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlBufContent(mut buf: *const xmlBuf) -> *mut xmlChar { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return ::core::ptr::null_mut::<xmlChar>();
     }
     return (*buf).content;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufEnd(mut buf: xmlBufPtr) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlBufEnd(mut buf: xmlBufPtr) -> *mut xmlChar { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return ::core::ptr::null_mut::<xmlChar>();
     }
@@ -1642,9 +1642,9 @@ pub unsafe extern "C" fn xmlBufEnd(mut buf: xmlBufPtr) -> *mut xmlChar {
         }
     }
     return (*buf).content.offset((*buf).use_0 as isize) as *mut xmlChar;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufAddLen(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlBufAddLen(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -1678,9 +1678,9 @@ pub unsafe extern "C" fn xmlBufAddLen(mut buf: xmlBufPtr, mut len: size_t) -> ::
         return -(1 as ::core::ffi::c_int);
     }
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufErase(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlBufErase(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -1710,9 +1710,9 @@ pub unsafe extern "C" fn xmlBufErase(mut buf: xmlBufPtr, mut len: size_t) -> ::c
         (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
     }
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufLength(buf: xmlBufPtr) -> size_t {
+pub unsafe extern "C" fn xmlBufLength(buf: xmlBufPtr) -> size_t { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return 0 as size_t;
     }
@@ -1727,9 +1727,9 @@ pub unsafe extern "C" fn xmlBufLength(buf: xmlBufPtr) -> size_t {
         }
     }
     return (*buf).use_0;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufUse(buf: xmlBufPtr) -> size_t {
+pub unsafe extern "C" fn xmlBufUse(buf: xmlBufPtr) -> size_t { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return 0 as size_t;
     }
@@ -1744,9 +1744,9 @@ pub unsafe extern "C" fn xmlBufUse(buf: xmlBufPtr) -> size_t {
         }
     }
     return (*buf).use_0;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufAvail(buf: xmlBufPtr) -> size_t {
+pub unsafe extern "C" fn xmlBufAvail(buf: xmlBufPtr) -> size_t { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return 0 as size_t;
     }
@@ -1761,9 +1761,9 @@ pub unsafe extern "C" fn xmlBufAvail(buf: xmlBufPtr) -> size_t {
         }
     }
     return (*buf).size.wrapping_sub((*buf).use_0);
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufIsEmpty(buf: xmlBufPtr) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlBufIsEmpty(buf: xmlBufPtr) -> ::core::ffi::c_int { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -1778,9 +1778,9 @@ pub unsafe extern "C" fn xmlBufIsEmpty(buf: xmlBufPtr) -> ::core::ffi::c_int {
         }
     }
     return ((*buf).use_0 == 0 as size_t) as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufResize(mut buf: xmlBufPtr, mut size: size_t) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlBufResize(mut buf: xmlBufPtr, mut size: size_t) -> ::core::ffi::c_int { unsafe {
     let mut newSize: size_t = 0;
     let mut rebuf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     let mut start_buf: size_t = 0;
@@ -1942,13 +1942,13 @@ pub unsafe extern "C" fn xmlBufResize(mut buf: xmlBufPtr, mut size: size_t) -> :
         (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
     }
     return 1 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufAdd(
     mut buf: xmlBufPtr,
     mut str: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     let mut needSize: size_t = 0;
     if str.is_null() || buf.is_null() || (*buf).error != 0 {
         return -(1 as ::core::ffi::c_int);
@@ -2028,13 +2028,13 @@ pub unsafe extern "C" fn xmlBufAdd(
         (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
     }
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufAddHead(
     mut buf: xmlBufPtr,
     mut str: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     let mut needSize: ::core::ffi::c_uint = 0;
     if buf.is_null() || (*buf).error != 0 {
         return -(1 as ::core::ffi::c_int);
@@ -2147,12 +2147,12 @@ pub unsafe extern "C" fn xmlBufAddHead(
         (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
     }
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufCat(
     mut buf: xmlBufPtr,
     mut str: *const xmlChar,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -2175,19 +2175,19 @@ pub unsafe extern "C" fn xmlBufCat(
         return -(1 as ::core::ffi::c_int);
     }
     return xmlBufAdd(buf, str, -(1 as ::core::ffi::c_int));
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufCCat(
     mut buf: xmlBufPtr,
     mut str: *const ::core::ffi::c_char,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     return xmlBufCat(buf, str as *const xmlChar);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufWriteCHAR(
     mut buf: xmlBufPtr,
     mut string: *const xmlChar,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -2207,12 +2207,12 @@ pub unsafe extern "C" fn xmlBufWriteCHAR(
         return -(1 as ::core::ffi::c_int);
     }
     return xmlBufCat(buf, string);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufWriteChar(
     mut buf: xmlBufPtr,
     mut string: *const ::core::ffi::c_char,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     if buf.is_null() || (*buf).error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -2232,12 +2232,12 @@ pub unsafe extern "C" fn xmlBufWriteChar(
         return -(1 as ::core::ffi::c_int);
     }
     return xmlBufCCat(buf, string);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufWriteQuotedString(
     mut buf: xmlBufPtr,
     mut string: *const xmlChar,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     let mut cur: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut base: *const xmlChar = ::core::ptr::null::<xmlChar>();
     if buf.is_null() || (*buf).error != 0 {
@@ -2302,9 +2302,9 @@ pub unsafe extern "C" fn xmlBufWriteQuotedString(
         xmlBufCCat(buf, b"\"\0" as *const u8 as *const ::core::ffi::c_char);
     }
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufFromBuffer(mut buffer: xmlBufferPtr) -> xmlBufPtr {
+pub unsafe extern "C" fn xmlBufFromBuffer(mut buffer: xmlBufferPtr) -> xmlBufPtr { unsafe {
     let mut ret: xmlBufPtr = ::core::ptr::null_mut::<xmlBuf>();
     if buffer.is_null() {
         return ::core::ptr::null_mut::<xmlBuf>();
@@ -2328,9 +2328,9 @@ pub unsafe extern "C" fn xmlBufFromBuffer(mut buffer: xmlBufferPtr) -> xmlBufPtr
     (*ret).content = (*buffer).content;
     (*ret).contentIO = (*buffer).contentIO;
     return ret;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufBackToBuffer(mut buf: xmlBufPtr) -> xmlBufferPtr {
+pub unsafe extern "C" fn xmlBufBackToBuffer(mut buf: xmlBufPtr) -> xmlBufferPtr { unsafe {
     let mut ret: xmlBufferPtr = ::core::ptr::null_mut::<xmlBuffer>();
     if buf.is_null() {
         return ::core::ptr::null_mut::<xmlBuffer>();
@@ -2373,12 +2373,12 @@ pub unsafe extern "C" fn xmlBufBackToBuffer(mut buf: xmlBufPtr) -> xmlBufferPtr 
     (*ret).contentIO = (*buf).contentIO;
     xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
     return ret;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufMergeBuffer(
     mut buf: xmlBufPtr,
     mut buffer: xmlBufferPtr,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     let mut ret: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if buf.is_null() || (*buf).error != 0 {
         xmlBufferFree(buffer);
@@ -2406,12 +2406,12 @@ pub unsafe extern "C" fn xmlBufMergeBuffer(
     }
     xmlBufferFree(buffer);
     return ret;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufResetInput(
     mut buf: xmlBufPtr,
     mut input: xmlParserInputPtr,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     if input.is_null() || buf.is_null() || (*buf).error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -2429,12 +2429,12 @@ pub unsafe extern "C" fn xmlBufResetInput(
     (*input).base = (*input).cur;
     (*input).end = (*buf).content.offset((*buf).use_0 as isize) as *mut xmlChar;
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufGetInputBase(
     mut buf: xmlBufPtr,
     mut input: xmlParserInputPtr,
-) -> size_t {
+) -> size_t { unsafe {
     let mut base: size_t = 0;
     if input.is_null() || buf.is_null() || (*buf).error != 0 {
         return -(1 as ::core::ffi::c_int) as size_t;
@@ -2458,14 +2458,14 @@ pub unsafe extern "C" fn xmlBufGetInputBase(
         base = 0 as size_t;
     }
     return base;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufSetInputBaseCur(
     mut buf: xmlBufPtr,
     mut input: xmlParserInputPtr,
     mut base: size_t,
     mut cur: size_t,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     if input.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -2489,5 +2489,5 @@ pub unsafe extern "C" fn xmlBufSetInputBaseCur(
     (*input).cur = (*input).base.offset(cur as isize);
     (*input).end = (*buf).content.offset((*buf).use_0 as isize) as *mut xmlChar;
     return 0 as ::core::ffi::c_int;
-}
+}}
 pub const __INT_MAX__: ::core::ffi::c_int = 2147483647 as ::core::ffi::c_int;

@@ -1640,7 +1640,7 @@ pub static mut xmlIsIdeographicGroup: xmlChRangeGroup = unsafe {
 pub unsafe extern "C" fn xmlCharInRange(
     mut val: ::core::ffi::c_uint,
     mut rptr: *const xmlChRangeGroup,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     let mut low: ::core::ffi::c_int = 0;
     let mut high: ::core::ffi::c_int = 0;
     let mut mid: ::core::ffi::c_int = 0;
@@ -1689,9 +1689,9 @@ pub unsafe extern "C" fn xmlCharInRange(
         }
     }
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlIsBaseChar(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlIsBaseChar(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int { unsafe {
     return if ch < 0x100 as ::core::ffi::c_uint {
         (0x41 as ::core::ffi::c_uint <= ch && ch <= 0x5a as ::core::ffi::c_uint
             || 0x61 as ::core::ffi::c_uint <= ch && ch <= 0x7a as ::core::ffi::c_uint
@@ -1701,7 +1701,7 @@ pub unsafe extern "C" fn xmlIsBaseChar(mut ch: ::core::ffi::c_uint) -> ::core::f
     } else {
         xmlCharInRange(ch, &raw const xmlIsBaseCharGroup)
     };
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlIsBlank(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int {
     return if ch < 0x100 as ::core::ffi::c_uint {
@@ -1727,30 +1727,30 @@ pub unsafe extern "C" fn xmlIsChar(mut ch: ::core::ffi::c_uint) -> ::core::ffi::
     };
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlIsCombining(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlIsCombining(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int { unsafe {
     return if ch < 0x100 as ::core::ffi::c_uint {
         0 as ::core::ffi::c_int
     } else {
         xmlCharInRange(ch, &raw const xmlIsCombiningGroup)
     };
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlIsDigit(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlIsDigit(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int { unsafe {
     return if ch < 0x100 as ::core::ffi::c_uint {
         (0x30 as ::core::ffi::c_uint <= ch && ch <= 0x39 as ::core::ffi::c_uint)
             as ::core::ffi::c_int
     } else {
         xmlCharInRange(ch, &raw const xmlIsDigitGroup)
     };
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlIsExtender(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlIsExtender(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int { unsafe {
     return if ch < 0x100 as ::core::ffi::c_uint {
         (ch == 0xb7 as ::core::ffi::c_uint) as ::core::ffi::c_int
     } else {
         xmlCharInRange(ch, &raw const xmlIsExtenderGroup)
     };
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlIsIdeographic(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int {
     return if ch < 0x100 as ::core::ffi::c_uint {
@@ -1763,10 +1763,10 @@ pub unsafe extern "C" fn xmlIsIdeographic(mut ch: ::core::ffi::c_uint) -> ::core
     };
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlIsPubidChar(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlIsPubidChar(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int { unsafe {
     return if ch < 0x100 as ::core::ffi::c_uint {
         xmlIsPubidChar_tab[ch as usize] as ::core::ffi::c_int
     } else {
         0 as ::core::ffi::c_int
     };
-}
+}}

@@ -141,19 +141,19 @@ static mut block: ::core::ffi::c_uint = 0 as ::core::ffi::c_uint;
 static mut xmlMemStopAtBlock: ::core::ffi::c_uint = 0 as ::core::ffi::c_uint;
 static mut xmlMemTraceBlockAt: *mut ::core::ffi::c_void = NULL;
 #[no_mangle]
-pub unsafe extern "C" fn xmlMallocBreakpoint() {
+pub unsafe extern "C" fn xmlMallocBreakpoint() { unsafe {
     (*__xmlGenericError()).expect("non-null function pointer")(
         *__xmlGenericErrorContext(),
         b"xmlMallocBreakpoint reached on block %d\n\0" as *const u8 as *const ::core::ffi::c_char,
         xmlMemStopAtBlock,
     );
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlMallocLoc(
     mut size: size_t,
     mut file: *const ::core::ffi::c_char,
     mut line: ::core::ffi::c_int,
-) -> *mut ::core::ffi::c_void {
+) -> *mut ::core::ffi::c_void { unsafe {
     let mut p: *mut MEMHDR = ::core::ptr::null_mut::<MEMHDR>();
     let mut ret: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
     if xmlMemInitialized == 0 {
@@ -204,13 +204,13 @@ pub unsafe extern "C" fn xmlMallocLoc(
         xmlMallocBreakpoint();
     }
     return ret;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlMallocAtomicLoc(
     mut size: size_t,
     mut file: *const ::core::ffi::c_char,
     mut line: ::core::ffi::c_int,
-) -> *mut ::core::ffi::c_void {
+) -> *mut ::core::ffi::c_void { unsafe {
     let mut p: *mut MEMHDR = ::core::ptr::null_mut::<MEMHDR>();
     let mut ret: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
     if xmlMemInitialized == 0 {
@@ -263,22 +263,22 @@ pub unsafe extern "C" fn xmlMallocAtomicLoc(
         xmlMallocBreakpoint();
     }
     return ret;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlMemMalloc(mut size: size_t) -> *mut ::core::ffi::c_void {
+pub unsafe extern "C" fn xmlMemMalloc(mut size: size_t) -> *mut ::core::ffi::c_void { unsafe {
     return xmlMallocLoc(
         size,
         b"none\0" as *const u8 as *const ::core::ffi::c_char,
         0 as ::core::ffi::c_int,
     );
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlReallocLoc(
     mut ptr: *mut ::core::ffi::c_void,
     mut size: size_t,
     mut file: *const ::core::ffi::c_char,
     mut line: ::core::ffi::c_int,
-) -> *mut ::core::ffi::c_void {
+) -> *mut ::core::ffi::c_void { unsafe {
     let mut p: *mut MEMHDR = ::core::ptr::null_mut::<MEMHDR>();
     let mut tmp: *mut MEMHDR = ::core::ptr::null_mut::<MEMHDR>();
     let mut number: ::core::ffi::c_ulong = 0;
@@ -346,21 +346,21 @@ pub unsafe extern "C" fn xmlReallocLoc(
         }
     }
     return ::core::ptr::null_mut::<::core::ffi::c_void>();
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlMemRealloc(
     mut ptr: *mut ::core::ffi::c_void,
     mut size: size_t,
-) -> *mut ::core::ffi::c_void {
+) -> *mut ::core::ffi::c_void { unsafe {
     return xmlReallocLoc(
         ptr,
         size,
         b"none\0" as *const u8 as *const ::core::ffi::c_char,
         0 as ::core::ffi::c_int,
     );
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlMemFree(mut ptr: *mut ::core::ffi::c_void) {
+pub unsafe extern "C" fn xmlMemFree(mut ptr: *mut ::core::ffi::c_void) { unsafe {
     let mut p: *mut MEMHDR = ::core::ptr::null_mut::<MEMHDR>();
     let mut target: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     if ptr.is_null() {
@@ -410,13 +410,13 @@ pub unsafe extern "C" fn xmlMemFree(mut ptr: *mut ::core::ffi::c_void) {
         ptr,
     );
     xmlMallocBreakpoint();
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlMemStrdupLoc(
     mut str: *const ::core::ffi::c_char,
     mut file: *const ::core::ffi::c_char,
     mut line: ::core::ffi::c_int,
-) -> *mut ::core::ffi::c_char {
+) -> *mut ::core::ffi::c_char { unsafe {
     let mut s: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut size: size_t = strlen(str).wrapping_add(1 as size_t);
     let mut p: *mut MEMHDR = ::core::ptr::null_mut::<MEMHDR>();
@@ -465,35 +465,35 @@ pub unsafe extern "C" fn xmlMemStrdupLoc(
         }
         return s;
     };
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlMemoryStrdup(
     mut str: *const ::core::ffi::c_char,
-) -> *mut ::core::ffi::c_char {
+) -> *mut ::core::ffi::c_char { unsafe {
     return xmlMemStrdupLoc(
         str,
         b"none\0" as *const u8 as *const ::core::ffi::c_char,
         0 as ::core::ffi::c_int,
     );
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlMemUsed() -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlMemUsed() -> ::core::ffi::c_int { unsafe {
     let mut res: ::core::ffi::c_int = 0;
     xmlMutexLock(xmlMemMutex);
     res = debugMemSize as ::core::ffi::c_int;
     xmlMutexUnlock(xmlMemMutex);
     return res;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlMemBlocks() -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlMemBlocks() -> ::core::ffi::c_int { unsafe {
     let mut res: ::core::ffi::c_int = 0;
     xmlMutexLock(xmlMemMutex);
     res = debugMemBlocks as ::core::ffi::c_int;
     xmlMutexUnlock(xmlMemMutex);
     return res;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlMemDisplayLast(mut fp: *mut FILE, mut nbBytes: ::core::ffi::c_long) {
+pub unsafe extern "C" fn xmlMemDisplayLast(mut fp: *mut FILE, mut nbBytes: ::core::ffi::c_long) { unsafe {
     let mut old_fp: *mut FILE = fp;
     if nbBytes <= 0 as ::core::ffi::c_long {
         return;
@@ -515,9 +515,9 @@ pub unsafe extern "C" fn xmlMemDisplayLast(mut fp: *mut FILE, mut nbBytes: ::cor
     if old_fp.is_null() {
         fclose(fp);
     }
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlMemDisplay(mut fp: *mut FILE) {
+pub unsafe extern "C" fn xmlMemDisplay(mut fp: *mut FILE) { unsafe {
     let mut old_fp: *mut FILE = fp;
     if fp.is_null() {
         fp = fopen(
@@ -536,16 +536,16 @@ pub unsafe extern "C" fn xmlMemDisplay(mut fp: *mut FILE) {
     if old_fp.is_null() {
         fclose(fp);
     }
-}
-unsafe extern "C" fn debugmem_tag_error(mut p: *mut ::core::ffi::c_void) {
+}}
+unsafe extern "C" fn debugmem_tag_error(mut p: *mut ::core::ffi::c_void) { unsafe {
     (*__xmlGenericError()).expect("non-null function pointer")(
         *__xmlGenericErrorContext(),
         b"Memory tag error occurs :%p \n\t bye\n\0" as *const u8 as *const ::core::ffi::c_char,
         p,
     );
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlMemShow(mut fp: *mut FILE, mut _nr: ::core::ffi::c_int) {
+pub unsafe extern "C" fn xmlMemShow(mut fp: *mut FILE, mut _nr: ::core::ffi::c_int) { unsafe {
     if !fp.is_null() {
         fprintf(
             fp,
@@ -555,11 +555,11 @@ pub unsafe extern "C" fn xmlMemShow(mut fp: *mut FILE, mut _nr: ::core::ffi::c_i
             debugMaxMemSize,
         );
     }
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlMemoryDump() {}
 #[no_mangle]
-pub unsafe extern "C" fn xmlInitMemory() -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlInitMemory() -> ::core::ffi::c_int { unsafe {
     let mut breakpoint: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     if xmlMemInitialized != 0 {
         return -(1 as ::core::ffi::c_int);
@@ -583,18 +583,18 @@ pub unsafe extern "C" fn xmlInitMemory() -> ::core::ffi::c_int {
         );
     }
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlCleanupMemory() {
+pub unsafe extern "C" fn xmlCleanupMemory() { unsafe {
     if xmlMemInitialized == 0 as ::core::ffi::c_int {
         return;
     }
     xmlFreeMutex(xmlMemMutex);
     xmlMemMutex = ::core::ptr::null_mut::<xmlMutex>();
     xmlMemInitialized = 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlMemSetup(
+pub extern "C" fn xmlMemSetup(
     mut freeFunc: xmlFreeFunc,
     mut mallocFunc: xmlMallocFunc,
     mut reallocFunc: xmlReallocFunc,
@@ -612,11 +612,13 @@ pub unsafe extern "C" fn xmlMemSetup(
     if strdupFunc.is_none() {
         return -(1 as ::core::ffi::c_int);
     }
-    xmlFree = freeFunc;
-    xmlMalloc = mallocFunc;
-    xmlMallocAtomic = mallocFunc;
-    xmlRealloc = reallocFunc;
-    xmlMemStrdup = strdupFunc;
+    unsafe {
+        xmlFree = freeFunc;
+        xmlMalloc = mallocFunc;
+        xmlMallocAtomic = mallocFunc;
+        xmlRealloc = reallocFunc;
+        xmlMemStrdup = strdupFunc;
+    }
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]
@@ -625,7 +627,7 @@ pub unsafe extern "C" fn xmlMemGet(
     mut mallocFunc: *mut xmlMallocFunc,
     mut reallocFunc: *mut xmlReallocFunc,
     mut strdupFunc: *mut xmlStrdupFunc,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     if !freeFunc.is_null() {
         *freeFunc = xmlFree;
     }
@@ -639,9 +641,9 @@ pub unsafe extern "C" fn xmlMemGet(
         *strdupFunc = xmlMemStrdup;
     }
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlGcMemSetup(
+pub extern "C" fn xmlGcMemSetup(
     mut freeFunc: xmlFreeFunc,
     mut mallocFunc: xmlMallocFunc,
     mut mallocAtomicFunc: xmlMallocFunc,
@@ -663,11 +665,13 @@ pub unsafe extern "C" fn xmlGcMemSetup(
     if strdupFunc.is_none() {
         return -(1 as ::core::ffi::c_int);
     }
-    xmlFree = freeFunc;
-    xmlMalloc = mallocFunc;
-    xmlMallocAtomic = mallocAtomicFunc;
-    xmlRealloc = reallocFunc;
-    xmlMemStrdup = strdupFunc;
+    unsafe {
+        xmlFree = freeFunc;
+        xmlMalloc = mallocFunc;
+        xmlMallocAtomic = mallocAtomicFunc;
+        xmlRealloc = reallocFunc;
+        xmlMemStrdup = strdupFunc;
+    }
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]
@@ -677,7 +681,7 @@ pub unsafe extern "C" fn xmlGcMemGet(
     mut mallocAtomicFunc: *mut xmlMallocFunc,
     mut reallocFunc: *mut xmlReallocFunc,
     mut strdupFunc: *mut xmlStrdupFunc,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     if !freeFunc.is_null() {
         *freeFunc = xmlFree;
     }
@@ -694,4 +698,4 @@ pub unsafe extern "C" fn xmlGcMemGet(
         *strdupFunc = xmlMemStrdup;
     }
     return 0 as ::core::ffi::c_int;
-}
+}}

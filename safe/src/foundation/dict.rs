@@ -94,7 +94,7 @@ pub unsafe extern "C" fn xmlInitializeDict() -> ::core::ffi::c_int {
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn __xmlInitializeDict() -> ::core::ffi::c_int {
+pub unsafe extern "C" fn __xmlInitializeDict() -> ::core::ffi::c_int { unsafe {
     if xmlDictInitialized != 0 {
         return 1 as ::core::ffi::c_int;
     }
@@ -108,9 +108,9 @@ pub unsafe extern "C" fn __xmlInitializeDict() -> ::core::ffi::c_int {
     xmlDictInitialized = 1 as ::core::ffi::c_int;
     xmlRMutexUnlock(xmlDictMutex);
     return 1 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn __xmlRandom() -> ::core::ffi::c_int {
+pub unsafe extern "C" fn __xmlRandom() -> ::core::ffi::c_int { unsafe {
     let mut ret: ::core::ffi::c_int = 0;
     if xmlDictInitialized == 0 as ::core::ffi::c_int {
         __xmlInitializeDict();
@@ -119,20 +119,20 @@ pub unsafe extern "C" fn __xmlRandom() -> ::core::ffi::c_int {
     ret = rand_r(&raw mut rand_seed);
     xmlRMutexUnlock(xmlDictMutex);
     return ret;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictCleanup() {
+pub unsafe extern "C" fn xmlDictCleanup() { unsafe {
     if xmlDictInitialized == 0 {
         return;
     }
     xmlFreeRMutex(xmlDictMutex);
     xmlDictInitialized = 0 as ::core::ffi::c_int;
-}
+}}
 unsafe extern "C" fn xmlDictAddString(
     mut dict: xmlDictPtr,
     mut name: *const xmlChar,
     mut namelen: ::core::ffi::c_uint,
-) -> *const xmlChar {
+) -> *const xmlChar { unsafe {
     let mut current_block: u64;
     let mut pool: xmlDictStringsPtr = ::core::ptr::null_mut::<xmlDictStrings>();
     let mut ret: *const xmlChar = ::core::ptr::null::<xmlChar>();
@@ -201,14 +201,14 @@ unsafe extern "C" fn xmlDictAddString(
     *fresh4 = 0 as xmlChar;
     (*pool).nbStrings = (*pool).nbStrings.wrapping_add(1);
     return ret;
-}
+}}
 unsafe extern "C" fn xmlDictAddQString(
     mut dict: xmlDictPtr,
     mut prefix: *const xmlChar,
     mut plen: ::core::ffi::c_uint,
     mut name: *const xmlChar,
     mut namelen: ::core::ffi::c_uint,
-) -> *const xmlChar {
+) -> *const xmlChar { unsafe {
     let mut current_block: u64;
     let mut pool: xmlDictStringsPtr = ::core::ptr::null_mut::<xmlDictStrings>();
     let mut ret: *const xmlChar = ::core::ptr::null::<xmlChar>();
@@ -301,12 +301,12 @@ unsafe extern "C" fn xmlDictAddQString(
     *fresh6 = 0 as xmlChar;
     (*pool).nbStrings = (*pool).nbStrings.wrapping_add(1);
     return ret;
-}
+}}
 unsafe extern "C" fn xmlDictComputeBigKey(
     mut data: *const xmlChar,
     mut namelen: ::core::ffi::c_int,
     mut seed: ::core::ffi::c_int,
-) -> uint32_t {
+) -> uint32_t { unsafe {
     let mut hash: uint32_t = 0;
     let mut i: ::core::ffi::c_int = 0;
     if namelen <= 0 as ::core::ffi::c_int || data.is_null() {
@@ -324,14 +324,14 @@ unsafe extern "C" fn xmlDictComputeBigKey(
     hash ^= hash >> 11 as ::core::ffi::c_int;
     hash = hash.wrapping_add(hash << 15 as ::core::ffi::c_int);
     return hash;
-}
+}}
 unsafe extern "C" fn xmlDictComputeBigQKey(
     mut prefix: *const xmlChar,
     mut plen: ::core::ffi::c_int,
     mut name: *const xmlChar,
     mut len: ::core::ffi::c_int,
     mut seed: ::core::ffi::c_int,
-) -> ::core::ffi::c_ulong {
+) -> ::core::ffi::c_ulong { unsafe {
     let mut hash: uint32_t = 0;
     let mut i: ::core::ffi::c_int = 0;
     hash = seed as uint32_t;
@@ -356,12 +356,12 @@ unsafe extern "C" fn xmlDictComputeBigQKey(
     hash ^= hash >> 11 as ::core::ffi::c_int;
     hash = hash.wrapping_add(hash << 15 as ::core::ffi::c_int);
     return hash as ::core::ffi::c_ulong;
-}
+}}
 unsafe extern "C" fn xmlDictComputeFastKey(
     mut name: *const xmlChar,
     mut namelen: ::core::ffi::c_int,
     mut seed: ::core::ffi::c_int,
-) -> ::core::ffi::c_ulong {
+) -> ::core::ffi::c_ulong { unsafe {
     let mut value: ::core::ffi::c_ulong = seed as ::core::ffi::c_ulong;
     if name.is_null() || namelen <= 0 as ::core::ffi::c_int {
         return value;
@@ -483,14 +483,14 @@ unsafe extern "C" fn xmlDictComputeFastKey(
         _ => {}
     }
     return value;
-}
+}}
 unsafe extern "C" fn xmlDictComputeFastQKey(
     mut prefix: *const xmlChar,
     mut plen: ::core::ffi::c_int,
     mut name: *const xmlChar,
     mut len: ::core::ffi::c_int,
     mut seed: ::core::ffi::c_int,
-) -> ::core::ffi::c_ulong {
+) -> ::core::ffi::c_ulong { unsafe {
     let mut value: ::core::ffi::c_ulong = seed as ::core::ffi::c_ulong;
     if plen == 0 as ::core::ffi::c_int {
         value = value.wrapping_add(
@@ -757,9 +757,9 @@ unsafe extern "C" fn xmlDictComputeFastQKey(
         _ => {}
     }
     return value;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictCreate() -> xmlDictPtr {
+pub unsafe extern "C" fn xmlDictCreate() -> xmlDictPtr { unsafe {
     let mut dict: xmlDictPtr = ::core::ptr::null_mut::<xmlDict>();
     if xmlDictInitialized == 0 {
         if __xmlInitializeDict() == 0 {
@@ -792,9 +792,9 @@ pub unsafe extern "C" fn xmlDictCreate() -> xmlDictPtr {
         xmlFree.expect("non-null function pointer")(dict as *mut ::core::ffi::c_void);
     }
     return ::core::ptr::null_mut::<xmlDict>();
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictCreateSub(mut sub: xmlDictPtr) -> xmlDictPtr {
+pub unsafe extern "C" fn xmlDictCreateSub(mut sub: xmlDictPtr) -> xmlDictPtr { unsafe {
     let mut dict: xmlDictPtr = xmlDictCreate();
     if !dict.is_null() && !sub.is_null() {
         (*dict).seed = (*sub).seed;
@@ -802,9 +802,9 @@ pub unsafe extern "C" fn xmlDictCreateSub(mut sub: xmlDictPtr) -> xmlDictPtr {
         xmlDictReference((*dict).subdict as xmlDictPtr);
     }
     return dict;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictReference(mut dict: xmlDictPtr) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlDictReference(mut dict: xmlDictPtr) -> ::core::ffi::c_int { unsafe {
     if xmlDictInitialized == 0 {
         if __xmlInitializeDict() == 0 {
             return -(1 as ::core::ffi::c_int);
@@ -817,8 +817,8 @@ pub unsafe extern "C" fn xmlDictReference(mut dict: xmlDictPtr) -> ::core::ffi::
     (*dict).ref_counter += 1;
     xmlRMutexUnlock(xmlDictMutex);
     return 0 as ::core::ffi::c_int;
-}
-unsafe extern "C" fn xmlDictGrow(mut dict: xmlDictPtr, mut size: size_t) -> ::core::ffi::c_int {
+}}
+unsafe extern "C" fn xmlDictGrow(mut dict: xmlDictPtr, mut size: size_t) -> ::core::ffi::c_int { unsafe {
     let mut key: ::core::ffi::c_ulong = 0;
     let mut okey: ::core::ffi::c_ulong = 0;
     let mut oldsize: size_t = 0;
@@ -956,9 +956,9 @@ unsafe extern "C" fn xmlDictGrow(mut dict: xmlDictPtr, mut size: size_t) -> ::co
     }
     xmlFree.expect("non-null function pointer")(olddict as *mut ::core::ffi::c_void);
     return ret;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictFree(mut dict: xmlDictPtr) {
+pub unsafe extern "C" fn xmlDictFree(mut dict: xmlDictPtr) { unsafe {
     let mut i: size_t = 0;
     let mut iter: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
     let mut next: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
@@ -1012,13 +1012,13 @@ pub unsafe extern "C" fn xmlDictFree(mut dict: xmlDictPtr) {
         pool = nextp;
     }
     xmlFree.expect("non-null function pointer")(dict as *mut ::core::ffi::c_void);
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDictLookup(
     mut dict: xmlDictPtr,
     mut name: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> *const xmlChar {
+) -> *const xmlChar { unsafe {
     let mut key: ::core::ffi::c_ulong = 0;
     let mut okey: ::core::ffi::c_ulong = 0;
     let mut nbi: ::core::ffi::c_ulong = 0 as ::core::ffi::c_ulong;
@@ -1157,13 +1157,13 @@ pub unsafe extern "C" fn xmlDictLookup(
         }
     }
     return ret;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDictExists(
     mut dict: xmlDictPtr,
     mut name: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> *const xmlChar {
+) -> *const xmlChar { unsafe {
     let mut key: ::core::ffi::c_ulong = 0;
     let mut okey: ::core::ffi::c_ulong = 0;
     let mut nbi: ::core::ffi::c_ulong = 0 as ::core::ffi::c_ulong;
@@ -1265,13 +1265,13 @@ pub unsafe extern "C" fn xmlDictExists(
         }
     }
     return ::core::ptr::null::<xmlChar>();
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDictQLookup(
     mut dict: xmlDictPtr,
     mut prefix: *const xmlChar,
     mut name: *const xmlChar,
-) -> *const xmlChar {
+) -> *const xmlChar { unsafe {
     let mut okey: ::core::ffi::c_ulong = 0;
     let mut key: ::core::ffi::c_ulong = 0;
     let mut nbi: ::core::ffi::c_ulong = 0 as ::core::ffi::c_ulong;
@@ -1427,12 +1427,12 @@ pub unsafe extern "C" fn xmlDictQLookup(
         );
     }
     return ret;
-}
+}}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDictOwns(
     mut dict: xmlDictPtr,
     mut str: *const xmlChar,
-) -> ::core::ffi::c_int {
+) -> ::core::ffi::c_int { unsafe {
     let mut pool: xmlDictStringsPtr = ::core::ptr::null_mut::<xmlDictStrings>();
     if dict.is_null() || str.is_null() {
         return -(1 as ::core::ffi::c_int);
@@ -1452,9 +1452,9 @@ pub unsafe extern "C" fn xmlDictOwns(
         return xmlDictOwns((*dict).subdict as xmlDictPtr, str);
     }
     return 0 as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictSize(mut dict: xmlDictPtr) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlDictSize(mut dict: xmlDictPtr) -> ::core::ffi::c_int { unsafe {
     if dict.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -1462,9 +1462,9 @@ pub unsafe extern "C" fn xmlDictSize(mut dict: xmlDictPtr) -> ::core::ffi::c_int
         return (*dict).nbElems.wrapping_add((*(*dict).subdict).nbElems) as ::core::ffi::c_int;
     }
     return (*dict).nbElems as ::core::ffi::c_int;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictSetLimit(mut dict: xmlDictPtr, mut limit: size_t) -> size_t {
+pub unsafe extern "C" fn xmlDictSetLimit(mut dict: xmlDictPtr, mut limit: size_t) -> size_t { unsafe {
     let mut ret: size_t = 0;
     if dict.is_null() {
         return 0 as size_t;
@@ -1472,9 +1472,9 @@ pub unsafe extern "C" fn xmlDictSetLimit(mut dict: xmlDictPtr, mut limit: size_t
     ret = (*dict).limit;
     (*dict).limit = limit;
     return ret;
-}
+}}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictGetUsage(mut dict: xmlDictPtr) -> size_t {
+pub unsafe extern "C" fn xmlDictGetUsage(mut dict: xmlDictPtr) -> size_t { unsafe {
     let mut pool: xmlDictStringsPtr = ::core::ptr::null_mut::<xmlDictStrings>();
     let mut limit: size_t = 0 as size_t;
     if dict.is_null() {
@@ -1486,5 +1486,5 @@ pub unsafe extern "C" fn xmlDictGetUsage(mut dict: xmlDictPtr) -> size_t {
         pool = (*pool).next;
     }
     return limit;
-}
+}}
 pub const __INT_MAX__: ::core::ffi::c_int = 2147483647 as ::core::ffi::c_int;
