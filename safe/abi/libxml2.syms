@@ -2395,4 +2395,6 @@ Base {
   xmlRelaxParserSetIncLImit;
   xmlUpgradeOldNs;
   xmlXPtrAdvanceNode;
+  local:
+    *;
 };

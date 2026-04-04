@@ -18,7 +18,7 @@ private_headers = [
 [[module]]
 name = "buf"
 source = "../original/buf.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "c14n"
@@ -33,7 +33,7 @@ provider = "c_fallback"
 [[module]]
 name = "chvalid"
 source = "../original/chvalid.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "debugXML"
@@ -43,7 +43,7 @@ provider = "c_fallback"
 [[module]]
 name = "dict"
 source = "../original/dict.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "DOCBparser"
@@ -64,17 +64,17 @@ provider = "c_fallback"
 [[module]]
 name = "error"
 source = "../original/error.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "globals"
 source = "../original/globals.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "hash"
 source = "../original/hash.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "HTMLparser"
@@ -94,7 +94,7 @@ provider = "c_fallback"
 [[module]]
 name = "list"
 source = "../original/list.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "nanoftp"
@@ -144,7 +144,7 @@ provider = "c_fallback"
 [[module]]
 name = "threads"
 source = "../original/threads.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "tree"
@@ -179,7 +179,7 @@ provider = "c_fallback"
 [[module]]
 name = "xmlmemory"
 source = "../original/xmlmemory.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xmlmodule"
@@ -214,12 +214,22 @@ provider = "c_fallback"
 [[module]]
 name = "xmlstring"
 source = "../original/xmlstring.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xmlunicode"
 source = "../original/xmlunicode.c"
-provider = "c_fallback"
+provider = "rust"
+
+[[module]]
+name = "error_varargs"
+source = "shims/error_varargs.c"
+provider = "c_shim"
+
+[[module]]
+name = "xmlstring_varargs"
+source = "shims/xmlstring_varargs.c"
+provider = "c_shim"
 
 [[module]]
 name = "xmlwriter"

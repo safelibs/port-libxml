@@ -22,8 +22,16 @@ ACLOCALDIR="$STAGE/usr/share/aclocal"
 rm -rf "$STAGE"
 mkdir -p "$LIBDIR" "$BINDIR" "$INCLUDEDIR" "$PKGDIR" "$ACLOCALDIR"
 
-cp "$LIBXML2_NATIVE_SHARED" "$LIBDIR/libxml2.so.$LIBXML2_VERSION"
 cp "$LIBXML2_NATIVE_STATIC" "$LIBDIR/libxml2.a"
+cc -shared \
+  -Wl,--no-undefined \
+  -Wl,-soname,libxml2.so.2 \
+  -Wl,--version-script,"$ROOT/safe/abi/libxml2.syms" \
+  -o "$LIBDIR/libxml2.so.$LIBXML2_VERSION" \
+  -Wl,--whole-archive \
+  "$LIBXML2_NATIVE_STATIC" \
+  -Wl,--no-whole-archive \
+  -lz -llzma -lm -ldl -lpthread
 ln -s "libxml2.so.$LIBXML2_VERSION" "$LIBDIR/libxml2.so.2"
 ln -s "libxml2.so.2" "$LIBDIR/libxml2.so"
 

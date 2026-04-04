@@ -1,9 +1,7 @@
 use std::env;
 use std::ffi::OsString;
 use std::fs;
-use std::io;
-use std::os::unix::fs::symlink;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::{Command, Output};
 
 use serde::Deserialize;
@@ -37,7 +35,7 @@ fn default_enabled() -> bool {
 
 fn main() {
     if let Err(err) = run() {
-        panic!("phase-1 native scaffold build failed: {err}");
+        panic!("safe libxml2 build failed: {err}");
     }
 }
 
@@ -72,10 +70,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let version_script = manifest_dir.join(&manifest.version_script);
 
     println!("cargo:rerun-if-changed={}", config_header.display());
-    println!(
-        "cargo:rerun-if-changed={}",
-        private_include_dir.display()
-    );
+    println!("cargo:rerun-if-changed={}", private_include_dir.display());
     println!("cargo:rerun-if-changed={}", public_include_dir.display());
 
     for header in &manifest.private_headers {
@@ -94,19 +89,14 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     ];
     let env_cflags = env::var("CFLAGS")
         .ok()
-        .map(|value| {
-            value
-                .split_whitespace()
-                .map(OsString::from)
-                .collect::<Vec<_>>()
-        })
+        .map(|value| value.split_whitespace().map(OsString::from).collect::<Vec<_>>())
         .unwrap_or_else(|| default_cflags.clone());
 
     let mut objects = Vec::new();
     for module in &manifest.module {
         let source = manifest_dir.join(&module.source);
         println!("cargo:rerun-if-changed={}", source.display());
-        if !module.enabled || module.provider != "c_fallback" {
+        if !module.enabled || module.provider == "rust" {
             continue;
         }
 
@@ -126,50 +116,40 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     if objects.is_empty() {
-        return Err("build/modules.toml did not enable any c_fallback modules".into());
+        return Err("build/modules.toml did not enable any non-rust modules".into());
     }
 
-    let static_archive = native_dir.join("libxml2.a");
+    let support_archive = native_dir.join("libxml2_c_support.a");
     let mut ar_cmd = Command::new(&ar);
     ar_cmd.arg("crs");
-    ar_cmd.arg(&static_archive);
+    ar_cmd.arg(&support_archive);
     for object in &objects {
         ar_cmd.arg(object);
     }
-    run_command(&mut ar_cmd, "archive libxml2.a")?;
+    run_command(&mut ar_cmd, "archive libxml2_c_support.a")?;
 
-    let version = &manifest.shared_object_version;
-    let shared_name = format!("libxml2.so.{version}");
-    let soname = "libxml2.so.2";
-    let shared_path = native_dir.join(&shared_name);
-
-    let mut link_cmd = Command::new(&cc);
-    link_cmd.arg("-shared");
-    link_cmd.arg("-Wl,--no-undefined");
-    link_cmd.arg(format!("-Wl,-soname,{soname}"));
-    link_cmd.arg(format!(
-        "-Wl,--version-script={}",
+    println!("cargo:rustc-link-search=native={}", native_dir.display());
+    println!("cargo:rustc-link-lib=static:+whole-archive=xml2_c_support");
+    println!("cargo:rustc-cdylib-link-arg=-Wl,--no-undefined");
+    println!("cargo:rustc-cdylib-link-arg=-Wl,--undefined-version");
+    println!("cargo:rustc-cdylib-link-arg=-Wl,-soname,libxml2.so.2");
+    println!(
+        "cargo:rustc-cdylib-link-arg=-Wl,--version-script={}",
         version_script.display()
-    ));
-    link_cmd.arg("-o");
-    link_cmd.arg(&shared_path);
-    for object in &objects {
-        link_cmd.arg(object);
-    }
+    );
     for link_lib in &manifest.link_libs {
-        link_cmd.arg(format!("-l{link_lib}"));
+        println!("cargo:rustc-link-lib={link_lib}");
     }
-    run_command(&mut link_cmd, &format!("link {}", shared_path.display()))?;
-
-    replace_symlink(&native_dir.join("libxml2.so.2"), Path::new(&shared_name))?;
-    replace_symlink(&native_dir.join("libxml2.so"), Path::new("libxml2.so.2"))?;
 
     let triplet = detect_multiarch(&cc)?;
+    let target_dir = manifest_dir.join("target").join(&profile);
     let metadata = format!(
-        "PROFILE={profile}\nLIBXML2_NATIVE_DIR={native}\nLIBXML2_NATIVE_SHARED={shared}\nLIBXML2_NATIVE_STATIC={static_archive}\nLIBXML2_SONAME={soname}\nLIBXML2_VERSION={version}\nLIBXML2_TRIPLET={triplet}\n",
-        native = native_dir.display(),
-        shared = shared_path.display(),
-        static_archive = static_archive.display(),
+        "PROFILE={profile}\nLIBXML2_NATIVE_DIR={native}\nLIBXML2_NATIVE_SHARED={shared}\nLIBXML2_NATIVE_STATIC={static_archive}\nLIBXML2_SUPPORT_ARCHIVE={support_archive}\nLIBXML2_SONAME=libxml2.so.2\nLIBXML2_VERSION={version}\nLIBXML2_TRIPLET={triplet}\n",
+        native = target_dir.display(),
+        shared = target_dir.join("libxml2.so").display(),
+        static_archive = target_dir.join("libxml2.a").display(),
+        support_archive = support_archive.display(),
+        version = manifest.shared_object_version,
     );
     fs::write(manifest_dir.join("target/build-artifacts.env"), metadata)?;
 
@@ -185,15 +165,6 @@ fn detect_multiarch(cc: &OsString) -> Result<String, Box<dyn std::error::Error>>
         }
     }
     Ok(env::var("TARGET").unwrap_or_else(|_| String::from("unknown-target")))
-}
-
-fn replace_symlink(path: &Path, target: &Path) -> io::Result<()> {
-    match fs::remove_file(path) {
-        Ok(()) => {}
-        Err(err) if err.kind() == io::ErrorKind::NotFound => {}
-        Err(err) => return Err(err),
-    }
-    symlink(target, path)
 }
 
 fn run_command(command: &mut Command, what: &str) -> Result<(), Box<dyn std::error::Error>> {
