@@ -48,7 +48,7 @@ provider = "rust"
 [[module]]
 name = "DOCBparser"
 source = "../original/DOCBparser.c"
-provider = "c_fallback"
+provider = "rust"
 enabled = false
 
 [[module]]
@@ -79,7 +79,7 @@ provider = "rust"
 [[module]]
 name = "HTMLparser"
 source = "../original/HTMLparser.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "HTMLtree"
@@ -89,7 +89,7 @@ provider = "rust"
 [[module]]
 name = "legacy"
 source = "../original/legacy.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "list"
@@ -109,12 +109,12 @@ provider = "rust"
 [[module]]
 name = "parser"
 source = "../original/parser.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "parserInternals"
 source = "../original/parserInternals.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "pattern"
@@ -129,12 +129,12 @@ provider = "c_fallback"
 [[module]]
 name = "SAX"
 source = "../original/SAX.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "SAX2"
 source = "../original/SAX2.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "schematron"
@@ -189,7 +189,7 @@ provider = "c_fallback"
 [[module]]
 name = "xmlreader"
 source = "../original/xmlreader.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xmlregexp"
@@ -199,7 +199,7 @@ provider = "c_fallback"
 [[module]]
 name = "xmlsave"
 source = "../original/xmlsave.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xmlschemas"
@@ -222,6 +222,51 @@ source = "../original/xmlunicode.c"
 provider = "rust"
 
 [[module]]
+name = "parser_impl"
+source = "shims/parser_impl.c"
+provider = "c_shim"
+
+[[module]]
+name = "parserInternals_impl"
+source = "shims/parser_internals_impl.c"
+provider = "c_shim"
+
+[[module]]
+name = "SAX_impl"
+source = "shims/sax_impl.c"
+provider = "c_shim"
+
+[[module]]
+name = "SAX2_impl"
+source = "shims/sax2_impl.c"
+provider = "c_shim"
+
+[[module]]
+name = "HTMLparser_impl"
+source = "shims/html_parser_impl.c"
+provider = "c_shim"
+
+[[module]]
+name = "legacy_impl"
+source = "shims/legacy_impl.c"
+provider = "c_shim"
+
+[[module]]
+name = "xmlreader_impl"
+source = "shims/xmlreader_impl.c"
+provider = "c_shim"
+
+[[module]]
+name = "xmlsave_impl"
+source = "shims/xmlsave_impl.c"
+provider = "c_shim"
+
+[[module]]
+name = "xmlwriter_impl"
+source = "shims/xmlwriter_impl.c"
+provider = "c_shim"
+
+[[module]]
 name = "error_varargs"
 source = "shims/error_varargs.c"
 provider = "c_shim"
@@ -232,9 +277,14 @@ source = "shims/xmlstring_varargs.c"
 provider = "c_shim"
 
 [[module]]
+name = "xmlwriter_varargs"
+source = "shims/xmlwriter_varargs.c"
+provider = "c_shim"
+
+[[module]]
 name = "xmlwriter"
 source = "../original/xmlwriter.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xpath"

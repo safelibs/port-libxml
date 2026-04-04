@@ -12,6 +12,8 @@ export LD_LIBRARY_PATH="$STAGE/usr/lib/$TRIPLET:${LD_LIBRARY_PATH:-}"
 export LIBRARY_PATH="$STAGE/usr/lib/$TRIPLET:${LIBRARY_PATH:-}"
 export C_INCLUDE_PATH="$STAGE/usr/include/libxml2:${C_INCLUDE_PATH:-}"
 export PYTHONPATH="$STAGE/usr/lib/python3/dist-packages:${PYTHONPATH:-}"
+unset XML_CATALOG_FILES
+unset SGML_CATALOG_FILES
 
 "$ROOT/safe/tests/upstream/build_helpers.sh"
 

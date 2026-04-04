@@ -55,6 +55,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-env-changed=CC");
     println!("cargo:rerun-if-env-changed=AR");
     println!("cargo:rerun-if-env-changed=CFLAGS");
+    println!("cargo:rerun-if-changed={}", manifest_dir.join("shims").display());
 
     let cc = env::var_os("CC").unwrap_or_else(|| OsString::from("cc"));
     let ar = env::var_os("AR").unwrap_or_else(|| OsString::from("ar"));
@@ -125,6 +126,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let support_archive = native_dir.join("libxml2_c_support.a");
+    let _ = fs::remove_file(&support_archive);
     let mut ar_cmd = Command::new(&ar);
     ar_cmd.arg("crs");
     ar_cmd.arg(&support_archive);

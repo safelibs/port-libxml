@@ -27,6 +27,26 @@ pub mod foundation {
 }
 
 pub mod internal_ffi;
+#[allow(
+    dead_code,
+    non_camel_case_types,
+    non_snake_case,
+    non_upper_case_globals,
+    unused_macros
+)]
+pub mod parser {
+    pub mod budget;
+    pub mod docb_parser;
+    pub mod html_parser;
+    pub mod legacy;
+    pub mod parser;
+    pub mod parser_internals;
+    pub mod sax;
+    pub mod sax2;
+    pub mod xmlreader;
+    pub mod xmlsave;
+    pub mod xmlwriter;
+}
 pub mod tree_io;
 
 pub const MODULE_MANIFEST: &str = include_str!("../build/modules.toml");
