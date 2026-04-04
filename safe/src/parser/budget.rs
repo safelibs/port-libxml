@@ -160,11 +160,6 @@ pub(crate) fn entity_limit_exceeded<T>(
         return true;
     }
     let consumed = consumed.max(snapshot.reader_bytes);
-    if snapshot.entity_bytes >= XML_SHARED_LARGE_TEXT
-        && snapshot.entity_bytes >= consumed.saturating_mul(XML_SHARED_NON_LINEAR)
-    {
-        return true;
-    }
     if in_dtd
         && nbentities > 10_000
         && nbentities % 1024 == 0

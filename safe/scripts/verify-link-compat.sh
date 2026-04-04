@@ -159,6 +159,10 @@ def run_entry(binary: Path, entry: dict, mode: str) -> subprocess.CompletedProce
     argv = [str(binary), *entry.get("argv", [])]
     return subprocess.run(argv, cwd=cwd, env=env, check=False, text=True, capture_output=True)
 
+
+def normalize_output(text: str, binary: Path, entry: dict) -> str:
+    return text.replace(str(binary), entry["output"])
+
 failures = []
 for entry in entries:
     if entry.get("link", "dynamic") == "static":
@@ -176,13 +180,17 @@ for entry in entries:
     safe_binary = compile_entry(entry, safe_dir, "safe")
     original_result = run_entry(original_binary, entry, "original")
     safe_result = run_entry(safe_binary, entry, "safe")
+    original_stdout = normalize_output(original_result.stdout, original_binary, entry)
+    safe_stdout = normalize_output(safe_result.stdout, safe_binary, entry)
+    original_stderr = normalize_output(original_result.stderr, original_binary, entry)
+    safe_stderr = normalize_output(safe_result.stderr, safe_binary, entry)
     if original_result.returncode != safe_result.returncode:
         failures.append((entry["name"], "returncode", original_result.returncode, safe_result.returncode))
         continue
-    if original_result.stdout != safe_result.stdout:
+    if original_stdout != safe_stdout:
         failures.append((entry["name"], "stdout", "mismatch", "mismatch"))
         continue
-    if original_result.stderr != safe_result.stderr:
+    if original_stderr != safe_stderr:
         failures.append((entry["name"], "stderr", "mismatch", "mismatch"))
 
 if failures:

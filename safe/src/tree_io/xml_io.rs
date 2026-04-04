@@ -5415,9 +5415,6 @@ pub unsafe extern "C" fn xmlLoadExternalEntity(
     mut ID: *const ::core::ffi::c_char,
     mut ctxt: xmlParserCtxtPtr,
 ) -> xmlParserInputPtr {
-    if unsafe { deny_network_uri(URL) } {
-        return ::core::ptr::null_mut::<xmlParserInput>();
-    }
     if !URL.is_null() && xmlNoNetExists(URL) == 0 as ::core::ffi::c_int {
         let mut canonicFilename: *mut ::core::ffi::c_char =
             ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -5447,9 +5444,6 @@ pub unsafe extern "C" fn xmlNoNetExternalEntityLoader(
 ) -> xmlParserInputPtr {
     let mut input: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
     let mut resource: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if unsafe { deny_network_uri(URL) } {
-        return ::core::ptr::null_mut::<xmlParserInput>();
-    }
     resource = xmlResolveResourceFromCatalog(URL, ID, ctxt);
     if resource.is_null() {
         resource = URL as *mut xmlChar;

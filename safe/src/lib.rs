@@ -53,6 +53,31 @@ pub mod parser {
     pub mod xmlsave;
     pub mod xmlwriter;
 }
+#[allow(
+    dead_code,
+    improper_ctypes,
+    improper_ctypes_definitions,
+    non_camel_case_types,
+    non_snake_case,
+    non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
+    unused_assignments,
+    unused_mut,
+    unused_unsafe,
+    unused_macros
+)]
+pub mod xpath_valid {
+    pub mod c14n;
+    pub mod catalog;
+    pub mod pattern;
+    pub mod valid;
+    pub mod xinclude;
+    pub mod xlink;
+    pub mod xmlmodule;
+    pub mod xmlregexp;
+    pub mod xpath;
+    pub mod xpointer;
+}
 pub mod tree_io;
 
 pub const MODULE_MANIFEST: &str = include_str!("../build/modules.toml");

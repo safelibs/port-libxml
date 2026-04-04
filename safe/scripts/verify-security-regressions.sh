@@ -9,11 +9,13 @@ import ctypes
 import json
 import lzma
 import os
+import subprocess
 import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
 subset = sys.argv[2]
+sys.setrecursionlimit(max(sys.getrecursionlimit(), 5000))
 all_path = root / "all_cves.json"
 relevant_path = root / "relevant_cves.json"
 
@@ -52,88 +54,380 @@ print(
     f"{len(relevant_entries)} relevant CVEs from {len(all_ids)} authoritative corpus entries"
 )
 
-if subset not in {"tree-io", ""}:
+if subset not in {"tree-io", "xpath-valid", ""}:
     raise SystemExit(0)
 
 stage_candidates = sorted((root / "safe/target/stage").glob("usr/lib/*/libxml2.so.2.9.14"))
 if not stage_candidates:
-    raise SystemExit("tree-io security checks require a staged libxml2.so.2.9.14")
+    raise SystemExit("security checks require a staged libxml2.so.2.9.14")
 
 os.environ.pop("LIBXML2_SAFE_ALLOW_NETWORK", None)
-lib = ctypes.CDLL(str(stage_candidates[0]))
+os.environ.pop("XML_CATALOG_FILES", None)
+os.environ.pop("SGML_CATALOG_FILES", None)
+
+stage_lib = stage_candidates[0]
+stage_libdir = stage_lib.parent
+stage_bindir = root / "safe/target/stage/usr/bin"
+stage_xmllint = stage_bindir / "xmllint"
+stage_xmlcatalog = stage_bindir / "xmlcatalog"
+lib = ctypes.CDLL(str(stage_lib))
 
 char_pp = ctypes.POINTER(ctypes.c_char_p)
 
-lib.xmlNanoHTTPOpen.argtypes = [ctypes.c_char_p, char_pp]
-lib.xmlNanoHTTPOpen.restype = ctypes.c_void_p
-lib.xmlNanoFTPConnectTo.argtypes = [ctypes.c_char_p, ctypes.c_int]
-lib.xmlNanoFTPConnectTo.restype = ctypes.c_void_p
-lib.xmlLoadExternalEntity.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_void_p]
-lib.xmlLoadExternalEntity.restype = ctypes.c_void_p
-lib.xmlParserInputBufferCreateFilename.argtypes = [ctypes.c_char_p, ctypes.c_int]
-lib.xmlParserInputBufferCreateFilename.restype = ctypes.c_void_p
-lib.xmlFreeParserInputBuffer.argtypes = [ctypes.c_void_p]
-lib.xmlFreeParserInputBuffer.restype = None
-lib.__libxml2_xzopen.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
-lib.__libxml2_xzopen.restype = ctypes.c_void_p
-lib.__libxml2_xzread.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint]
-lib.__libxml2_xzread.restype = ctypes.c_int
-lib.__libxml2_xzclose.argtypes = [ctypes.c_void_p]
-lib.__libxml2_xzclose.restype = ctypes.c_int
+def stage_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env["LD_LIBRARY_PATH"] = f"{stage_libdir}:{env.get('LD_LIBRARY_PATH', '')}".rstrip(":")
+    env.pop("LIBXML2_SAFE_ALLOW_NETWORK", None)
+    env.pop("XML_CATALOG_FILES", None)
+    env.pop("SGML_CATALOG_FILES", None)
+    return env
 
-content_type = ctypes.c_char_p()
-http_ctx = lib.xmlNanoHTTPOpen(b"http://example.com/", ctypes.byref(content_type))
-if http_ctx or content_type.value:
-    raise SystemExit("xmlNanoHTTPOpen unexpectedly permitted a network URL")
 
-ftp_ctx = lib.xmlNanoFTPConnectTo(b"example.com", 21)
-if ftp_ctx:
-    raise SystemExit("xmlNanoFTPConnectTo unexpectedly permitted a network connection")
+def run_stage_command(
+    label: str,
+    argv: list[str],
+    cwd: Path,
+    *,
+    timeout: int = 5,
+    expect_success: bool | None = None,
+) -> subprocess.CompletedProcess[str]:
+    try:
+        completed = subprocess.run(
+            argv,
+            cwd=cwd,
+            env=stage_env(),
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=timeout,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise SystemExit(f"{label} timed out after {timeout}s") from exc
 
-loaded = lib.xmlLoadExternalEntity(b"http://example.com/ext.dtd", None, None)
-if loaded:
-    raise SystemExit("xmlLoadExternalEntity unexpectedly permitted a network URL")
+    if expect_success is True and completed.returncode != 0:
+        raise SystemExit(
+            f"{label} failed with exit {completed.returncode}\n"
+            f"stdout:\n{completed.stdout}\n"
+            f"stderr:\n{completed.stderr}"
+        )
+    if expect_success is False and completed.returncode == 0:
+        raise SystemExit(
+            f"{label} unexpectedly succeeded\n"
+            f"stdout:\n{completed.stdout}\n"
+            f"stderr:\n{completed.stderr}"
+        )
+    return completed
 
-local_path = root / "original/test/URI/uri.data"
-local_buf = lib.xmlParserInputBufferCreateFilename(str(local_path).encode(), 0)
-if not local_buf:
-    raise SystemExit(f"xmlParserInputBufferCreateFilename failed for local path {local_path}")
-lib.xmlFreeParserInputBuffer(local_buf)
 
-remote_buf = lib.xmlParserInputBufferCreateFilename(b"http://example.com/doc.xml", 0)
-if remote_buf:
-    raise SystemExit("xmlParserInputBufferCreateFilename unexpectedly permitted a network URL")
+if subset in {"tree-io", ""}:
+    lib.xmlNanoHTTPOpen.argtypes = [ctypes.c_char_p, char_pp]
+    lib.xmlNanoHTTPOpen.restype = ctypes.c_void_p
+    lib.xmlNanoFTPConnectTo.argtypes = [ctypes.c_char_p, ctypes.c_int]
+    lib.xmlNanoFTPConnectTo.restype = ctypes.c_void_p
+    lib.xmlLoadExternalEntity.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_void_p]
+    lib.xmlLoadExternalEntity.restype = ctypes.c_void_p
+    lib.xmlParserInputBufferCreateFilename.argtypes = [ctypes.c_char_p, ctypes.c_int]
+    lib.xmlParserInputBufferCreateFilename.restype = ctypes.c_void_p
+    lib.xmlFreeParserInputBuffer.argtypes = [ctypes.c_void_p]
+    lib.xmlFreeParserInputBuffer.restype = None
+    lib.__libxml2_xzopen.argtypes = [ctypes.c_char_p, ctypes.c_char_p]
+    lib.__libxml2_xzopen.restype = ctypes.c_void_p
+    lib.__libxml2_xzread.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_uint]
+    lib.__libxml2_xzread.restype = ctypes.c_int
+    lib.__libxml2_xzclose.argtypes = [ctypes.c_void_p]
+    lib.__libxml2_xzclose.restype = ctypes.c_int
 
-xz_budget = 8 * 1024 * 1024
-scratch = root / "safe/target/security-regressions"
-scratch.mkdir(parents=True, exist_ok=True)
-xz_path = scratch / "oversized-output.xz"
-xz_path.write_bytes(lzma.compress(b"A" * (xz_budget + 1024 * 1024)))
+    content_type = ctypes.c_char_p()
+    http_ctx = lib.xmlNanoHTTPOpen(b"http://example.com/", ctypes.byref(content_type))
+    if http_ctx or content_type.value:
+        raise SystemExit("xmlNanoHTTPOpen unexpectedly permitted a network URL")
 
-xz_handle = lib.__libxml2_xzopen(str(xz_path).encode(), b"rb")
-if not xz_handle:
-    raise SystemExit("failed to open generated xz regression fixture")
+    ftp_ctx = lib.xmlNanoFTPConnectTo(b"example.com", 21)
+    if ftp_ctx:
+        raise SystemExit("xmlNanoFTPConnectTo unexpectedly permitted a network connection")
 
-chunk = ctypes.create_string_buffer(64 * 1024)
-total = 0
-iterations = 0
-last_ret = 0
-while True:
-    ret = lib.__libxml2_xzread(xz_handle, chunk, len(chunk))
-    iterations += 1
-    if ret <= 0:
-        last_ret = ret
-        break
-    total += ret
-    if iterations > 10_000:
-        raise SystemExit("xz regression fixture exceeded iteration budget")
+    loaded = lib.xmlLoadExternalEntity(b"http://example.com/ext.dtd", None, None)
+    if loaded:
+        raise SystemExit("xmlLoadExternalEntity unexpectedly permitted a network URL")
 
-lib.__libxml2_xzclose(xz_handle)
+    local_path = root / "original/test/URI/uri.data"
+    local_buf = lib.xmlParserInputBufferCreateFilename(str(local_path).encode(), 0)
+    if not local_buf:
+        raise SystemExit(f"xmlParserInputBufferCreateFilename failed for local path {local_path}")
+    lib.xmlFreeParserInputBuffer(local_buf)
 
-if total > xz_budget:
-    raise SystemExit(f"xz output budget exceeded: produced {total} bytes with budget {xz_budget}")
-if last_ret != -1:
-    raise SystemExit(f"xz regression fixture did not terminate with a hard stop: last read={last_ret}")
+    remote_buf = lib.xmlParserInputBufferCreateFilename(b"http://example.com/doc.xml", 0)
+    if remote_buf:
+        raise SystemExit("xmlParserInputBufferCreateFilename unexpectedly permitted a network URL")
 
-print("tree-io security checks passed: direct network loads blocked and xz output budget enforced")
+    xz_budget = 8 * 1024 * 1024
+    scratch = root / "safe/target/security-regressions"
+    scratch.mkdir(parents=True, exist_ok=True)
+    xz_path = scratch / "oversized-output.xz"
+    xz_path.write_bytes(lzma.compress(b"A" * (xz_budget + 1024 * 1024)))
+
+    xz_handle = lib.__libxml2_xzopen(str(xz_path).encode(), b"rb")
+    if not xz_handle:
+        raise SystemExit("failed to open generated xz regression fixture")
+
+    chunk = ctypes.create_string_buffer(64 * 1024)
+    total = 0
+    iterations = 0
+    last_ret = 0
+    while True:
+        ret = lib.__libxml2_xzread(xz_handle, chunk, len(chunk))
+        iterations += 1
+        if ret <= 0:
+            last_ret = ret
+            break
+        total += ret
+        if iterations > 10_000:
+            raise SystemExit("xz regression fixture exceeded iteration budget")
+
+    lib.__libxml2_xzclose(xz_handle)
+
+    if total > xz_budget:
+        raise SystemExit(f"xz output budget exceeded: produced {total} bytes with budget {xz_budget}")
+    if last_ret != -1:
+        raise SystemExit(f"xz regression fixture did not terminate with a hard stop: last read={last_ret}")
+
+    print("tree-io security checks passed: direct network loads blocked and xz output budget enforced")
+
+
+if subset in {"xpath-valid", ""}:
+    security_root = root / "safe/tests/security"
+    catalog_dir = security_root / "catalog"
+    xinclude_dir = security_root / "xinclude"
+    xpath_dir = security_root / "xpath"
+
+    for path in (
+        stage_xmllint,
+        stage_xmlcatalog,
+        catalog_dir / "duplicate-next.xml",
+        catalog_dir / "leaf.xml",
+        catalog_dir / "loop-a.xml",
+        catalog_dir / "loop-b.xml",
+        xinclude_dir / "remote.xml",
+        xinclude_dir / "self.xml",
+        xpath_dir / "doc.xml",
+        xpath_dir / "malformed.expr",
+        xpath_dir / "recurse.expr",
+    ):
+        if not path.exists():
+            raise SystemExit(f"missing xpath-valid security fixture or tool: {path}")
+
+    duplicate_result = run_stage_command(
+        "catalog duplicate nextCatalog",
+        [str(stage_xmlcatalog), "duplicate-next.xml", "urn:dup-target"],
+        catalog_dir,
+        expect_success=True,
+    )
+    duplicate_lines = [line.strip() for line in duplicate_result.stdout.splitlines() if line.strip()]
+    if not duplicate_lines or duplicate_lines[-1] != "file:///resolved/duplicate-target":
+        raise SystemExit(
+            "catalog duplicate nextCatalog fixture resolved unexpectedly:\n"
+            f"stdout:\n{duplicate_result.stdout}\n"
+            f"stderr:\n{duplicate_result.stderr}"
+        )
+
+    run_stage_command(
+        "catalog recursive nextCatalog loop",
+        [str(stage_xmlcatalog), "loop-a.xml", "urn:missing"],
+        catalog_dir,
+        expect_success=False,
+    )
+    run_stage_command(
+        "catalog upstream recursive sgml",
+        [str(stage_xmlcatalog), "recursive.sgml", "urn:missing"],
+        root / "original/test/catalogs",
+        expect_success=False,
+    )
+
+    run_stage_command(
+        "xinclude remote nonet",
+        [str(stage_xmllint), "--noout", "--nonet", "--xinclude", "remote.xml"],
+        xinclude_dir,
+        expect_success=False,
+    )
+    run_stage_command(
+        "xinclude self recursion",
+        [str(stage_xmllint), "--noout", "--nonet", "--xinclude", "self.xml"],
+        xinclude_dir,
+        expect_success=False,
+    )
+
+    class XmlError(ctypes.Structure):
+        _fields_ = [
+            ("domain", ctypes.c_int),
+            ("code", ctypes.c_int),
+            ("message", ctypes.c_char_p),
+            ("level", ctypes.c_int),
+            ("file", ctypes.c_char_p),
+            ("line", ctypes.c_int),
+            ("str1", ctypes.c_char_p),
+            ("str2", ctypes.c_char_p),
+            ("str3", ctypes.c_char_p),
+            ("int1", ctypes.c_int),
+            ("int2", ctypes.c_int),
+            ("ctxt", ctypes.c_void_p),
+            ("node", ctypes.c_void_p),
+        ]
+
+
+    class XmlXPathContext(ctypes.Structure):
+        pass
+
+
+    class XmlXPathParserContext(ctypes.Structure):
+        pass
+
+
+    XmlXPathContext._fields_ = [
+        ("doc", ctypes.c_void_p),
+        ("node", ctypes.c_void_p),
+        ("nb_variables_unused", ctypes.c_int),
+        ("max_variables_unused", ctypes.c_int),
+        ("varHash", ctypes.c_void_p),
+        ("nb_types", ctypes.c_int),
+        ("max_types", ctypes.c_int),
+        ("types", ctypes.c_void_p),
+        ("nb_funcs_unused", ctypes.c_int),
+        ("max_funcs_unused", ctypes.c_int),
+        ("funcHash", ctypes.c_void_p),
+        ("nb_axis", ctypes.c_int),
+        ("max_axis", ctypes.c_int),
+        ("axis", ctypes.c_void_p),
+        ("namespaces", ctypes.c_void_p),
+        ("nsNr", ctypes.c_int),
+        ("user", ctypes.c_void_p),
+        ("contextSize", ctypes.c_int),
+        ("proximityPosition", ctypes.c_int),
+        ("xptr", ctypes.c_int),
+        ("here", ctypes.c_void_p),
+        ("origin", ctypes.c_void_p),
+        ("nsHash", ctypes.c_void_p),
+        ("varLookupFunc", ctypes.c_void_p),
+        ("varLookupData", ctypes.c_void_p),
+        ("extra", ctypes.c_void_p),
+        ("function", ctypes.c_char_p),
+        ("functionURI", ctypes.c_char_p),
+        ("funcLookupFunc", ctypes.c_void_p),
+        ("funcLookupData", ctypes.c_void_p),
+        ("tmpNsList", ctypes.c_void_p),
+        ("tmpNsNr", ctypes.c_int),
+        ("userData", ctypes.c_void_p),
+        ("error", ctypes.c_void_p),
+        ("lastError", XmlError),
+        ("debugNode", ctypes.c_void_p),
+        ("dict", ctypes.c_void_p),
+        ("flags", ctypes.c_int),
+        ("cache", ctypes.c_void_p),
+        ("opLimit", ctypes.c_ulong),
+        ("opCount", ctypes.c_ulong),
+        ("depth", ctypes.c_int),
+    ]
+
+    XmlXPathParserContext._fields_ = [
+        ("cur", ctypes.c_void_p),
+        ("base", ctypes.c_void_p),
+        ("error", ctypes.c_int),
+        ("context", ctypes.POINTER(XmlXPathContext)),
+    ]
+
+    xpath_func_t = ctypes.CFUNCTYPE(None, ctypes.POINTER(XmlXPathParserContext), ctypes.c_int)
+
+    lib.xmlReadFile.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int]
+    lib.xmlReadFile.restype = ctypes.c_void_p
+    lib.xmlFreeDoc.argtypes = [ctypes.c_void_p]
+    lib.xmlFreeDoc.restype = None
+    lib.xmlXPathNewContext.argtypes = [ctypes.c_void_p]
+    lib.xmlXPathNewContext.restype = ctypes.POINTER(XmlXPathContext)
+    lib.xmlXPathFreeContext.argtypes = [ctypes.POINTER(XmlXPathContext)]
+    lib.xmlXPathFreeContext.restype = None
+    lib.xmlXPathEvalExpression.argtypes = [ctypes.c_char_p, ctypes.POINTER(XmlXPathContext)]
+    lib.xmlXPathEvalExpression.restype = ctypes.c_void_p
+    lib.xmlXPathRegisterFunc.argtypes = [ctypes.POINTER(XmlXPathContext), ctypes.c_char_p, xpath_func_t]
+    lib.xmlXPathRegisterFunc.restype = ctypes.c_int
+    lib.xmlXPathNewBoolean.argtypes = [ctypes.c_int]
+    lib.xmlXPathNewBoolean.restype = ctypes.c_void_p
+    lib.valuePush.argtypes = [ctypes.POINTER(XmlXPathParserContext), ctypes.c_void_p]
+    lib.valuePush.restype = ctypes.c_int
+    lib.xmlXPathFreeObject.argtypes = [ctypes.c_void_p]
+    lib.xmlXPathFreeObject.restype = None
+
+    xpath_doc = lib.xmlReadFile(str(xpath_dir / "doc.xml").encode(), None, 0)
+    if not xpath_doc:
+        raise SystemExit("failed to parse xpath security fixture document")
+
+    xpath_ctx = lib.xmlXPathNewContext(xpath_doc)
+    if not xpath_ctx:
+        lib.xmlFreeDoc(xpath_doc)
+        raise SystemExit("failed to create XPath context for security regression checks")
+
+    malformed_expr = (xpath_dir / "malformed.expr").read_bytes().strip()
+    malformed_result = lib.xmlXPathEvalExpression(malformed_expr, xpath_ctx)
+    if malformed_result:
+        lib.xmlXPathFreeObject(malformed_result)
+        lib.xmlXPathFreeContext(xpath_ctx)
+        lib.xmlFreeDoc(xpath_doc)
+        raise SystemExit("malformed XPath expression unexpectedly evaluated successfully")
+
+    recursive_expr = (xpath_dir / "recurse.expr").read_bytes().strip()
+    recursive_state = {"calls": 0, "hit_limit": False, "errors": []}
+    xpath_ctx.contents.depth = 4996
+
+    @xpath_func_t
+    def recurse_function(parser_ctxt, nargs):
+        del nargs
+        try:
+            recursive_state["calls"] += 1
+            if not parser_ctxt:
+                recursive_state["errors"].append("recursive XPath callback received a null parser context")
+            elif not recursive_state["hit_limit"]:
+                inner_result = lib.xmlXPathEvalExpression(recursive_expr, parser_ctxt.contents.context)
+                if inner_result:
+                    lib.xmlXPathFreeObject(inner_result)
+                else:
+                    recursive_state["hit_limit"] = True
+
+            boolean_obj = lib.xmlXPathNewBoolean(1 if recursive_state["hit_limit"] else 0)
+            if not boolean_obj:
+                recursive_state["errors"].append("xmlXPathNewBoolean failed in recursive callback")
+            elif parser_ctxt and lib.valuePush(parser_ctxt, boolean_obj) < 0:
+                recursive_state["errors"].append("valuePush failed in recursive callback")
+                lib.xmlXPathFreeObject(boolean_obj)
+        except Exception as exc:  # pragma: no cover - fatal test harness guard
+            recursive_state["errors"].append(str(exc))
+
+    register_rc = lib.xmlXPathRegisterFunc(xpath_ctx, b"recurse", recurse_function)
+    if register_rc != 0:
+        lib.xmlXPathFreeContext(xpath_ctx)
+        lib.xmlFreeDoc(xpath_doc)
+        raise SystemExit(f"xmlXPathRegisterFunc failed for recursive regression fixture: rc={register_rc}")
+
+    recursive_result = lib.xmlXPathEvalExpression(recursive_expr, xpath_ctx)
+    if recursive_result:
+        lib.xmlXPathFreeObject(recursive_result)
+
+    lib.xmlXPathFreeContext(xpath_ctx)
+    lib.xmlFreeDoc(xpath_doc)
+
+    if recursive_state["errors"]:
+        raise SystemExit(
+            "recursive XPath regression harness failed:\n" + "\n".join(recursive_state["errors"])
+        )
+    if recursive_state["calls"] < 2:
+        raise SystemExit("recursive XPath regression did not reach a recursive re-entry")
+    if not recursive_state["hit_limit"]:
+        raise SystemExit(
+            "recursive XPath regression never hit the shared depth budget; "
+            "the CVE-2025-9714 guard may be bypassed"
+        )
+
+    print(
+        "xpath-valid security checks passed: catalog recursion/duplicate-next limits "
+        "hold, XInclude honors nonet and self-recursion failures, and recursive XPath "
+        "re-entry stops with a recoverable depth error"
+    )
 PY

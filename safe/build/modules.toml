@@ -23,12 +23,12 @@ provider = "rust"
 [[module]]
 name = "c14n"
 source = "../original/c14n.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "catalog"
 source = "../original/catalog.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "chvalid"
@@ -119,7 +119,7 @@ provider = "rust"
 [[module]]
 name = "pattern"
 source = "../original/pattern.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "relaxng"
@@ -159,17 +159,17 @@ provider = "rust"
 [[module]]
 name = "valid"
 source = "../original/valid.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xinclude"
 source = "../original/xinclude.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xlink"
 source = "../original/xlink.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xmlIO"
@@ -184,7 +184,7 @@ provider = "rust"
 [[module]]
 name = "xmlmodule"
 source = "../original/xmlmodule.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xmlreader"
@@ -194,7 +194,7 @@ provider = "rust"
 [[module]]
 name = "xmlregexp"
 source = "../original/xmlregexp.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xmlsave"
@@ -249,12 +249,12 @@ provider = "rust"
 [[module]]
 name = "xpath"
 source = "../original/xpath.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xpointer"
 source = "../original/xpointer.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xzlib"
