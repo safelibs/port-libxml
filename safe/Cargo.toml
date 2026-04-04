@@ -9,6 +9,9 @@ publish = false
 name = "xml2"
 crate-type = ["cdylib", "staticlib", "rlib"]
 
+[dependencies]
+c2rust-bitfields = "0.22.1"
+
 [[bin]]
 name = "xmllint"
 path = "src/bin/xmllint.rs"
