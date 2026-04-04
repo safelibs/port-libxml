@@ -222,22 +222,23 @@ unsafe extern "C" fn xmlDictAddQString(
     mut plen: ::core::ffi::c_uint,
     mut name: *const xmlChar,
     mut namelen: ::core::ffi::c_uint,
-) -> *const xmlChar { unsafe {
+) -> *const xmlChar {
     let mut current_block: u64;
     let mut pool: xmlDictStringsPtr = ::core::ptr::null_mut::<xmlDictStrings>();
-    let mut ret: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut size: size_t = 0 as size_t;
     let mut limit: size_t = 0 as size_t;
     if prefix.is_null() {
-        return xmlDictAddString(dict, name, namelen);
+        return unsafe { xmlDictAddString(dict, name, namelen) };
     }
-    pool = (*dict).strings;
+    pool = unsafe { (*dict).strings };
     loop {
         if pool.is_null() {
             current_block = 13513818773234778473;
             break;
         }
-        if (*pool).end.offset_from((*pool).free) as ::core::ffi::c_long as size_t
+        let available =
+            unsafe { (*pool).end.offset_from((*pool).free) as ::core::ffi::c_long as size_t };
+        if available
             > namelen
                 .wrapping_add(plen)
                 .wrapping_add(1 as ::core::ffi::c_uint) as size_t
@@ -245,16 +246,18 @@ unsafe extern "C" fn xmlDictAddQString(
             current_block = 9272350092442567110;
             break;
         }
-        if (*pool).size > size {
-            size = (*pool).size;
+        let pool_size = unsafe { (*pool).size };
+        if pool_size > size {
+            size = pool_size;
         }
-        limit = limit.wrapping_add((*pool).size);
-        pool = (*pool).next;
+        limit = limit.wrapping_add(pool_size);
+        pool = unsafe { (*pool).next };
     }
     match current_block {
         13513818773234778473 => {
             if pool.is_null() {
-                if (*dict).limit > 0 as size_t && limit > (*dict).limit {
+                let dict_limit = unsafe { (*dict).limit };
+                if dict_limit > 0 as size_t && limit > dict_limit {
                     return ::core::ptr::null::<xmlChar>();
                 }
                 if size == 0 as size_t {
@@ -275,52 +278,58 @@ unsafe extern "C" fn xmlDictAddQString(
                             .wrapping_add(1 as ::core::ffi::c_uint),
                     ) as size_t;
                 }
-                pool = xmlMalloc.expect("non-null function pointer")(
-                    (::core::mem::size_of::<xmlDictStrings>() as size_t).wrapping_add(size),
-                ) as xmlDictStringsPtr;
+                pool = unsafe {
+                    xmlMalloc.expect("non-null function pointer")(
+                        (::core::mem::size_of::<xmlDictStrings>() as size_t).wrapping_add(size),
+                    ) as xmlDictStringsPtr
+                };
                 if pool.is_null() {
                     return ::core::ptr::null::<xmlChar>();
                 }
-                (*pool).size = size;
-                (*pool).nbStrings = 0 as size_t;
-                (*pool).free = (&raw mut (*pool).array as *mut xmlChar)
-                    .offset(0 as ::core::ffi::c_int as isize)
-                    as *mut xmlChar;
-                (*pool).end =
-                    (&raw mut (*pool).array as *mut xmlChar).offset(size as isize) as *mut xmlChar;
-                (*pool).next = (*dict).strings;
-                (*dict).strings = pool;
+                unsafe {
+                    (*pool).size = size;
+                    (*pool).nbStrings = 0 as size_t;
+                    (*pool).free = (&raw mut (*pool).array as *mut xmlChar)
+                        .offset(0 as ::core::ffi::c_int as isize)
+                        as *mut xmlChar;
+                    (*pool).end = (&raw mut (*pool).array as *mut xmlChar).offset(size as isize)
+                        as *mut xmlChar;
+                    (*pool).next = (*dict).strings;
+                    (*dict).strings = pool;
+                }
             }
         }
         _ => {}
     }
-    ret = (*pool).free;
-    memcpy(
-        (*pool).free as *mut ::core::ffi::c_void,
-        prefix as *const ::core::ffi::c_void,
-        plen as size_t,
-    );
-    (*pool).free = (*pool).free.offset(plen as isize);
-    let fresh5 = (*pool).free;
-    (*pool).free = (*pool).free.offset(1);
-    *fresh5 = ':' as i32 as xmlChar;
-    memcpy(
-        (*pool).free as *mut ::core::ffi::c_void,
-        name as *const ::core::ffi::c_void,
-        namelen as size_t,
-    );
-    (*pool).free = (*pool).free.offset(namelen as isize);
-    let fresh6 = (*pool).free;
-    (*pool).free = (*pool).free.offset(1);
-    *fresh6 = 0 as xmlChar;
-    (*pool).nbStrings = (*pool).nbStrings.wrapping_add(1);
+    let ret = unsafe { (*pool).free as *const xmlChar };
+    unsafe {
+        memcpy(
+            (*pool).free as *mut ::core::ffi::c_void,
+            prefix as *const ::core::ffi::c_void,
+            plen as size_t,
+        );
+        (*pool).free = (*pool).free.offset(plen as isize);
+        let fresh5 = (*pool).free;
+        (*pool).free = (*pool).free.offset(1);
+        *fresh5 = ':' as i32 as xmlChar;
+        memcpy(
+            (*pool).free as *mut ::core::ffi::c_void,
+            name as *const ::core::ffi::c_void,
+            namelen as size_t,
+        );
+        (*pool).free = (*pool).free.offset(namelen as isize);
+        let fresh6 = (*pool).free;
+        (*pool).free = (*pool).free.offset(1);
+        *fresh6 = 0 as xmlChar;
+        (*pool).nbStrings = (*pool).nbStrings.wrapping_add(1);
+    }
     return ret;
-}}
+}
 unsafe extern "C" fn xmlDictComputeBigKey(
     mut data: *const xmlChar,
     mut namelen: ::core::ffi::c_int,
     mut seed: ::core::ffi::c_int,
-) -> uint32_t { unsafe {
+) -> uint32_t {
     let mut hash: uint32_t = 0;
     let mut i: ::core::ffi::c_int = 0;
     if namelen <= 0 as ::core::ffi::c_int || data.is_null() {
@@ -329,7 +338,7 @@ unsafe extern "C" fn xmlDictComputeBigKey(
     hash = seed as uint32_t;
     i = 0 as ::core::ffi::c_int;
     while i < namelen {
-        hash = hash.wrapping_add(*data.offset(i as isize) as uint32_t);
+        hash = hash.wrapping_add(unsafe { *data.offset(i as isize) as uint32_t });
         hash = hash.wrapping_add(hash << 10 as ::core::ffi::c_int);
         hash ^= hash >> 6 as ::core::ffi::c_int;
         i += 1;
@@ -338,7 +347,7 @@ unsafe extern "C" fn xmlDictComputeBigKey(
     hash ^= hash >> 11 as ::core::ffi::c_int;
     hash = hash.wrapping_add(hash << 15 as ::core::ffi::c_int);
     return hash;
-}}
+}
 unsafe extern "C" fn xmlDictComputeBigQKey(
     mut prefix: *const xmlChar,
     mut plen: ::core::ffi::c_int,

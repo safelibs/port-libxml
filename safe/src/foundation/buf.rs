@@ -1123,18 +1123,22 @@ unsafe extern "C" fn xmlBufMemoryError(mut buf: xmlBufPtr, mut extra: *const ::c
 unsafe extern "C" fn xmlBufOverflowError(
     mut buf: xmlBufPtr,
     mut extra: *const ::core::ffi::c_char,
-) { unsafe {
-    __xmlSimpleError(
+) {
+    unsafe {
+        __xmlSimpleError(
         XML_FROM_BUFFER as ::core::ffi::c_int,
         XML_BUF_OVERFLOW as ::core::ffi::c_int,
         ::core::ptr::null_mut::<xmlNode>(),
         ::core::ptr::null::<::core::ffi::c_char>(),
         extra,
-    );
-    if !buf.is_null() && (*buf).error == 0 as ::core::ffi::c_int {
-        (*buf).error = XML_BUF_OVERFLOW as ::core::ffi::c_int;
+        );
     }
-}}
+    if !buf.is_null() && unsafe { (*buf).error } == 0 as ::core::ffi::c_int {
+        unsafe {
+        (*buf).error = XML_BUF_OVERFLOW as ::core::ffi::c_int;
+        }
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufCreate() -> xmlBufPtr {
     let mut ret: xmlBufPtr = unsafe {
@@ -1184,114 +1188,130 @@ pub unsafe extern "C" fn xmlBufCreate() -> xmlBufPtr {
     return ret;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufCreateSize(mut size: size_t) -> xmlBufPtr { unsafe {
-    let mut ret: xmlBufPtr = ::core::ptr::null_mut::<xmlBuf>();
+pub unsafe extern "C" fn xmlBufCreateSize(mut size: size_t) -> xmlBufPtr {
     if size == SIZE_MAX {
         return ::core::ptr::null_mut::<xmlBuf>();
     }
-    ret = xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<xmlBuf>() as size_t)
-        as xmlBufPtr;
+    let ret = unsafe {
+        xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<xmlBuf>() as size_t)
+            as xmlBufPtr
+    };
     if ret.is_null() {
-        xmlBufMemoryError(
-            ::core::ptr::null_mut::<xmlBuf>(),
-            b"creating buffer\0" as *const u8 as *const ::core::ffi::c_char,
-        );
+        unsafe {
+            xmlBufMemoryError(
+                ::core::ptr::null_mut::<xmlBuf>(),
+                b"creating buffer\0" as *const u8 as *const ::core::ffi::c_char,
+            );
+        }
         return ::core::ptr::null_mut::<xmlBuf>();
     }
-    (*ret).compat_use = 0 as ::core::ffi::c_uint;
-    (*ret).use_0 = 0 as size_t;
-    (*ret).error = 0 as ::core::ffi::c_int;
-    (*ret).buffer = ::core::ptr::null_mut::<xmlBuffer>();
-    (*ret).alloc = *__xmlBufferAllocScheme();
-    (*ret).size = if size != 0 {
+    let ret_ref = unsafe { &mut *ret };
+    ret_ref.compat_use = 0 as ::core::ffi::c_uint;
+    ret_ref.use_0 = 0 as size_t;
+    ret_ref.error = 0 as ::core::ffi::c_int;
+    ret_ref.buffer = ::core::ptr::null_mut::<xmlBuffer>();
+    ret_ref.alloc = unsafe { *__xmlBufferAllocScheme() };
+    ret_ref.size = if size != 0 {
         size.wrapping_add(1 as size_t)
     } else {
         0 as size_t
     };
-    (*ret).compat_size = (if (*ret).size > INT_MAX as size_t {
+    ret_ref.compat_size = (if ret_ref.size > INT_MAX as size_t {
         INT_MAX as size_t
     } else {
-        (*ret).size
+        ret_ref.size
     }) as ::core::ffi::c_uint;
-    if (*ret).size != 0 {
-        (*ret).content = xmlMallocAtomic.expect("non-null function pointer")(
-            (*ret)
-                .size
+    if ret_ref.size != 0 {
+        let content = unsafe {
+            xmlMallocAtomic.expect("non-null function pointer")(
+                ret_ref
+                    .size
                 .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-        ) as *mut xmlChar;
-        if (*ret).content.is_null() {
-            xmlBufMemoryError(
-                ret,
-                b"creating buffer\0" as *const u8 as *const ::core::ffi::c_char,
-            );
-            xmlFree.expect("non-null function pointer")(ret as *mut ::core::ffi::c_void);
+            ) as *mut xmlChar
+        };
+        if content.is_null() {
+            unsafe {
+                xmlBufMemoryError(
+                    ret,
+                    b"creating buffer\0" as *const u8 as *const ::core::ffi::c_char,
+                );
+                xmlFree.expect("non-null function pointer")(ret as *mut ::core::ffi::c_void);
+            }
             return ::core::ptr::null_mut::<xmlBuf>();
         }
-        *(*ret).content.offset(0 as ::core::ffi::c_int as isize) = 0 as xmlChar;
+        ret_ref.content = content;
+        unsafe {
+            *content.offset(0 as ::core::ffi::c_int as isize) = 0 as xmlChar;
+        }
     } else {
-        (*ret).content = ::core::ptr::null_mut::<xmlChar>();
+        ret_ref.content = ::core::ptr::null_mut::<xmlChar>();
     }
-    (*ret).contentIO = ::core::ptr::null_mut::<xmlChar>();
+    ret_ref.contentIO = ::core::ptr::null_mut::<xmlChar>();
     return ret;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufDetach(mut buf: xmlBufPtr) -> *mut xmlChar { unsafe {
-    let mut ret: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
+pub unsafe extern "C" fn xmlBufDetach(mut buf: xmlBufPtr) -> *mut xmlChar {
     if buf.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    if (*buf).alloc as ::core::ffi::c_uint
+    if unsafe { (*buf).alloc as ::core::ffi::c_uint }
         == XML_BUFFER_ALLOC_IMMUTABLE as ::core::ffi::c_int as ::core::ffi::c_uint
     {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    if !(*buf).buffer.is_null() {
+    if unsafe { !(*buf).buffer.is_null() } {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    if (*buf).error != 0 {
+    if unsafe { (*buf).error } != 0 {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    ret = (*buf).content;
-    (*buf).content = ::core::ptr::null_mut::<xmlChar>();
-    (*buf).size = 0 as size_t;
-    (*buf).use_0 = 0 as size_t;
-    (*buf).compat_use = 0 as ::core::ffi::c_uint;
-    (*buf).compat_size = 0 as ::core::ffi::c_uint;
+    let ret = unsafe { (*buf).content };
+    unsafe {
+        (*buf).content = ::core::ptr::null_mut::<xmlChar>();
+        (*buf).size = 0 as size_t;
+        (*buf).use_0 = 0 as size_t;
+        (*buf).compat_use = 0 as ::core::ffi::c_uint;
+        (*buf).compat_size = 0 as ::core::ffi::c_uint;
+    }
     return ret;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufCreateStatic(
     mut mem: *mut ::core::ffi::c_void,
     mut size: size_t,
-) -> xmlBufPtr { unsafe {
-    let mut ret: xmlBufPtr = ::core::ptr::null_mut::<xmlBuf>();
+) -> xmlBufPtr {
     if mem.is_null() {
         return ::core::ptr::null_mut::<xmlBuf>();
     }
-    ret = xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<xmlBuf>() as size_t)
-        as xmlBufPtr;
+    let ret = unsafe {
+        xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<xmlBuf>() as size_t)
+            as xmlBufPtr
+    };
     if ret.is_null() {
-        xmlBufMemoryError(
-            ::core::ptr::null_mut::<xmlBuf>(),
-            b"creating buffer\0" as *const u8 as *const ::core::ffi::c_char,
-        );
+        unsafe {
+            xmlBufMemoryError(
+                ::core::ptr::null_mut::<xmlBuf>(),
+                b"creating buffer\0" as *const u8 as *const ::core::ffi::c_char,
+            );
+        }
         return ::core::ptr::null_mut::<xmlBuf>();
     }
+    let ret_ref = unsafe { &mut *ret };
     if size < INT_MAX as size_t {
-        (*ret).compat_use = size as ::core::ffi::c_uint;
-        (*ret).compat_size = size as ::core::ffi::c_uint;
+        ret_ref.compat_use = size as ::core::ffi::c_uint;
+        ret_ref.compat_size = size as ::core::ffi::c_uint;
     } else {
-        (*ret).compat_use = INT_MAX as ::core::ffi::c_uint;
-        (*ret).compat_size = INT_MAX as ::core::ffi::c_uint;
+        ret_ref.compat_use = INT_MAX as ::core::ffi::c_uint;
+        ret_ref.compat_size = INT_MAX as ::core::ffi::c_uint;
     }
-    (*ret).use_0 = size;
-    (*ret).size = size;
-    (*ret).alloc = XML_BUFFER_ALLOC_IMMUTABLE;
-    (*ret).content = mem as *mut xmlChar;
-    (*ret).error = 0 as ::core::ffi::c_int;
-    (*ret).buffer = ::core::ptr::null_mut::<xmlBuffer>();
+    ret_ref.use_0 = size;
+    ret_ref.size = size;
+    ret_ref.alloc = XML_BUFFER_ALLOC_IMMUTABLE;
+    ret_ref.content = mem as *mut xmlChar;
+    ret_ref.error = 0 as ::core::ffi::c_int;
+    ret_ref.buffer = ::core::ptr::null_mut::<xmlBuffer>();
     return ret;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufGetAllocationScheme(mut buf: xmlBufPtr) -> ::core::ffi::c_int { unsafe {
     if buf.is_null() {

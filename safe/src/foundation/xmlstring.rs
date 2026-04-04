@@ -708,97 +708,113 @@ pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::
 pub unsafe extern "C" fn xmlStrndup(
     mut cur: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> *mut xmlChar { unsafe {
-    let mut ret: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
+) -> *mut xmlChar {
     if cur.is_null() || len < 0 as ::core::ffi::c_int {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    ret = xmlMallocAtomic.expect("non-null function pointer")(
-        (len as size_t)
-            .wrapping_add(1 as size_t)
-            .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) as *mut xmlChar;
+    let ret = unsafe {
+        xmlMallocAtomic.expect("non-null function pointer")(
+            (len as size_t)
+                .wrapping_add(1 as size_t)
+                .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        ) as *mut xmlChar
+    };
     if ret.is_null() {
-        xmlErrMemory(
-            ::core::ptr::null_mut::<xmlParserCtxt>(),
-            ::core::ptr::null::<::core::ffi::c_char>(),
-        );
+        unsafe {
+            xmlErrMemory(
+                ::core::ptr::null_mut::<xmlParserCtxt>(),
+                ::core::ptr::null::<::core::ffi::c_char>(),
+            );
+        }
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    memcpy(
-        ret as *mut ::core::ffi::c_void,
-        cur as *const ::core::ffi::c_void,
-        (len as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    );
-    *ret.offset(len as isize) = 0 as xmlChar;
+    unsafe {
+        memcpy(
+            ret as *mut ::core::ffi::c_void,
+            cur as *const ::core::ffi::c_void,
+            (len as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        );
+        *ret.offset(len as isize) = 0 as xmlChar;
+    }
     return ret;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlStrdup(mut cur: *const xmlChar) -> *mut xmlChar { unsafe {
-    let mut p: *const xmlChar = cur;
+pub unsafe extern "C" fn xmlStrdup(mut cur: *const xmlChar) -> *mut xmlChar {
+    let mut p = cur;
     if cur.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    while *p as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
-        p = p.offset(1);
+    while unsafe { *p as ::core::ffi::c_int } != 0 as ::core::ffi::c_int {
+        p = unsafe { p.offset(1) };
     }
-    return xmlStrndup(
-        cur,
-        p.offset_from(cur) as ::core::ffi::c_long as ::core::ffi::c_int,
-    );
-}}
+    return unsafe {
+        xmlStrndup(
+            cur,
+            p.offset_from(cur) as ::core::ffi::c_long as ::core::ffi::c_int,
+        )
+    };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlCharStrndup(
     mut cur: *const ::core::ffi::c_char,
     mut len: ::core::ffi::c_int,
-) -> *mut xmlChar { unsafe {
+) -> *mut xmlChar {
     let mut i: ::core::ffi::c_int = 0;
-    let mut ret: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     if cur.is_null() || len < 0 as ::core::ffi::c_int {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    ret = xmlMallocAtomic.expect("non-null function pointer")(
-        (len as size_t)
-            .wrapping_add(1 as size_t)
-            .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) as *mut xmlChar;
+    let ret = unsafe {
+        xmlMallocAtomic.expect("non-null function pointer")(
+            (len as size_t)
+                .wrapping_add(1 as size_t)
+                .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        ) as *mut xmlChar
+    };
     if ret.is_null() {
-        xmlErrMemory(
-            ::core::ptr::null_mut::<xmlParserCtxt>(),
-            ::core::ptr::null::<::core::ffi::c_char>(),
-        );
+        unsafe {
+            xmlErrMemory(
+                ::core::ptr::null_mut::<xmlParserCtxt>(),
+                ::core::ptr::null::<::core::ffi::c_char>(),
+            );
+        }
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    i = 0 as ::core::ffi::c_int;
     while i < len {
-        *ret.offset(i as isize) = *cur.offset(i as isize) as xmlChar;
-        if *ret.offset(i as isize) as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
+        let ch = unsafe { *cur.offset(i as isize) };
+        unsafe {
+            *ret.offset(i as isize) = ch as xmlChar;
+        }
+        if ch as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
             return ret;
         }
         i += 1;
     }
-    *ret.offset(len as isize) = 0 as xmlChar;
+    unsafe {
+        *ret.offset(len as isize) = 0 as xmlChar;
+    }
     return ret;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlCharStrdup(mut cur: *const ::core::ffi::c_char) -> *mut xmlChar { unsafe {
-    let mut p: *const ::core::ffi::c_char = cur;
+pub unsafe extern "C" fn xmlCharStrdup(mut cur: *const ::core::ffi::c_char) -> *mut xmlChar {
+    let mut p = cur;
     if cur.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    while *p as ::core::ffi::c_int != '\0' as i32 {
-        p = p.offset(1);
+    while unsafe { *p as ::core::ffi::c_int } != '\0' as i32 {
+        p = unsafe { p.offset(1) };
     }
-    return xmlCharStrndup(
-        cur,
-        p.offset_from(cur) as ::core::ffi::c_long as ::core::ffi::c_int,
-    );
-}}
+    return unsafe {
+        xmlCharStrndup(
+            cur,
+            p.offset_from(cur) as ::core::ffi::c_long as ::core::ffi::c_int,
+        )
+    };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlStrcmp(
     mut str1: *const xmlChar,
     mut str2: *const xmlChar,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     if str1 == str2 {
         return 0 as ::core::ffi::c_int;
     }
@@ -809,26 +825,23 @@ pub unsafe extern "C" fn xmlStrcmp(
         return 1 as ::core::ffi::c_int;
     }
     loop {
-        let fresh4 = str1;
-        str1 = str1.offset(1);
-        let mut tmp: ::core::ffi::c_int =
-            *fresh4 as ::core::ffi::c_int - *str2 as ::core::ffi::c_int;
+        let tmp = unsafe { *str1 as ::core::ffi::c_int - *str2 as ::core::ffi::c_int };
         if tmp != 0 as ::core::ffi::c_int {
             return tmp;
         }
-        let fresh5 = str2;
-        str2 = str2.offset(1);
-        if !(*fresh5 as ::core::ffi::c_int != 0 as ::core::ffi::c_int) {
+        if unsafe { *str2 as ::core::ffi::c_int } == 0 as ::core::ffi::c_int {
             break;
         }
+        str1 = unsafe { str1.offset(1) };
+        str2 = unsafe { str2.offset(1) };
     }
     return 0 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlStrEqual(
     mut str1: *const xmlChar,
     mut str2: *const xmlChar,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     if str1 == str2 {
         return 1 as ::core::ffi::c_int;
     }
@@ -839,19 +852,17 @@ pub unsafe extern "C" fn xmlStrEqual(
         return 0 as ::core::ffi::c_int;
     }
     loop {
-        let fresh8 = str1;
-        str1 = str1.offset(1);
-        if *fresh8 as ::core::ffi::c_int != *str2 as ::core::ffi::c_int {
+        if unsafe { *str1 as ::core::ffi::c_int != *str2 as ::core::ffi::c_int } {
             return 0 as ::core::ffi::c_int;
         }
-        let fresh9 = str2;
-        str2 = str2.offset(1);
-        if !(*fresh9 != 0) {
+        if unsafe { *str2 } == 0 {
             break;
         }
+        str1 = unsafe { str1.offset(1) };
+        str2 = unsafe { str2.offset(1) };
     }
     return 1 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlStrQEqual(
     mut pref: *const xmlChar,
