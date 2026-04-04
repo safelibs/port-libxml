@@ -2,12 +2,12 @@
 set -euo pipefail
 
 SELF_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-if [[ -f "$SELF_DIR/../Cargo.toml" ]]; then
-  WORKTREE_ROOT="$(cd -- "$SELF_DIR/.." && pwd)"
-  SOURCE_ROOT="$WORKTREE_ROOT"
-elif [[ -f "$SELF_DIR/../../safe/Cargo.toml" ]]; then
+if [[ -f "$SELF_DIR/../../safe/Cargo.toml" ]]; then
   WORKTREE_ROOT="$(cd -- "$SELF_DIR/../.." && pwd)"
   SOURCE_ROOT="$WORKTREE_ROOT/safe"
+elif [[ -f "$SELF_DIR/../Cargo.toml" ]]; then
+  WORKTREE_ROOT="$(cd -- "$SELF_DIR/.." && pwd)"
+  SOURCE_ROOT="$WORKTREE_ROOT"
 else
   printf 'failed to resolve safe source root from %s\n' "$SELF_DIR" >&2
   exit 1
