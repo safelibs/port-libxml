@@ -746,6 +746,69 @@ static mut global_init_lock: pthread_mutex_t = pthread_mutex_t {
     },
 };
 static mut xmlLibraryLock: xmlRMutexPtr = ::core::ptr::null::<xmlRMutex>() as *mut xmlRMutex;
+
+#[inline]
+fn libxml_is_threaded_value() -> ::core::ffi::c_int {
+    unsafe { *::core::ptr::addr_of!(libxml_is_threaded) }
+}
+
+#[inline]
+fn set_libxml_is_threaded(value: ::core::ffi::c_int) {
+    unsafe {
+        *::core::ptr::addr_of_mut!(libxml_is_threaded) = value;
+    }
+}
+
+#[inline]
+fn globalkey_value() -> pthread_key_t {
+    unsafe { *::core::ptr::addr_of!(globalkey) }
+}
+
+#[inline]
+fn globalkey_ptr() -> *mut pthread_key_t {
+    ::core::ptr::addr_of_mut!(globalkey)
+}
+
+#[inline]
+fn mainthread_value() -> pthread_t {
+    unsafe { *::core::ptr::addr_of!(mainthread) }
+}
+
+#[inline]
+fn set_mainthread(value: pthread_t) {
+    unsafe {
+        *::core::ptr::addr_of_mut!(mainthread) = value;
+    }
+}
+
+#[inline]
+fn once_control_ptr() -> *mut pthread_once_t {
+    ::core::ptr::addr_of_mut!(once_control)
+}
+
+#[inline]
+fn once_control_init_value() -> pthread_once_t {
+    unsafe { *::core::ptr::addr_of!(once_control_init) }
+}
+
+#[inline]
+fn set_once_control(value: pthread_once_t) {
+    unsafe {
+        *::core::ptr::addr_of_mut!(once_control) = value;
+    }
+}
+
+#[inline]
+fn xml_library_lock() -> xmlRMutexPtr {
+    unsafe { *::core::ptr::addr_of!(xmlLibraryLock) }
+}
+
+#[inline]
+fn set_xml_library_lock(value: xmlRMutexPtr) {
+    unsafe {
+        *::core::ptr::addr_of_mut!(xmlLibraryLock) = value;
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlNewMutex() -> xmlMutexPtr {
     let mut tok: xmlMutexPtr = ::core::ptr::null_mut::<xmlMutex>();
@@ -753,7 +816,7 @@ pub unsafe extern "C" fn xmlNewMutex() -> xmlMutexPtr {
     if tok.is_null() {
         return ::core::ptr::null_mut::<xmlMutex>();
     }
-    if unsafe { libxml_is_threaded } != 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() != 0 as ::core::ffi::c_int {
         unsafe {
             pthread_mutex_init(
                 &raw mut (*tok).lock,
@@ -768,7 +831,7 @@ pub unsafe extern "C" fn xmlFreeMutex(mut tok: xmlMutexPtr) {
     if tok.is_null() {
         return;
     }
-    if unsafe { libxml_is_threaded } != 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() != 0 as ::core::ffi::c_int {
         unsafe { pthread_mutex_destroy(&raw mut (*tok).lock) };
     }
     unsafe { free(tok as *mut ::core::ffi::c_void) };
@@ -778,7 +841,7 @@ pub unsafe extern "C" fn xmlMutexLock(mut tok: xmlMutexPtr) {
     if tok.is_null() {
         return;
     }
-    if unsafe { libxml_is_threaded } != 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() != 0 as ::core::ffi::c_int {
         unsafe { pthread_mutex_lock(&raw mut (*tok).lock) };
     }
 }
@@ -787,7 +850,7 @@ pub unsafe extern "C" fn xmlMutexUnlock(mut tok: xmlMutexPtr) {
     if tok.is_null() {
         return;
     }
-    if unsafe { libxml_is_threaded } != 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() != 0 as ::core::ffi::c_int {
         unsafe { pthread_mutex_unlock(&raw mut (*tok).lock) };
     }
 }
@@ -798,7 +861,7 @@ pub unsafe extern "C" fn xmlNewRMutex() -> xmlRMutexPtr {
     if tok.is_null() {
         return ::core::ptr::null_mut::<xmlRMutex>();
     }
-    if unsafe { libxml_is_threaded } != 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() != 0 as ::core::ffi::c_int {
         unsafe {
             pthread_mutex_init(
                 &raw mut (*tok).lock,
@@ -819,7 +882,7 @@ pub unsafe extern "C" fn xmlFreeRMutex(mut tok: xmlRMutexPtr) {
     if tok.is_null() {
         return;
     }
-    if unsafe { libxml_is_threaded } != 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() != 0 as ::core::ffi::c_int {
         unsafe {
             pthread_mutex_destroy(&raw mut (*tok).lock);
             pthread_cond_destroy(&raw mut (*tok).cv);
@@ -832,7 +895,7 @@ pub unsafe extern "C" fn xmlRMutexLock(mut tok: xmlRMutexPtr) {
     if tok.is_null() {
         return;
     }
-    if unsafe { libxml_is_threaded } == 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() == 0 as ::core::ffi::c_int {
         return;
     }
     unsafe {
@@ -860,7 +923,7 @@ pub unsafe extern "C" fn xmlRMutexUnlock(mut tok: xmlRMutexPtr) {
     if tok.is_null() {
         return;
     }
-    if unsafe { libxml_is_threaded } == 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() == 0 as ::core::ffi::c_int {
         return;
     }
     unsafe {
@@ -934,23 +997,23 @@ unsafe extern "C" fn xmlNewGlobalState() -> xmlGlobalStatePtr {
 #[no_mangle]
 pub extern "C" fn xmlGetGlobalState() -> xmlGlobalStatePtr {
     let mut globalval: *mut xmlGlobalState = ::core::ptr::null_mut::<xmlGlobalState>();
-    if unsafe { libxml_is_threaded } == 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() == 0 as ::core::ffi::c_int {
         return ::core::ptr::null_mut::<xmlGlobalState>();
     }
     unsafe {
         pthread_once(
-            &raw mut once_control,
+            once_control_ptr(),
             Some(xmlOnceInit as unsafe extern "C" fn() -> ()),
         );
     }
-    globalval = unsafe { pthread_getspecific(globalkey) as *mut xmlGlobalState };
+    globalval = unsafe { pthread_getspecific(globalkey_value()) as *mut xmlGlobalState };
     if globalval.is_null() {
         let mut tsd: *mut xmlGlobalState = unsafe { xmlNewGlobalState() as *mut xmlGlobalState };
         if tsd.is_null() {
             return ::core::ptr::null_mut::<xmlGlobalState>();
         }
         unsafe {
-            pthread_setspecific(globalkey, tsd as *const ::core::ffi::c_void);
+            pthread_setspecific(globalkey_value(), tsd as *const ::core::ffi::c_void);
         }
         return tsd as xmlGlobalStatePtr;
     }
@@ -960,7 +1023,7 @@ pub extern "C" fn xmlGetGlobalState() -> xmlGlobalStatePtr {
 pub unsafe extern "C" fn xmlGetThreadId() -> ::core::ffi::c_int {
     let mut id: pthread_t = 0;
     let mut ret: ::core::ffi::c_int = 0;
-    if unsafe { libxml_is_threaded } == 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() == 0 as ::core::ffi::c_int {
         return 0 as ::core::ffi::c_int;
     }
     unsafe {
@@ -975,31 +1038,31 @@ pub unsafe extern "C" fn xmlGetThreadId() -> ::core::ffi::c_int {
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlIsMainThread() -> ::core::ffi::c_int {
-    if unsafe { libxml_is_threaded } == -(1 as ::core::ffi::c_int) {
+    if libxml_is_threaded_value() == -(1 as ::core::ffi::c_int) {
         unsafe { xmlInitThreads() };
     }
-    if unsafe { libxml_is_threaded } == 0 as ::core::ffi::c_int {
+    if libxml_is_threaded_value() == 0 as ::core::ffi::c_int {
         return 1 as ::core::ffi::c_int;
     }
     return unsafe {
         pthread_once(
-            &raw mut once_control,
+            once_control_ptr(),
             Some(xmlOnceInit as unsafe extern "C" fn() -> ()),
         );
-        pthread_equal(mainthread, pthread_self())
+        pthread_equal(mainthread_value(), pthread_self())
     };
 }
 #[no_mangle]
 pub extern "C" fn xmlLockLibrary() {
-    unsafe { xmlRMutexLock(xmlLibraryLock) };
+    unsafe { xmlRMutexLock(xml_library_lock()) };
 }
 #[no_mangle]
 pub extern "C" fn xmlUnlockLibrary() {
-    unsafe { xmlRMutexUnlock(xmlLibraryLock) };
+    unsafe { xmlRMutexUnlock(xml_library_lock()) };
 }
 #[no_mangle]
 pub extern "C" fn xmlInitThreads() {
-    if unsafe { libxml_is_threaded } == -(1 as ::core::ffi::c_int) {
+    if libxml_is_threaded_value() == -(1 as ::core::ffi::c_int) {
         if Some(
             pthread_once
                 as unsafe extern "C" fn(
@@ -1086,26 +1149,26 @@ pub extern "C" fn xmlInitThreads() {
             )
             .is_some()
         {
-            unsafe { libxml_is_threaded = 1 as ::core::ffi::c_int };
+            set_libxml_is_threaded(1 as ::core::ffi::c_int);
         } else {
-            unsafe { libxml_is_threaded = 0 as ::core::ffi::c_int };
+            set_libxml_is_threaded(0 as ::core::ffi::c_int);
         }
     }
 }
 #[no_mangle]
 pub extern "C" fn xmlCleanupThreads() {
-    if unsafe { libxml_is_threaded } != 0 as ::core::ffi::c_int {
-        unsafe { pthread_key_delete(globalkey) };
+    if libxml_is_threaded_value() != 0 as ::core::ffi::c_int {
+        unsafe { pthread_key_delete(globalkey_value()) };
     }
-    unsafe { once_control = once_control_init };
+    set_once_control(once_control_init_value());
 }
 unsafe extern "C" fn xmlOnceInit() {
     unsafe {
         pthread_key_create(
-            &raw mut globalkey,
+            globalkey_ptr(),
             Some(xmlFreeGlobalState as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()),
         );
-        mainthread = pthread_self();
+        set_mainthread(pthread_self());
         __xmlInitializeDict();
     }
 }
