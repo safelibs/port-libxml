@@ -1,6 +1,5 @@
 libxml2.so.2 libxml2 #MINVER#
 * Build-Depends-Package: libxml2-dev
- Base@Base 2.9.14+dfsg-1.3ubuntu3.7+safelibs1
  (symver|optional)LIBXML2_2.4.30 2.7.4
  (symver|optional)LIBXML2_2.5.0 2.7.4
  (symver|optional)LIBXML2_2.5.2 2.7.4
