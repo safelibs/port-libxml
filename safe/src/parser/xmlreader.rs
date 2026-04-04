@@ -1,4 +1,4 @@
-use super::budget::SHARED_BUDGET;
+use super::budget;
 
 extern "C" {
     pub type _xmlBuf;
@@ -2060,7 +2060,7 @@ unsafe extern "C" fn xmlTextReaderPushData(
             }
             val = xmlParserInputBufferRead((*reader).input, 4096 as ::core::ffi::c_int);
             if val > 0 as ::core::ffi::c_int {
-                SHARED_BUDGET.note_reader_bytes(val as usize);
+                budget::note_reader_bytes((*reader).ctxt, val as usize);
             }
             if val == 0 as ::core::ffi::c_int
                 && alloc == XML_BUFFER_ALLOC_IMMUTABLE as ::core::ffi::c_int
@@ -2086,7 +2086,7 @@ unsafe extern "C" fn xmlTextReaderPushData(
         if xmlBufUse(inbuf)
             >= (*reader).cur.wrapping_add(CHUNK_SIZE as ::core::ffi::c_uint) as size_t
         {
-            SHARED_BUDGET.note_reader_bytes(CHUNK_SIZE as usize);
+            budget::note_reader_bytes((*reader).ctxt, CHUNK_SIZE as usize);
             val = xmlParseChunk(
                 (*reader).ctxt,
                 (xmlBufContent(inbuf as *const xmlBuf) as *const ::core::ffi::c_char)
@@ -2107,7 +2107,7 @@ unsafe extern "C" fn xmlTextReaderPushData(
             s = xmlBufUse(inbuf).wrapping_sub((*reader).cur as size_t)
                 as ::core::ffi::c_int;
             if s > 0 as ::core::ffi::c_int {
-                SHARED_BUDGET.note_reader_bytes(s as usize);
+                budget::note_reader_bytes((*reader).ctxt, s as usize);
             }
             val = xmlParseChunk(
                 (*reader).ctxt,
@@ -2144,7 +2144,7 @@ unsafe extern "C" fn xmlTextReaderPushData(
             s = xmlBufUse(inbuf).wrapping_sub((*reader).cur as size_t)
                 as ::core::ffi::c_int;
             if s > 0 as ::core::ffi::c_int {
-                SHARED_BUDGET.note_reader_bytes(s as usize);
+                budget::note_reader_bytes((*reader).ctxt, s as usize);
             }
             val = xmlParseChunk(
                 (*reader).ctxt,
@@ -2547,7 +2547,7 @@ pub unsafe extern "C" fn xmlTextReaderRead(
         return -(1 as ::core::ffi::c_int);
     }
     if (*reader).mode == XML_TEXTREADER_MODE_INITIAL as ::core::ffi::c_int {
-        SHARED_BUDGET.reset();
+        budget::reset_context((*reader).ctxt);
         (*reader).mode = XML_TEXTREADER_MODE_INTERACTIVE as ::core::ffi::c_int;
         loop {
             val = xmlTextReaderPushData(reader);
@@ -2587,7 +2587,7 @@ pub unsafe extern "C" fn xmlTextReaderRead(
         }
         (*reader).depth = 0 as ::core::ffi::c_int;
         (*(*reader).ctxt).parseMode = XML_PARSE_READER;
-        SHARED_BUDGET.note_recursion_depth(0);
+        budget::note_recursion_depth((*reader).ctxt, 0);
         current_block = 9604905064405801039;
     } else {
         oldstate = (*reader).state;

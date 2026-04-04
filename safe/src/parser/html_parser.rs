@@ -1,4 +1,4 @@
-use super::budget::SHARED_BUDGET;
+use super::budget;
 
 extern "C" {
     pub type _xmlDict;
@@ -2078,8 +2078,9 @@ unsafe extern "C" fn htmlnamePush(
             return 0 as ::core::ffi::c_int;
         }
     }
-    SHARED_BUDGET.note_recursion_depth((*ctxt).nameNr as u32);
-    if SHARED_BUDGET.document_depth_limit_exceeded(
+    budget::note_recursion_depth(ctxt, (*ctxt).nameNr as u32);
+    if budget::document_depth_limit_exceeded(
+        ctxt,
         (*ctxt).nameNr as u32,
         256 as u32,
         (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int != 0,
@@ -13004,7 +13005,7 @@ pub unsafe extern "C" fn htmlParseDocument(
         );
         return XML_ERR_INTERNAL_ERROR as ::core::ffi::c_int;
     }
-    SHARED_BUDGET.reset();
+    budget::reset_context(ctxt);
     (*ctxt).html = 1 as ::core::ffi::c_int;
     (*ctxt).linenumbers = 1 as ::core::ffi::c_int;
     if (*ctxt).progressive == 0 as ::core::ffi::c_int
@@ -13311,6 +13312,7 @@ unsafe extern "C" fn htmlInitParserCtxt(
     (*ctxt).checkIndex = 0 as ::core::ffi::c_long;
     (*ctxt).catalogs = NULL;
     xmlInitNodeInfoSeq(&raw mut (*ctxt).node_seq);
+    budget::reset_context(ctxt);
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]
@@ -14611,14 +14613,14 @@ pub unsafe extern "C" fn htmlParseChunk(
         return XML_ERR_INTERNAL_ERROR as ::core::ffi::c_int;
     }
     if (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_START as ::core::ffi::c_int {
-        SHARED_BUDGET.reset();
+        budget::reset_context(ctxt);
     }
     if size > 0 as ::core::ffi::c_int {
-        SHARED_BUDGET.note_reader_bytes(size as usize);
+        budget::note_reader_bytes(ctxt, size as usize);
     }
     let budget_depth = (*ctxt).depth.max((*ctxt).inputNr).max((*ctxt).nodeNr);
     if budget_depth > 0 {
-        SHARED_BUDGET.note_recursion_depth(budget_depth as u32);
+        budget::note_recursion_depth(ctxt, budget_depth as u32);
     }
     if size > 0 as ::core::ffi::c_int && !chunk.is_null() && !(*ctxt).input.is_null()
         && !(*(*ctxt).input).buf.is_null()

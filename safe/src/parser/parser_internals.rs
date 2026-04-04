@@ -1,3 +1,5 @@
+use super::budget;
+
 extern "C" {
     pub type _IO_wide_data;
     pub type _IO_codecvt;
@@ -3705,6 +3707,7 @@ pub unsafe extern "C" fn xmlInitParserCtxt(
     (*ctxt).sizeentcopy = 0 as ::core::ffi::c_ulong;
     (*ctxt).input_id = 1 as ::core::ffi::c_int;
     xmlInitNodeInfoSeq(&raw mut (*ctxt).node_seq);
+    budget::reset_context(ctxt);
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]
@@ -3713,6 +3716,7 @@ pub unsafe extern "C" fn xmlFreeParserCtxt(mut ctxt: xmlParserCtxtPtr) {
     if ctxt.is_null() {
         return;
     }
+    budget::clear_context(ctxt);
     loop {
         input = inputPop(ctxt);
         if input.is_null() {

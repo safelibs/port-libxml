@@ -1,4 +1,4 @@
-use super::budget::SHARED_BUDGET;
+use super::budget;
 
 extern "C" {
     pub type _xmlBuf;
@@ -2164,7 +2164,7 @@ unsafe extern "C" fn xmlParserEntityCheck(
     let current_depth = ((*ctxt).depth.max(0 as ::core::ffi::c_int)) as u32;
     let budget_depth = (*ctxt).depth.max((*ctxt).inputNr).max((*ctxt).nodeNr);
     if budget_depth > 0 {
-        SHARED_BUDGET.note_recursion_depth(budget_depth as u32);
+        budget::note_recursion_depth(ctxt, budget_depth as u32);
     }
     let budget_bytes = if replacement != 0 {
         replacement
@@ -2176,7 +2176,8 @@ unsafe extern "C" fn xmlParserEntityCheck(
         0 as size_t
     };
     if budget_bytes != 0 {
-        SHARED_BUDGET.note_entity_expansion(
+        budget::note_entity_expansion(
+            ctxt,
             budget_bytes,
             current_depth,
         );
@@ -2245,8 +2246,9 @@ unsafe extern "C" fn xmlParserEntityCheck(
                 ) as size_t as size_t;
             i += 1;
         }
-        consumed = SHARED_BUDGET.parser_progress(consumed);
-        if SHARED_BUDGET.entity_limit_exceeded(
+        consumed = budget::parser_progress(ctxt, consumed);
+        if budget::entity_limit_exceeded(
+            ctxt,
             current_depth,
             consumed,
             (*ctxt).nbentities as usize,
@@ -2277,8 +2279,9 @@ unsafe extern "C" fn xmlParserEntityCheck(
         }
         consumed = (consumed as ::core::ffi::c_ulong).wrapping_add((*ctxt).sizeentities)
             as size_t as size_t;
-        consumed = SHARED_BUDGET.parser_progress(consumed);
-        if SHARED_BUDGET.entity_limit_exceeded(
+        consumed = budget::parser_progress(ctxt, consumed);
+        if budget::entity_limit_exceeded(
+            ctxt,
             current_depth,
             consumed,
             (*ctxt).nbentities as usize,
@@ -2309,8 +2312,9 @@ unsafe extern "C" fn xmlParserEntityCheck(
         }
         consumed = (consumed as ::core::ffi::c_ulong).wrapping_add((*ctxt).sizeentities)
             as size_t as size_t;
-        consumed = SHARED_BUDGET.parser_progress(consumed);
-        if SHARED_BUDGET.entity_limit_exceeded(
+        consumed = budget::parser_progress(ctxt, consumed);
+        if budget::entity_limit_exceeded(
+            ctxt,
             current_depth,
             consumed,
             (*ctxt).nbentities as usize,
@@ -2342,8 +2346,9 @@ unsafe extern "C" fn xmlParserEntityCheck(
         }
         consumed = (consumed as ::core::ffi::c_ulong).wrapping_add((*ctxt).sizeentities)
             as size_t as size_t;
-        consumed = SHARED_BUDGET.parser_progress(consumed);
-        if SHARED_BUDGET.entity_limit_exceeded(
+        consumed = budget::parser_progress(ctxt, consumed);
+        if budget::entity_limit_exceeded(
+            ctxt,
             current_depth,
             consumed,
             (*ctxt).nbentities as usize,
@@ -2367,7 +2372,8 @@ unsafe extern "C" fn xmlParserEntityCheck(
         || (*ctxt).nbentities <= 10000 as ::core::ffi::c_ulong
     {
         return 0 as ::core::ffi::c_int
-    } else if !SHARED_BUDGET.entity_limit_exceeded(
+    } else if !budget::entity_limit_exceeded(
+        ctxt,
         current_depth,
         0 as usize,
         (*ctxt).nbentities as usize,
@@ -4085,8 +4091,9 @@ pub unsafe extern "C" fn nodePush(
         (*ctxt).nodeTab = tmp;
         (*ctxt).nodeMax *= 2 as ::core::ffi::c_int;
     }
-    SHARED_BUDGET.note_recursion_depth((*ctxt).nodeNr as u32);
-    if SHARED_BUDGET.document_depth_limit_exceeded(
+    budget::note_recursion_depth(ctxt, (*ctxt).nodeNr as u32);
+    if budget::document_depth_limit_exceeded(
+        ctxt,
         (*ctxt).nodeNr as u32,
         xmlParserMaxDepth,
         (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int != 0,
@@ -4532,8 +4539,9 @@ pub unsafe extern "C" fn xmlPushInput(
             (*input).cur,
         );
     }
-    SHARED_BUDGET.note_dtd_depth((*ctxt).inputNr as u32);
-    if SHARED_BUDGET.dtd_depth_limit_exceeded(
+    budget::note_dtd_depth(ctxt, (*ctxt).inputNr as u32);
+    if budget::dtd_depth_limit_exceeded(
+        ctxt,
         (*ctxt).inputNr as u32,
         40 as u32,
         1024 as u32,
@@ -11258,8 +11266,9 @@ unsafe extern "C" fn xmlParseElementChildrenContentDeclPriv(
     let mut op: xmlElementContentPtr = ::core::ptr::null_mut::<xmlElementContent>();
     let mut elem: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut type_0: xmlChar = 0 as xmlChar;
-    SHARED_BUDGET.note_dtd_depth(depth as u32);
-    if SHARED_BUDGET.dtd_depth_limit_exceeded(
+    budget::note_dtd_depth(ctxt, depth as u32);
+    if budget::dtd_depth_limit_exceeded(
+        ctxt,
         depth as u32,
         128 as u32,
         2048 as u32,
@@ -16253,8 +16262,9 @@ unsafe extern "C" fn xmlParseElementStart(
     let mut tlen: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     let mut ret: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     let mut nsNr: ::core::ffi::c_int = (*ctxt).nsNr;
-    SHARED_BUDGET.note_recursion_depth((*ctxt).nameNr as u32);
-    if SHARED_BUDGET.document_depth_limit_exceeded(
+    budget::note_recursion_depth(ctxt, (*ctxt).nameNr as u32);
+    if budget::document_depth_limit_exceeded(
+        ctxt,
         (*ctxt).nameNr as u32,
         xmlParserMaxDepth,
         (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int != 0,
@@ -17178,7 +17188,7 @@ pub unsafe extern "C" fn xmlParseDocument(
     if ctxt.is_null() || (*ctxt).input.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    SHARED_BUDGET.reset();
+    budget::reset_context(ctxt);
     if (*ctxt).progressive == 0 as ::core::ffi::c_int
         && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
             as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
@@ -19346,14 +19356,14 @@ pub unsafe extern "C" fn xmlParseChunk(
         return XML_ERR_INTERNAL_ERROR as ::core::ffi::c_int;
     }
     if (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_START as ::core::ffi::c_int {
-        SHARED_BUDGET.reset();
+        budget::reset_context(ctxt);
     }
     if size > 0 as ::core::ffi::c_int {
-        SHARED_BUDGET.note_reader_bytes(size as usize);
+        budget::note_reader_bytes(ctxt, size as usize);
     }
     let budget_depth = (*ctxt).depth.max((*ctxt).inputNr).max((*ctxt).nodeNr);
     if budget_depth > 0 {
-        SHARED_BUDGET.note_recursion_depth(budget_depth as u32);
+        budget::note_recursion_depth(ctxt, budget_depth as u32);
     }
     if (*ctxt).errNo != XML_ERR_OK as ::core::ffi::c_int
         && (*ctxt).disableSAX == 1 as ::core::ffi::c_int
@@ -20404,6 +20414,7 @@ unsafe extern "C" fn xmlParseExternalEntityPrivate(
     if !oldctxt.is_null() && (*ctxt).lastError.code != XML_ERR_OK as ::core::ffi::c_int {
         xmlCopyError(&raw mut (*ctxt).lastError, &raw mut (*oldctxt).lastError);
     }
+    budget::merge_context(oldctxt, ctxt);
     if !sax.is_null() {
         (*ctxt).sax = oldsax as *mut _xmlSAXHandler;
     }
@@ -20498,6 +20509,7 @@ unsafe extern "C" fn xmlParseBalancedChunkMemoryInternal(
     if ctxt.is_null() {
         return XML_WAR_UNDECLARED_ENTITY;
     }
+    budget::inherit_context(ctxt, oldctxt);
     if !user_data.is_null() {
         (*ctxt).userData = user_data;
     } else {
@@ -20657,6 +20669,7 @@ unsafe extern "C" fn xmlParseBalancedChunkMemoryInternal(
     if (*ctxt).lastError.code != XML_ERR_OK as ::core::ffi::c_int {
         xmlCopyError(&raw mut (*ctxt).lastError, &raw mut (*oldctxt).lastError);
     }
+    budget::merge_context(oldctxt, ctxt);
     (*ctxt).sax = oldsax as *mut _xmlSAXHandler;
     (*ctxt).dict = ::core::ptr::null_mut::<xmlDict>();
     (*ctxt).attsDefault = ::core::ptr::null_mut::<xmlHashTable>();
@@ -21102,6 +21115,7 @@ unsafe extern "C" fn xmlCreateEntityParserCtxtInternal(
     if ctxt.is_null() {
         return ::core::ptr::null_mut::<xmlParserCtxt>();
     }
+    budget::inherit_context(ctxt, pctx);
     if !pctx.is_null() {
         (*ctxt).options = (*pctx).options;
         (*ctxt)._private = (*pctx)._private;
@@ -21665,6 +21679,7 @@ pub unsafe extern "C" fn xmlCtxtReset(mut ctxt: xmlParserCtxtPtr) {
     if ctxt.is_null() {
         return;
     }
+    budget::reset_context(ctxt);
     dict = (*ctxt).dict;
     loop {
         input = inputPop(ctxt);
