@@ -6,6 +6,8 @@
 )]
 
 pub mod layout_asserts;
+pub mod opaque;
 pub mod types;
 
+pub use opaque::*;
 pub use types::*;

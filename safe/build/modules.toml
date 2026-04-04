@@ -237,6 +237,11 @@ source = "shims/xmlwriter_varargs.c"
 provider = "c_shim"
 
 [[module]]
+name = "xmlreader_varargs"
+source = "shims/xmlreader_varargs.c"
+provider = "c_shim"
+
+[[module]]
 name = "xmlwriter"
 source = "../original/xmlwriter.c"
 provider = "rust"

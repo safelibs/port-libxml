@@ -1,24 +1,14 @@
+use crate::abi::opaque::{
+    _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict, _xmlHashTable, _xmlLink, _xmlList,
+    _xmlStartTag, _xmlValidState,
+};
+
 extern "C" {
-    pub type _xmlBuf;
-    pub type _xmlDict;
-    pub type _xmlHashTable;
-    pub type _xmlStartTag;
-    pub type _xmlAutomataState;
-    pub type _xmlAutomata;
-    pub type _xmlValidState;
-    pub type _xmlLink;
-    pub type _xmlList;
     fn xmlStrdup(cur: *const xmlChar) -> *mut xmlChar;
     fn xmlStrcmp(str1: *const xmlChar, str2: *const xmlChar) -> ::core::ffi::c_int;
     fn xmlStrcasecmp(str1: *const xmlChar, str2: *const xmlChar) -> ::core::ffi::c_int;
     fn xmlStrlen(str: *const xmlChar) -> ::core::ffi::c_int;
     fn xmlStrcat(cur: *mut xmlChar, add: *const xmlChar) -> *mut xmlChar;
-    fn vsnprintf(
-        __s: *mut ::core::ffi::c_char,
-        __maxlen: size_t,
-        __format: *const ::core::ffi::c_char,
-        __arg: ::core::ffi::VaList,
-    ) -> ::core::ffi::c_int;
     fn memset(
         __s: *mut ::core::ffi::c_void,
         __c: ::core::ffi::c_int,
@@ -2696,31 +2686,6 @@ pub unsafe extern "C" fn xmlTextWriterEndComment(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatComment(
-    mut writer: xmlTextWriterPtr,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        xmlWriterErrMsg(
-            writer,
-            XML_ERR_INTERNAL_ERROR,
-            b"xmlTextWriterWriteVFormatComment : invalid writer!\n\0" as *const u8
-                as *const ::core::ffi::c_char,
-        );
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteComment(writer, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
-}
-#[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteComment(
     mut writer: xmlTextWriterPtr,
     mut content: *const xmlChar,
@@ -3140,25 +3105,6 @@ pub unsafe extern "C" fn xmlTextWriterFullEndElement(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatRaw(
-    mut writer: xmlTextWriterPtr,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteRaw(writer, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
-}
-#[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteRawLen(
     mut writer: xmlTextWriterPtr,
     mut content: *const xmlChar,
@@ -3220,25 +3166,6 @@ pub unsafe extern "C" fn xmlTextWriterWriteRaw(
     mut content: *const xmlChar,
 ) -> ::core::ffi::c_int {
     return xmlTextWriterWriteRawLen(writer, content, xmlStrlen(content));
-}
-#[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatString(
-    mut writer: xmlTextWriterPtr,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() || format.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteString(writer, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteString(
@@ -3803,26 +3730,6 @@ pub unsafe extern "C" fn xmlTextWriterEndAttribute(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatAttribute(
-    mut writer: xmlTextWriterPtr,
-    mut name: *const xmlChar,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteAttribute(writer, name, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
-}
-#[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteAttribute(
     mut writer: xmlTextWriterPtr,
     mut name: *const xmlChar,
@@ -3847,28 +3754,6 @@ pub unsafe extern "C" fn xmlTextWriterWriteAttribute(
     }
     sum += count;
     return sum;
-}
-#[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatAttributeNS(
-    mut writer: xmlTextWriterPtr,
-    mut prefix: *const xmlChar,
-    mut name: *const xmlChar,
-    mut namespaceURI: *const xmlChar,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteAttributeNS(writer, prefix, name, namespaceURI, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteAttributeNS(
@@ -3902,26 +3787,6 @@ pub unsafe extern "C" fn xmlTextWriterWriteAttributeNS(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatElement(
-    mut writer: xmlTextWriterPtr,
-    mut name: *const xmlChar,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteElement(writer, name, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
-}
-#[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteElement(
     mut writer: xmlTextWriterPtr,
     mut name: *const xmlChar,
@@ -3948,28 +3813,6 @@ pub unsafe extern "C" fn xmlTextWriterWriteElement(
     }
     sum += count;
     return sum;
-}
-#[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatElementNS(
-    mut writer: xmlTextWriterPtr,
-    mut prefix: *const xmlChar,
-    mut name: *const xmlChar,
-    mut namespaceURI: *const xmlChar,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteElementNS(writer, prefix, name, namespaceURI, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteElementNS(
@@ -4178,26 +4021,6 @@ pub unsafe extern "C" fn xmlTextWriterEndPI(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatPI(
-    mut writer: xmlTextWriterPtr,
-    mut target: *const xmlChar,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWritePI(writer, target, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
-}
-#[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWritePI(
     mut writer: xmlTextWriterPtr,
     mut target: *const xmlChar,
@@ -4355,25 +4178,6 @@ pub unsafe extern "C" fn xmlTextWriterEndCDATA(
     }
     xmlListPopFront((*writer).nodes);
     return sum;
-}
-#[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatCDATA(
-    mut writer: xmlTextWriterPtr,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteCDATA(writer, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteCDATA(
@@ -4698,28 +4502,6 @@ pub unsafe extern "C" fn xmlTextWriterEndDTD(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatDTD(
-    mut writer: xmlTextWriterPtr,
-    mut name: *const xmlChar,
-    mut pubid: *const xmlChar,
-    mut sysid: *const xmlChar,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteDTD(writer, name, pubid, sysid, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
-}
-#[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteDTD(
     mut writer: xmlTextWriterPtr,
     mut name: *const xmlChar,
@@ -4897,26 +4679,6 @@ pub unsafe extern "C" fn xmlTextWriterEndDTDElement(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatDTDElement(
-    mut writer: xmlTextWriterPtr,
-    mut name: *const xmlChar,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteDTDElement(writer, name, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
-}
-#[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteDTDElement(
     mut writer: xmlTextWriterPtr,
     mut name: *const xmlChar,
@@ -5091,26 +4853,6 @@ pub unsafe extern "C" fn xmlTextWriterEndDTDAttlist(
     }
     xmlListPopFront((*writer).nodes);
     return sum;
-}
-#[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatDTDAttlist(
-    mut writer: xmlTextWriterPtr,
-    mut name: *const xmlChar,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteDTDAttlist(writer, name, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteDTDAttlist(
@@ -5311,27 +5053,6 @@ pub unsafe extern "C" fn xmlTextWriterEndDTDEntity(
     }
     xmlListPopFront((*writer).nodes);
     return sum;
-}
-#[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterWriteVFormatDTDInternalEntity(
-    mut writer: xmlTextWriterPtr,
-    mut pe: ::core::ffi::c_int,
-    mut name: *const xmlChar,
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> ::core::ffi::c_int {
-    let mut rc: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if writer.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    buf = xmlTextWriterVSprintf(format, argptr.clone());
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    rc = xmlTextWriterWriteDTDInternalEntity(writer, pe, name, buf);
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-    return rc;
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlTextWriterWriteDTDEntity(
@@ -5935,54 +5656,6 @@ unsafe extern "C" fn xmlTextWriterCloseDocCallback(
         return -(1 as ::core::ffi::c_int);
     }
     return 0 as ::core::ffi::c_int;
-}
-unsafe extern "C" fn xmlTextWriterVSprintf(
-    mut format: *const ::core::ffi::c_char,
-    mut argptr: ::core::ffi::VaList,
-) -> *mut xmlChar {
-    let mut size: ::core::ffi::c_int = 0;
-    let mut count: ::core::ffi::c_int = 0;
-    let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    let mut locarg = argptr.clone();
-    size = BUFSIZ;
-    buf = xmlMalloc.expect("non-null function pointer")(size as size_t) as *mut xmlChar;
-    if buf.is_null() {
-        xmlWriterErrMsg(
-            ::core::ptr::null_mut::<xmlTextWriter>(),
-            XML_ERR_NO_MEMORY,
-            b"xmlTextWriterVSprintf : out of memory!\n\0" as *const u8
-                as *const ::core::ffi::c_char,
-        );
-        return ::core::ptr::null_mut::<xmlChar>();
-    }
-    loop {
-        count = vsnprintf(
-            buf as *mut ::core::ffi::c_char,
-            size as size_t,
-            format,
-            locarg.clone(),
-        );
-        if !(count < 0 as ::core::ffi::c_int || count == size - 1 as ::core::ffi::c_int
-            || count == size || count > size)
-        {
-            break;
-        }
-        xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-        size += BUFSIZ;
-        buf = xmlMalloc.expect("non-null function pointer")(size as size_t)
-            as *mut xmlChar;
-        if buf.is_null() {
-            xmlWriterErrMsg(
-                ::core::ptr::null_mut::<xmlTextWriter>(),
-                XML_ERR_NO_MEMORY,
-                b"xmlTextWriterVSprintf : out of memory!\n\0" as *const u8
-                    as *const ::core::ffi::c_char,
-            );
-            return ::core::ptr::null_mut::<xmlChar>();
-        }
-        locarg = argptr.clone();
-    }
-    return buf;
 }
 unsafe extern "C" fn xmlTextWriterStartDocumentCallback(
     mut ctx: *mut ::core::ffi::c_void,

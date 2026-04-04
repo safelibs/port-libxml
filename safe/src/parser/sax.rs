@@ -1,6 +1,6 @@
+use crate::abi::opaque::{_xmlBuf, _xmlDict};
+
 extern "C" {
-    pub type _xmlBuf;
-    pub type _xmlDict;
     fn xmlParserError(
         ctx: *mut ::core::ffi::c_void,
         msg: *const ::core::ffi::c_char,

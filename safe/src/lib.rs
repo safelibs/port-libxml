@@ -1,4 +1,3 @@
-#![feature(c_variadic, extern_types)]
 #![deny(unsafe_op_in_unsafe_fn)]
 
 pub mod abi;

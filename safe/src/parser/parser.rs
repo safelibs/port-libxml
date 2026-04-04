@@ -1,12 +1,9 @@
 use super::budget;
+use crate::abi::opaque::{
+    _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict, _xmlHashTable, _xmlValidState,
+};
 
 extern "C" {
-    pub type _xmlBuf;
-    pub type _xmlDict;
-    pub type _xmlHashTable;
-    pub type _xmlAutomataState;
-    pub type _xmlAutomata;
-    pub type _xmlValidState;
     fn xmlStrdup(cur: *const xmlChar) -> *mut xmlChar;
     fn xmlStrndup(cur: *const xmlChar, len: ::core::ffi::c_int) -> *mut xmlChar;
     fn xmlCharStrdup(cur: *const ::core::ffi::c_char) -> *mut xmlChar;

@@ -1,11 +1,9 @@
+use crate::abi::opaque::{
+    _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict, _xmlHashTable, _xmlStartTag,
+    _xmlValidState,
+};
+
 extern "C" {
-    pub type _xmlBuf;
-    pub type _xmlDict;
-    pub type _xmlHashTable;
-    pub type _xmlStartTag;
-    pub type _xmlAutomataState;
-    pub type _xmlAutomata;
-    pub type _xmlValidState;
     fn xmlStrlen(str: *const xmlChar) -> ::core::ffi::c_int;
     fn __xmlGenericError() -> *mut xmlGenericErrorFunc;
     fn __xmlGenericErrorContext() -> *mut *mut ::core::ffi::c_void;

@@ -1,16 +1,10 @@
 use super::budget;
+use crate::abi::opaque::{
+    _IO_codecvt, _IO_marker, _IO_wide_data, _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict,
+    _xmlHashTable, _xmlStartTag, _xmlValidState,
+};
 
 extern "C" {
-    pub type _IO_wide_data;
-    pub type _IO_codecvt;
-    pub type _IO_marker;
-    pub type _xmlBuf;
-    pub type _xmlDict;
-    pub type _xmlHashTable;
-    pub type _xmlStartTag;
-    pub type _xmlAutomataState;
-    pub type _xmlAutomata;
-    pub type _xmlValidState;
     fn xmlStrdup(cur: *const xmlChar) -> *mut xmlChar;
     fn xmlStrlen(str: *const xmlChar) -> ::core::ffi::c_int;
     static mut stderr: *mut FILE;

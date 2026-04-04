@@ -1,33 +1,16 @@
 use super::budget;
+use crate::abi::opaque::{
+    _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict, _xmlHashTable, _xmlList, _xmlPattern,
+    _xmlRelaxNG, _xmlRelaxNGParserCtxt, _xmlRelaxNGValidCtxt, _xmlSchema,
+    _xmlSchemaParserCtxt, _xmlSchemaSAXPlug, _xmlSchemaValidCtxt, _xmlStartTag, _xmlValidState,
+    _xmlXIncludeCtxt,
+};
 
 extern "C" {
-    pub type _xmlBuf;
-    pub type _xmlDict;
-    pub type _xmlHashTable;
-    pub type _xmlStartTag;
-    pub type _xmlAutomataState;
-    pub type _xmlAutomata;
-    pub type _xmlValidState;
-    pub type _xmlList;
-    pub type _xmlRelaxNG;
-    pub type _xmlRelaxNGParserCtxt;
-    pub type _xmlRelaxNGValidCtxt;
-    pub type _xmlSchema;
-    pub type _xmlSchemaParserCtxt;
-    pub type _xmlSchemaValidCtxt;
-    pub type _xmlSchemaSAXPlug;
-    pub type _xmlPattern;
-    pub type _xmlXIncludeCtxt;
     fn xmlStrdup(cur: *const xmlChar) -> *mut xmlChar;
     fn xmlStrEqual(str1: *const xmlChar, str2: *const xmlChar) -> ::core::ffi::c_int;
     fn xmlStrlen(str: *const xmlChar) -> ::core::ffi::c_int;
     fn xmlStrcat(cur: *mut xmlChar, add: *const xmlChar) -> *mut xmlChar;
-    fn vsnprintf(
-        __s: *mut ::core::ffi::c_char,
-        __maxlen: size_t,
-        __format: *const ::core::ffi::c_char,
-        __arg: ::core::ffi::VaList,
-    ) -> ::core::ffi::c_int;
     static mut __xmlRegisterCallbacks: ::core::ffi::c_int;
     fn memset(
         __s: *mut ::core::ffi::c_void,
@@ -118,6 +101,36 @@ extern "C" {
     );
     fn xmlParserValidityWarning(
         ctx: *mut ::core::ffi::c_void,
+        msg: *const ::core::ffi::c_char,
+        ...
+    );
+    fn xmlTextReaderError(
+        ctxt: *mut ::core::ffi::c_void,
+        msg: *const ::core::ffi::c_char,
+        ...
+    );
+    fn xmlTextReaderWarning(
+        ctxt: *mut ::core::ffi::c_void,
+        msg: *const ::core::ffi::c_char,
+        ...
+    );
+    fn xmlTextReaderValidityError(
+        ctxt: *mut ::core::ffi::c_void,
+        msg: *const ::core::ffi::c_char,
+        ...
+    );
+    fn xmlTextReaderValidityWarning(
+        ctxt: *mut ::core::ffi::c_void,
+        msg: *const ::core::ffi::c_char,
+        ...
+    );
+    fn xmlTextReaderValidityErrorRelay(
+        ctxt: *mut ::core::ffi::c_void,
+        msg: *const ::core::ffi::c_char,
+        ...
+    );
+    fn xmlTextReaderValidityWarningRelay(
+        ctxt: *mut ::core::ffi::c_void,
         msg: *const ::core::ffi::c_char,
         ...
     );
@@ -5440,62 +5453,6 @@ pub unsafe extern "C" fn xmlTextReaderCurrentDoc(
     (*reader).preserve = 1 as ::core::ffi::c_int;
     return (*(*reader).ctxt).myDoc;
 }
-unsafe extern "C" fn xmlTextReaderValidityErrorRelay(
-    mut ctx: *mut ::core::ffi::c_void,
-    mut msg: *const ::core::ffi::c_char,
-    mut args: ...
-) {
-    let mut reader: xmlTextReaderPtr = ctx as xmlTextReaderPtr;
-    let mut str: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
-        ::core::ffi::c_char,
-    >();
-    let ap = args.clone();
-    str = xmlTextReaderBuildMessage(msg, ap.clone());
-    if (*reader).errorFunc.is_none() {
-        xmlTextReaderValidityError(
-            ctx,
-            b"%s\0" as *const u8 as *const ::core::ffi::c_char,
-            str,
-        );
-    } else {
-        (*reader)
-            .errorFunc
-            .expect(
-                "non-null function pointer",
-            )((*reader).errorFuncArg, str, XML_PARSER_SEVERITY_VALIDITY_ERROR, NULL);
-    }
-    if !str.is_null() {
-        xmlFree.expect("non-null function pointer")(str as *mut ::core::ffi::c_void);
-    }
-}
-unsafe extern "C" fn xmlTextReaderValidityWarningRelay(
-    mut ctx: *mut ::core::ffi::c_void,
-    mut msg: *const ::core::ffi::c_char,
-    mut args: ...
-) {
-    let mut reader: xmlTextReaderPtr = ctx as xmlTextReaderPtr;
-    let mut str: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
-        ::core::ffi::c_char,
-    >();
-    let ap = args.clone();
-    str = xmlTextReaderBuildMessage(msg, ap.clone());
-    if (*reader).errorFunc.is_none() {
-        xmlTextReaderValidityWarning(
-            ctx,
-            b"%s\0" as *const u8 as *const ::core::ffi::c_char,
-            str,
-        );
-    } else {
-        (*reader)
-            .errorFunc
-            .expect(
-                "non-null function pointer",
-            )((*reader).errorFuncArg, str, XML_PARSER_SEVERITY_VALIDITY_WARNING, NULL);
-    }
-    if !str.is_null() {
-        xmlFree.expect("non-null function pointer")(str as *mut ::core::ffi::c_void);
-    }
-}
 unsafe extern "C" fn xmlTextReaderValidityStructuredRelay(
     mut userData: *mut ::core::ffi::c_void,
     mut error: xmlErrorPtr,
@@ -6130,71 +6087,6 @@ pub unsafe extern "C" fn xmlTextReaderStandalone(
     }
     return (*doc).standalone;
 }
-unsafe extern "C" fn xmlTextReaderBuildMessage(
-    mut msg: *const ::core::ffi::c_char,
-    mut ap: ::core::ffi::VaList,
-) -> *mut ::core::ffi::c_char {
-    let mut size: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
-    let mut chars: ::core::ffi::c_int = 0;
-    let mut larger: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
-        ::core::ffi::c_char,
-    >();
-    let mut str: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
-        ::core::ffi::c_char,
-    >();
-    let mut aq = ap.clone();
-    loop {
-        aq = ap.clone();
-        chars = vsnprintf(str, size as size_t, msg, aq.clone());
-        if chars < 0 as ::core::ffi::c_int {
-            (*__xmlGenericError())
-                .expect(
-                    "non-null function pointer",
-                )(
-                *__xmlGenericErrorContext(),
-                b"vsnprintf failed !\n\0" as *const u8 as *const ::core::ffi::c_char,
-            );
-            if !str.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(str as *mut ::core::ffi::c_void);
-            }
-            return ::core::ptr::null_mut::<::core::ffi::c_char>();
-        }
-        if chars < size || size == MAX_ERR_MSG_SIZE {
-            break;
-        }
-        if chars < MAX_ERR_MSG_SIZE {
-            size = chars + 1 as ::core::ffi::c_int;
-        } else {
-            size = MAX_ERR_MSG_SIZE;
-        }
-        larger = xmlRealloc
-            .expect(
-                "non-null function pointer",
-            )(str as *mut ::core::ffi::c_void, size as size_t)
-            as *mut ::core::ffi::c_char;
-        if larger.is_null() {
-            (*__xmlGenericError())
-                .expect(
-                    "non-null function pointer",
-                )(
-                *__xmlGenericErrorContext(),
-                b"xmlRealloc failed !\n\0" as *const u8 as *const ::core::ffi::c_char,
-            );
-            if !str.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(str as *mut ::core::ffi::c_void);
-            }
-            return ::core::ptr::null_mut::<::core::ffi::c_char>();
-        }
-        str = larger;
-    }
-    return str;
-}
 #[no_mangle]
 pub unsafe extern "C" fn xmlTextReaderLocatorLineNumber(
     mut locator: xmlTextReaderLocatorPtr,
@@ -6252,7 +6144,8 @@ pub unsafe extern "C" fn xmlTextReaderLocatorBaseURI(
     }
     return ret;
 }
-unsafe extern "C" fn xmlTextReaderGenericError(
+#[no_mangle]
+pub unsafe extern "C" fn xmlTextReaderGenericError(
     mut ctxt: *mut ::core::ffi::c_void,
     mut severity: xmlParserSeverities,
     mut str: *mut ::core::ffi::c_char,
@@ -6270,6 +6163,27 @@ unsafe extern "C" fn xmlTextReaderGenericError(
         xmlFree.expect("non-null function pointer")(str as *mut ::core::ffi::c_void);
     }
 }
+#[no_mangle]
+pub unsafe extern "C" fn safeXmlTextReaderValidityRelayMessage(
+    mut ctx: *mut ::core::ffi::c_void,
+    mut severity: xmlParserSeverities,
+    mut str: *mut ::core::ffi::c_char,
+) {
+    let mut reader: xmlTextReaderPtr = ctx as xmlTextReaderPtr;
+    if str.is_null() || reader.is_null() {
+        return;
+    }
+    if (*reader).errorFunc.is_none() {
+        xmlTextReaderGenericError((*reader).ctxt as *mut ::core::ffi::c_void, severity, str);
+    } else {
+        (*reader)
+            .errorFunc
+            .expect(
+                "non-null function pointer",
+            )((*reader).errorFuncArg, str, severity, NULL);
+        xmlFree.expect("non-null function pointer")(str as *mut ::core::ffi::c_void);
+    }
+}
 unsafe extern "C" fn xmlTextReaderStructuredError(
     mut ctxt: *mut ::core::ffi::c_void,
     mut error: xmlErrorPtr,
@@ -6280,66 +6194,6 @@ unsafe extern "C" fn xmlTextReaderStructuredError(
         (*reader)
             .sErrorFunc
             .expect("non-null function pointer")((*reader).errorFuncArg, error);
-    }
-}
-unsafe extern "C" fn xmlTextReaderError(
-    mut ctxt: *mut ::core::ffi::c_void,
-    mut msg: *const ::core::ffi::c_char,
-    mut args: ...
-) {
-    let ap = args.clone();
-    xmlTextReaderGenericError(
-        ctxt,
-        XML_PARSER_SEVERITY_ERROR,
-        xmlTextReaderBuildMessage(msg, ap.clone()),
-    );
-}
-unsafe extern "C" fn xmlTextReaderWarning(
-    mut ctxt: *mut ::core::ffi::c_void,
-    mut msg: *const ::core::ffi::c_char,
-    mut args: ...
-) {
-    let ap = args.clone();
-    xmlTextReaderGenericError(
-        ctxt,
-        XML_PARSER_SEVERITY_WARNING,
-        xmlTextReaderBuildMessage(msg, ap.clone()),
-    );
-}
-unsafe extern "C" fn xmlTextReaderValidityError(
-    mut ctxt: *mut ::core::ffi::c_void,
-    mut msg: *const ::core::ffi::c_char,
-    mut args: ...
-) {
-    let ap = args.clone();
-    let mut len: ::core::ffi::c_int = xmlStrlen(msg as *const xmlChar);
-    if len > 1 as ::core::ffi::c_int
-        && *msg.offset((len - 2 as ::core::ffi::c_int) as isize) as ::core::ffi::c_int
-            != ':' as i32
-    {
-        xmlTextReaderGenericError(
-            ctxt,
-            XML_PARSER_SEVERITY_VALIDITY_ERROR,
-            xmlTextReaderBuildMessage(msg, ap.clone()),
-        );
-    }
-}
-unsafe extern "C" fn xmlTextReaderValidityWarning(
-    mut ctxt: *mut ::core::ffi::c_void,
-    mut msg: *const ::core::ffi::c_char,
-    mut args: ...
-) {
-    let ap = args.clone();
-    let mut len: ::core::ffi::c_int = xmlStrlen(msg as *const xmlChar);
-    if len != 0 as ::core::ffi::c_int
-        && *msg.offset((len - 1 as ::core::ffi::c_int) as isize) as ::core::ffi::c_int
-            != ':' as i32
-    {
-        xmlTextReaderGenericError(
-            ctxt,
-            XML_PARSER_SEVERITY_VALIDITY_WARNING,
-            xmlTextReaderBuildMessage(msg, ap.clone()),
-        );
     }
 }
 #[no_mangle]

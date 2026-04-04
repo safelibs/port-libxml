@@ -1,11 +1,8 @@
+use crate::abi::opaque::{
+    _IO_codecvt, _IO_marker, _IO_wide_data, _xmlBuf, _xmlDict, _xmlHashTable, _xmlRegexp,
+};
+
 extern "C" {
-    pub type _IO_wide_data;
-    pub type _IO_codecvt;
-    pub type _IO_marker;
-    pub type _xmlBuf;
-    pub type _xmlDict;
-    pub type _xmlHashTable;
-    pub type _xmlRegexp;
     fn xmlStrdup(cur: *const xmlChar) -> *mut xmlChar;
     fn xmlStrndup(cur: *const xmlChar, len: ::core::ffi::c_int) -> *mut xmlChar;
     fn xmlStrcasecmp(str1: *const xmlChar, str2: *const xmlChar) -> ::core::ffi::c_int;
