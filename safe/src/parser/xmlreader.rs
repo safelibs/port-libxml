@@ -178,7 +178,9 @@ extern "C" {
         filename: *const ::core::ffi::c_char,
     ) -> *mut ::core::ffi::c_char;
     fn xmlStopParser(ctxt: xmlParserCtxtPtr);
+    fn xmlNewParserCtxt() -> xmlParserCtxtPtr;
     fn xmlFreeParserCtxt(ctxt: xmlParserCtxtPtr);
+    fn xmlFreeInputStream(input: xmlParserInputPtr);
     fn xmlCreatePushParserCtxt(
         sax: xmlSAXHandlerPtr,
         user_data: *mut ::core::ffi::c_void,
@@ -186,6 +188,11 @@ extern "C" {
         size: ::core::ffi::c_int,
         filename: *const ::core::ffi::c_char,
     ) -> xmlParserCtxtPtr;
+    fn xmlLoadExternalEntity(
+        URL: *const ::core::ffi::c_char,
+        ID: *const ::core::ffi::c_char,
+        ctxt: xmlParserCtxtPtr,
+    ) -> xmlParserInputPtr;
     fn xmlParseChunk(
         ctxt: xmlParserCtxtPtr,
         chunk: *const ::core::ffi::c_char,
@@ -3496,6 +3503,57 @@ pub unsafe extern "C" fn xmlNewTextReader(
     (*ret).patternTab = ::core::ptr::null_mut::<xmlPatternPtr>();
     return ret;
 }
+unsafe fn xmlTextReaderLoadExternalInput(
+    uri: *const ::core::ffi::c_char,
+    loaded_uri: *mut *mut ::core::ffi::c_char,
+    loaded_directory: *mut *mut ::core::ffi::c_char,
+) -> xmlParserInputBufferPtr {
+    let mut ctxt: xmlParserCtxtPtr = ::core::ptr::null_mut::<xmlParserCtxt>();
+    let mut stream: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
+        xmlParserInputBuffer,
+    >();
+    if !loaded_uri.is_null() {
+        *loaded_uri = ::core::ptr::null_mut::<::core::ffi::c_char>();
+    }
+    if !loaded_directory.is_null() {
+        *loaded_directory = ::core::ptr::null_mut::<::core::ffi::c_char>();
+    }
+    if uri.is_null() {
+        return ::core::ptr::null_mut::<xmlParserInputBuffer>();
+    }
+    ctxt = xmlNewParserCtxt();
+    if ctxt.is_null() {
+        return ::core::ptr::null_mut::<xmlParserInputBuffer>();
+    }
+    stream = xmlLoadExternalEntity(
+        uri,
+        ::core::ptr::null::<::core::ffi::c_char>(),
+        ctxt,
+    );
+    if stream.is_null() {
+        xmlFreeParserCtxt(ctxt);
+        return ::core::ptr::null_mut::<xmlParserInputBuffer>();
+    }
+    input = (*stream).buf;
+    (*stream).buf = ::core::ptr::null_mut::<xmlParserInputBuffer>();
+    if !loaded_uri.is_null() && !(*stream).filename.is_null() {
+        *loaded_uri = (*stream).filename as *mut ::core::ffi::c_char;
+        (*stream).filename = ::core::ptr::null::<::core::ffi::c_char>();
+    }
+    if !loaded_directory.is_null() {
+        if !(*stream).directory.is_null() {
+            *loaded_directory = (*stream).directory as *mut ::core::ffi::c_char;
+            (*stream).directory = ::core::ptr::null::<::core::ffi::c_char>();
+        } else if !(*ctxt).directory.is_null() {
+            *loaded_directory = (*ctxt).directory as *mut ::core::ffi::c_char;
+            (*ctxt).directory = ::core::ptr::null_mut::<::core::ffi::c_char>();
+        }
+    }
+    xmlFreeInputStream(stream);
+    xmlFreeParserCtxt(ctxt);
+    return input;
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlNewTextReaderFilename(
     mut URI: *const ::core::ffi::c_char,
@@ -3504,20 +3562,54 @@ pub unsafe extern "C" fn xmlNewTextReaderFilename(
         xmlParserInputBuffer,
     >();
     let mut ret: xmlTextReaderPtr = ::core::ptr::null_mut::<xmlTextReader>();
+    let mut loaded_uri: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
+        ::core::ffi::c_char,
+    >();
+    let mut loaded_directory: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
+        ::core::ffi::c_char,
+    >();
     let mut directory: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
         ::core::ffi::c_char,
     >();
-    input = xmlParserInputBufferCreateFilename(URI, XML_CHAR_ENCODING_NONE);
+    input = xmlTextReaderLoadExternalInput(
+        URI,
+        &raw mut loaded_uri,
+        &raw mut loaded_directory,
+    );
     if input.is_null() {
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
-    ret = xmlNewTextReader(input, URI);
+    ret = xmlNewTextReader(
+        input,
+        if !loaded_uri.is_null() {
+            loaded_uri as *const ::core::ffi::c_char
+        } else {
+            URI
+        },
+    );
     if ret.is_null() {
         xmlFreeParserInputBuffer(input);
+        if !loaded_uri.is_null() {
+            xmlFree
+                .expect("non-null function pointer")(loaded_uri as *mut ::core::ffi::c_void);
+        }
+        if !loaded_directory.is_null() {
+            xmlFree.expect("non-null function pointer")(
+                loaded_directory as *mut ::core::ffi::c_void,
+            );
+        }
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
     (*ret).allocs |= XML_TEXTREADER_INPUT;
-    if (*(*ret).ctxt).directory.is_null() {
+    if !loaded_directory.is_null() {
+        if !(*(*ret).ctxt).directory.is_null() {
+            xmlFree.expect("non-null function pointer")(
+                (*(*ret).ctxt).directory as *mut ::core::ffi::c_void,
+            );
+        }
+        (*(*ret).ctxt).directory = loaded_directory;
+        loaded_directory = ::core::ptr::null_mut::<::core::ffi::c_char>();
+    } else if (*(*ret).ctxt).directory.is_null() {
         directory = xmlParserGetDirectory(URI);
     }
     if (*(*ret).ctxt).directory.is_null() && !directory.is_null() {
@@ -3527,6 +3619,13 @@ pub unsafe extern "C" fn xmlNewTextReaderFilename(
     if !directory.is_null() {
         xmlFree
             .expect("non-null function pointer")(directory as *mut ::core::ffi::c_void);
+    }
+    if !loaded_uri.is_null() {
+        xmlFree.expect("non-null function pointer")(loaded_uri as *mut ::core::ffi::c_void);
+    }
+    if !loaded_directory.is_null() {
+        xmlFree
+            .expect("non-null function pointer")(loaded_directory as *mut ::core::ffi::c_void);
     }
     return ret;
 }
@@ -7123,17 +7222,57 @@ pub unsafe extern "C" fn xmlReaderNewFile(
     let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
         xmlParserInputBuffer,
     >();
+    let mut loaded_uri: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
+        ::core::ffi::c_char,
+    >();
+    let mut loaded_directory: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
+        ::core::ffi::c_char,
+    >();
+    let mut ret: ::core::ffi::c_int = 0;
     if filename.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
     if reader.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    input = xmlParserInputBufferCreateFilename(filename, XML_CHAR_ENCODING_NONE);
+    input = xmlTextReaderLoadExternalInput(
+        filename,
+        &raw mut loaded_uri,
+        &raw mut loaded_directory,
+    );
     if input.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    return xmlTextReaderSetup(reader, input, filename, encoding, options);
+    ret = xmlTextReaderSetup(
+        reader,
+        input,
+        if !loaded_uri.is_null() {
+            loaded_uri as *const ::core::ffi::c_char
+        } else {
+            filename
+        },
+        encoding,
+        options,
+    );
+    if ret == 0 as ::core::ffi::c_int && !loaded_directory.is_null()
+        && !reader.is_null() && !(*reader).ctxt.is_null()
+    {
+        if !(*(*reader).ctxt).directory.is_null() {
+            xmlFree.expect("non-null function pointer")(
+                (*(*reader).ctxt).directory as *mut ::core::ffi::c_void,
+            );
+        }
+        (*(*reader).ctxt).directory = loaded_directory;
+        loaded_directory = ::core::ptr::null_mut::<::core::ffi::c_char>();
+    }
+    if !loaded_uri.is_null() {
+        xmlFree.expect("non-null function pointer")(loaded_uri as *mut ::core::ffi::c_void);
+    }
+    if !loaded_directory.is_null() {
+        xmlFree
+            .expect("non-null function pointer")(loaded_directory as *mut ::core::ffi::c_void);
+    }
+    return ret;
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlReaderNewMemory(
