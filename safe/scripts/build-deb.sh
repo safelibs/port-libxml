@@ -23,16 +23,25 @@ prepare_snapshot() {
   local dest="$1"
 
   mkdir -p "$dest"
-  tar \
-    -C "$ROOT" \
-    --exclude='safe/target' \
-    --exclude='safe/debian/.debhelper' \
-    --exclude='safe/debian/files' \
-    --exclude='safe/debian/tmp' \
-    -cf - \
-    safe \
-    original \
-    | tar -xf - -C "$dest"
+  if git -C "$ROOT" rev-parse --show-toplevel >/dev/null 2>&1; then
+    git -C "$ROOT" ls-files -z -- safe original \
+      | tar -C "$ROOT" --null -T - -cf - \
+      | tar -xf - -C "$dest"
+  else
+    tar \
+      -C "$ROOT" \
+      --exclude='safe/target' \
+      --exclude='safe/debian/.debhelper' \
+      --exclude='safe/debian/files' \
+      --exclude='safe/debian/tmp' \
+      -cf - \
+      safe \
+      original \
+      | tar -xf - -C "$dest"
+  fi
+
+  rm -rf "$dest/safe/original"
+  cp -a "$dest/original" "$dest/safe/original"
 }
 
 collect_artifacts() {
@@ -71,6 +80,30 @@ ensure_orig_tarball() {
     -cJf "$tarball" \
     --transform="s,^safe,libxml2-${upstream_version}," \
     safe
+}
+
+reset_output_dir() {
+  if rm -rf "$OUT" 2>/dev/null; then
+    mkdir -p "$OUT"
+    return
+  fi
+
+  docker run --rm \
+    -v "$ROOT:$ROOT" \
+    ubuntu:24.04 \
+    bash -lc "rm -rf '$OUT'"
+
+  rm -rf "$OUT"
+  mkdir -p "$OUT"
+}
+
+fix_tree_ownership() {
+  local tree_root="$1"
+
+  docker run --rm \
+    -v "$tree_root:/work" \
+    ubuntu:24.04 \
+    bash -lc "chown -R $(id -u):$(id -g) /work"
 }
 
 run_build() {
@@ -143,20 +176,38 @@ ensure_modern_rust_toolchain() {
 }
 
 run_in_docker() {
+  local snapshot_root
+  local status
+
   if ! command -v docker >/dev/null 2>&1; then
     printf 'missing required host tool: docker\n' >&2
     exit 1
   fi
 
+  snapshot_root="$(mktemp -d)"
+  prepare_snapshot "$snapshot_root"
+
+  status=0
   docker run --rm \
     -e DEBIAN_FRONTEND=noninteractive \
-    -v "$ROOT:$ROOT" \
-    -w "$ROOT" \
+    -v "$snapshot_root:/work" \
+    -w /work \
     ubuntu:24.04 \
-    bash -lc "sed 's/^Types: deb\$/Types: deb-src/' /etc/apt/sources.list.d/ubuntu.sources > /etc/apt/sources.list.d/ubuntu-src.sources && apt-get update >/tmp/build-deb-bootstrap.log && apt-get install -y --no-install-recommends ca-certificates curl dpkg-dev python3 >/tmp/build-deb-bootstrap-install.log && apt-get build-dep -y '$ROOT/safe' >/tmp/build-deb-builddep.log && '$ROOT/safe/scripts/build-deb.sh' --inside-current-env"
+    bash -lc "sed 's/^Types: deb\$/Types: deb-src/' /etc/apt/sources.list.d/ubuntu.sources > /etc/apt/sources.list.d/ubuntu-src.sources && apt-get update >/tmp/build-deb-bootstrap.log && apt-get install -y --no-install-recommends ca-certificates curl dpkg-dev git python3 >/tmp/build-deb-bootstrap-install.log && apt-get build-dep -y /work/safe >/tmp/build-deb-builddep.log && /work/safe/scripts/build-deb.sh --inside-current-env" || status=$?
+  fix_tree_ownership "$snapshot_root"
+  if [[ "$status" -ne 0 ]]; then
+    rm -rf "$snapshot_root"
+    return "$status"
+  fi
+
+  reset_output_dir
+  cp -a "$snapshot_root/safe/target/debs/." "$OUT/"
+  rm -rf "$snapshot_root"
+
+  return "$status"
 }
 
-if [[ "$INSIDE_CURRENT_ENV" -eq 1 ]]; then
+  if [[ "$INSIDE_CURRENT_ENV" -eq 1 ]]; then
   run_inside_current_env
 else
   run_in_docker

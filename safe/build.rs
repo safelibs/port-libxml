@@ -1,7 +1,7 @@
 use std::env;
 use std::ffi::OsString;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
 
 #[derive(Debug, Default)]
@@ -53,7 +53,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("cargo:rerun-if-changed={}", manifest_path.display());
     println!(
         "cargo:rerun-if-changed={}",
-        manifest_dir.join(&manifest.version_script).display()
+        resolve_layout_path(&manifest_dir, &manifest.version_script).display()
     );
     println!("cargo:rerun-if-env-changed=CC");
     println!("cargo:rerun-if-env-changed=AR");
@@ -71,9 +71,9 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let obj_dir = native_dir.join("obj");
     fs::create_dir_all(&obj_dir)?;
 
-    let config_header = manifest_dir.join(&manifest.config_header);
-    let private_include_dir = manifest_dir.join(&manifest.private_include_dir);
-    let public_include_dir = manifest_dir.join(&manifest.public_include_dir);
+    let config_header = resolve_layout_path(&manifest_dir, &manifest.config_header);
+    let private_include_dir = resolve_layout_path(&manifest_dir, &manifest.private_include_dir);
+    let public_include_dir = resolve_layout_path(&manifest_dir, &manifest.public_include_dir);
     println!("cargo:rerun-if-changed={}", config_header.display());
     println!("cargo:rerun-if-changed={}", private_include_dir.display());
     println!("cargo:rerun-if-changed={}", public_include_dir.display());
@@ -104,7 +104,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut objects = Vec::new();
     for module in &manifest.module {
-        let source = manifest_dir.join(&module.source);
+        let source = resolve_layout_path(&manifest_dir, &module.source);
         println!("cargo:rerun-if-changed={}", source.display());
         if !module.enabled {
             continue;
@@ -161,6 +161,22 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     fs::write(manifest_dir.join("target/build-artifacts.env"), metadata)?;
 
     Ok(())
+}
+
+fn resolve_layout_path(manifest_dir: &Path, relative: &str) -> PathBuf {
+    let direct = manifest_dir.join(relative);
+    if direct.exists() {
+        return direct;
+    }
+
+    if let Some(stripped) = relative.strip_prefix("../") {
+        let packaged = manifest_dir.join(stripped);
+        if packaged.exists() {
+            return packaged;
+        }
+    }
+
+    direct
 }
 
 fn detect_multiarch(cc: &OsString) -> Result<String, Box<dyn std::error::Error>> {

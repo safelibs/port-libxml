@@ -1,18 +1,38 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
-STAGE="${1:-$ROOT/safe/target/stage}"
-if [[ "$STAGE" != /* ]]; then
-  STAGE="$ROOT/$STAGE"
+SELF_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+if [[ -f "$SELF_DIR/../Cargo.toml" ]]; then
+  WORKTREE_ROOT="$(cd -- "$SELF_DIR/.." && pwd)"
+  SOURCE_ROOT="$WORKTREE_ROOT"
+elif [[ -f "$SELF_DIR/../../safe/Cargo.toml" ]]; then
+  WORKTREE_ROOT="$(cd -- "$SELF_DIR/../.." && pwd)"
+  SOURCE_ROOT="$WORKTREE_ROOT/safe"
+else
+  printf 'failed to resolve safe source root from %s\n' "$SELF_DIR" >&2
+  exit 1
 fi
-ARTIFACTS_ENV="$ROOT/safe/target/build-artifacts.env"
-RELEASE_BINDIR="$ROOT/safe/target/release"
+
+if [[ -d "$SOURCE_ROOT/original" ]]; then
+  ORIGINAL_ROOT="$SOURCE_ROOT/original"
+elif [[ -d "$WORKTREE_ROOT/original" ]]; then
+  ORIGINAL_ROOT="$WORKTREE_ROOT/original"
+else
+  printf 'missing required original/ assets next to %s\n' "$SOURCE_ROOT" >&2
+  exit 1
+fi
+
+STAGE="${1:-$SOURCE_ROOT/target/stage}"
+if [[ "$STAGE" != /* ]]; then
+  STAGE="$WORKTREE_ROOT/$STAGE"
+fi
+ARTIFACTS_ENV="$SOURCE_ROOT/target/build-artifacts.env"
+RELEASE_BINDIR="$SOURCE_ROOT/target/release"
 
 ensure_release_artifacts() {
   RUSTFLAGS="${RUSTFLAGS:-} -C relocation-model=pic" \
-    cargo rustc --manifest-path "$ROOT/safe/Cargo.toml" --release --lib --crate-type staticlib
-  cargo build --manifest-path "$ROOT/safe/Cargo.toml" --release --bins
+    cargo rustc --manifest-path "$SOURCE_ROOT/Cargo.toml" --release --lib --crate-type staticlib
+  cargo build --manifest-path "$SOURCE_ROOT/Cargo.toml" --release --bins
 }
 
 ensure_release_artifacts
@@ -37,7 +57,7 @@ cp "$LIBXML2_NATIVE_STATIC" "$LIBDIR/libxml2.a"
 cc -shared \
   -Wl,--no-undefined \
   -Wl,-soname,libxml2.so.2 \
-  -Wl,--version-script,"$ROOT/safe/abi/libxml2.syms" \
+  -Wl,--version-script,"$SOURCE_ROOT/abi/libxml2.syms" \
   -o "$LIBDIR/libxml2.so.$LIBXML2_VERSION" \
   -Wl,--whole-archive \
   "$LIBXML2_NATIVE_STATIC" \
@@ -46,8 +66,8 @@ cc -shared \
 ln -s "libxml2.so.$LIBXML2_VERSION" "$LIBDIR/libxml2.so.2"
 ln -s "libxml2.so.2" "$LIBDIR/libxml2.so"
 
-cp -a "$ROOT/safe/include/libxml/." "$INCLUDEDIR/"
-cp "$ROOT/safe/share/aclocal/libxml2.m4" "$ACLOCALDIR/libxml2.m4"
+cp -a "$SOURCE_ROOT/include/libxml/." "$INCLUDEDIR/"
+cp "$SOURCE_ROOT/share/aclocal/libxml2.m4" "$ACLOCALDIR/libxml2.m4"
 
 cat >"$PKGDIR/libxml-2.0.pc" <<EOF
 prefix=/usr
@@ -157,12 +177,12 @@ EOF
 chmod +x "$BINDIR/xml2-config"
 install -m 0755 "$RELEASE_BINDIR/xmllint" "$BINDIR/xmllint"
 install -m 0755 "$RELEASE_BINDIR/xmlcatalog" "$BINDIR/xmlcatalog"
-install -m 0644 "$ROOT/original/doc/xmllint.1" "$MAN1DIR/xmllint.1"
-install -m 0644 "$ROOT/original/doc/xmlcatalog.1" "$MAN1DIR/xmlcatalog.1"
-install -m 0644 "$ROOT/original/xml2-config.1" "$MAN1DIR/xml2-config.1"
-install -m 0644 "$ROOT/original/libxml.3" "$MAN3DIR/libxml.3"
+install -m 0644 "$ORIGINAL_ROOT/doc/xmllint.1" "$MAN1DIR/xmllint.1"
+install -m 0644 "$ORIGINAL_ROOT/doc/xmlcatalog.1" "$MAN1DIR/xmlcatalog.1"
+install -m 0644 "$ORIGINAL_ROOT/xml2-config.1" "$MAN1DIR/xml2-config.1"
+install -m 0644 "$ORIGINAL_ROOT/libxml.3" "$MAN3DIR/libxml.3"
 
-make -C "$ROOT/safe/python" \
+make -C "$SOURCE_ROOT/python" \
   STAGE="$STAGE" \
   TRIPLET="$TRIPLET" \
   PYTHON=python3 \

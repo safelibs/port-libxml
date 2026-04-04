@@ -1,17 +1,28 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
 import os
+from pathlib import Path
 import shlex
 import subprocess
 import sys
 
 
-ROOT = Path(__file__).resolve().parents[2]
-STAGE = Path(os.environ.get("LIBXML2_STAGE", ROOT / "safe/target/stage")).resolve()
+ROOT = Path(__file__).resolve().parents[1]
+STAGE = Path(os.environ.get("LIBXML2_STAGE", ROOT / "target/stage")).resolve()
 TRIPLET = os.environ.get("LIBXML2_TRIPLET")
 if not TRIPLET:
     TRIPLET = subprocess.check_output(["gcc", "-print-multiarch"], text=True).strip()
+
+
+def resolve_original_root() -> Path:
+    candidates = [ROOT / "original", ROOT.parent / "original"]
+    for candidate in candidates:
+        if candidate.is_dir():
+            return candidate
+    raise SystemExit(f"missing required original/ assets next to {ROOT}")
+
+
+ORIGINAL_ROOT = resolve_original_root()
 
 
 def python_config(option: str) -> list[str]:
@@ -54,13 +65,13 @@ def build_extension(argv: list[str]) -> int:
         "-DHAVE_CONFIG_H",
         *python_config("--cflags"),
         "-D_REENTRANT=1",
-        f"-I{ROOT / 'original/python'}",
-        f"-I{ROOT / 'safe/include'}",
-        f"-I{ROOT / 'original'}",
+        f"-I{ORIGINAL_ROOT / 'python'}",
+        f"-I{ROOT / 'include'}",
+        f"-I{ORIGINAL_ROOT}",
         f"-I{STAGE / 'usr/include/libxml2'}",
-        str(ROOT / "original/python/libxml2-py.c"),
-        str(ROOT / "original/python/libxml.c"),
-        str(ROOT / "original/python/types.c"),
+        str(ORIGINAL_ROOT / "python/libxml2-py.c"),
+        str(ORIGINAL_ROOT / "python/libxml.c"),
+        str(ORIGINAL_ROOT / "python/types.c"),
         f"-L{STAGE / 'usr/lib' / TRIPLET}",
         "-Wl,--enable-new-dtags",
         f"-Wl,-rpath,$ORIGIN/../{TRIPLET}",
