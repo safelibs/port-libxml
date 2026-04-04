@@ -1568,93 +1568,111 @@ pub type xmlMallocFunc = Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi
 pub const XML_SAX2_MAGIC: ::core::ffi::c_uint = 0xdeedbeaf as ::core::ffi::c_uint;
 pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 #[no_mangle]
-pub unsafe extern "C" fn initGenericErrorDefaultFunc(mut handler: *mut xmlGenericErrorFunc) { unsafe {
+pub extern "C" fn initGenericErrorDefaultFunc(mut handler: *mut xmlGenericErrorFunc) {
     if handler.is_null() {
-        let ref mut fresh4 = *__xmlGenericError();
-        *fresh4 = Some(
-            xmlGenericErrorDefaultFunc
-                as unsafe extern "C" fn(
-                    *mut ::core::ffi::c_void,
-                    *const ::core::ffi::c_char,
-                    ...
-                ) -> (),
-        ) as xmlGenericErrorFunc;
+        unsafe {
+            let ref mut fresh4 = *__xmlGenericError();
+            *fresh4 = Some(
+                xmlGenericErrorDefaultFunc
+                    as unsafe extern "C" fn(
+                        *mut ::core::ffi::c_void,
+                        *const ::core::ffi::c_char,
+                        ...
+                    ) -> (),
+            ) as xmlGenericErrorFunc;
+        }
     } else {
-        let ref mut fresh5 = *__xmlGenericError();
-        *fresh5 = *handler;
+        unsafe {
+            let ref mut fresh5 = *__xmlGenericError();
+            *fresh5 = *handler;
+        }
     };
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlSetGenericErrorFunc(
+pub extern "C" fn xmlSetGenericErrorFunc(
     mut ctx: *mut ::core::ffi::c_void,
     mut handler: xmlGenericErrorFunc,
-) { unsafe {
-    let ref mut fresh0 = *__xmlGenericErrorContext();
-    *fresh0 = ctx;
+) {
+    unsafe {
+        let ref mut fresh0 = *__xmlGenericErrorContext();
+        *fresh0 = ctx;
+    }
     if handler.is_some() {
-        let ref mut fresh1 = *__xmlGenericError();
-        *fresh1 = handler;
+        unsafe {
+            let ref mut fresh1 = *__xmlGenericError();
+            *fresh1 = handler;
+        }
     } else {
-        let ref mut fresh2 = *__xmlGenericError();
-        *fresh2 = Some(
-            xmlGenericErrorDefaultFunc
-                as unsafe extern "C" fn(
-                    *mut ::core::ffi::c_void,
-                    *const ::core::ffi::c_char,
-                    ...
-                ) -> (),
-        ) as xmlGenericErrorFunc;
+        unsafe {
+            let ref mut fresh2 = *__xmlGenericError();
+            *fresh2 = Some(
+                xmlGenericErrorDefaultFunc
+                    as unsafe extern "C" fn(
+                        *mut ::core::ffi::c_void,
+                        *const ::core::ffi::c_char,
+                        ...
+                    ) -> (),
+            ) as xmlGenericErrorFunc;
+        }
     };
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlSetStructuredErrorFunc(
+pub extern "C" fn xmlSetStructuredErrorFunc(
     mut ctx: *mut ::core::ffi::c_void,
     mut handler: xmlStructuredErrorFunc,
-) { unsafe {
-    let ref mut fresh6 = *__xmlStructuredErrorContext();
-    *fresh6 = ctx;
-    let ref mut fresh7 = *__xmlStructuredError();
-    *fresh7 = handler;
-}}
+) {
+    unsafe {
+        let ref mut fresh6 = *__xmlStructuredErrorContext();
+        *fresh6 = ctx;
+        let ref mut fresh7 = *__xmlStructuredError();
+        *fresh7 = handler;
+    }
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlParserPrintFileInfo(mut input: xmlParserInputPtr) { unsafe {
+pub unsafe extern "C" fn xmlParserPrintFileInfo(mut input: xmlParserInputPtr) {
     if !input.is_null() {
-        if !(*input).filename.is_null() {
-            (*__xmlGenericError()).expect("non-null function pointer")(
-                *__xmlGenericErrorContext(),
-                b"%s:%d: \0" as *const u8 as *const ::core::ffi::c_char,
-                (*input).filename,
-                (*input).line,
-            );
+        if unsafe { !(*input).filename.is_null() } {
+            unsafe {
+                (*__xmlGenericError()).expect("non-null function pointer")(
+                    *__xmlGenericErrorContext(),
+                    b"%s:%d: \0" as *const u8 as *const ::core::ffi::c_char,
+                    (*input).filename,
+                    (*input).line,
+                );
+            }
         } else {
-            (*__xmlGenericError()).expect("non-null function pointer")(
-                *__xmlGenericErrorContext(),
-                b"Entity: line %d: \0" as *const u8 as *const ::core::ffi::c_char,
-                (*input).line,
-            );
+            unsafe {
+                (*__xmlGenericError()).expect("non-null function pointer")(
+                    *__xmlGenericErrorContext(),
+                    b"Entity: line %d: \0" as *const u8 as *const ::core::ffi::c_char,
+                    (*input).line,
+                );
+            }
         }
     }
-}}
+}
 unsafe extern "C" fn xmlParserPrintFileContextInternal(
     mut input: xmlParserInputPtr,
     mut channel: xmlGenericErrorFunc,
     mut data: *mut ::core::ffi::c_void,
-) { unsafe {
+) {
     let mut cur: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut base: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut n: ::core::ffi::c_uint = 0;
     let mut col: ::core::ffi::c_uint = 0;
     let mut content: [xmlChar; 81] = [0; 81];
     let mut ctnt: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if input.is_null() || (*input).cur.is_null() {
+    if input.is_null() || unsafe { (*input).cur.is_null() } {
         return;
     }
-    cur = (*input).cur;
-    base = (*input).base;
+    cur = unsafe { (*input).cur };
+    base = unsafe { (*input).base };
     while cur > base
-        && (*cur as ::core::ffi::c_int == '\n' as i32 || *cur as ::core::ffi::c_int == '\r' as i32)
+        && unsafe {
+            *cur as ::core::ffi::c_int == '\n' as i32 || *cur as ::core::ffi::c_int == '\r' as i32
+        }
     {
-        cur = cur.offset(-1);
+        cur = unsafe { cur.offset(-1) };
     }
     n = 0 as ::core::ffi::c_uint;
     loop {
@@ -1663,38 +1681,40 @@ unsafe extern "C" fn xmlParserPrintFileContextInternal(
         if !((fresh8 as usize)
             < (::core::mem::size_of::<[xmlChar; 81]>() as usize).wrapping_sub(1 as usize)
             && cur > base
-            && *cur as ::core::ffi::c_int != '\n' as i32
-            && *cur as ::core::ffi::c_int != '\r' as i32)
+            && unsafe { *cur as ::core::ffi::c_int != '\n' as i32 }
+            && unsafe { *cur as ::core::ffi::c_int != '\r' as i32 })
         {
             break;
         }
-        cur = cur.offset(-1);
+        cur = unsafe { cur.offset(-1) };
     }
-    if *cur as ::core::ffi::c_int == '\n' as i32 || *cur as ::core::ffi::c_int == '\r' as i32 {
-        cur = cur.offset(1);
+    if unsafe { *cur as ::core::ffi::c_int == '\n' as i32 || *cur as ::core::ffi::c_int == '\r' as i32 } {
+        cur = unsafe { cur.offset(1) };
     }
-    col = (*input).cur.offset_from(cur) as ::core::ffi::c_long as ::core::ffi::c_uint;
+    col = unsafe { (*input).cur.offset_from(cur) as ::core::ffi::c_long as ::core::ffi::c_uint };
     n = 0 as ::core::ffi::c_uint;
     ctnt = &raw mut content as *mut xmlChar;
-    while *cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int
-        && *cur as ::core::ffi::c_int != '\n' as i32
-        && *cur as ::core::ffi::c_int != '\r' as i32
+    while unsafe { *cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int }
+        && unsafe { *cur as ::core::ffi::c_int != '\n' as i32 }
+        && unsafe { *cur as ::core::ffi::c_int != '\r' as i32 }
         && (n as usize)
             < (::core::mem::size_of::<[xmlChar; 81]>() as usize).wrapping_sub(1 as usize)
     {
         let fresh9 = cur;
-        cur = cur.offset(1);
+        cur = unsafe { cur.offset(1) };
         let fresh10 = ctnt;
-        ctnt = ctnt.offset(1);
-        *fresh10 = *fresh9;
+        ctnt = unsafe { ctnt.offset(1) };
+        unsafe { *fresh10 = *fresh9 };
         n = n.wrapping_add(1);
     }
-    *ctnt = 0 as xmlChar;
-    channel.expect("non-null function pointer")(
-        data,
-        b"%s\n\0" as *const u8 as *const ::core::ffi::c_char,
-        &raw mut content as *mut xmlChar,
-    );
+    unsafe { *ctnt = 0 as xmlChar };
+    unsafe {
+        channel.expect("non-null function pointer")(
+            data,
+            b"%s\n\0" as *const u8 as *const ::core::ffi::c_char,
+            &raw mut content as *mut xmlChar,
+        );
+    }
     n = 0 as ::core::ffi::c_uint;
     ctnt = &raw mut content as *mut xmlChar;
     while n < col
@@ -1704,34 +1724,41 @@ unsafe extern "C" fn xmlParserPrintFileContextInternal(
             (fresh11 as usize)
                 < (::core::mem::size_of::<[xmlChar; 81]>() as usize).wrapping_sub(2 as usize)
         }
-        && *ctnt as ::core::ffi::c_int != 0 as ::core::ffi::c_int
+        && unsafe { *ctnt as ::core::ffi::c_int != 0 as ::core::ffi::c_int }
     {
-        if *ctnt as ::core::ffi::c_int != '\t' as i32 {
-            *ctnt = ' ' as i32 as xmlChar;
+        if unsafe { *ctnt as ::core::ffi::c_int != '\t' as i32 } {
+            unsafe { *ctnt = ' ' as i32 as xmlChar };
         }
-        ctnt = ctnt.offset(1);
+        ctnt = unsafe { ctnt.offset(1) };
     }
     let fresh12 = ctnt;
-    ctnt = ctnt.offset(1);
-    *fresh12 = '^' as i32 as xmlChar;
-    *ctnt = 0 as xmlChar;
-    channel.expect("non-null function pointer")(
-        data,
-        b"%s\n\0" as *const u8 as *const ::core::ffi::c_char,
-        &raw mut content as *mut xmlChar,
-    );
-}}
+    ctnt = unsafe { ctnt.offset(1) };
+    unsafe {
+        *fresh12 = '^' as i32 as xmlChar;
+        *ctnt = 0 as xmlChar;
+        channel.expect("non-null function pointer")(
+            data,
+            b"%s\n\0" as *const u8 as *const ::core::ffi::c_char,
+            &raw mut content as *mut xmlChar,
+        );
+    }
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlParserPrintFileContext(mut input: xmlParserInputPtr) { unsafe {
-    xmlParserPrintFileContextInternal(input, *__xmlGenericError(), *__xmlGenericErrorContext());
-}}
-unsafe extern "C" fn xmlReportError(
+pub unsafe extern "C" fn xmlParserPrintFileContext(mut input: xmlParserInputPtr) {
+    unsafe { xmlParserPrintFileContextInternal(input, *__xmlGenericError(), *__xmlGenericErrorContext()) };
+}
+fn xmlReportError(
     mut err: xmlErrorPtr,
     mut ctxt: xmlParserCtxtPtr,
     mut str: *const ::core::ffi::c_char,
     mut channel: xmlGenericErrorFunc,
     mut data: *mut ::core::ffi::c_void,
-) { unsafe {
+) {
+    macro_rules! emit {
+        ($($arg:tt)*) => {{
+            unsafe { channel.expect("non-null function pointer")($($arg)*) }
+        }};
+    }
     let mut file: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut line: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     let mut code: ::core::ffi::c_int = -(1 as ::core::ffi::c_int);
@@ -1745,38 +1772,44 @@ unsafe extern "C" fn xmlReportError(
         return;
     }
     if channel.is_none() {
-        channel = *__xmlGenericError();
-        data = *__xmlGenericErrorContext();
+        unsafe {
+            channel = *__xmlGenericError();
+            data = *__xmlGenericErrorContext();
+        }
     }
-    file = (*err).file;
-    line = (*err).line;
-    code = (*err).code;
-    domain = (*err).domain;
-    level = (*err).level;
-    node = (*err).node as xmlNodePtr;
+    unsafe {
+        file = (*err).file;
+        line = (*err).line;
+        code = (*err).code;
+        domain = (*err).domain;
+        level = (*err).level;
+        node = (*err).node as xmlNodePtr;
+    }
     if code == XML_ERR_OK as ::core::ffi::c_int {
         return;
     }
     if !node.is_null()
-        && (*node).type_0 as ::core::ffi::c_uint
+        && unsafe { (*node).type_0 as ::core::ffi::c_uint }
             == XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
     {
-        name = (*node).name;
+        name = unsafe { (*node).name };
     }
     if !ctxt.is_null() {
-        input = (*ctxt).input;
+        input = unsafe { (*ctxt).input };
         if !input.is_null()
-            && (*input).filename.is_null()
-            && (*ctxt).inputNr > 1 as ::core::ffi::c_int
+            && unsafe { (*input).filename.is_null() }
+            && unsafe { (*ctxt).inputNr > 1 as ::core::ffi::c_int }
         {
             cur = input;
-            input = *(*ctxt)
-                .inputTab
-                .offset(((*ctxt).inputNr - 2 as ::core::ffi::c_int) as isize);
+            input = unsafe {
+                *(*ctxt)
+                    .inputTab
+                    .offset(((*ctxt).inputNr - 2 as ::core::ffi::c_int) as isize)
+            };
         }
         if !input.is_null() {
-            if !(*input).filename.is_null() {
-                channel.expect("non-null function pointer")(
+            if unsafe { !(*input).filename.is_null() } {
+                emit!(
                     data,
                     b"%s:%d: \0" as *const u8 as *const ::core::ffi::c_char,
                     (*input).filename,
@@ -1785,7 +1818,7 @@ unsafe extern "C" fn xmlReportError(
             } else if line != 0 as ::core::ffi::c_int
                 && domain == XML_FROM_PARSER as ::core::ffi::c_int
             {
-                channel.expect("non-null function pointer")(
+                emit!(
                     data,
                     b"Entity: line %d: \0" as *const u8 as *const ::core::ffi::c_char,
                     (*input).line,
@@ -1793,7 +1826,7 @@ unsafe extern "C" fn xmlReportError(
             }
         }
     } else if !file.is_null() {
-        channel.expect("non-null function pointer")(
+        emit!(
             data,
             b"%s:%d: \0" as *const u8 as *const ::core::ffi::c_char,
             file,
@@ -1807,14 +1840,14 @@ unsafe extern "C" fn xmlReportError(
             || domain == XML_FROM_RELAXNGP as ::core::ffi::c_int
             || domain == XML_FROM_RELAXNGV as ::core::ffi::c_int)
     {
-        channel.expect("non-null function pointer")(
+        emit!(
             data,
             b"Entity: line %d: \0" as *const u8 as *const ::core::ffi::c_char,
             line,
         );
     }
     if !name.is_null() {
-        channel.expect("non-null function pointer")(
+        emit!(
             data,
             b"element %s: \0" as *const u8 as *const ::core::ffi::c_char,
             name,
@@ -1822,139 +1855,139 @@ unsafe extern "C" fn xmlReportError(
     }
     match domain {
         1 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"parser \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         3 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"namespace \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         4 | 23 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"validity \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         5 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"HTML parser \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         6 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"memory \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         7 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"output \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         8 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"I/O \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         11 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"XInclude \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         12 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"XPath \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         13 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"parser \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         14 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"regexp \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         26 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"module \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         17 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"Schemas validity \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         16 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"Schemas parser \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         18 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"Relax-NG parser \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         19 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"Relax-NG validity \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         20 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"Catalog \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         21 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"C14N \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         22 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"XSLT \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         27 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"encoding \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         28 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"schematron \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         29 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"internal buffer \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         30 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"URI \0" as *const u8 as *const ::core::ffi::c_char,
             );
@@ -1963,25 +1996,25 @@ unsafe extern "C" fn xmlReportError(
     }
     match level as ::core::ffi::c_uint {
         0 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b": \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         1 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"warning : \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         2 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"error : \0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         3 => {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"error : \0" as *const u8 as *const ::core::ffi::c_char,
             );
@@ -1990,35 +2023,37 @@ unsafe extern "C" fn xmlReportError(
     }
     if !str.is_null() {
         let mut len: ::core::ffi::c_int = 0;
-        len = xmlStrlen(str as *const xmlChar);
+        len = unsafe { xmlStrlen(str as *const xmlChar) };
         if len > 0 as ::core::ffi::c_int
-            && *str.offset((len - 1 as ::core::ffi::c_int) as isize) as ::core::ffi::c_int
-                != '\n' as i32
+            && unsafe {
+                *str.offset((len - 1 as ::core::ffi::c_int) as isize) as ::core::ffi::c_int
+                    != '\n' as i32
+            }
         {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"%s\n\0" as *const u8 as *const ::core::ffi::c_char,
                 str,
             );
         } else {
-            channel.expect("non-null function pointer")(
+            emit!(
                 data,
                 b"%s\0" as *const u8 as *const ::core::ffi::c_char,
                 str,
             );
         }
     } else {
-        channel.expect("non-null function pointer")(
+        emit!(
             data,
             b"%s\n\0" as *const u8 as *const ::core::ffi::c_char,
             b"out of memory error\0" as *const u8 as *const ::core::ffi::c_char,
         );
     }
     if !ctxt.is_null() {
-        xmlParserPrintFileContextInternal(input, channel, data);
+        unsafe { xmlParserPrintFileContextInternal(input, channel, data) };
         if !cur.is_null() {
-            if !(*cur).filename.is_null() {
-                channel.expect("non-null function pointer")(
+            if unsafe { !(*cur).filename.is_null() } {
+                emit!(
                     data,
                     b"%s:%d: \n\0" as *const u8 as *const ::core::ffi::c_char,
                     (*cur).filename,
@@ -2027,29 +2062,31 @@ unsafe extern "C" fn xmlReportError(
             } else if line != 0 as ::core::ffi::c_int
                 && domain == XML_FROM_PARSER as ::core::ffi::c_int
             {
-                channel.expect("non-null function pointer")(
+                emit!(
                     data,
                     b"Entity: line %d: \n\0" as *const u8 as *const ::core::ffi::c_char,
                     (*cur).line,
                 );
             }
-            xmlParserPrintFileContextInternal(cur, channel, data);
+            unsafe { xmlParserPrintFileContextInternal(cur, channel, data) };
         }
     }
+    let str1 = unsafe { (*err).str1 };
+    let int1 = unsafe { (*err).int1 };
     if domain == XML_FROM_XPATH as ::core::ffi::c_int
-        && !(*err).str1.is_null()
-        && (*err).int1 < 100 as ::core::ffi::c_int
-        && (*err).int1 < xmlStrlen((*err).str1 as *const xmlChar)
+        && !str1.is_null()
+        && int1 < 100 as ::core::ffi::c_int
+        && int1 < unsafe { xmlStrlen(str1 as *const xmlChar) }
     {
         let mut buf: [xmlChar; 150] = [0; 150];
         let mut i: ::core::ffi::c_int = 0;
-        channel.expect("non-null function pointer")(
+        emit!(
             data,
             b"%s\n\0" as *const u8 as *const ::core::ffi::c_char,
-            (*err).str1,
+            str1,
         );
         i = 0 as ::core::ffi::c_int;
-        while i < (*err).int1 {
+        while i < int1 {
             buf[i as usize] = ' ' as i32 as xmlChar;
             i += 1;
         }
@@ -2057,13 +2094,13 @@ unsafe extern "C" fn xmlReportError(
         i = i + 1;
         buf[fresh13 as usize] = '^' as i32 as xmlChar;
         buf[i as usize] = 0 as xmlChar;
-        channel.expect("non-null function pointer")(
+        emit!(
             data,
             b"%s\n\0" as *const u8 as *const ::core::ffi::c_char,
             &raw mut buf as *mut xmlChar,
         );
     }
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn __xmlSimpleError(
     mut domain: ::core::ffi::c_int,

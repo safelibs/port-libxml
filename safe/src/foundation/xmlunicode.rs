@@ -8,7 +8,7 @@ extern "C" {
         group: *const xmlChRangeGroup,
     ) -> ::core::ffi::c_int;
 }
-pub type xmlIntFunc = unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int;
+pub type xmlIntFunc = extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct xmlUnicodeNameTable {
@@ -51,127 +51,127 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
             rangename: b"AegeanNumbers\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsAegeanNumbers
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"AlphabeticPresentationForms\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsAlphabeticPresentationForms
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Arabic\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsArabic as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsArabic as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"ArabicPresentationForms-A\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsArabicPresentationFormsA
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"ArabicPresentationForms-B\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsArabicPresentationFormsB
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Armenian\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsArmenian as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsArmenian as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Arrows\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsArrows as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsArrows as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"BasicLatin\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsBasicLatin
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Bengali\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsBengali as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsBengali as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"BlockElements\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsBlockElements
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Bopomofo\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsBopomofo as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsBopomofo as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"BopomofoExtended\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsBopomofoExtended
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"BoxDrawing\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsBoxDrawing
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"BraillePatterns\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsBraillePatterns
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Buhid\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsBuhid as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsBuhid as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"ByzantineMusicalSymbols\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsByzantineMusicalSymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CJKCompatibility\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCJKCompatibility
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CJKCompatibilityForms\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCJKCompatibilityForms
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CJKCompatibilityIdeographs\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCJKCompatibilityIdeographs
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -179,28 +179,28 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCJKCompatibilityIdeographsSupplement
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CJKRadicalsSupplement\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCJKRadicalsSupplement
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CJKSymbolsandPunctuation\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCJKSymbolsandPunctuation
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CJKUnifiedIdeographs\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCJKUnifiedIdeographs
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -208,7 +208,7 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCJKUnifiedIdeographsExtensionA
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -216,20 +216,20 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCJKUnifiedIdeographsExtensionB
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Cherokee\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCherokee as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCherokee as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CombiningDiacriticalMarks\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCombiningDiacriticalMarks
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -237,219 +237,219 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCombiningDiacriticalMarksforSymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CombiningHalfMarks\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCombiningHalfMarks
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CombiningMarksforSymbols\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCombiningMarksforSymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"ControlPictures\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsControlPictures
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CurrencySymbols\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCurrencySymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CypriotSyllabary\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCypriotSyllabary
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Cyrillic\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCyrillic as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCyrillic as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"CyrillicSupplement\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsCyrillicSupplement
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Deseret\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsDeseret as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsDeseret as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Devanagari\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsDevanagari
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Dingbats\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsDingbats as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsDingbats as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"EnclosedAlphanumerics\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsEnclosedAlphanumerics
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"EnclosedCJKLettersandMonths\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsEnclosedCJKLettersandMonths
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Ethiopic\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsEthiopic as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsEthiopic as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"GeneralPunctuation\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsGeneralPunctuation
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"GeometricShapes\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsGeometricShapes
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Georgian\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsGeorgian as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsGeorgian as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Gothic\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsGothic as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsGothic as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Greek\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsGreek as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsGreek as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"GreekExtended\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsGreekExtended
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"GreekandCoptic\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsGreekandCoptic
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Gujarati\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsGujarati as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsGujarati as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Gurmukhi\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsGurmukhi as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsGurmukhi as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"HalfwidthandFullwidthForms\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsHalfwidthandFullwidthForms
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"HangulCompatibilityJamo\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsHangulCompatibilityJamo
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"HangulJamo\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsHangulJamo
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"HangulSyllables\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsHangulSyllables
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Hanunoo\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsHanunoo as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsHanunoo as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Hebrew\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsHebrew as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsHebrew as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"HighPrivateUseSurrogates\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsHighPrivateUseSurrogates
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"HighSurrogates\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsHighSurrogates
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Hiragana\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsHiragana as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsHiragana as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"IPAExtensions\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsIPAExtensions
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -457,126 +457,126 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsIdeographicDescriptionCharacters
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Kanbun\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsKanbun as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsKanbun as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"KangxiRadicals\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsKangxiRadicals
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Kannada\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsKannada as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsKannada as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Katakana\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsKatakana as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsKatakana as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"KatakanaPhoneticExtensions\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsKatakanaPhoneticExtensions
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Khmer\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsKhmer as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsKhmer as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"KhmerSymbols\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsKhmerSymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Lao\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsLao as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsLao as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Latin-1Supplement\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsLatin1Supplement
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"LatinExtended-A\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsLatinExtendedA
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"LatinExtended-B\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsLatinExtendedB
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"LatinExtendedAdditional\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsLatinExtendedAdditional
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"LetterlikeSymbols\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsLetterlikeSymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Limbu\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsLimbu as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsLimbu as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"LinearBIdeograms\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsLinearBIdeograms
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"LinearBSyllabary\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsLinearBSyllabary
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"LowSurrogates\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsLowSurrogates
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Malayalam\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsMalayalam as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsMalayalam as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -584,14 +584,14 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsMathematicalAlphanumericSymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"MathematicalOperators\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsMathematicalOperators
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -599,7 +599,7 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsMiscellaneousMathematicalSymbolsA
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -607,14 +607,14 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsMiscellaneousMathematicalSymbolsB
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"MiscellaneousSymbols\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsMiscellaneousSymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -622,151 +622,151 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsMiscellaneousSymbolsandArrows
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"MiscellaneousTechnical\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsMiscellaneousTechnical
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Mongolian\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsMongolian as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsMongolian as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"MusicalSymbols\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsMusicalSymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Myanmar\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsMyanmar as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsMyanmar as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"NumberForms\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsNumberForms
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Ogham\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsOgham as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsOgham as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"OldItalic\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsOldItalic as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsOldItalic as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"OpticalCharacterRecognition\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsOpticalCharacterRecognition
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Oriya\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsOriya as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsOriya as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Osmanya\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsOsmanya as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsOsmanya as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"PhoneticExtensions\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsPhoneticExtensions
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"PrivateUse\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsPrivateUse
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"PrivateUseArea\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsPrivateUseArea
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Runic\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsRunic as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsRunic as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Shavian\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsShavian as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsShavian as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Sinhala\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsSinhala as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsSinhala as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"SmallFormVariants\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsSmallFormVariants
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"SpacingModifierLetters\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsSpacingModifierLetters
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Specials\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsSpecials as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsSpecials as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"SuperscriptsandSubscripts\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsSuperscriptsandSubscripts
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"SupplementalArrows-A\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsSupplementalArrowsA
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"SupplementalArrows-B\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsSupplementalArrowsB
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -774,7 +774,7 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsSupplementalMathematicalOperators
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -782,7 +782,7 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsSupplementaryPrivateUseAreaA
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -790,80 +790,80 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsSupplementaryPrivateUseAreaB
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Syriac\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsSyriac as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsSyriac as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Tagalog\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsTagalog as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsTagalog as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Tagbanwa\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsTagbanwa as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsTagbanwa as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Tags\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsTags as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsTags as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"TaiLe\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsTaiLe as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsTaiLe as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"TaiXuanJingSymbols\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsTaiXuanJingSymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Tamil\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsTamil as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsTamil as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Telugu\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsTelugu as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsTelugu as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Thaana\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsThaana as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsThaana as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Thai\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsThai as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsThai as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Tibetan\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsTibetan as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsTibetan as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Ugaritic\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsUgaritic as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsUgaritic as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
@@ -871,42 +871,42 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
                 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsUnifiedCanadianAboriginalSyllabics
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"VariationSelectors\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsVariationSelectors
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"VariationSelectorsSupplement\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsVariationSelectorsSupplement
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"YiRadicals\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsYiRadicals
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"YiSyllables\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsYiSyllables
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"YijingHexagramSymbols\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
                 xmlUCSIsYijingHexagramSymbols
-                    as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                    as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
     ]
@@ -916,217 +916,217 @@ static mut xmlUnicodeCats: [xmlUnicodeRange; 36] = unsafe {
         xmlUnicodeRange {
             rangename: b"C\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatC as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatC as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Cc\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatCc as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatCc as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Cf\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatCf as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatCf as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Co\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatCo as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatCo as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Cs\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatCs as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatCs as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"L\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatL as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatL as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Ll\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatLl as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatLl as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Lm\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatLm as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatLm as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Lo\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatLo as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatLo as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Lt\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatLt as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatLt as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Lu\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatLu as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatLu as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"M\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatM as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatM as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Mc\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatMc as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatMc as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Me\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatMe as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatMe as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Mn\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatMn as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatMn as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"N\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatN as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatN as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Nd\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatNd as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatNd as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Nl\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatNl as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatNl as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"No\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatNo as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatNo as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"P\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatP as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatP as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Pc\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatPc as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatPc as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Pd\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatPd as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatPd as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Pe\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatPe as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatPe as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Pf\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatPf as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatPf as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Pi\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatPi as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatPi as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Po\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatPo as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatPo as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Ps\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatPs as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatPs as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"S\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatS as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatS as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Sc\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatSc as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatSc as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Sk\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatSk as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatSk as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Sm\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatSm as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatSm as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"So\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatSo as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatSo as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Z\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatZ as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatZ as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Zl\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatZl as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatZl as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Zp\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatZp as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatZp as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
         xmlUnicodeRange {
             rangename: b"Zs\0" as *const u8 as *const ::core::ffi::c_char,
             func: Some(
-                xmlUCSIsCatZs as unsafe extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
+                xmlUCSIsCatZs as extern "C" fn(::core::ffi::c_int) -> ::core::ffi::c_int,
             ),
         },
     ]
@@ -11515,26 +11515,26 @@ static mut xmlUnicodeCatTbl: xmlUnicodeNameTable = unsafe {
         numentries: 36 as ::core::ffi::c_int,
     }
 };
-unsafe extern "C" fn xmlUnicodeLookup(
+fn xmlUnicodeLookup(
     mut tptr: *mut xmlUnicodeNameTable,
     mut tname: *const ::core::ffi::c_char,
-) -> Option<xmlIntFunc> { unsafe {
+) -> Option<xmlIntFunc> {
     let mut low: ::core::ffi::c_int = 0;
     let mut high: ::core::ffi::c_int = 0;
     let mut mid: ::core::ffi::c_int = 0;
-    let mut cmp: ::core::ffi::c_int = 0;
     let mut sptr: *const xmlUnicodeRange = ::core::ptr::null::<xmlUnicodeRange>();
     if tptr.is_null() || tname.is_null() {
         return None;
     }
     low = 0 as ::core::ffi::c_int;
-    high = (*tptr).numentries - 1 as ::core::ffi::c_int;
-    sptr = (*tptr).table;
+    high = unsafe { (*tptr).numentries } - 1 as ::core::ffi::c_int;
+    sptr = unsafe { (*tptr).table };
     while low <= high {
         mid = (low + high) / 2 as ::core::ffi::c_int;
-        cmp = strcmp(tname, (*sptr.offset(mid as isize)).rangename);
+        let range = unsafe { &*sptr.offset(mid as isize) };
+        let cmp = unsafe { strcmp(tname, range.rangename) };
         if cmp == 0 as ::core::ffi::c_int {
-            return (*sptr.offset(mid as isize)).func;
+            return range.func;
         }
         if cmp < 0 as ::core::ffi::c_int {
             high = mid - 1 as ::core::ffi::c_int;
@@ -11543,811 +11543,811 @@ unsafe extern "C" fn xmlUnicodeLookup(
         }
     }
     return None;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsAegeanNumbers(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsAegeanNumbers(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x10100 as ::core::ffi::c_int && code <= 0x1013f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsAlphabeticPresentationForms(
+pub extern "C" fn xmlUCSIsAlphabeticPresentationForms(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xfb00 as ::core::ffi::c_int && code <= 0xfb4f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsArabic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsArabic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x600 as ::core::ffi::c_int && code <= 0x6ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsArabicPresentationFormsA(
+pub extern "C" fn xmlUCSIsArabicPresentationFormsA(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xfb50 as ::core::ffi::c_int && code <= 0xfdff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsArabicPresentationFormsB(
+pub extern "C" fn xmlUCSIsArabicPresentationFormsB(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xfe70 as ::core::ffi::c_int && code <= 0xfeff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsArmenian(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsArmenian(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x530 as ::core::ffi::c_int && code <= 0x58f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsArrows(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsArrows(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x2190 as ::core::ffi::c_int && code <= 0x21ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsBasicLatin(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsBasicLatin(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0 as ::core::ffi::c_int && code <= 0x7f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsBengali(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsBengali(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x980 as ::core::ffi::c_int && code <= 0x9ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsBlockElements(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsBlockElements(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x2580 as ::core::ffi::c_int && code <= 0x259f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsBopomofo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsBopomofo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x3100 as ::core::ffi::c_int && code <= 0x312f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsBopomofoExtended(
+pub extern "C" fn xmlUCSIsBopomofoExtended(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x31a0 as ::core::ffi::c_int && code <= 0x31bf as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsBoxDrawing(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsBoxDrawing(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x2500 as ::core::ffi::c_int && code <= 0x257f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsBraillePatterns(
+pub extern "C" fn xmlUCSIsBraillePatterns(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2800 as ::core::ffi::c_int && code <= 0x28ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsBuhid(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsBuhid(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1740 as ::core::ffi::c_int && code <= 0x175f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsByzantineMusicalSymbols(
+pub extern "C" fn xmlUCSIsByzantineMusicalSymbols(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x1d000 as ::core::ffi::c_int && code <= 0x1d0ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCJKCompatibility(
+pub extern "C" fn xmlUCSIsCJKCompatibility(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x3300 as ::core::ffi::c_int && code <= 0x33ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCJKCompatibilityForms(
+pub extern "C" fn xmlUCSIsCJKCompatibilityForms(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xfe30 as ::core::ffi::c_int && code <= 0xfe4f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCJKCompatibilityIdeographs(
+pub extern "C" fn xmlUCSIsCJKCompatibilityIdeographs(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xf900 as ::core::ffi::c_int && code <= 0xfaff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCJKCompatibilityIdeographsSupplement(
+pub extern "C" fn xmlUCSIsCJKCompatibilityIdeographsSupplement(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2f800 as ::core::ffi::c_int && code <= 0x2fa1f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCJKRadicalsSupplement(
+pub extern "C" fn xmlUCSIsCJKRadicalsSupplement(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2e80 as ::core::ffi::c_int && code <= 0x2eff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCJKSymbolsandPunctuation(
+pub extern "C" fn xmlUCSIsCJKSymbolsandPunctuation(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x3000 as ::core::ffi::c_int && code <= 0x303f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCJKUnifiedIdeographs(
+pub extern "C" fn xmlUCSIsCJKUnifiedIdeographs(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x4e00 as ::core::ffi::c_int && code <= 0x9fff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCJKUnifiedIdeographsExtensionA(
+pub extern "C" fn xmlUCSIsCJKUnifiedIdeographsExtensionA(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x3400 as ::core::ffi::c_int && code <= 0x4dbf as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCJKUnifiedIdeographsExtensionB(
+pub extern "C" fn xmlUCSIsCJKUnifiedIdeographsExtensionB(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x20000 as ::core::ffi::c_int && code <= 0x2a6df as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCherokee(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCherokee(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x13a0 as ::core::ffi::c_int && code <= 0x13ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCombiningDiacriticalMarks(
+pub extern "C" fn xmlUCSIsCombiningDiacriticalMarks(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x300 as ::core::ffi::c_int && code <= 0x36f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCombiningDiacriticalMarksforSymbols(
+pub extern "C" fn xmlUCSIsCombiningDiacriticalMarksforSymbols(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x20d0 as ::core::ffi::c_int && code <= 0x20ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCombiningHalfMarks(
+pub extern "C" fn xmlUCSIsCombiningHalfMarks(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xfe20 as ::core::ffi::c_int && code <= 0xfe2f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCombiningMarksforSymbols(
+pub extern "C" fn xmlUCSIsCombiningMarksforSymbols(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x20d0 as ::core::ffi::c_int && code <= 0x20ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsControlPictures(
+pub extern "C" fn xmlUCSIsControlPictures(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2400 as ::core::ffi::c_int && code <= 0x243f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCurrencySymbols(
+pub extern "C" fn xmlUCSIsCurrencySymbols(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x20a0 as ::core::ffi::c_int && code <= 0x20cf as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCypriotSyllabary(
+pub extern "C" fn xmlUCSIsCypriotSyllabary(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x10800 as ::core::ffi::c_int && code <= 0x1083f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCyrillic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCyrillic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x400 as ::core::ffi::c_int && code <= 0x4ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCyrillicSupplement(
+pub extern "C" fn xmlUCSIsCyrillicSupplement(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x500 as ::core::ffi::c_int && code <= 0x52f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsDeseret(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsDeseret(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x10400 as ::core::ffi::c_int && code <= 0x1044f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsDevanagari(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsDevanagari(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x900 as ::core::ffi::c_int && code <= 0x97f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsDingbats(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsDingbats(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x2700 as ::core::ffi::c_int && code <= 0x27bf as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsEnclosedAlphanumerics(
+pub extern "C" fn xmlUCSIsEnclosedAlphanumerics(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2460 as ::core::ffi::c_int && code <= 0x24ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsEnclosedCJKLettersandMonths(
+pub extern "C" fn xmlUCSIsEnclosedCJKLettersandMonths(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x3200 as ::core::ffi::c_int && code <= 0x32ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsEthiopic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsEthiopic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1200 as ::core::ffi::c_int && code <= 0x137f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsGeneralPunctuation(
+pub extern "C" fn xmlUCSIsGeneralPunctuation(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2000 as ::core::ffi::c_int && code <= 0x206f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsGeometricShapes(
+pub extern "C" fn xmlUCSIsGeometricShapes(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x25a0 as ::core::ffi::c_int && code <= 0x25ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsGeorgian(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsGeorgian(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x10a0 as ::core::ffi::c_int && code <= 0x10ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsGothic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsGothic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x10330 as ::core::ffi::c_int && code <= 0x1034f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsGreek(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsGreek(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x370 as ::core::ffi::c_int && code <= 0x3ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsGreekExtended(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsGreekExtended(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1f00 as ::core::ffi::c_int && code <= 0x1fff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsGreekandCoptic(
+pub extern "C" fn xmlUCSIsGreekandCoptic(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x370 as ::core::ffi::c_int && code <= 0x3ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsGujarati(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsGujarati(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xa80 as ::core::ffi::c_int && code <= 0xaff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsGurmukhi(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsGurmukhi(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xa00 as ::core::ffi::c_int && code <= 0xa7f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsHalfwidthandFullwidthForms(
+pub extern "C" fn xmlUCSIsHalfwidthandFullwidthForms(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xff00 as ::core::ffi::c_int && code <= 0xffef as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsHangulCompatibilityJamo(
+pub extern "C" fn xmlUCSIsHangulCompatibilityJamo(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x3130 as ::core::ffi::c_int && code <= 0x318f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsHangulJamo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsHangulJamo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1100 as ::core::ffi::c_int && code <= 0x11ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsHangulSyllables(
+pub extern "C" fn xmlUCSIsHangulSyllables(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xac00 as ::core::ffi::c_int && code <= 0xd7af as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsHanunoo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsHanunoo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1720 as ::core::ffi::c_int && code <= 0x173f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsHebrew(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsHebrew(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x590 as ::core::ffi::c_int && code <= 0x5ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsHighPrivateUseSurrogates(
+pub extern "C" fn xmlUCSIsHighPrivateUseSurrogates(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xdb80 as ::core::ffi::c_int && code <= 0xdbff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsHighSurrogates(
+pub extern "C" fn xmlUCSIsHighSurrogates(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xd800 as ::core::ffi::c_int && code <= 0xdb7f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsHiragana(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsHiragana(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x3040 as ::core::ffi::c_int && code <= 0x309f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsIPAExtensions(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsIPAExtensions(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x250 as ::core::ffi::c_int && code <= 0x2af as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsIdeographicDescriptionCharacters(
+pub extern "C" fn xmlUCSIsIdeographicDescriptionCharacters(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2ff0 as ::core::ffi::c_int && code <= 0x2fff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsKanbun(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsKanbun(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x3190 as ::core::ffi::c_int && code <= 0x319f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsKangxiRadicals(
+pub extern "C" fn xmlUCSIsKangxiRadicals(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2f00 as ::core::ffi::c_int && code <= 0x2fdf as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsKannada(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsKannada(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xc80 as ::core::ffi::c_int && code <= 0xcff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsKatakana(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsKatakana(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x30a0 as ::core::ffi::c_int && code <= 0x30ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsKatakanaPhoneticExtensions(
+pub extern "C" fn xmlUCSIsKatakanaPhoneticExtensions(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x31f0 as ::core::ffi::c_int && code <= 0x31ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsKhmer(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsKhmer(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1780 as ::core::ffi::c_int && code <= 0x17ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsKhmerSymbols(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsKhmerSymbols(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x19e0 as ::core::ffi::c_int && code <= 0x19ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsLao(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsLao(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xe80 as ::core::ffi::c_int && code <= 0xeff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsLatin1Supplement(
+pub extern "C" fn xmlUCSIsLatin1Supplement(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x80 as ::core::ffi::c_int && code <= 0xff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsLatinExtendedA(
+pub extern "C" fn xmlUCSIsLatinExtendedA(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x100 as ::core::ffi::c_int && code <= 0x17f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsLatinExtendedB(
+pub extern "C" fn xmlUCSIsLatinExtendedB(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x180 as ::core::ffi::c_int && code <= 0x24f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsLatinExtendedAdditional(
+pub extern "C" fn xmlUCSIsLatinExtendedAdditional(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x1e00 as ::core::ffi::c_int && code <= 0x1eff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsLetterlikeSymbols(
+pub extern "C" fn xmlUCSIsLetterlikeSymbols(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2100 as ::core::ffi::c_int && code <= 0x214f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsLimbu(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsLimbu(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1900 as ::core::ffi::c_int && code <= 0x194f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsLinearBIdeograms(
+pub extern "C" fn xmlUCSIsLinearBIdeograms(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x10080 as ::core::ffi::c_int && code <= 0x100ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsLinearBSyllabary(
+pub extern "C" fn xmlUCSIsLinearBSyllabary(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x10000 as ::core::ffi::c_int && code <= 0x1007f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsLowSurrogates(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsLowSurrogates(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xdc00 as ::core::ffi::c_int && code <= 0xdfff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMalayalam(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsMalayalam(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xd00 as ::core::ffi::c_int && code <= 0xd7f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMathematicalAlphanumericSymbols(
+pub extern "C" fn xmlUCSIsMathematicalAlphanumericSymbols(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x1d400 as ::core::ffi::c_int && code <= 0x1d7ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMathematicalOperators(
+pub extern "C" fn xmlUCSIsMathematicalOperators(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2200 as ::core::ffi::c_int && code <= 0x22ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMiscellaneousMathematicalSymbolsA(
+pub extern "C" fn xmlUCSIsMiscellaneousMathematicalSymbolsA(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x27c0 as ::core::ffi::c_int && code <= 0x27ef as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMiscellaneousMathematicalSymbolsB(
+pub extern "C" fn xmlUCSIsMiscellaneousMathematicalSymbolsB(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2980 as ::core::ffi::c_int && code <= 0x29ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMiscellaneousSymbols(
+pub extern "C" fn xmlUCSIsMiscellaneousSymbols(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2600 as ::core::ffi::c_int && code <= 0x26ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMiscellaneousSymbolsandArrows(
+pub extern "C" fn xmlUCSIsMiscellaneousSymbolsandArrows(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2b00 as ::core::ffi::c_int && code <= 0x2bff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMiscellaneousTechnical(
+pub extern "C" fn xmlUCSIsMiscellaneousTechnical(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2300 as ::core::ffi::c_int && code <= 0x23ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMongolian(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsMongolian(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1800 as ::core::ffi::c_int && code <= 0x18af as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMusicalSymbols(
+pub extern "C" fn xmlUCSIsMusicalSymbols(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x1d100 as ::core::ffi::c_int && code <= 0x1d1ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsMyanmar(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsMyanmar(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1000 as ::core::ffi::c_int && code <= 0x109f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsNumberForms(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsNumberForms(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x2150 as ::core::ffi::c_int && code <= 0x218f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsOgham(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsOgham(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1680 as ::core::ffi::c_int && code <= 0x169f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsOldItalic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsOldItalic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x10300 as ::core::ffi::c_int && code <= 0x1032f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsOpticalCharacterRecognition(
+pub extern "C" fn xmlUCSIsOpticalCharacterRecognition(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2440 as ::core::ffi::c_int && code <= 0x245f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsOriya(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsOriya(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xb00 as ::core::ffi::c_int && code <= 0xb7f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsOsmanya(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsOsmanya(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x10480 as ::core::ffi::c_int && code <= 0x104af as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsPhoneticExtensions(
+pub extern "C" fn xmlUCSIsPhoneticExtensions(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x1d00 as ::core::ffi::c_int && code <= 0x1d7f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsPrivateUse(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsPrivateUse(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xe000 as ::core::ffi::c_int && code <= 0xf8ff as ::core::ffi::c_int
         || code >= 0xf0000 as ::core::ffi::c_int && code <= 0xfffff as ::core::ffi::c_int
         || code >= 0x100000 as ::core::ffi::c_int && code <= 0x10ffff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsPrivateUseArea(
+pub extern "C" fn xmlUCSIsPrivateUseArea(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xe000 as ::core::ffi::c_int && code <= 0xf8ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsRunic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsRunic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x16a0 as ::core::ffi::c_int && code <= 0x16ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsShavian(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsShavian(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x10450 as ::core::ffi::c_int && code <= 0x1047f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSinhala(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsSinhala(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xd80 as ::core::ffi::c_int && code <= 0xdff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSmallFormVariants(
+pub extern "C" fn xmlUCSIsSmallFormVariants(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xfe50 as ::core::ffi::c_int && code <= 0xfe6f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSpacingModifierLetters(
+pub extern "C" fn xmlUCSIsSpacingModifierLetters(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2b0 as ::core::ffi::c_int && code <= 0x2ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSpecials(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsSpecials(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xfff0 as ::core::ffi::c_int && code <= 0xffff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSuperscriptsandSubscripts(
+pub extern "C" fn xmlUCSIsSuperscriptsandSubscripts(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2070 as ::core::ffi::c_int && code <= 0x209f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSupplementalArrowsA(
+pub extern "C" fn xmlUCSIsSupplementalArrowsA(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x27f0 as ::core::ffi::c_int && code <= 0x27ff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSupplementalArrowsB(
+pub extern "C" fn xmlUCSIsSupplementalArrowsB(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2900 as ::core::ffi::c_int && code <= 0x297f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSupplementalMathematicalOperators(
+pub extern "C" fn xmlUCSIsSupplementalMathematicalOperators(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x2a00 as ::core::ffi::c_int && code <= 0x2aff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSupplementaryPrivateUseAreaA(
+pub extern "C" fn xmlUCSIsSupplementaryPrivateUseAreaA(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xf0000 as ::core::ffi::c_int && code <= 0xfffff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSupplementaryPrivateUseAreaB(
+pub extern "C" fn xmlUCSIsSupplementaryPrivateUseAreaB(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x100000 as ::core::ffi::c_int && code <= 0x10ffff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsSyriac(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsSyriac(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x700 as ::core::ffi::c_int && code <= 0x74f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsTagalog(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsTagalog(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1700 as ::core::ffi::c_int && code <= 0x171f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsTagbanwa(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsTagbanwa(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1760 as ::core::ffi::c_int && code <= 0x177f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsTags(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsTags(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xe0000 as ::core::ffi::c_int && code <= 0xe007f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsTaiLe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsTaiLe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x1950 as ::core::ffi::c_int && code <= 0x197f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsTaiXuanJingSymbols(
+pub extern "C" fn xmlUCSIsTaiXuanJingSymbols(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x1d300 as ::core::ffi::c_int && code <= 0x1d35f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsTamil(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsTamil(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xb80 as ::core::ffi::c_int && code <= 0xbff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsTelugu(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsTelugu(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xc00 as ::core::ffi::c_int && code <= 0xc7f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsThaana(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsThaana(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x780 as ::core::ffi::c_int && code <= 0x7bf as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsThai(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsThai(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xe00 as ::core::ffi::c_int && code <= 0xe7f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsTibetan(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsTibetan(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xf00 as ::core::ffi::c_int && code <= 0xfff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsUgaritic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsUgaritic(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x10380 as ::core::ffi::c_int && code <= 0x1039f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsUnifiedCanadianAboriginalSyllabics(
+pub extern "C" fn xmlUCSIsUnifiedCanadianAboriginalSyllabics(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x1400 as ::core::ffi::c_int && code <= 0x167f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsVariationSelectors(
+pub extern "C" fn xmlUCSIsVariationSelectors(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xfe00 as ::core::ffi::c_int && code <= 0xfe0f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsVariationSelectorsSupplement(
+pub extern "C" fn xmlUCSIsVariationSelectorsSupplement(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0xe0100 as ::core::ffi::c_int && code <= 0xe01ef as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsYiRadicals(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsYiRadicals(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xa490 as ::core::ffi::c_int && code <= 0xa4cf as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsYiSyllables(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsYiSyllables(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0xa000 as ::core::ffi::c_int && code <= 0xa48f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsYijingHexagramSymbols(
+pub extern "C" fn xmlUCSIsYijingHexagramSymbols(
     mut code: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     return (code >= 0x4dc0 as ::core::ffi::c_int && code <= 0x4dff as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsBlock(
+pub extern "C" fn xmlUCSIsBlock(
     mut code: ::core::ffi::c_int,
     mut block: *const ::core::ffi::c_char,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut func: Option<xmlIntFunc> = None;
     func = xmlUnicodeLookup(&raw mut xmlUnicodeBlockTbl, block);
     if func.is_none() {
         return -(1 as ::core::ffi::c_int);
     }
     return func.expect("non-null function pointer")(code);
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatC(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatC(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlCG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatCc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatCc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0 as ::core::ffi::c_int && code <= 0x1f as ::core::ffi::c_int
         || code >= 0x7f as ::core::ffi::c_int && code <= 0x9f as ::core::ffi::c_int)
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatCf(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatCf(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlCfG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatCo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatCo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0xe000 as ::core::ffi::c_int
         || code == 0xf8ff as ::core::ffi::c_int
         || code == 0xf0000 as ::core::ffi::c_int
@@ -12356,46 +12356,46 @@ pub unsafe extern "C" fn xmlUCSIsCatCo(mut code: ::core::ffi::c_int) -> ::core::
         || code == 0x10fffd as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatCs(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatCs(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0xd800 as ::core::ffi::c_int
         || code >= 0xdb7f as ::core::ffi::c_int && code <= 0xdb80 as ::core::ffi::c_int
         || code >= 0xdbff as ::core::ffi::c_int && code <= 0xdc00 as ::core::ffi::c_int
         || code == 0xdfff as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatL(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatL(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatLl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatLl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLlG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatLm(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatLm(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLmG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatLo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatLo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLoG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatLt(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatLt(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLtG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatLu(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatLu(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLuG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatM(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatM(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlMG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatMc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatMc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlMcG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatMe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatMe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x488 as ::core::ffi::c_int && code <= 0x489 as ::core::ffi::c_int
         || code == 0x6de as ::core::ffi::c_int
         || code >= 0x20dd as ::core::ffi::c_int && code <= 0x20e0 as ::core::ffi::c_int
@@ -12403,19 +12403,19 @@ pub unsafe extern "C" fn xmlUCSIsCatMe(mut code: ::core::ffi::c_int) -> ::core::
         as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatMn(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatMn(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlMnG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatN(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatN(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlNG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatNd(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatNd(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlNdG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatNl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatNl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code >= 0x16ee as ::core::ffi::c_int && code <= 0x16f0 as ::core::ffi::c_int
         || code >= 0x2160 as ::core::ffi::c_int && code <= 0x2183 as ::core::ffi::c_int
         || code == 0x3007 as ::core::ffi::c_int
@@ -12424,15 +12424,15 @@ pub unsafe extern "C" fn xmlUCSIsCatNl(mut code: ::core::ffi::c_int) -> ::core::
         || code == 0x1034a as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatNo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatNo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlNoG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatP(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatP(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatPc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0x5f as ::core::ffi::c_int
         || code >= 0x203f as ::core::ffi::c_int && code <= 0x2040 as ::core::ffi::c_int
         || code == 0x2054 as ::core::ffi::c_int
@@ -12443,22 +12443,22 @@ pub unsafe extern "C" fn xmlUCSIsCatPc(mut code: ::core::ffi::c_int) -> ::core::
         || code == 0xff65 as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPd(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatPd(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPdG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatPe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPeG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPf(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatPf(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0xbb as ::core::ffi::c_int
         || code == 0x2019 as ::core::ffi::c_int
         || code == 0x201d as ::core::ffi::c_int
         || code == 0x203a as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPi(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatPi(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0xab as ::core::ffi::c_int
         || code == 0x2018 as ::core::ffi::c_int
         || code >= 0x201b as ::core::ffi::c_int && code <= 0x201c as ::core::ffi::c_int
@@ -12466,47 +12466,47 @@ pub unsafe extern "C" fn xmlUCSIsCatPi(mut code: ::core::ffi::c_int) -> ::core::
         || code == 0x2039 as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatPo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPoG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatPs(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatPs(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPsG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatS(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatS(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatSc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatSc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlScG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatSk(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatSk(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSkG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatSm(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatSm(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSmG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatSo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatSo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSoG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatZ(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
+pub extern "C" fn xmlUCSIsCatZ(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
     return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlZG);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatZl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatZl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0x2028 as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatZp(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatZp(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0x2029 as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCatZs(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
+pub extern "C" fn xmlUCSIsCatZs(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
     return (code == 0x20 as ::core::ffi::c_int
         || code == 0xa0 as ::core::ffi::c_int
         || code == 0x1680 as ::core::ffi::c_int
@@ -12517,14 +12517,14 @@ pub unsafe extern "C" fn xmlUCSIsCatZs(mut code: ::core::ffi::c_int) -> ::core::
         || code == 0x3000 as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlUCSIsCat(
+pub extern "C" fn xmlUCSIsCat(
     mut code: ::core::ffi::c_int,
     mut cat: *const ::core::ffi::c_char,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut func: Option<xmlIntFunc> = None;
     func = xmlUnicodeLookup(&raw mut xmlUnicodeCatTbl, cat);
     if func.is_none() {
         return -(1 as ::core::ffi::c_int);
     }
     return func.expect("non-null function pointer")(code);
-}}
+}

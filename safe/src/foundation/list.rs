@@ -51,14 +51,16 @@ pub type xmlListWalker = Option<
     ) -> ::core::ffi::c_int,
 >;
 pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
-unsafe extern "C" fn xmlLinkDeallocator(mut l: xmlListPtr, mut lk: xmlLinkPtr) { unsafe {
-    (*(*lk).prev).next = (*lk).next;
-    (*(*lk).next).prev = (*lk).prev;
-    if (*l).linkDeallocator.is_some() {
-        (*l).linkDeallocator.expect("non-null function pointer")(lk);
+unsafe extern "C" fn xmlLinkDeallocator(mut l: xmlListPtr, mut lk: xmlLinkPtr) {
+    unsafe {
+        (*(*lk).prev).next = (*lk).next;
+        (*(*lk).next).prev = (*lk).prev;
     }
-    xmlFree.expect("non-null function pointer")(lk as *mut ::core::ffi::c_void);
-}}
+    if unsafe { (*l).linkDeallocator.is_some() } {
+        unsafe { (*l).linkDeallocator.expect("non-null function pointer")(lk) };
+    }
+    unsafe { xmlFree.expect("non-null function pointer")(lk as *mut ::core::ffi::c_void) };
+}
 unsafe extern "C" fn xmlLinkCompare(
     mut data0: *const ::core::ffi::c_void,
     mut data1: *const ::core::ffi::c_void,
@@ -294,14 +296,17 @@ pub unsafe extern "C" fn xmlListAppend(
     return 0 as ::core::ffi::c_int;
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlListDelete(mut l: xmlListPtr) { unsafe {
+pub unsafe extern "C" fn xmlListDelete(mut l: xmlListPtr) {
     if l.is_null() {
         return;
     }
-    xmlListClear(l);
-    xmlFree.expect("non-null function pointer")((*l).sentinel as *mut ::core::ffi::c_void);
-    xmlFree.expect("non-null function pointer")(l as *mut ::core::ffi::c_void);
-}}
+    unsafe { xmlListClear(l) };
+    let sentinel = unsafe { (*l).sentinel };
+    unsafe {
+        xmlFree.expect("non-null function pointer")(sentinel as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(l as *mut ::core::ffi::c_void);
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlListRemoveFirst(
     mut l: xmlListPtr,
@@ -349,199 +354,232 @@ pub unsafe extern "C" fn xmlListRemoveAll(
     return count;
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlListClear(mut l: xmlListPtr) { unsafe {
+pub unsafe extern "C" fn xmlListClear(mut l: xmlListPtr) {
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
     if l.is_null() {
         return;
     }
-    lk = (*(*l).sentinel).next as xmlLinkPtr;
-    while lk != (*l).sentinel {
-        let mut next: xmlLinkPtr = (*lk).next as xmlLinkPtr;
-        xmlLinkDeallocator(l, lk);
+    let sentinel = unsafe { (*l).sentinel };
+    lk = unsafe { (*sentinel).next as xmlLinkPtr };
+    while lk != sentinel {
+        let mut next: xmlLinkPtr = unsafe { (*lk).next as xmlLinkPtr };
+        unsafe { xmlLinkDeallocator(l, lk) };
         lk = next;
     }
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlListEmpty(mut l: xmlListPtr) -> ::core::ffi::c_int { unsafe {
+pub unsafe extern "C" fn xmlListEmpty(mut l: xmlListPtr) -> ::core::ffi::c_int {
     if l.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    return ((*(*l).sentinel).next == (*l).sentinel) as ::core::ffi::c_int;
-}}
+    let sentinel = unsafe { (*l).sentinel };
+    return (unsafe { (*sentinel).next } == sentinel) as ::core::ffi::c_int;
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlListFront(mut l: xmlListPtr) -> xmlLinkPtr { unsafe {
+pub unsafe extern "C" fn xmlListFront(mut l: xmlListPtr) -> xmlLinkPtr {
     if l.is_null() {
         return ::core::ptr::null_mut::<xmlLink>();
     }
-    return (*(*l).sentinel).next as xmlLinkPtr;
-}}
+    let sentinel = unsafe { (*l).sentinel };
+    return unsafe { (*sentinel).next as xmlLinkPtr };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlListEnd(mut l: xmlListPtr) -> xmlLinkPtr { unsafe {
+pub unsafe extern "C" fn xmlListEnd(mut l: xmlListPtr) -> xmlLinkPtr {
     if l.is_null() {
         return ::core::ptr::null_mut::<xmlLink>();
     }
-    return (*(*l).sentinel).prev as xmlLinkPtr;
-}}
+    let sentinel = unsafe { (*l).sentinel };
+    return unsafe { (*sentinel).prev as xmlLinkPtr };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlListSize(mut l: xmlListPtr) -> ::core::ffi::c_int { unsafe {
+pub unsafe extern "C" fn xmlListSize(mut l: xmlListPtr) -> ::core::ffi::c_int {
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
     let mut count: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if l.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    lk = (*(*l).sentinel).next as xmlLinkPtr;
-    while lk != (*l).sentinel {
-        lk = (*lk).next as xmlLinkPtr;
+    let sentinel = unsafe { (*l).sentinel };
+    lk = unsafe { (*sentinel).next as xmlLinkPtr };
+    while lk != sentinel {
+        lk = unsafe { (*lk).next as xmlLinkPtr };
         count += 1;
     }
     return count;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlListPopFront(mut l: xmlListPtr) { unsafe {
-    if xmlListEmpty(l) == 0 {
-        xmlLinkDeallocator(l, (*(*l).sentinel).next as xmlLinkPtr);
+pub unsafe extern "C" fn xmlListPopFront(mut l: xmlListPtr) {
+    if unsafe { xmlListEmpty(l) } == 0 {
+        let sentinel = unsafe { (*l).sentinel };
+        let next = unsafe { (*sentinel).next as xmlLinkPtr };
+        unsafe { xmlLinkDeallocator(l, next) };
     }
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlListPopBack(mut l: xmlListPtr) { unsafe {
-    if xmlListEmpty(l) == 0 {
-        xmlLinkDeallocator(l, (*(*l).sentinel).prev as xmlLinkPtr);
+pub unsafe extern "C" fn xmlListPopBack(mut l: xmlListPtr) {
+    if unsafe { xmlListEmpty(l) } == 0 {
+        let sentinel = unsafe { (*l).sentinel };
+        let prev = unsafe { (*sentinel).prev as xmlLinkPtr };
+        unsafe { xmlLinkDeallocator(l, prev) };
     }
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlListPushFront(
     mut l: xmlListPtr,
     mut data: *mut ::core::ffi::c_void,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut lkPlace: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
     let mut lkNew: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
     if l.is_null() {
         return 0 as ::core::ffi::c_int;
     }
-    lkPlace = (*l).sentinel;
-    lkNew =
+    lkPlace = unsafe { (*l).sentinel };
+    lkNew = unsafe {
         xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<xmlLink>() as size_t)
-            as xmlLinkPtr;
+            as xmlLinkPtr
+    };
     if lkNew.is_null() {
-        (*__xmlGenericError()).expect("non-null function pointer")(
-            *__xmlGenericErrorContext(),
-            b"Cannot initialize memory for new link\0" as *const u8 as *const ::core::ffi::c_char,
-        );
+        unsafe {
+            (*__xmlGenericError()).expect("non-null function pointer")(
+                *__xmlGenericErrorContext(),
+                b"Cannot initialize memory for new link\0" as *const u8
+                    as *const ::core::ffi::c_char,
+            );
+        }
         return 0 as ::core::ffi::c_int;
     }
-    (*lkNew).data = data;
-    (*lkNew).next = (*lkPlace).next;
-    (*(*lkPlace).next).prev = lkNew as *mut _xmlLink;
-    (*lkPlace).next = lkNew as *mut _xmlLink;
-    (*lkNew).prev = lkPlace as *mut _xmlLink;
+    unsafe {
+        (*lkNew).data = data;
+        (*lkNew).next = (*lkPlace).next;
+        (*(*lkPlace).next).prev = lkNew as *mut _xmlLink;
+        (*lkPlace).next = lkNew as *mut _xmlLink;
+        (*lkNew).prev = lkPlace as *mut _xmlLink;
+    }
     return 1 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlListPushBack(
     mut l: xmlListPtr,
     mut data: *mut ::core::ffi::c_void,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut lkPlace: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
     let mut lkNew: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
     if l.is_null() {
         return 0 as ::core::ffi::c_int;
     }
-    lkPlace = (*(*l).sentinel).prev as xmlLinkPtr;
-    lkNew =
+    let sentinel = unsafe { (*l).sentinel };
+    lkPlace = unsafe { (*sentinel).prev as xmlLinkPtr };
+    lkNew = unsafe {
         xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<xmlLink>() as size_t)
-            as xmlLinkPtr;
+            as xmlLinkPtr
+    };
     if lkNew.is_null() {
-        (*__xmlGenericError()).expect("non-null function pointer")(
-            *__xmlGenericErrorContext(),
-            b"Cannot initialize memory for new link\0" as *const u8 as *const ::core::ffi::c_char,
-        );
+        unsafe {
+            (*__xmlGenericError()).expect("non-null function pointer")(
+                *__xmlGenericErrorContext(),
+                b"Cannot initialize memory for new link\0" as *const u8
+                    as *const ::core::ffi::c_char,
+            );
+        }
         return 0 as ::core::ffi::c_int;
     }
-    (*lkNew).data = data;
-    (*lkNew).next = (*lkPlace).next;
-    (*(*lkPlace).next).prev = lkNew as *mut _xmlLink;
-    (*lkPlace).next = lkNew as *mut _xmlLink;
-    (*lkNew).prev = lkPlace as *mut _xmlLink;
+    unsafe {
+        (*lkNew).data = data;
+        (*lkNew).next = (*lkPlace).next;
+        (*(*lkPlace).next).prev = lkNew as *mut _xmlLink;
+        (*lkPlace).next = lkNew as *mut _xmlLink;
+        (*lkNew).prev = lkPlace as *mut _xmlLink;
+    }
     return 1 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlLinkGetData(mut lk: xmlLinkPtr) -> *mut ::core::ffi::c_void { unsafe {
+pub unsafe extern "C" fn xmlLinkGetData(mut lk: xmlLinkPtr) -> *mut ::core::ffi::c_void {
     if lk.is_null() {
         return ::core::ptr::null_mut::<::core::ffi::c_void>();
     }
-    return (*lk).data;
-}}
+    return unsafe { (*lk).data };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlListReverse(mut l: xmlListPtr) { unsafe {
+pub unsafe extern "C" fn xmlListReverse(mut l: xmlListPtr) {
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
     let mut lkPrev: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
     if l.is_null() {
         return;
     }
-    lkPrev = (*l).sentinel;
-    lk = (*(*l).sentinel).next as xmlLinkPtr;
-    while lk != (*l).sentinel {
+    let sentinel = unsafe { (*l).sentinel };
+    lkPrev = sentinel;
+    lk = unsafe { (*sentinel).next as xmlLinkPtr };
+    while lk != sentinel {
+        unsafe {
+            (*lkPrev).next = (*lkPrev).prev;
+            (*lkPrev).prev = lk as *mut _xmlLink;
+        }
+        lkPrev = lk;
+        lk = unsafe { (*lk).next as xmlLinkPtr };
+    }
+    unsafe {
         (*lkPrev).next = (*lkPrev).prev;
         (*lkPrev).prev = lk as *mut _xmlLink;
-        lkPrev = lk;
-        lk = (*lk).next as xmlLinkPtr;
     }
-    (*lkPrev).next = (*lkPrev).prev;
-    (*lkPrev).prev = lk as *mut _xmlLink;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlListSort(mut l: xmlListPtr) { unsafe {
+pub unsafe extern "C" fn xmlListSort(mut l: xmlListPtr) {
     let mut lTemp: xmlListPtr = ::core::ptr::null_mut::<xmlList>();
     if l.is_null() {
         return;
     }
-    if xmlListEmpty(l) != 0 {
+    if unsafe { xmlListEmpty(l) } != 0 {
         return;
     }
-    lTemp = xmlListDup(l);
+    lTemp = unsafe { xmlListDup(l) };
     if lTemp.is_null() {
         return;
     }
-    xmlListClear(l);
+    unsafe { xmlListClear(l) };
     xmlListMerge(l, lTemp);
-    xmlListDelete(lTemp);
-}}
+    unsafe { xmlListDelete(lTemp) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlListWalk(
     mut l: xmlListPtr,
     mut walker: xmlListWalker,
     mut user: *mut ::core::ffi::c_void,
-) { unsafe {
+) {
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
     if l.is_null() || walker.is_none() {
         return;
     }
-    lk = (*(*l).sentinel).next as xmlLinkPtr;
-    while lk != (*l).sentinel {
-        if walker.expect("non-null function pointer")((*lk).data, user) == 0 as ::core::ffi::c_int {
+    let sentinel = unsafe { (*l).sentinel };
+    lk = unsafe { (*sentinel).next as xmlLinkPtr };
+    while lk != sentinel {
+        if unsafe { walker.expect("non-null function pointer")((*lk).data, user) }
+            == 0 as ::core::ffi::c_int
+        {
             break;
         }
-        lk = (*lk).next as xmlLinkPtr;
+        lk = unsafe { (*lk).next as xmlLinkPtr };
     }
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlListReverseWalk(
     mut l: xmlListPtr,
     mut walker: xmlListWalker,
     mut user: *mut ::core::ffi::c_void,
-) { unsafe {
+) {
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
     if l.is_null() || walker.is_none() {
         return;
     }
-    lk = (*(*l).sentinel).prev as xmlLinkPtr;
-    while lk != (*l).sentinel {
-        if walker.expect("non-null function pointer")((*lk).data, user) == 0 as ::core::ffi::c_int {
+    let sentinel = unsafe { (*l).sentinel };
+    lk = unsafe { (*sentinel).prev as xmlLinkPtr };
+    while lk != sentinel {
+        if unsafe { walker.expect("non-null function pointer")((*lk).data, user) }
+            == 0 as ::core::ffi::c_int
+        {
             break;
         }
-        lk = (*lk).prev as xmlLinkPtr;
+        lk = unsafe { (*lk).prev as xmlLinkPtr };
     }
-}}
+}
 #[no_mangle]
 pub extern "C" fn xmlListMerge(mut l1: xmlListPtr, mut l2: xmlListPtr) {
     unsafe {

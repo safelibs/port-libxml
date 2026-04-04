@@ -141,70 +141,83 @@ static mut block: ::core::ffi::c_uint = 0 as ::core::ffi::c_uint;
 static mut xmlMemStopAtBlock: ::core::ffi::c_uint = 0 as ::core::ffi::c_uint;
 static mut xmlMemTraceBlockAt: *mut ::core::ffi::c_void = NULL;
 #[no_mangle]
-pub unsafe extern "C" fn xmlMallocBreakpoint() { unsafe {
-    (*__xmlGenericError()).expect("non-null function pointer")(
-        *__xmlGenericErrorContext(),
-        b"xmlMallocBreakpoint reached on block %d\n\0" as *const u8 as *const ::core::ffi::c_char,
-        xmlMemStopAtBlock,
-    );
-}}
+pub extern "C" fn xmlMallocBreakpoint() {
+    unsafe {
+        (*__xmlGenericError()).expect("non-null function pointer")(
+            *__xmlGenericErrorContext(),
+            b"xmlMallocBreakpoint reached on block %d\n\0" as *const u8
+                as *const ::core::ffi::c_char,
+            xmlMemStopAtBlock,
+        );
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlMallocLoc(
     mut size: size_t,
     mut file: *const ::core::ffi::c_char,
     mut line: ::core::ffi::c_int,
-) -> *mut ::core::ffi::c_void { unsafe {
+) -> *mut ::core::ffi::c_void {
     let mut p: *mut MEMHDR = ::core::ptr::null_mut::<MEMHDR>();
     let mut ret: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
-    if xmlMemInitialized == 0 {
-        xmlInitMemory();
+    if unsafe { xmlMemInitialized } == 0 {
+        unsafe { xmlInitMemory() };
     }
     if size > MAX_SIZE_T.wrapping_sub(RESERVE_SIZE) {
-        (*__xmlGenericError()).expect("non-null function pointer")(
-            *__xmlGenericErrorContext(),
-            b"xmlMallocLoc : Unsigned overflow\n\0" as *const u8 as *const ::core::ffi::c_char,
-        );
-        xmlMemoryDump();
+        unsafe {
+            (*__xmlGenericError()).expect("non-null function pointer")(
+                *__xmlGenericErrorContext(),
+                b"xmlMallocLoc : Unsigned overflow\n\0" as *const u8 as *const ::core::ffi::c_char,
+            );
+            xmlMemoryDump();
+        }
         return ::core::ptr::null_mut::<::core::ffi::c_void>();
     }
-    p = malloc(RESERVE_SIZE.wrapping_add(size)) as *mut MEMHDR;
+    p = unsafe { malloc(RESERVE_SIZE.wrapping_add(size)) as *mut MEMHDR };
     if p.is_null() {
-        (*__xmlGenericError()).expect("non-null function pointer")(
-            *__xmlGenericErrorContext(),
-            b"xmlMallocLoc : Out of free space\n\0" as *const u8 as *const ::core::ffi::c_char,
-        );
-        xmlMemoryDump();
+        unsafe {
+            (*__xmlGenericError()).expect("non-null function pointer")(
+                *__xmlGenericErrorContext(),
+                b"xmlMallocLoc : Out of free space\n\0" as *const u8 as *const ::core::ffi::c_char,
+            );
+            xmlMemoryDump();
+        }
         return ::core::ptr::null_mut::<::core::ffi::c_void>();
     }
-    (*p).mh_tag = MEMTAG;
-    (*p).mh_size = size;
-    (*p).mh_type = MALLOC_TYPE as ::core::ffi::c_uint;
-    (*p).mh_file = file;
-    (*p).mh_line = line as ::core::ffi::c_uint;
-    xmlMutexLock(xmlMemMutex);
-    block = block.wrapping_add(1);
-    (*p).mh_number = block as ::core::ffi::c_ulong;
-    debugMemSize = debugMemSize.wrapping_add(size as ::core::ffi::c_ulong);
-    debugMemBlocks = debugMemBlocks.wrapping_add(1);
-    if debugMemSize > debugMaxMemSize {
-        debugMaxMemSize = debugMemSize;
+    unsafe {
+        (*p).mh_tag = MEMTAG;
+        (*p).mh_size = size;
+        (*p).mh_type = MALLOC_TYPE as ::core::ffi::c_uint;
+        (*p).mh_file = file;
+        (*p).mh_line = line as ::core::ffi::c_uint;
+        xmlMutexLock(xmlMemMutex);
+        block = block.wrapping_add(1);
+        (*p).mh_number = block as ::core::ffi::c_ulong;
+        debugMemSize = debugMemSize.wrapping_add(size as ::core::ffi::c_ulong);
+        debugMemBlocks = debugMemBlocks.wrapping_add(1);
+        if debugMemSize > debugMaxMemSize {
+            debugMaxMemSize = debugMemSize;
+        }
+        xmlMutexUnlock(xmlMemMutex);
     }
-    xmlMutexUnlock(xmlMemMutex);
-    if xmlMemStopAtBlock as ::core::ffi::c_ulong == (*p).mh_number {
+    if unsafe { xmlMemStopAtBlock as ::core::ffi::c_ulong == (*p).mh_number } {
         xmlMallocBreakpoint();
     }
-    ret = (p as *mut ::core::ffi::c_char).offset(RESERVE_SIZE as isize) as *mut ::core::ffi::c_void;
-    if xmlMemTraceBlockAt == ret {
-        (*__xmlGenericError()).expect("non-null function pointer")(
-            *__xmlGenericErrorContext(),
-            b"%p : Malloc(%lu) Ok\n\0" as *const u8 as *const ::core::ffi::c_char,
-            xmlMemTraceBlockAt,
-            size as ::core::ffi::c_ulong,
-        );
+    ret = unsafe {
+        (p as *mut ::core::ffi::c_char).offset(RESERVE_SIZE as isize) as *mut ::core::ffi::c_void
+    };
+    if unsafe { xmlMemTraceBlockAt == ret } {
+        unsafe {
+            (*__xmlGenericError()).expect("non-null function pointer")(
+                *__xmlGenericErrorContext(),
+                b"%p : Malloc(%lu) Ok\n\0" as *const u8 as *const ::core::ffi::c_char,
+                xmlMemTraceBlockAt,
+                size as ::core::ffi::c_ulong,
+            );
+        }
         xmlMallocBreakpoint();
     }
     return ret;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlMallocAtomicLoc(
     mut size: size_t,
@@ -585,14 +598,16 @@ pub unsafe extern "C" fn xmlInitMemory() -> ::core::ffi::c_int { unsafe {
     return 0 as ::core::ffi::c_int;
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlCleanupMemory() { unsafe {
-    if xmlMemInitialized == 0 as ::core::ffi::c_int {
+pub extern "C" fn xmlCleanupMemory() {
+    if unsafe { xmlMemInitialized } == 0 as ::core::ffi::c_int {
         return;
     }
-    xmlFreeMutex(xmlMemMutex);
-    xmlMemMutex = ::core::ptr::null_mut::<xmlMutex>();
-    xmlMemInitialized = 0 as ::core::ffi::c_int;
-}}
+    unsafe {
+        xmlFreeMutex(xmlMemMutex);
+        xmlMemMutex = ::core::ptr::null_mut::<xmlMutex>();
+        xmlMemInitialized = 0 as ::core::ffi::c_int;
+    }
+}
 #[no_mangle]
 pub extern "C" fn xmlMemSetup(
     mut freeFunc: xmlFreeFunc,
