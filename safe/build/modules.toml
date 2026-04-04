@@ -17,208 +17,208 @@ private_headers = [
 
 [[module]]
 name = "buf"
-source = "../original/buf.c"
+source = "src/foundation/buf.rs"
 provider = "rust"
 
 [[module]]
 name = "c14n"
-source = "../original/c14n.c"
+source = "src/xpath_valid/c14n.rs"
 provider = "rust"
 
 [[module]]
 name = "catalog"
-source = "../original/catalog.c"
+source = "src/xpath_valid/catalog.rs"
 provider = "rust"
 
 [[module]]
 name = "chvalid"
-source = "../original/chvalid.c"
+source = "src/foundation/chvalid.rs"
 provider = "rust"
 
 [[module]]
 name = "debugXML"
-source = "../original/debugXML.c"
+source = "src/debug/debug_xml.rs"
 provider = "rust"
 
 [[module]]
 name = "dict"
-source = "../original/dict.c"
+source = "src/foundation/dict.rs"
 provider = "rust"
 
 [[module]]
 name = "DOCBparser"
-source = "../original/DOCBparser.c"
+source = "src/parser/docb_parser.rs"
 provider = "rust"
 enabled = false
 
 [[module]]
 name = "encoding"
-source = "../original/encoding.c"
+source = "src/tree_io/encoding.rs"
 provider = "rust"
 
 [[module]]
 name = "entities"
-source = "../original/entities.c"
+source = "src/tree_io/entities.rs"
 provider = "rust"
 
 [[module]]
 name = "error"
-source = "../original/error.c"
+source = "src/foundation/error.rs"
 provider = "rust"
 
 [[module]]
 name = "globals"
-source = "../original/globals.c"
+source = "src/foundation/globals.rs"
 provider = "rust"
 
 [[module]]
 name = "hash"
-source = "../original/hash.c"
+source = "src/foundation/hash.rs"
 provider = "rust"
 
 [[module]]
 name = "HTMLparser"
-source = "../original/HTMLparser.c"
+source = "src/parser/html_parser.rs"
 provider = "rust"
 
 [[module]]
 name = "HTMLtree"
-source = "../original/HTMLtree.c"
+source = "src/tree_io/htmltree.rs"
 provider = "rust"
 
 [[module]]
 name = "legacy"
-source = "../original/legacy.c"
+source = "src/parser/legacy.rs"
 provider = "rust"
 
 [[module]]
 name = "list"
-source = "../original/list.c"
+source = "src/foundation/list.rs"
 provider = "rust"
 
 [[module]]
 name = "nanoftp"
-source = "../original/nanoftp.c"
+source = "src/tree_io/nanoftp.rs"
 provider = "rust"
 
 [[module]]
 name = "nanohttp"
-source = "../original/nanohttp.c"
+source = "src/tree_io/nanohttp.rs"
 provider = "rust"
 
 [[module]]
 name = "parser"
-source = "../original/parser.c"
+source = "src/parser/parser.rs"
 provider = "rust"
 
 [[module]]
 name = "parserInternals"
-source = "../original/parserInternals.c"
+source = "src/parser/parser_internals.rs"
 provider = "rust"
 
 [[module]]
 name = "pattern"
-source = "../original/pattern.c"
+source = "src/xpath_valid/pattern.rs"
 provider = "rust"
 
 [[module]]
 name = "relaxng"
-source = "../original/relaxng.c"
+source = "src/schema/relaxng.rs"
 provider = "rust"
 
 [[module]]
 name = "SAX"
-source = "../original/SAX.c"
+source = "src/parser/sax.rs"
 provider = "rust"
 
 [[module]]
 name = "SAX2"
-source = "../original/SAX2.c"
+source = "src/parser/sax2.rs"
 provider = "rust"
 
 [[module]]
 name = "schematron"
-source = "../original/schematron.c"
+source = "src/schema/schematron.rs"
 provider = "rust"
 
 [[module]]
 name = "threads"
-source = "../original/threads.c"
+source = "src/foundation/threads.rs"
 provider = "rust"
 
 [[module]]
 name = "tree"
-source = "../original/tree.c"
+source = "src/tree_io/tree.rs"
 provider = "rust"
 
 [[module]]
 name = "uri"
-source = "../original/uri.c"
+source = "src/tree_io/uri.rs"
 provider = "rust"
 
 [[module]]
 name = "valid"
-source = "../original/valid.c"
+source = "src/xpath_valid/valid.rs"
 provider = "rust"
 
 [[module]]
 name = "xinclude"
-source = "../original/xinclude.c"
+source = "src/xpath_valid/xinclude.rs"
 provider = "rust"
 
 [[module]]
 name = "xlink"
-source = "../original/xlink.c"
+source = "src/xpath_valid/xlink.rs"
 provider = "rust"
 
 [[module]]
 name = "xmlIO"
-source = "../original/xmlIO.c"
+source = "src/tree_io/xml_io.rs"
 provider = "rust"
 
 [[module]]
 name = "xmlmemory"
-source = "../original/xmlmemory.c"
+source = "src/foundation/memory.rs"
 provider = "rust"
 
 [[module]]
 name = "xmlmodule"
-source = "../original/xmlmodule.c"
+source = "src/xpath_valid/xmlmodule.rs"
 provider = "rust"
 
 [[module]]
 name = "xmlreader"
-source = "../original/xmlreader.c"
+source = "src/parser/xmlreader.rs"
 provider = "rust"
 
 [[module]]
 name = "xmlregexp"
-source = "../original/xmlregexp.c"
+source = "src/xpath_valid/xmlregexp.rs"
 provider = "rust"
 
 [[module]]
 name = "xmlsave"
-source = "../original/xmlsave.c"
+source = "src/parser/xmlsave.rs"
 provider = "rust"
 
 [[module]]
 name = "xmlschemas"
-source = "../original/xmlschemas.c"
+source = "src/schema/xmlschemas.rs"
 provider = "rust"
 
 [[module]]
 name = "xmlschemastypes"
-source = "../original/xmlschemastypes.c"
+source = "src/schema/xmlschemastypes.rs"
 provider = "rust"
 
 [[module]]
 name = "xmlstring"
-source = "../original/xmlstring.c"
+source = "src/foundation/xmlstring.rs"
 provider = "rust"
 
 [[module]]
 name = "xmlunicode"
-source = "../original/xmlunicode.c"
+source = "src/foundation/xmlunicode.rs"
 provider = "rust"
 
 [[module]]
@@ -248,20 +248,20 @@ provider = "c_shim"
 
 [[module]]
 name = "xmlwriter"
-source = "../original/xmlwriter.c"
+source = "src/parser/xmlwriter.rs"
 provider = "rust"
 
 [[module]]
 name = "xpath"
-source = "../original/xpath.c"
+source = "src/xpath_valid/xpath.rs"
 provider = "rust"
 
 [[module]]
 name = "xpointer"
-source = "../original/xpointer.c"
+source = "src/xpath_valid/xpointer.rs"
 provider = "rust"
 
 [[module]]
 name = "xzlib"
-source = "../original/xzlib.c"
+source = "src/tree_io/xzlib.rs"
 provider = "rust"

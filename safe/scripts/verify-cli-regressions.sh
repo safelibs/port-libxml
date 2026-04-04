@@ -36,6 +36,38 @@ export LD_LIBRARY_PATH="$LIBDIR:${LD_LIBRARY_PATH:-}"
 unset XML_CATALOG_FILES
 unset SGML_CATALOG_FILES
 
+TMPDIR="$(mktemp -d)"
+trap 'rm -rf "$TMPDIR"' EXIT
+
+normalize_help() {
+  python3 -c 'import sys; text = sys.stdin.read().replace("\r\n", "\n"); print("\n".join(line.rstrip() for line in text.splitlines()) + "\n", end="")'
+}
+
+capture_help() {
+  local name="$1"
+  local expected_rc="$2"
+  local output="$TMPDIR/$name-help.txt"
+  local rc
+  set +e
+  env LD_LIBRARY_PATH="$LIBDIR:${LD_LIBRARY_PATH:-}" \
+    "$BINDIR/$name" --help 2>&1 | normalize_help >"$output"
+  rc=${PIPESTATUS[0]}
+  set -e
+  if [[ "$rc" -ne "$expected_rc" ]]; then
+    printf '%s --help exited %s, expected %s\n' "$name" "$rc" "$expected_rc" >&2
+    cat "$output" >&2
+    exit 1
+  fi
+  if ! grep -q '^Usage :' "$output"; then
+    printf '%s --help did not emit a usage banner\n' "$name" >&2
+    cat "$output" >&2
+    exit 1
+  fi
+}
+
+capture_help xmllint 0
+capture_help xmlcatalog 1
+
 "$ROOT/safe/tests/upstream/build_helpers.sh"
 
 env LD_LIBRARY_PATH="$LIBDIR:${LD_LIBRARY_PATH:-}" \

@@ -6,10 +6,9 @@ use std::sync::{Mutex, OnceLock};
 
 const ALLOW_NETWORK_ENV: &str = "LIBXML2_SAFE_ALLOW_NETWORK";
 
-// The xz wrapper is used for plain files too, matching upstream xmlIO
-// behavior. Compatibility runs exercise multi-megabyte uncompressed inputs,
-// so keep the bookkeeping but remove the low compatibility-breaking caps.
-pub const XZ_MAX_OUTPUT_BYTES: usize = usize::MAX;
+// Bound decompressed output for actual compressed streams. Plain files stay
+// on the upstream-compatible COPY path and are not subject to this cap.
+pub const XZ_MAX_OUTPUT_BYTES: usize = 8 * 1024 * 1024;
 pub const XZ_MAX_READ_CALLS: u32 = u32::MAX;
 pub const XZ_MAX_LOOP_ITERS: u32 = u32::MAX;
 pub const XZ_MAX_TERMINAL_ERRORS: u32 = u32::MAX;
@@ -104,6 +103,20 @@ pub fn xz_record_output(handle: *mut c_void, produced: usize) -> bool {
         entry.output_bytes = entry.output_bytes.saturating_add(produced);
         entry.output_bytes <= XZ_MAX_OUTPUT_BYTES
     })
+}
+
+pub fn xz_output_budget_remaining(handle: *mut c_void) -> usize {
+    if handle.is_null() {
+        return 0;
+    }
+    let state = xz_budget_state()
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    let output_bytes = state
+        .get(&(handle as usize))
+        .map(|entry| entry.output_bytes)
+        .unwrap_or(0);
+    XZ_MAX_OUTPUT_BYTES.saturating_sub(output_bytes)
 }
 
 pub fn xz_record_terminal_error(handle: *mut c_void) -> bool {

@@ -59,6 +59,20 @@ collect_artifacts() {
     -exec cp -f '{}' "$OUT/" \;
 }
 
+verify_dev_package_static_archive() {
+  local matches
+
+  mapfile -t matches < <(find "$OUT" -maxdepth 1 -type f -name 'libxml2-dev_*.deb' | sort)
+  if [[ "${#matches[@]}" -ne 1 ]]; then
+    printf 'expected exactly one libxml2-dev .deb under %s\n' "$OUT" >&2
+    exit 1
+  fi
+  if ! dpkg-deb -c "${matches[0]}" | grep -E '/usr/lib/.*/libxml2\.a$' >/dev/null; then
+    printf 'libxml2-dev package is missing /usr/lib/*/libxml2.a: %s\n' "${matches[0]}" >&2
+    exit 1
+  fi
+}
+
 ensure_orig_tarball() {
   local build_root="$1"
   local version
@@ -144,6 +158,7 @@ run_inside_current_env() {
 
   run_build source
   run_build binary
+  verify_dev_package_static_archive
 }
 
 ensure_modern_rust_toolchain() {
@@ -203,11 +218,12 @@ run_in_docker() {
   reset_output_dir
   cp -a "$snapshot_root/safe/target/debs/." "$OUT/"
   rm -rf "$snapshot_root"
+  verify_dev_package_static_archive
 
   return "$status"
 }
 
-  if [[ "$INSIDE_CURRENT_ENV" -eq 1 ]]; then
+if [[ "$INSIDE_CURRENT_ENV" -eq 1 ]]; then
   run_inside_current_env
 else
   run_in_docker

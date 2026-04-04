@@ -98,9 +98,21 @@ pub mod xpath_valid {
 pub mod tree_io;
 
 pub const MODULE_MANIFEST: &str = include_str!("../build/modules.toml");
+pub const RUST_CORE_ONLY: bool = true;
+pub const RESIDUAL_C_SHIMS: &[&str] = &[
+    "error_varargs",
+    "xmlstring_varargs",
+    "xmlwriter_varargs",
+    "xmlreader_varargs",
+    "xmlschemas_varargs",
+];
 
 pub fn module_manifest() -> &'static str {
     MODULE_MANIFEST
+}
+
+pub fn residual_c_shims() -> &'static [&'static str] {
+    RESIDUAL_C_SHIMS
 }
 
 pub fn ffi_boundary_smoke() -> i32 {

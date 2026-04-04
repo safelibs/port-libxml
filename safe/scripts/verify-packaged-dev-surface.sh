@@ -143,6 +143,11 @@ resolve_local_debs() {
     fi
     LOCAL_DEB_FILES+=("${matches[0]}")
   done
+
+  if ! dpkg-deb -c "${LOCAL_DEB_FILES[1]}" | grep -E '/usr/lib/.*/libxml2\.a$' >/dev/null; then
+    printf 'libxml2-dev package payload is missing /usr/lib/*/libxml2.a: %s\n' "${LOCAL_DEB_FILES[1]}" >&2
+    exit 1
+  fi
 }
 
 split_dependencies() {

@@ -32,9 +32,15 @@ if [[ ! -f "$ROOT/original/.libs/libxml2.so.2.9.14" || ! -f "$ROOT/original/.lib
   "$ROOT/safe/scripts/build-original-baseline.sh"
 fi
 
+TRIPLET="$(gcc -print-multiarch)"
+if [[ ! -f "$STAGE/usr/lib/$TRIPLET/libxml2.a" ]]; then
+  printf 'missing staged static archive: %s\n' "$STAGE/usr/lib/$TRIPLET/libxml2.a" >&2
+  exit 1
+fi
+
 export PATH="$STAGE/usr/bin:$PATH"
-export PKG_CONFIG_PATH="$STAGE/usr/lib/$(gcc -print-multiarch)/pkgconfig"
-export LIBRARY_PATH="$STAGE/usr/lib/$(gcc -print-multiarch):${LIBRARY_PATH:-}"
+export PKG_CONFIG_PATH="$STAGE/usr/lib/$TRIPLET/pkgconfig"
+export LIBRARY_PATH="$STAGE/usr/lib/$TRIPLET:${LIBRARY_PATH:-}"
 export C_INCLUDE_PATH="$STAGE/usr/include/libxml2:${C_INCLUDE_PATH:-}"
 
 python3 - "$ROOT" "$STAGE" "$SUBSET" <<'PY'
@@ -72,6 +78,10 @@ for name in subset_entries[subset]:
     if name not in entry_map:
         raise SystemExit(f"subset {subset!r} references missing entry {name!r}")
     entries.append(entry_map[name])
+
+selected_static_entries = [entry["name"] for entry in entries if entry.get("link", "dynamic") == "static"]
+if subset == "full" and not selected_static_entries:
+    raise SystemExit("full link-compat subset must exercise at least one static-link entry")
 
 def run_command(argv: list[str], env: dict[str, str] | None = None) -> None:
     subprocess.run(argv, check=True, env=env)

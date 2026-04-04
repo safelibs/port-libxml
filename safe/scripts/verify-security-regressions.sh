@@ -50,12 +50,17 @@ if relevant_count is not None and relevant_count != len(relevant_entries):
     raise SystemExit("relevant_cves.json summary count does not match relevant_cves entries")
 
 print(
-    "phase-1 security regression scaffold loaded "
+    "security regression corpus loaded "
     f"{len(relevant_entries)} relevant CVEs from {len(all_ids)} authoritative corpus entries"
 )
 
-if subset not in {"tree-io", "xpath-valid", "cli-shell", "schema", ""}:
-    raise SystemExit(0)
+valid_subsets = {"", "all", "tree-io", "xpath-valid", "cli-shell", "schema"}
+if subset not in valid_subsets:
+    raise SystemExit(f"unknown security subset {subset!r}")
+
+
+def selected(name: str) -> bool:
+    return subset in {"", "all", name}
 
 stage_candidates = sorted((root / "safe/target/stage").glob("usr/lib/*/libxml2.so.2.9.14"))
 if not stage_candidates:
@@ -131,7 +136,7 @@ def require_recoverable_failure(label: str, completed: subprocess.CompletedProce
         raise SystemExit(f"{label} failed without any diagnostic output")
 
 
-if subset in {"tree-io", ""}:
+if selected("tree-io"):
     lib.xmlNanoHTTPOpen.argtypes = [ctypes.c_char_p, char_pp]
     lib.xmlNanoHTTPOpen.restype = ctypes.c_void_p
     lib.xmlNanoFTPConnectTo.argtypes = [ctypes.c_char_p, ctypes.c_int]
@@ -206,9 +211,10 @@ if subset in {"tree-io", ""}:
     print("tree-io security checks passed: direct network loads blocked and xz output budget enforced")
 
 
-if subset in {"xpath-valid", ""}:
+if selected("xpath-valid"):
     security_root = root / "safe/tests/security"
     catalog_dir = security_root / "catalog"
+    pattern_dir = security_root / "pattern"
     xinclude_dir = security_root / "xinclude"
     xpath_dir = security_root / "xpath"
 
@@ -219,6 +225,7 @@ if subset in {"xpath-valid", ""}:
         catalog_dir / "leaf.xml",
         catalog_dir / "loop-a.xml",
         catalog_dir / "loop-b.xml",
+        pattern_dir / "child-axis.xml",
         xinclude_dir / "remote.xml",
         xinclude_dir / "self.xml",
         xpath_dir / "doc.xml",
@@ -350,8 +357,20 @@ if subset in {"xpath-valid", ""}:
 
     lib.xmlReadFile.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_int]
     lib.xmlReadFile.restype = ctypes.c_void_p
+    lib.xmlReadMemory.argtypes = [
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_char_p,
+        ctypes.c_int,
+    ]
+    lib.xmlReadMemory.restype = ctypes.c_void_p
     lib.xmlFreeDoc.argtypes = [ctypes.c_void_p]
     lib.xmlFreeDoc.restype = None
+    lib.xmlDocGetRootElement.argtypes = [ctypes.c_void_p]
+    lib.xmlDocGetRootElement.restype = ctypes.c_void_p
+    lib.xmlFirstElementChild.argtypes = [ctypes.c_void_p]
+    lib.xmlFirstElementChild.restype = ctypes.c_void_p
     lib.xmlXPathNewContext.argtypes = [ctypes.c_void_p]
     lib.xmlXPathNewContext.restype = ctypes.POINTER(XmlXPathContext)
     lib.xmlXPathFreeContext.argtypes = [ctypes.POINTER(XmlXPathContext)]
@@ -366,6 +385,12 @@ if subset in {"xpath-valid", ""}:
     lib.valuePush.restype = ctypes.c_int
     lib.xmlXPathFreeObject.argtypes = [ctypes.c_void_p]
     lib.xmlXPathFreeObject.restype = None
+    lib.xmlPatterncompile.argtypes = [ctypes.c_char_p, ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
+    lib.xmlPatterncompile.restype = ctypes.c_void_p
+    lib.xmlPatternMatch.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+    lib.xmlPatternMatch.restype = ctypes.c_int
+    lib.xmlFreePattern.argtypes = [ctypes.c_void_p]
+    lib.xmlFreePattern.restype = None
 
     xpath_doc = lib.xmlReadFile(str(xpath_dir / "doc.xml").encode(), None, 0)
     if not xpath_doc:
@@ -436,14 +461,55 @@ if subset in {"xpath-valid", ""}:
             "the CVE-2025-9714 guard may be bypassed"
         )
 
+    pattern_doc = lib.xmlReadFile(str(pattern_dir / "child-axis.xml").encode(), None, 0)
+    if not pattern_doc:
+        raise SystemExit("failed to parse child-axis pattern regression fixture")
+    pattern_root = lib.xmlDocGetRootElement(pattern_doc)
+    pattern_child = lib.xmlFirstElementChild(pattern_root)
+    if not pattern_root or not pattern_child:
+        lib.xmlFreeDoc(pattern_doc)
+        raise SystemExit("child-axis pattern regression fixture did not produce expected root/child nodes")
+
+    default_pattern = lib.xmlPatterncompile(b"root/child", None, 0, None)
+    explicit_child_pattern = lib.xmlPatterncompile(b"child::root/child::child", None, 0, None)
+    if not default_pattern or not explicit_child_pattern:
+        if default_pattern:
+            lib.xmlFreePattern(default_pattern)
+        if explicit_child_pattern:
+            lib.xmlFreePattern(explicit_child_pattern)
+        lib.xmlFreeDoc(pattern_doc)
+        raise SystemExit("xmlPatterncompile failed for the child-axis regression fixture")
+    if lib.xmlPatternMatch(default_pattern, pattern_child) != 1:
+        lib.xmlFreePattern(default_pattern)
+        lib.xmlFreePattern(explicit_child_pattern)
+        lib.xmlFreeDoc(pattern_doc)
+        raise SystemExit("default child pattern no longer matches the child-axis regression fixture")
+    if lib.xmlPatternMatch(explicit_child_pattern, pattern_child) != 1:
+        lib.xmlFreePattern(default_pattern)
+        lib.xmlFreePattern(explicit_child_pattern)
+        lib.xmlFreeDoc(pattern_doc)
+        raise SystemExit(
+            "explicit child-axis pattern failed to match the regression fixture; "
+            "the CVE-2025-27113 fix regressed"
+        )
+    if lib.xmlPatternMatch(explicit_child_pattern, pattern_root) == 1:
+        lib.xmlFreePattern(default_pattern)
+        lib.xmlFreePattern(explicit_child_pattern)
+        lib.xmlFreeDoc(pattern_doc)
+        raise SystemExit("explicit child-axis pattern incorrectly matched the document root")
+    lib.xmlFreePattern(default_pattern)
+    lib.xmlFreePattern(explicit_child_pattern)
+    lib.xmlFreeDoc(pattern_doc)
+
     print(
         "xpath-valid security checks passed: catalog recursion/duplicate-next limits "
-        "hold, XInclude honors nonet and self-recursion failures, and recursive XPath "
-        "re-entry stops with a recoverable depth error"
+        "hold, XInclude honors nonet and self-recursion failures, recursive XPath "
+        "re-entry stops with a recoverable depth error, and explicit child-axis "
+        "patterns still compile and match correctly"
     )
 
 
-if subset in {"cli-shell", ""}:
+if selected("cli-shell"):
     script_dir = root / "original" / "test" / "scripts"
     result_dir = root / "original" / "result" / "scripts"
     script_path = script_dir / "long_command.script"
@@ -487,10 +553,12 @@ if subset in {"cli-shell", ""}:
     print("cli-shell security checks passed: bounded long-command shell fixture matches expected output")
 
 
-if subset in {"schema", ""}:
+if selected("schema"):
     security_root = root / "safe/tests/security"
     schema_dir = security_root / "schema"
     relaxng_dir = security_root / "relaxng"
+    schematron_dir = root / "original" / "test" / "schematron"
+    schematron_result_dir = root / "original" / "result" / "schematron"
     include_limit = root / "original/test/relaxng/include/include-limit.rng"
 
     for path in (
@@ -499,6 +567,12 @@ if subset in {"schema", ""}:
         schema_dir / "issue491_0.xml",
         relaxng_dir / "invalid.rng",
         relaxng_dir / "instance.xml",
+        schematron_dir / "cve-2025-49794.sct",
+        schematron_dir / "cve-2025-49794_0.xml",
+        schematron_result_dir / "cve-2025-49794_0.err",
+        schematron_dir / "cve-2025-49796.sct",
+        schematron_dir / "cve-2025-49796_0.xml",
+        schematron_result_dir / "cve-2025-49796_0.err",
         include_limit,
     ):
         if not path.exists():
@@ -569,8 +643,43 @@ if subset in {"schema", ""}:
     lib.xmlRelaxNGFree(schema)
     lib.xmlRelaxNGFreeParserCtxt(ctxt)
 
+    for case_name, schema_name, xml_name, err_name in (
+        (
+            "schematron report-output use-after-free",
+            "cve-2025-49794.sct",
+            "cve-2025-49794_0.xml",
+            "cve-2025-49794_0.err",
+        ),
+        (
+            "schematron report-output node-type confusion",
+            "cve-2025-49796.sct",
+            "cve-2025-49796_0.xml",
+            "cve-2025-49796_0.err",
+        ),
+    ):
+        completed = run_stage_command(
+            case_name,
+            [
+                str(stage_xmllint),
+                "--schematron",
+                f"./test/schematron/{schema_name}",
+                f"./test/schematron/{xml_name}",
+            ],
+            root / "original",
+            expect_success=False,
+        )
+        require_recoverable_failure(case_name, completed)
+        expected_stderr = (schematron_result_dir / err_name).read_text(encoding="utf-8")
+        if completed.stderr != expected_stderr:
+            raise SystemExit(
+                f"{case_name} drifted from the checked-in regression oracle:\n"
+                f"stderr:\n{completed.stderr}\n"
+                f"expected:\n{expected_stderr}"
+            )
+
     print(
         "schema security checks passed: malformed XSD and RNG inputs fail with "
-        "recoverable diagnostics, and RelaxNG include depth limits are enforced"
+        "recoverable diagnostics, RelaxNG include depth limits are enforced, "
+        "and the patch-added Schematron regression fixtures still fail safely"
     )
 PY

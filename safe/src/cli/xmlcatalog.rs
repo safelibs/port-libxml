@@ -4,6 +4,7 @@ use crate::debug::shell::{
     write_file_str, FILE,
 };
 use crate::foundation::globals::xmlFree;
+use crate::internal_ffi;
 use core::ffi::{c_char, c_int, c_void};
 use std::ffi::{CStr, CString};
 use std::ptr::{null, null_mut};
@@ -408,7 +409,7 @@ unsafe fn save_sgml_catalog(
     }
 }
 
-pub fn main() -> i32 {
+fn main_impl() -> i32 {
     let args = collect_args();
     if args.len() <= 1 {
         usage(&args[0].to_string_lossy());
@@ -686,4 +687,8 @@ pub fn main() -> i32 {
         xmlMemoryDump();
     }
     exit_value
+}
+
+pub fn main() -> i32 {
+    internal_ffi::ffi_boundary_i32(main_impl, 1)
 }

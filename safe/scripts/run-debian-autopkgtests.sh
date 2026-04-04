@@ -176,6 +176,7 @@ install_packages() {
   local package
   local expected_version
   local installed_version
+  local static_archive
 
   apt-get update
   if [[ "${#NON_LOCAL_DEPS[@]}" -gt 0 ]]; then
@@ -192,6 +193,12 @@ install_packages() {
       exit 1
     fi
   done
+
+  static_archive="$(dpkg-query -L libxml2-dev | grep -E '/usr/lib/.*/libxml2\.a$' | head -n1)"
+  if [[ -z "$static_archive" || ! -f "$static_archive" ]]; then
+    printf 'installed autopkgtest environment is missing libxml2.a from libxml2-dev\n' >&2
+    exit 1
+  fi
 }
 
 run_tests() {

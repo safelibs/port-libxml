@@ -163,12 +163,13 @@ def collect_original_baseline() -> dict[str, object]:
     return results
 
 
-if baseline_path.exists():
-    baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
-else:
-    baseline_path.parent.mkdir(parents=True, exist_ok=True)
-    baseline = collect_original_baseline()
-    baseline_path.write_text(json.dumps(baseline, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+if not baseline_path.is_file():
+    raise SystemExit(
+        f"missing recorded performance baseline: {baseline_path}\n"
+        "phase 09 consumes the preexisting baseline in place and must not regenerate it"
+    )
+
+baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
 
 safe_results = {}
 for name, spec in workloads.items():

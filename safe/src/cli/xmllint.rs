@@ -2,7 +2,7 @@ use crate::abi::opaque::{
     _xmlRelaxNG, _xmlRelaxNGParserCtxt, _xmlRelaxNGValidCtxt, _xmlSchema, _xmlSchemaParserCtxt,
     _xmlSchemaValidCtxt, _xmlSchematron, _xmlSchematronParserCtxt, _xmlSchematronValidCtxt,
 };
-use crate::abi::types::xmlDoc;
+use crate::abi::types::{xmlChar, xmlDict, xmlDoc, xmlNode};
 use crate::cli::{collect_args, cstring_from_os};
 use crate::debug::debug_xml::xmlDebugDumpDocument;
 use crate::debug::shell::{order_doc_for_shell, stdout_handle, xmllint_shell_readline};
@@ -10,6 +10,7 @@ use crate::foundation::globals::{
     xmlDoValidityCheckingDefaultValue, xmlGetWarningsDefaultValue, xmlLoadExtDtdDefaultValue,
 };
 use crate::foundation::memory::xmlMemoryDump;
+use crate::internal_ffi;
 use crate::parser::parser::{
     xmlParserCtxt, XML_PARSE_BIG_LINES, XML_PARSE_COMPACT, XML_PARSE_DTDVALID, XML_PARSE_NOENT,
     XML_PARSE_NONET, XML_PARSE_NOWARNING, XML_PARSE_NOXINCNODE, XML_PARSE_OLD10,
@@ -19,6 +20,7 @@ use crate::parser::xmlreader::XML_PARSER_VALIDATE;
 use core::ffi::{c_char, c_int, c_void};
 use std::ffi::{CStr, CString, OsStr};
 use std::fs::File;
+use std::io::{Cursor, Read};
 use std::os::fd::IntoRawFd;
 use std::os::unix::ffi::OsStrExt;
 use std::ptr::{null, null_mut};
@@ -30,9 +32,12 @@ const XMLLINT_ERR_VALID: i32 = 3;
 const XMLLINT_ERR_RDFILE: i32 = 4;
 const XMLLINT_ERR_SCHEMACOMP: i32 = 5;
 const XMLLINT_ERR_OUT: i32 = 6;
+const XMLLINT_ERR_SCHEMAPAT: i32 = 7;
 const XML_SCHEMATRON_OUT_QUIET: c_int = 1;
 const XML_SCHEMATRON_OUT_TEXT: c_int = 1 << 1;
 const XML_SCHEMATRON_OUT_XML: c_int = 1 << 2;
+const XML_READER_TYPE_ELEMENT: c_int = 1;
+const XML_READER_TYPE_END_ELEMENT: c_int = 15;
 
 type xmlGenericErrorFunc = Option<unsafe extern "C" fn(*mut c_void, *const c_char, ...)>;
 
@@ -46,6 +51,8 @@ type xmlSchemaValidCtxtPtr = *mut _xmlSchemaValidCtxt;
 type xmlSchematronPtr = *mut _xmlSchematron;
 type xmlSchematronParserCtxtPtr = *mut _xmlSchematronParserCtxt;
 type xmlSchematronValidCtxtPtr = *mut _xmlSchematronValidCtxt;
+type xmlPatternPtr = *mut c_void;
+type xmlStreamCtxtPtr = *mut c_void;
 
 #[repr(C)]
 struct xmlTextReader {
@@ -71,9 +78,24 @@ type xmlExternalEntityLoader = Option<
 
 unsafe extern "C" {
     static mut xmlGenericError: xmlGenericErrorFunc;
+    static mut xmlFree: Option<unsafe extern "C" fn(*mut c_void)>;
 
     fn xmlNewParserCtxt() -> *mut xmlParserCtxt;
     fn xmlFreeParserCtxt(ctxt: *mut xmlParserCtxt);
+    fn xmlCreatePushParserCtxt(
+        sax: *mut c_void,
+        user_data: *mut c_void,
+        chunk: *const c_char,
+        size: c_int,
+        filename: *const c_char,
+    ) -> *mut xmlParserCtxt;
+    fn xmlParseChunk(
+        ctxt: *mut xmlParserCtxt,
+        chunk: *const c_char,
+        size: c_int,
+        terminate: c_int,
+    ) -> c_int;
+    fn xmlCtxtUseOptions(ctxt: *mut xmlParserCtxt, options: c_int) -> c_int;
     fn xmlCtxtReadFile(
         ctxt: *mut xmlParserCtxt,
         filename: *const c_char,
@@ -127,7 +149,10 @@ unsafe extern "C" {
     fn xmlTextReaderRead(reader: xmlTextReaderPtr) -> c_int;
     fn xmlTextReaderDepth(reader: xmlTextReaderPtr) -> c_int;
     fn xmlTextReaderNodeType(reader: xmlTextReaderPtr) -> c_int;
+    fn xmlTextReaderCurrentNode(reader: xmlTextReaderPtr) -> *mut xmlNode;
     fn xmlTextReaderConstName(reader: xmlTextReaderPtr) -> *const u8;
+    fn xmlTextReaderConstLocalName(reader: xmlTextReaderPtr) -> *const u8;
+    fn xmlTextReaderConstNamespaceUri(reader: xmlTextReaderPtr) -> *const u8;
     fn xmlTextReaderConstValue(reader: xmlTextReaderPtr) -> *const u8;
     fn xmlTextReaderIsEmptyElement(reader: xmlTextReaderPtr) -> c_int;
     fn xmlTextReaderHasValue(reader: xmlTextReaderPtr) -> c_int;
@@ -135,8 +160,22 @@ unsafe extern "C" {
     fn xmlTextReaderIsValid(reader: xmlTextReaderPtr) -> c_int;
     fn xmlTextReaderRelaxNGValidate(reader: xmlTextReaderPtr, rng: *const c_char) -> c_int;
     fn xmlTextReaderSchemaValidate(reader: xmlTextReaderPtr, xsd: *const c_char) -> c_int;
+    fn xmlPatterncompile(
+        pattern: *const xmlChar,
+        dict: *mut xmlDict,
+        flags: c_int,
+        namespaces: *mut *const xmlChar,
+    ) -> xmlPatternPtr;
+    fn xmlPatternGetStreamCtxt(comp: xmlPatternPtr) -> xmlStreamCtxtPtr;
+    fn xmlPatternMatch(comp: xmlPatternPtr, node: *mut xmlNode) -> c_int;
+    fn xmlFreePattern(comp: xmlPatternPtr);
+    fn xmlStreamPush(stream: xmlStreamCtxtPtr, name: *const xmlChar, ns: *const xmlChar) -> c_int;
+    fn xmlStreamPop(stream: xmlStreamCtxtPtr) -> c_int;
+    fn xmlFreeStreamCtxt(stream: xmlStreamCtxtPtr);
+    fn xmlGetNodePath(node: *const xmlNode) -> *mut xmlChar;
 
     fn xmlXIncludeProcessFlags(doc: xmlDocPtr, flags: c_int) -> c_int;
+    fn xmlDocGetRootElement(doc: xmlDocPtr) -> *mut xmlNode;
     fn xmlRelaxNGNewParserCtxt(url: *const c_char) -> xmlRelaxNGParserCtxtPtr;
     fn xmlRelaxNGFreeParserCtxt(ctxt: xmlRelaxNGParserCtxtPtr);
     fn xmlRelaxNGParse(ctxt: xmlRelaxNGParserCtxtPtr) -> xmlRelaxNGPtr;
@@ -181,6 +220,7 @@ unsafe extern "C" {
 struct Config {
     debug: bool,
     shell: bool,
+    push: bool,
     noout: bool,
     memory: bool,
     valid: bool,
@@ -194,7 +234,9 @@ struct Config {
     oldxml10: bool,
     noxincludenode: bool,
     repeat: usize,
+    push_size: usize,
     output: Option<CString>,
+    pattern: Option<CString>,
     relaxng: Option<CString>,
     schema: Option<CString>,
     schematron: Option<CString>,
@@ -206,15 +248,22 @@ struct ParseOutcome {
     status: i32,
 }
 
+struct PatternState<'a> {
+    expr: &'a CString,
+    compiled: xmlPatternPtr,
+    stream: xmlStreamCtxtPtr,
+}
+
 fn usage(name: &str) {
     eprintln!(
-        "Usage : {name} [options] XMLfiles ...\n\tParse the XML files and output the result of the parsing\n\t--version : display the version of the XML library used\n\t--debug : dump a debug tree of the in-memory document\n\t--shell : run a navigating shell\n\t--noout : don't output the result tree\n\t--valid : validate the document in addition to std well-formed check\n\t--schema schema : do validation against the WXS schema\n\t--relaxng schema : do RelaxNG validation against the schema\n\t--schematron schema : do validation against a schematron\n\t--timing : print some timings\n\t--output file or -o file: save to a given file\n\t--repeat : repeat 100 times, for timing or profiling\n\t--memory : parse from memory\n\t--nowarning : do not emit warnings from parser/validator\n\t--xinclude : do XInclude processing\n\t--noxincludenode : same but do not generate XInclude nodes\n\t--stream : use the streaming interface to process very large files\n\t--walker : create a reader and walk though the resulting doc\n\t--nonet : refuse to fetch DTDs or entities over network\n\t--noent : substitute entity references by their value\n\t--oldxml10: use XML-1.0 parsing rules before the 5th edition"
+        "Usage : {name} [options] XMLfiles ...\n\tParse the XML files and output the result of the parsing\n\t--version : display the version of the XML library used\n\t--debug : dump a debug tree of the in-memory document\n\t--shell : run a navigating shell\n\t--noout : don't output the result tree\n\t--valid : validate the document in addition to std well-formed check\n\t--schema schema : do validation against the WXS schema\n\t--relaxng schema : do RelaxNG validation against the schema\n\t--schematron schema : do validation against a schematron\n\t--timing : print some timings\n\t--output file or -o file: save to a given file\n\t--repeat : repeat 100 times, for timing or profiling\n\t--memory : parse from memory\n\t--nowarning : do not emit warnings from parser/validator\n\t--xinclude : do XInclude processing\n\t--noxincludenode : same but do not generate XInclude nodes\n\t--stream : use the streaming interface to process very large files\n\t--walker : create a reader and walk though the resulting doc\n\t--push : use the push mode of the parser\n\t--pushsmall : use the push mode of the parser using tiny increments\n\t--pattern pattern_value : test the pattern support\n\t--nonet : refuse to fetch DTDs or entities over network\n\t--noent : substitute entity references by their value\n\t--oldxml10: use XML-1.0 parsing rules before the 5th edition"
     );
 }
 
 fn parse_args(args: &[std::ffi::OsString]) -> Result<(Config, Vec<CString>), i32> {
     let mut cfg = Config {
         options: XML_PARSE_COMPACT as c_int | XML_PARSE_BIG_LINES as c_int,
+        push_size: 4096,
         ..Config::default()
     };
     let mut files = Vec::new();
@@ -284,10 +333,23 @@ fn parse_args(args: &[std::ffi::OsString]) -> Result<(Config, Vec<CString>), i32
                     cfg.repeat * 10
                 };
             }
+            "-push" | "--push" => cfg.push = true,
+            "-pushsmall" | "--pushsmall" => {
+                cfg.push = true;
+                cfg.push_size = 10;
+            }
             "-stream" | "--stream" => cfg.stream = true,
             "-walker" | "--walker" => {
                 cfg.walker = true;
                 cfg.noout = true;
+            }
+            "-pattern" | "--pattern" => {
+                i += 1;
+                if i >= args.len() {
+                    usage(&args[0].to_string_lossy());
+                    return Err(XMLLINT_ERR_UNCLASS);
+                }
+                cfg.pattern = Some(cstring_from_os(args[i].as_os_str())?);
             }
             "-nowarning" | "--nowarning" => {
                 cfg.nowarning = true;
@@ -357,7 +419,50 @@ unsafe fn xml_string_lossy(ptr: *const u8) -> String {
     unsafe { c_string_lossy(ptr as *const c_char) }
 }
 
-unsafe fn process_node(reader: xmlTextReaderPtr) {
+unsafe fn compile_pattern<'a>(
+    expr: &'a CString,
+    dict: *mut xmlDict,
+    namespaces: *mut *const xmlChar,
+) -> Result<PatternState<'a>, i32> {
+    let compiled =
+        unsafe { xmlPatterncompile(expr.as_ptr() as *const xmlChar, dict, 0, namespaces) };
+    if compiled.is_null() {
+        eprintln!("Pattern {} failed to compile", unsafe {
+            c_string_lossy(expr.as_ptr())
+        });
+        return Err(XMLLINT_ERR_SCHEMAPAT);
+    }
+
+    let mut stream = unsafe { xmlPatternGetStreamCtxt(compiled) };
+    if !stream.is_null() && unsafe { xmlStreamPush(stream, null(), null()) } < 0 {
+        eprintln!("xmlStreamPush() failure");
+        unsafe { xmlFreeStreamCtxt(stream) };
+        stream = null_mut();
+    }
+
+    Ok(PatternState {
+        expr,
+        compiled,
+        stream,
+    })
+}
+
+unsafe fn free_pattern_state(pattern: &mut Option<PatternState<'_>>) {
+    if let Some(state) = pattern.take() {
+        if !state.stream.is_null() {
+            unsafe { xmlFreeStreamCtxt(state.stream) };
+        }
+        if !state.compiled.is_null() {
+            unsafe { xmlFreePattern(state.compiled) };
+        }
+    }
+}
+
+unsafe fn process_node(
+    reader: xmlTextReaderPtr,
+    debug: bool,
+    pattern: Option<&mut PatternState<'_>>,
+) {
     let node_type = unsafe { xmlTextReaderNodeType(reader) };
     let empty = unsafe { xmlTextReaderIsEmptyElement(reader) };
     let name = unsafe { xmlTextReaderConstName(reader) };
@@ -367,15 +472,80 @@ unsafe fn process_node(reader: xmlTextReaderPtr) {
     } else {
         unsafe { xml_string_lossy(name) }
     };
-    let depth = unsafe { xmlTextReaderDepth(reader) };
-    let has_value = unsafe { xmlTextReaderHasValue(reader) };
-    if value.is_null() {
-        println!("{depth} {node_type} {name} {empty} {has_value}");
-    } else {
-        println!(
-            "{depth} {node_type} {name} {empty} {has_value} {}",
-            unsafe { xml_string_lossy(value) }
-        );
+    if debug {
+        let depth = unsafe { xmlTextReaderDepth(reader) };
+        let has_value = unsafe { xmlTextReaderHasValue(reader) };
+        if value.is_null() {
+            println!("{depth} {node_type} {name} {empty} {has_value}");
+        } else {
+            println!(
+                "{depth} {node_type} {name} {empty} {has_value} {}",
+                unsafe { xml_string_lossy(value) }
+            );
+        }
+    }
+
+    if let Some(pattern) = pattern {
+        let mut path_ptr = null_mut();
+        let mut matched = -1;
+        if node_type == XML_READER_TYPE_ELEMENT {
+            let node = unsafe { xmlTextReaderCurrentNode(reader) };
+            matched = unsafe { xmlPatternMatch(pattern.compiled, node) };
+            if matched != 0 {
+                path_ptr = unsafe { xmlGetNodePath(node as *const xmlNode) };
+                if !path_ptr.is_null() {
+                    println!(
+                        "Node {} matches pattern {}",
+                        unsafe { xml_string_lossy(path_ptr) },
+                        pattern.expr.to_string_lossy()
+                    );
+                } else {
+                    println!(
+                        "Node {name} matches pattern {}",
+                        pattern.expr.to_string_lossy()
+                    );
+                }
+            }
+            if !pattern.stream.is_null() {
+                let ret = unsafe {
+                    xmlStreamPush(
+                        pattern.stream,
+                        xmlTextReaderConstLocalName(reader),
+                        xmlTextReaderConstNamespaceUri(reader),
+                    )
+                };
+                if ret < 0 {
+                    eprintln!("xmlStreamPush() failure");
+                    unsafe { xmlFreeStreamCtxt(pattern.stream) };
+                    pattern.stream = null_mut();
+                } else if ret != matched {
+                    eprintln!("xmlPatternMatch and xmlStreamPush disagree");
+                    if !path_ptr.is_null() {
+                        eprintln!(
+                            "  pattern {} node {}",
+                            pattern.expr.to_string_lossy(),
+                            unsafe { xml_string_lossy(path_ptr) }
+                        );
+                    } else {
+                        eprintln!("  pattern {} node {name}", pattern.expr.to_string_lossy());
+                    }
+                }
+            }
+        }
+        if !pattern.stream.is_null()
+            && (node_type == XML_READER_TYPE_END_ELEMENT
+                || (node_type == XML_READER_TYPE_ELEMENT && empty != 0))
+            && unsafe { xmlStreamPop(pattern.stream) } < 0
+        {
+            eprintln!("xmlStreamPop() failure");
+            unsafe { xmlFreeStreamCtxt(pattern.stream) };
+            pattern.stream = null_mut();
+        }
+        if !path_ptr.is_null() {
+            unsafe {
+                xmlFree.expect("non-null function pointer")(path_ptr as *mut c_void);
+            }
+        }
     }
 }
 
@@ -400,7 +570,90 @@ unsafe fn save_doc(doc: xmlDocPtr, output: Option<&CString>) -> i32 {
     XMLLINT_RETURN_OK
 }
 
+unsafe fn push_parse_doc(filename: &CString, cfg: &Config) -> Result<ParseOutcome, i32> {
+    let filename_text = unsafe { c_string_lossy(filename.as_ptr()) };
+    let mut source: Box<dyn Read> = if cfg.memory {
+        let bytes = std::fs::read(OsStr::from_bytes(filename.as_bytes()))
+            .map_err(|_| XMLLINT_ERR_RDFILE)?;
+        Box::new(Cursor::new(bytes))
+    } else if filename.as_bytes() == b"-" {
+        Box::new(std::io::stdin())
+    } else {
+        Box::new(
+            File::open(OsStr::from_bytes(filename.as_bytes())).map_err(|_| XMLLINT_ERR_RDFILE)?,
+        )
+    };
+
+    let mut initial = [0u8; 4];
+    let initial_len = source.read(&mut initial).map_err(|_| XMLLINT_ERR_RDFILE)?;
+    if initial_len == 0 {
+        eprintln!("Unable to open {filename_text}");
+        return Err(XMLLINT_ERR_UNCLASS);
+    }
+
+    let ctxt = unsafe {
+        xmlCreatePushParserCtxt(
+            null_mut(),
+            null_mut(),
+            initial.as_ptr() as *const c_char,
+            initial_len as c_int,
+            filename.as_ptr(),
+        )
+    };
+    if ctxt.is_null() {
+        return Err(XMLLINT_ERR_UNCLASS);
+    }
+    unsafe {
+        let _ = xmlCtxtUseOptions(ctxt, cfg.options);
+    }
+
+    let chunk_size = cfg.push_size.max(1);
+    let mut chunk = vec![0u8; chunk_size];
+    loop {
+        let read_len = match source.read(&mut chunk) {
+            Ok(read_len) => read_len,
+            Err(_) => {
+                unsafe { xmlFreeParserCtxt(ctxt) };
+                return Err(XMLLINT_ERR_RDFILE);
+            }
+        };
+        if read_len == 0 {
+            break;
+        }
+        unsafe {
+            let _ = xmlParseChunk(ctxt, chunk.as_ptr() as *const c_char, read_len as c_int, 0);
+        }
+    }
+    unsafe {
+        let _ = xmlParseChunk(ctxt, chunk.as_ptr() as *const c_char, 0, 1);
+    }
+
+    let doc = unsafe { (*ctxt).myDoc as xmlDocPtr };
+    let status = if cfg.valid && unsafe { (*ctxt).valid } == 0 {
+        XMLLINT_ERR_RDFILE
+    } else {
+        XMLLINT_RETURN_OK
+    };
+    let well_formed = unsafe { (*ctxt).wellFormed != 0 };
+    unsafe { xmlFreeParserCtxt(ctxt) };
+
+    if !well_formed {
+        if !doc.is_null() {
+            unsafe { xmlFreeDoc(doc) };
+        }
+        Err(XMLLINT_ERR_UNCLASS)
+    } else if doc.is_null() {
+        Err(XMLLINT_ERR_UNCLASS)
+    } else {
+        Ok(ParseOutcome { doc, status })
+    }
+}
+
 unsafe fn parse_doc(filename: &CString, cfg: &Config) -> Result<ParseOutcome, i32> {
+    if cfg.push {
+        return unsafe { push_parse_doc(filename, cfg) };
+    }
+
     let ctxt = unsafe { xmlNewParserCtxt() };
     if ctxt.is_null() {
         return Err(XMLLINT_ERR_UNCLASS);
@@ -448,6 +701,7 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
     let mut reader = null_mut();
     let mut bytes = Vec::new();
     let mut fd: Option<c_int> = None;
+    let mut pattern = None;
 
     if cfg.memory {
         match std::fs::read(OsStr::from_bytes(filename.as_bytes())) {
@@ -489,11 +743,26 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
             let _ = xmlTextReaderSetParserProp(reader, XML_PARSER_VALIDATE as c_int, 1);
         }
     }
+    if let Some(expr) = cfg.pattern.as_ref() {
+        match unsafe { compile_pattern(expr, null_mut(), null_mut()) } {
+            Ok(state) => pattern = Some(state),
+            Err(code) => {
+                unsafe { xmlFreeTextReader(reader) };
+                if let Some(fd) = fd.take() {
+                    unsafe {
+                        let _ = close(fd);
+                    }
+                }
+                return code;
+            }
+        }
+    }
     if let Some(schema) = cfg.relaxng.as_ref() {
         if unsafe { xmlTextReaderRelaxNGValidate(reader, schema.as_ptr()) } != 0 {
             eprintln!("Relax-NG schema {} failed to compile", unsafe {
                 c_string_lossy(schema.as_ptr())
             });
+            unsafe { free_pattern_state(&mut pattern) };
             unsafe { xmlFreeTextReader(reader) };
             if let Some(fd) = fd.take() {
                 unsafe {
@@ -508,6 +777,7 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
             eprintln!("WXS schema {} failed to compile", unsafe {
                 c_string_lossy(schema.as_ptr())
             });
+            unsafe { free_pattern_state(&mut pattern) };
             unsafe { xmlFreeTextReader(reader) };
             if let Some(fd) = fd.take() {
                 unsafe {
@@ -520,8 +790,8 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
 
     let mut ret = unsafe { xmlTextReaderRead(reader) };
     while ret == 1 {
-        if cfg.debug {
-            unsafe { process_node(reader) };
+        if cfg.debug || pattern.is_some() {
+            unsafe { process_node(reader, cfg.debug, pattern.as_mut()) };
         }
         ret = unsafe { xmlTextReaderRead(reader) };
     }
@@ -529,6 +799,7 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
     let is_valid = unsafe { xmlTextReaderIsValid(reader) };
     if cfg.valid && is_valid != 1 {
         eprintln!("Document {filename_text} does not validate");
+        unsafe { free_pattern_state(&mut pattern) };
         unsafe { xmlFreeTextReader(reader) };
         if let Some(fd) = fd.take() {
             unsafe {
@@ -540,6 +811,7 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
     if cfg.relaxng.is_some() || cfg.schema.is_some() {
         if is_valid != 1 {
             eprintln!("{filename_text} fails to validate");
+            unsafe { free_pattern_state(&mut pattern) };
             unsafe { xmlFreeTextReader(reader) };
             if let Some(fd) = fd.take() {
                 unsafe {
@@ -551,6 +823,7 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
         eprintln!("{filename_text} validates");
     }
 
+    unsafe { free_pattern_state(&mut pattern) };
     unsafe { xmlFreeTextReader(reader) };
     if let Some(fd) = fd.take() {
         unsafe {
@@ -717,18 +990,49 @@ unsafe fn validate_doc(filename: &str, doc: xmlDocPtr, cfg: &Config) -> i32 {
 }
 
 unsafe fn walk_doc(doc: xmlDocPtr, cfg: &Config) -> i32 {
+    let mut pattern = None;
+    if let Some(expr) = cfg.pattern.as_ref() {
+        let root = unsafe { xmlDocGetRootElement(doc) };
+        if root.is_null() {
+            eprintln!("Document does not have a root element");
+            return XMLLINT_ERR_UNCLASS;
+        }
+
+        let mut namespaces = [null(); 22];
+        let mut i = 0usize;
+        let mut ns = unsafe { (*root).nsDef };
+        while !ns.is_null() && i + 1 < namespaces.len() - 1 && i < 20 {
+            namespaces[i] = unsafe { (*ns).href };
+            i += 1;
+            namespaces[i] = unsafe { (*ns).prefix };
+            i += 1;
+            ns = unsafe { (*ns).next };
+        }
+        namespaces[i] = null();
+        if i + 1 < namespaces.len() {
+            namespaces[i + 1] = null();
+        }
+
+        match unsafe { compile_pattern(expr, (*doc).dict, namespaces.as_mut_ptr()) } {
+            Ok(state) => pattern = Some(state),
+            Err(code) => return code,
+        }
+    }
+
     let reader = unsafe { xmlReaderWalker(doc) };
     if reader.is_null() {
         eprintln!("Failed to crate a reader from the document");
+        unsafe { free_pattern_state(&mut pattern) };
         return XMLLINT_ERR_UNCLASS;
     }
     let mut ret = unsafe { xmlTextReaderRead(reader) };
     while ret == 1 {
-        if cfg.debug {
-            unsafe { process_node(reader) };
+        if cfg.debug || pattern.is_some() {
+            unsafe { process_node(reader, cfg.debug, pattern.as_mut()) };
         }
         ret = unsafe { xmlTextReaderRead(reader) };
     }
+    unsafe { free_pattern_state(&mut pattern) };
     unsafe { xmlFreeTextReader(reader) };
     if ret != 0 {
         eprintln!("failed to walk through the doc");
@@ -783,7 +1087,7 @@ unsafe fn run_one(filename: &CString, cfg: &Config) -> i32 {
     status
 }
 
-pub fn main() -> i32 {
+fn main_impl() -> i32 {
     let args = collect_args();
     let (cfg, files) = match parse_args(&args) {
         Ok(parsed) => parsed,
@@ -820,4 +1124,8 @@ pub fn main() -> i32 {
         xmlMemoryDump();
     }
     result
+}
+
+pub fn main() -> i32 {
+    internal_ffi::ffi_boundary_i32(main_impl, XMLLINT_ERR_UNCLASS)
 }

@@ -1,6 +1,6 @@
 use crate::tree_io::common::{
-    xz_close_budget, xz_open_budget, xz_record_loop, xz_record_output, xz_record_read,
-    xz_record_terminal_error,
+    xz_close_budget, xz_open_budget, xz_output_budget_remaining, xz_record_loop, xz_record_output,
+    xz_record_read, xz_record_terminal_error,
 };
 
 #[repr(C)]
@@ -1156,6 +1156,36 @@ unsafe extern "C" fn xz_make(mut state: xz_statep) -> ::core::ffi::c_int {
     }
     return 0 as ::core::ffi::c_int;
 }
+unsafe fn xz_budgeted_output(
+    file: xzFile,
+    state: xz_statep,
+    requested: ::core::ffi::c_uint,
+) -> ::core::ffi::c_uint {
+    if state.is_null() || (*state).how == COPY {
+        return requested;
+    }
+    xz_output_budget_remaining(file).min(requested as usize) as ::core::ffi::c_uint
+}
+
+unsafe fn xz_record_budgeted_output(
+    file: xzFile,
+    state: xz_statep,
+    produced: ::core::ffi::c_uint,
+) -> bool {
+    if produced == 0 || state.is_null() || (*state).how == COPY {
+        return true;
+    }
+    xz_record_output(file, produced as usize)
+}
+
+unsafe fn xz_fail_output_budget(state: xz_statep) -> ::core::ffi::c_int {
+    xz_error(
+        state,
+        -(1 as ::core::ffi::c_int),
+        b"xz output budget exceeded\0" as *const u8 as *const ::core::ffi::c_char,
+    );
+    -(1 as ::core::ffi::c_int)
+}
 unsafe extern "C" fn xz_skip(mut state: xz_statep, mut len: uint64_t) -> ::core::ffi::c_int {
     let mut n: ::core::ffi::c_uint = 0;
     while len != 0 {
@@ -1165,6 +1195,13 @@ unsafe extern "C" fn xz_skip(mut state: xz_statep, mut len: uint64_t) -> ::core:
             } else {
                 (*state).have
             };
+            n = xz_budgeted_output(state as xzFile, state, n);
+            if n == 0 as ::core::ffi::c_uint {
+                return xz_fail_output_budget(state);
+            }
+            if !xz_record_budgeted_output(state as xzFile, state, n) {
+                return xz_fail_output_budget(state);
+            }
             (*state).have = (*state).have.wrapping_sub(n);
             (*state).next = (*state).next.offset(n as isize);
             (*state).pos = (*state).pos.wrapping_add(n as uint64_t);
@@ -1241,13 +1278,12 @@ pub unsafe extern "C" fn __libxml2_xzread(
             } else {
                 (*state).have
             };
-            if !xz_record_output(file, n as usize) {
-                xz_error(
-                    state,
-                    -(1 as ::core::ffi::c_int),
-                    b"xz output budget exceeded\0" as *const u8 as *const ::core::ffi::c_char,
-                );
-                return -(1 as ::core::ffi::c_int);
+            n = xz_budgeted_output(file, state, n);
+            if n == 0 as ::core::ffi::c_uint {
+                return xz_fail_output_budget(state);
+            }
+            if !xz_record_budgeted_output(file, state, n) {
+                return xz_fail_output_budget(state);
             }
             memcpy(
                 buf,
@@ -1276,7 +1312,11 @@ pub unsafe extern "C" fn __libxml2_xzread(
                         return -(1 as ::core::ffi::c_int);
                     }
                 } else {
-                    (*strm).avail_out = len as size_t;
+                    n = xz_budgeted_output(file, state, len);
+                    if n == 0 as ::core::ffi::c_uint {
+                        return xz_fail_output_budget(state);
+                    }
+                    (*strm).avail_out = n as size_t;
                     (*strm).next_out = buf as *mut uint8_t;
                     if xz_decomp(state) == -(1 as ::core::ffi::c_int) {
                         xz_record_terminal_error(file);
@@ -1285,13 +1325,8 @@ pub unsafe extern "C" fn __libxml2_xzread(
                     n = (*state).have;
                     (*state).have = 0 as ::core::ffi::c_uint;
                 }
-                if !xz_record_output(file, n as usize) {
-                    xz_error(
-                        state,
-                        -(1 as ::core::ffi::c_int),
-                        b"xz output budget exceeded\0" as *const u8 as *const ::core::ffi::c_char,
-                    );
-                    return -(1 as ::core::ffi::c_int);
+                if !xz_record_budgeted_output(file, state, n) {
+                    return xz_fail_output_budget(state);
                 }
                 current_block_39 = 8693738493027456495;
             }

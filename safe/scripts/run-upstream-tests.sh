@@ -18,6 +18,23 @@ export C_INCLUDE_PATH="$STAGE/usr/include/libxml2:${C_INCLUDE_PATH:-}"
 export PYTHONPATH="$STAGE/usr/lib/python3/dist-packages:${PYTHONPATH:-}"
 unset XML_CATALOG_FILES
 unset SGML_CATALOG_FILES
+mkdir -p "$ROOT/safe/target/upstream-logs"
+
+for optional_oracle in \
+  "original/xstc/Tests/.stamp" \
+  "check-xml-test-suite.log" \
+  "check-xinclude-test-suite.log" \
+  "original/check-xml-test-suite.log" \
+  "original/check-xinclude-test-suite.log"
+do
+  if [[ -e "$ROOT/$optional_oracle" ]]; then
+    printf '## using existing optional oracle %s\n' "$optional_oracle"
+  fi
+done
+
+export LIBXML2_XMLCONF_LOG_ORACLE="$ROOT/original/check-xml-test-suite.log"
+export LIBXML2_XINCLUDE_LOG_ORACLE="$ROOT/original/check-xinclude-test-suite.log"
+export LIBXML2_XSTC_STAMP_ORACLE="$ROOT/original/xstc/Tests/.stamp"
 
 "$ROOT/safe/tests/upstream/build_helpers.sh"
 

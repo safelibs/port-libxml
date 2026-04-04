@@ -49,6 +49,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     if manifest.version != 1 {
         return Err(format!("unsupported build manifest version {}", manifest.version).into());
     }
+    validate_module_sources(&manifest_dir, &manifest)?;
 
     println!("cargo:rerun-if-changed={}", manifest_path.display());
     println!(
@@ -68,8 +69,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let profile = env::var("PROFILE")?;
 
     let native_dir = manifest_dir.join("target/native").join(&profile);
+    let audit_dir = manifest_dir.join("target/audits");
     let obj_dir = native_dir.join("obj");
+    fs::create_dir_all(&audit_dir)?;
     fs::create_dir_all(&obj_dir)?;
+    let module_audit = audit_dir.join(format!("module-provenance-{profile}.tsv"));
+    write_module_audit(&module_audit, &manifest, &manifest_dir)?;
 
     let config_header = resolve_layout_path(&manifest_dir, &manifest.config_header);
     let private_include_dir = resolve_layout_path(&manifest_dir, &manifest.private_include_dir);
@@ -129,22 +134,20 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         objects.push(object);
     }
 
-    if objects.is_empty() {
-        return Err("build/modules.toml did not enable any non-rust modules".into());
-    }
-
     let support_archive = native_dir.join("libxml2_c_support.a");
     let _ = fs::remove_file(&support_archive);
-    let mut ar_cmd = Command::new(&ar);
-    ar_cmd.arg("crs");
-    ar_cmd.arg(&support_archive);
-    for object in &objects {
-        ar_cmd.arg(object);
-    }
-    run_command(&mut ar_cmd, "archive libxml2_c_support.a")?;
+    if !objects.is_empty() {
+        let mut ar_cmd = Command::new(&ar);
+        ar_cmd.arg("crs");
+        ar_cmd.arg(&support_archive);
+        for object in &objects {
+            ar_cmd.arg(object);
+        }
+        run_command(&mut ar_cmd, "archive libxml2_c_support.a")?;
 
-    println!("cargo:rustc-link-search=native={}", native_dir.display());
-    println!("cargo:rustc-link-lib=static:+whole-archive=xml2_c_support");
+        println!("cargo:rustc-link-search=native={}", native_dir.display());
+        println!("cargo:rustc-link-lib=static:+whole-archive=xml2_c_support");
+    }
     for link_lib in &manifest.link_libs {
         println!("cargo:rustc-link-lib={link_lib}");
     }
@@ -152,10 +155,11 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let triplet = detect_multiarch(&cc)?;
     let target_dir = manifest_dir.join("target").join(&profile);
     let metadata = format!(
-        "PROFILE={profile}\nLIBXML2_NATIVE_DIR={native}\nLIBXML2_NATIVE_STATIC={static_archive}\nLIBXML2_SUPPORT_ARCHIVE={support_archive}\nLIBXML2_SONAME=libxml2.so.2\nLIBXML2_VERSION={version}\nLIBXML2_TRIPLET={triplet}\n",
+        "PROFILE={profile}\nLIBXML2_NATIVE_DIR={native}\nLIBXML2_NATIVE_STATIC={static_archive}\nLIBXML2_SUPPORT_ARCHIVE={support_archive}\nLIBXML2_MODULE_AUDIT={module_audit}\nLIBXML2_SONAME=libxml2.so.2\nLIBXML2_VERSION={version}\nLIBXML2_TRIPLET={triplet}\n",
         native = target_dir.display(),
         static_archive = target_dir.join("libxml2.a").display(),
         support_archive = support_archive.display(),
+        module_audit = module_audit.display(),
         version = manifest.shared_object_version,
     );
     fs::write(manifest_dir.join("target/build-artifacts.env"), metadata)?;
@@ -188,6 +192,79 @@ fn detect_multiarch(cc: &OsString) -> Result<String, Box<dyn std::error::Error>>
         }
     }
     Ok(env::var("TARGET").unwrap_or_else(|_| String::from("unknown-target")))
+}
+
+fn validate_module_sources(
+    manifest_dir: &Path,
+    manifest: &BuildManifest,
+) -> Result<(), Box<dyn std::error::Error>> {
+    for module in &manifest.module {
+        let source = resolve_layout_path(manifest_dir, &module.source);
+        if !source.exists() {
+            return Err(format!(
+                "module {:?} source {:?} does not exist",
+                module.name, source
+            )
+            .into());
+        }
+
+        match module.provider.as_str() {
+            "rust" => {
+                if source.extension().and_then(|ext| ext.to_str()) != Some("rs") {
+                    return Err(format!(
+                        "rust-backed module {:?} must point at a Rust source file, found {:?}",
+                        module.name, module.source
+                    )
+                    .into());
+                }
+            }
+            "c_shim" => {
+                if source.extension().and_then(|ext| ext.to_str()) != Some("c") {
+                    return Err(format!(
+                        "residual C shim {:?} must point at a C source file, found {:?}",
+                        module.name, module.source
+                    )
+                    .into());
+                }
+                if !module.source.starts_with("shims/") {
+                    return Err(format!(
+                        "residual C shim {:?} must live under safe/shims, found {:?}",
+                        module.name, module.source
+                    )
+                    .into());
+                }
+            }
+            other => {
+                return Err(format!(
+                    "unsupported module provider {:?} for {:?}",
+                    other, module.name
+                )
+                .into())
+            }
+        }
+    }
+    Ok(())
+}
+
+fn write_module_audit(
+    path: &Path,
+    manifest: &BuildManifest,
+    manifest_dir: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut output = String::from("name\tprovider\tenabled\tsource\tresolved_source\n");
+    for module in &manifest.module {
+        let resolved = resolve_layout_path(manifest_dir, &module.source);
+        output.push_str(&format!(
+            "{}\t{}\t{}\t{}\t{}\n",
+            module.name,
+            module.provider,
+            module.enabled,
+            module.source,
+            resolved.display()
+        ));
+    }
+    fs::write(path, output)?;
+    Ok(())
 }
 
 fn run_command(command: &mut Command, what: &str) -> Result<(), Box<dyn std::error::Error>> {
