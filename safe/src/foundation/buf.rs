@@ -1312,24 +1312,49 @@ pub unsafe extern "C" fn xmlBufCreateStatic(
     ret_ref.buffer = ::core::ptr::null_mut::<xmlBuffer>();
     return ret;
 }
-#[no_mangle]
-pub unsafe extern "C" fn xmlBufGetAllocationScheme(mut buf: xmlBufPtr) -> ::core::ffi::c_int { unsafe {
-    if buf.is_null() {
-        return -(1 as ::core::ffi::c_int);
+#[inline]
+fn sync_buf_compat_fields(buf: &mut xmlBuf) {
+    if buf.size != buf.compat_size as size_t && buf.compat_size < INT_MAX as ::core::ffi::c_uint {
+        buf.size = buf.compat_size as size_t;
     }
-    return (*buf).alloc as ::core::ffi::c_int;
-}}
+    if buf.use_0 != buf.compat_use as size_t && buf.compat_use < INT_MAX as ::core::ffi::c_uint {
+        buf.use_0 = buf.compat_use as size_t;
+    }
+}
+#[inline]
+fn update_buf_compat_fields(buf: &mut xmlBuf) {
+    if buf.size < INT_MAX as size_t {
+        buf.compat_size = buf.size as ::core::ffi::c_uint;
+    } else {
+        buf.compat_size = INT_MAX as ::core::ffi::c_uint;
+    }
+    if buf.use_0 < INT_MAX as size_t {
+        buf.compat_use = buf.use_0 as ::core::ffi::c_uint;
+    } else {
+        buf.compat_use = INT_MAX as ::core::ffi::c_uint;
+    }
+}
+#[no_mangle]
+pub unsafe extern "C" fn xmlBufGetAllocationScheme(mut buf: xmlBufPtr) -> ::core::ffi::c_int {
+    let Some(buf) = (unsafe { buf.as_ref() }) else {
+        return -(1 as ::core::ffi::c_int);
+    };
+    return buf.alloc as ::core::ffi::c_int;
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufSetAllocationScheme(
     mut buf: xmlBufPtr,
     mut scheme: xmlBufferAllocationScheme,
-) -> ::core::ffi::c_int { unsafe {
-    if buf.is_null() || (*buf).error != 0 as ::core::ffi::c_int {
+) -> ::core::ffi::c_int {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
+        return -(1 as ::core::ffi::c_int);
+    };
+    if buf.error != 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
-    if (*buf).alloc as ::core::ffi::c_uint
+    if buf.alloc as ::core::ffi::c_uint
         == XML_BUFFER_ALLOC_IMMUTABLE as ::core::ffi::c_int as ::core::ffi::c_uint
-        || (*buf).alloc as ::core::ffi::c_uint
+        || buf.alloc as ::core::ffi::c_uint
             == XML_BUFFER_ALLOC_IO as ::core::ffi::c_int as ::core::ffi::c_uint
     {
         return -(1 as ::core::ffi::c_int);
@@ -1345,638 +1370,540 @@ pub unsafe extern "C" fn xmlBufSetAllocationScheme(
         || scheme as ::core::ffi::c_uint
             == XML_BUFFER_ALLOC_BOUNDED as ::core::ffi::c_int as ::core::ffi::c_uint
     {
-        (*buf).alloc = scheme;
-        if !(*buf).buffer.is_null() {
-            (*(*buf).buffer).alloc = scheme;
+        buf.alloc = scheme;
+        if !buf.buffer.is_null() {
+            unsafe { (*buf.buffer).alloc = scheme };
         }
         return 0 as ::core::ffi::c_int;
     }
     if scheme as ::core::ffi::c_uint
         == XML_BUFFER_ALLOC_IO as ::core::ffi::c_int as ::core::ffi::c_uint
     {
-        (*buf).alloc = XML_BUFFER_ALLOC_IO;
-        (*buf).contentIO = (*buf).content;
+        buf.alloc = XML_BUFFER_ALLOC_IO;
+        buf.contentIO = buf.content;
     }
     return -(1 as ::core::ffi::c_int);
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufFree(mut buf: xmlBufPtr) { unsafe {
-    if buf.is_null() {
+pub unsafe extern "C" fn xmlBufFree(mut buf: xmlBufPtr) {
+    let Some(buf_ref) = (unsafe { buf.as_ref() }) else {
         return;
-    }
-    if (*buf).alloc as ::core::ffi::c_uint
+    };
+    if buf_ref.alloc as ::core::ffi::c_uint
         == XML_BUFFER_ALLOC_IO as ::core::ffi::c_int as ::core::ffi::c_uint
-        && !(*buf).contentIO.is_null()
+        && !buf_ref.contentIO.is_null()
     {
-        xmlFree.expect("non-null function pointer")((*buf).contentIO as *mut ::core::ffi::c_void);
-    } else if !(*buf).content.is_null()
-        && (*buf).alloc as ::core::ffi::c_uint
+        unsafe {
+            xmlFree.expect("non-null function pointer")(buf_ref.contentIO as *mut ::core::ffi::c_void)
+        };
+    } else if !buf_ref.content.is_null()
+        && buf_ref.alloc as ::core::ffi::c_uint
             != XML_BUFFER_ALLOC_IMMUTABLE as ::core::ffi::c_int as ::core::ffi::c_uint
     {
-        xmlFree.expect("non-null function pointer")((*buf).content as *mut ::core::ffi::c_void);
+        unsafe {
+            xmlFree.expect("non-null function pointer")(buf_ref.content as *mut ::core::ffi::c_void)
+        };
     }
-    xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-}}
+    unsafe { xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void) };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufEmpty(mut buf: xmlBufPtr) { unsafe {
-    if buf.is_null() || (*buf).error != 0 as ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlBufEmpty(mut buf: xmlBufPtr) {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
         return;
-    }
-    if (*buf).content.is_null() {
-        return;
-    }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    (*buf).use_0 = 0 as size_t;
-    if (*buf).alloc as ::core::ffi::c_uint
-        == XML_BUFFER_ALLOC_IMMUTABLE as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
-        (*buf).content = b"\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar;
-    } else if (*buf).alloc as ::core::ffi::c_uint
-        == XML_BUFFER_ALLOC_IO as ::core::ffi::c_int as ::core::ffi::c_uint
-        && !(*buf).contentIO.is_null()
-    {
-        let mut start_buf: size_t =
-            (*buf).content.offset_from((*buf).contentIO) as ::core::ffi::c_long as size_t;
-        (*buf).size = (*buf).size.wrapping_add(start_buf);
-        (*buf).content = (*buf).contentIO;
-        *(*buf).content.offset(0 as ::core::ffi::c_int as isize) = 0 as xmlChar;
-    } else {
-        *(*buf).content.offset(0 as ::core::ffi::c_int as isize) = 0 as xmlChar;
-    }
-    if (*buf).size < INT_MAX as size_t {
-        (*buf).compat_size = (*buf).size as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_size = INT_MAX as ::core::ffi::c_uint;
-    }
-    if (*buf).use_0 < INT_MAX as size_t {
-        (*buf).compat_use = (*buf).use_0 as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
     };
-}}
-#[no_mangle]
-pub unsafe extern "C" fn xmlBufShrink(mut buf: xmlBufPtr, mut len: size_t) -> size_t { unsafe {
-    if buf.is_null() || (*buf).error != 0 as ::core::ffi::c_int {
-        return 0 as size_t;
+    if buf.error != 0 as ::core::ffi::c_int || buf.content.is_null() {
+        return;
     }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    if len == 0 as size_t {
-        return 0 as size_t;
-    }
-    if len > (*buf).use_0 {
-        return 0 as size_t;
-    }
-    (*buf).use_0 = (*buf).use_0.wrapping_sub(len);
-    if (*buf).alloc as ::core::ffi::c_uint
+    sync_buf_compat_fields(buf);
+    buf.use_0 = 0 as size_t;
+    if buf.alloc as ::core::ffi::c_uint
         == XML_BUFFER_ALLOC_IMMUTABLE as ::core::ffi::c_int as ::core::ffi::c_uint
-        || (*buf).alloc as ::core::ffi::c_uint
-            == XML_BUFFER_ALLOC_IO as ::core::ffi::c_int as ::core::ffi::c_uint
-            && !(*buf).contentIO.is_null()
     {
-        (*buf).content = (*buf).content.offset(len as isize);
-        (*buf).size = (*buf).size.wrapping_sub(len);
-        if (*buf).alloc as ::core::ffi::c_uint
+        buf.content = b"\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar;
+    } else if buf.alloc as ::core::ffi::c_uint
+        == XML_BUFFER_ALLOC_IO as ::core::ffi::c_int as ::core::ffi::c_uint
+        && !buf.contentIO.is_null()
+    {
+        let start_buf =
+            unsafe { buf.content.offset_from(buf.contentIO) as ::core::ffi::c_long as size_t };
+        buf.size = buf.size.wrapping_add(start_buf);
+        buf.content = buf.contentIO;
+        unsafe { *buf.content = 0 as xmlChar };
+    } else {
+        unsafe { *buf.content = 0 as xmlChar };
+    }
+    update_buf_compat_fields(buf);
+}
+#[no_mangle]
+pub unsafe extern "C" fn xmlBufShrink(mut buf: xmlBufPtr, mut len: size_t) -> size_t {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
+        return 0 as size_t;
+    };
+    if buf.error != 0 as ::core::ffi::c_int {
+        return 0 as size_t;
+    }
+    sync_buf_compat_fields(buf);
+    if len == 0 as size_t || len > buf.use_0 {
+        return 0 as size_t;
+    }
+    buf.use_0 = buf.use_0.wrapping_sub(len);
+    if buf.alloc as ::core::ffi::c_uint
+        == XML_BUFFER_ALLOC_IMMUTABLE as ::core::ffi::c_int as ::core::ffi::c_uint
+        || buf.alloc as ::core::ffi::c_uint
             == XML_BUFFER_ALLOC_IO as ::core::ffi::c_int as ::core::ffi::c_uint
-            && !(*buf).contentIO.is_null()
+            && !buf.contentIO.is_null()
+    {
+        buf.content = unsafe { buf.content.add(len) };
+        buf.size = buf.size.wrapping_sub(len);
+        if buf.alloc as ::core::ffi::c_uint
+            == XML_BUFFER_ALLOC_IO as ::core::ffi::c_int as ::core::ffi::c_uint
+            && !buf.contentIO.is_null()
         {
-            let mut start_buf: size_t =
-                (*buf).content.offset_from((*buf).contentIO) as ::core::ffi::c_long as size_t;
-            if start_buf >= (*buf).size {
-                memmove(
-                    (*buf).contentIO as *mut ::core::ffi::c_void,
-                    (*buf).content.offset(0 as ::core::ffi::c_int as isize) as *mut xmlChar
-                        as *const ::core::ffi::c_void,
-                    (*buf).use_0,
-                );
-                (*buf).content = (*buf).contentIO;
-                *(*buf).content.offset((*buf).use_0 as isize) = 0 as xmlChar;
-                (*buf).size = (*buf).size.wrapping_add(start_buf);
+            let start_buf =
+                unsafe { buf.content.offset_from(buf.contentIO) as ::core::ffi::c_long as size_t };
+            if start_buf >= buf.size {
+                unsafe {
+                    memmove(
+                        buf.contentIO as *mut ::core::ffi::c_void,
+                        buf.content as *const ::core::ffi::c_void,
+                        buf.use_0,
+                    );
+                    buf.content = buf.contentIO;
+                    *buf.content.add(buf.use_0) = 0 as xmlChar;
+                }
+                buf.size = buf.size.wrapping_add(start_buf);
             }
         }
     } else {
-        memmove(
-            (*buf).content as *mut ::core::ffi::c_void,
-            (*buf).content.offset(len as isize) as *mut xmlChar as *const ::core::ffi::c_void,
-            (*buf).use_0,
-        );
-        *(*buf).content.offset((*buf).use_0 as isize) = 0 as xmlChar;
+        unsafe {
+            memmove(
+                buf.content as *mut ::core::ffi::c_void,
+                buf.content.add(len) as *const ::core::ffi::c_void,
+                buf.use_0,
+            );
+            *buf.content.add(buf.use_0) = 0 as xmlChar;
+        }
     }
-    if (*buf).size < INT_MAX as size_t {
-        (*buf).compat_size = (*buf).size as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_size = INT_MAX as ::core::ffi::c_uint;
-    }
-    if (*buf).use_0 < INT_MAX as size_t {
-        (*buf).compat_use = (*buf).use_0 as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
-    }
+    update_buf_compat_fields(buf);
     return len;
-}}
-unsafe extern "C" fn xmlBufGrowInternal(mut buf: xmlBufPtr, mut len: size_t) -> size_t { unsafe {
-    let mut size: size_t = 0;
-    let mut newbuf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    if buf.is_null() || (*buf).error != 0 as ::core::ffi::c_int {
+}
+unsafe extern "C" fn xmlBufGrowInternal(mut buf: xmlBufPtr, mut len: size_t) -> size_t {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
+        return 0 as size_t;
+    };
+    if buf.error != 0 as ::core::ffi::c_int {
         return 0 as size_t;
     }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    if (*buf).alloc as ::core::ffi::c_uint
+    sync_buf_compat_fields(buf);
+    if buf.alloc as ::core::ffi::c_uint
         == XML_BUFFER_ALLOC_IMMUTABLE as ::core::ffi::c_int as ::core::ffi::c_uint
     {
         return 0 as size_t;
     }
-    if len < (*buf).size.wrapping_sub((*buf).use_0) {
-        return (*buf).size.wrapping_sub((*buf).use_0);
+    if len < buf.size.wrapping_sub(buf.use_0) {
+        return buf.size.wrapping_sub(buf.use_0);
     }
-    if len > SIZE_MAX.wrapping_sub((*buf).use_0) {
+    if len > SIZE_MAX.wrapping_sub(buf.use_0) {
         return 0 as size_t;
     }
-    if (*buf).size > len {
-        size = if (*buf).size > SIZE_MAX.wrapping_div(2 as size_t) {
+    let mut size = if buf.size > len {
+        if buf.size > SIZE_MAX.wrapping_div(2 as size_t) {
             SIZE_MAX
         } else {
-            (*buf).size.wrapping_mul(2 as size_t)
-        };
+            buf.size.wrapping_mul(2 as size_t)
+        }
     } else {
-        size = (*buf).use_0.wrapping_add(len);
-        size = if size > SIZE_MAX.wrapping_sub(100 as size_t) {
+        let size = buf.use_0.wrapping_add(len);
+        if size > SIZE_MAX.wrapping_sub(100 as size_t) {
             SIZE_MAX
         } else {
             size.wrapping_add(100 as size_t)
-        };
-    }
-    if (*buf).alloc as ::core::ffi::c_uint
+        }
+    };
+    if buf.alloc as ::core::ffi::c_uint
         == XML_BUFFER_ALLOC_BOUNDED as ::core::ffi::c_int as ::core::ffi::c_uint
     {
-        if (*buf).use_0.wrapping_add(len) >= XML_MAX_TEXT_LENGTH as size_t
-            || (*buf).size >= XML_MAX_TEXT_LENGTH as size_t
+        if buf.use_0.wrapping_add(len) >= XML_MAX_TEXT_LENGTH as size_t
+            || buf.size >= XML_MAX_TEXT_LENGTH as size_t
         {
-            xmlBufMemoryError(
-                buf,
-                b"buffer error: text too long\n\0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            unsafe {
+                xmlBufMemoryError(
+                    buf,
+                    b"buffer error: text too long\n\0" as *const u8 as *const ::core::ffi::c_char,
+                )
+            };
             return 0 as size_t;
         }
         if size >= XML_MAX_TEXT_LENGTH as size_t {
             size = XML_MAX_TEXT_LENGTH as size_t;
         }
     }
-    if (*buf).alloc as ::core::ffi::c_uint
+    let newbuf = if buf.alloc as ::core::ffi::c_uint
         == XML_BUFFER_ALLOC_IO as ::core::ffi::c_int as ::core::ffi::c_uint
-        && !(*buf).contentIO.is_null()
+        && !buf.contentIO.is_null()
     {
-        let mut start_buf: size_t =
-            (*buf).content.offset_from((*buf).contentIO) as ::core::ffi::c_long as size_t;
-        newbuf = xmlRealloc.expect("non-null function pointer")(
-            (*buf).contentIO as *mut ::core::ffi::c_void,
-            start_buf.wrapping_add(size),
-        ) as *mut xmlChar;
+        let start_buf =
+            unsafe { buf.content.offset_from(buf.contentIO) as ::core::ffi::c_long as size_t };
+        let newbuf = unsafe {
+            xmlRealloc.expect("non-null function pointer")(
+                buf.contentIO as *mut ::core::ffi::c_void,
+                start_buf.wrapping_add(size),
+            ) as *mut xmlChar
+        };
         if newbuf.is_null() {
-            xmlBufMemoryError(
-                buf,
-                b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            unsafe {
+                xmlBufMemoryError(
+                    buf,
+                    b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
+                )
+            };
             return 0 as size_t;
         }
-        (*buf).contentIO = newbuf;
-        (*buf).content = newbuf.offset(start_buf as isize);
+        buf.contentIO = newbuf;
+        buf.content = unsafe { newbuf.add(start_buf) };
+        newbuf
     } else {
-        newbuf = xmlRealloc.expect("non-null function pointer")(
-            (*buf).content as *mut ::core::ffi::c_void,
-            size,
-        ) as *mut xmlChar;
+        let newbuf = unsafe {
+            xmlRealloc.expect("non-null function pointer")(
+                buf.content as *mut ::core::ffi::c_void,
+                size,
+            ) as *mut xmlChar
+        };
         if newbuf.is_null() {
-            xmlBufMemoryError(
-                buf,
-                b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            unsafe {
+                xmlBufMemoryError(
+                    buf,
+                    b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
+                )
+            };
             return 0 as size_t;
         }
-        (*buf).content = newbuf;
-    }
-    (*buf).size = size;
-    if (*buf).size < INT_MAX as size_t {
-        (*buf).compat_size = (*buf).size as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_size = INT_MAX as ::core::ffi::c_uint;
-    }
-    if (*buf).use_0 < INT_MAX as size_t {
-        (*buf).compat_use = (*buf).use_0 as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
-    }
-    return (*buf).size.wrapping_sub((*buf).use_0);
-}}
+        buf.content = newbuf;
+        newbuf
+    };
+    let _ = newbuf;
+    buf.size = size;
+    update_buf_compat_fields(buf);
+    return buf.size.wrapping_sub(buf.use_0);
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufGrow(
     mut buf: xmlBufPtr,
     mut len: ::core::ffi::c_int,
-) -> ::core::ffi::c_int { unsafe {
-    let mut ret: size_t = 0;
+) -> ::core::ffi::c_int {
     if buf.is_null() || len < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
     if len == 0 as ::core::ffi::c_int {
         return 0 as ::core::ffi::c_int;
     }
-    ret = xmlBufGrowInternal(buf, len as size_t);
-    if (*buf).error != 0 as ::core::ffi::c_int {
+    let ret = unsafe { xmlBufGrowInternal(buf, len as size_t) };
+    if unsafe { (*buf).error } != 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
     return ret as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufInflate(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int { unsafe {
+pub unsafe extern "C" fn xmlBufInflate(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int {
     if buf.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    xmlBufGrowInternal(buf, len.wrapping_add((*buf).size));
-    if (*buf).error != 0 {
+    let size = unsafe { (*buf).size };
+    unsafe { xmlBufGrowInternal(buf, len.wrapping_add(size)) };
+    if unsafe { (*buf).error } != 0 {
         return -(1 as ::core::ffi::c_int);
     }
     return 0 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufDump(mut file: *mut FILE, mut buf: xmlBufPtr) -> size_t { unsafe {
-    let mut ret: size_t = 0;
-    if buf.is_null() || (*buf).error != 0 as ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlBufDump(mut file: *mut FILE, mut buf: xmlBufPtr) -> size_t {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
+        return 0 as size_t;
+    };
+    if buf.error != 0 as ::core::ffi::c_int || buf.content.is_null() {
         return 0 as size_t;
     }
-    if (*buf).content.is_null() {
-        return 0 as size_t;
-    }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
+    sync_buf_compat_fields(buf);
     if file.is_null() {
-        file = stdout;
+        file = unsafe { stdout };
     }
-    ret = fwrite(
-        (*buf).content as *const ::core::ffi::c_void,
-        ::core::mem::size_of::<xmlChar>() as size_t,
-        (*buf).use_0,
-        file,
-    ) as size_t;
-    return ret;
-}}
+    return unsafe {
+        fwrite(
+            buf.content as *const ::core::ffi::c_void,
+            ::core::mem::size_of::<xmlChar>() as size_t,
+            buf.use_0,
+            file,
+        ) as size_t
+    };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufContent(mut buf: *const xmlBuf) -> *mut xmlChar { unsafe {
-    if buf.is_null() || (*buf).error != 0 {
+pub unsafe extern "C" fn xmlBufContent(mut buf: *const xmlBuf) -> *mut xmlChar {
+    let Some(buf) = (unsafe { buf.as_ref() }) else {
+        return ::core::ptr::null_mut::<xmlChar>();
+    };
+    if buf.error != 0 {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    return (*buf).content;
-}}
+    return buf.content;
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufEnd(mut buf: xmlBufPtr) -> *mut xmlChar { unsafe {
-    if buf.is_null() || (*buf).error != 0 {
+pub unsafe extern "C" fn xmlBufEnd(mut buf: xmlBufPtr) -> *mut xmlChar {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
+        return ::core::ptr::null_mut::<xmlChar>();
+    };
+    if buf.error != 0 {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    return (*buf).content.offset((*buf).use_0 as isize) as *mut xmlChar;
-}}
+    sync_buf_compat_fields(buf);
+    return unsafe { buf.content.add(buf.use_0) };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufAddLen(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int { unsafe {
-    if buf.is_null() || (*buf).error != 0 {
+pub unsafe extern "C" fn xmlBufAddLen(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
+        return -(1 as ::core::ffi::c_int);
+    };
+    if buf.error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    if len > (*buf).size.wrapping_sub((*buf).use_0) {
+    sync_buf_compat_fields(buf);
+    if len > buf.size.wrapping_sub(buf.use_0) {
         return -(1 as ::core::ffi::c_int);
     }
-    (*buf).use_0 = (*buf).use_0.wrapping_add(len);
-    if (*buf).size < INT_MAX as size_t {
-        (*buf).compat_size = (*buf).size as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_size = INT_MAX as ::core::ffi::c_uint;
-    }
-    if (*buf).use_0 < INT_MAX as size_t {
-        (*buf).compat_use = (*buf).use_0 as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
-    }
-    if (*buf).size > (*buf).use_0 {
-        *(*buf).content.offset((*buf).use_0 as isize) = 0 as xmlChar;
+    buf.use_0 = buf.use_0.wrapping_add(len);
+    update_buf_compat_fields(buf);
+    if buf.size > buf.use_0 {
+        unsafe { *buf.content.add(buf.use_0) = 0 as xmlChar };
     } else {
         return -(1 as ::core::ffi::c_int);
     }
     return 0 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufErase(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int { unsafe {
-    if buf.is_null() || (*buf).error != 0 {
+pub unsafe extern "C" fn xmlBufErase(mut buf: xmlBufPtr, mut len: size_t) -> ::core::ffi::c_int {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
+        return -(1 as ::core::ffi::c_int);
+    };
+    if buf.error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    if len > (*buf).use_0 {
+    sync_buf_compat_fields(buf);
+    if len > buf.use_0 {
         return -(1 as ::core::ffi::c_int);
     }
-    (*buf).use_0 = (*buf).use_0.wrapping_sub(len);
-    *(*buf).content.offset((*buf).use_0 as isize) = 0 as xmlChar;
-    if (*buf).size < INT_MAX as size_t {
-        (*buf).compat_size = (*buf).size as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_size = INT_MAX as ::core::ffi::c_uint;
-    }
-    if (*buf).use_0 < INT_MAX as size_t {
-        (*buf).compat_use = (*buf).use_0 as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
-    }
+    buf.use_0 = buf.use_0.wrapping_sub(len);
+    unsafe { *buf.content.add(buf.use_0) = 0 as xmlChar };
+    update_buf_compat_fields(buf);
     return 0 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufLength(buf: xmlBufPtr) -> size_t { unsafe {
-    if buf.is_null() || (*buf).error != 0 {
+pub unsafe extern "C" fn xmlBufLength(buf: xmlBufPtr) -> size_t {
+    let Some(buf) = (unsafe { buf.as_ref() }) else {
+        return 0 as size_t;
+    };
+    if buf.error != 0 {
         return 0 as size_t;
     }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    return (*buf).use_0;
-}}
+    let mut buf = *buf;
+    sync_buf_compat_fields(&mut buf);
+    return buf.use_0;
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufUse(buf: xmlBufPtr) -> size_t { unsafe {
-    if buf.is_null() || (*buf).error != 0 {
+pub unsafe extern "C" fn xmlBufUse(buf: xmlBufPtr) -> size_t {
+    let len = unsafe { xmlBufLength(buf) };
+    len
+}
+#[no_mangle]
+pub unsafe extern "C" fn xmlBufAvail(buf: xmlBufPtr) -> size_t {
+    let Some(buf) = (unsafe { buf.as_ref() }) else {
+        return 0 as size_t;
+    };
+    if buf.error != 0 {
         return 0 as size_t;
     }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    return (*buf).use_0;
-}}
+    let mut buf = *buf;
+    sync_buf_compat_fields(&mut buf);
+    return buf.size.wrapping_sub(buf.use_0);
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufAvail(buf: xmlBufPtr) -> size_t { unsafe {
-    if buf.is_null() || (*buf).error != 0 {
-        return 0 as size_t;
-    }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    return (*buf).size.wrapping_sub((*buf).use_0);
-}}
-#[no_mangle]
-pub unsafe extern "C" fn xmlBufIsEmpty(buf: xmlBufPtr) -> ::core::ffi::c_int { unsafe {
-    if buf.is_null() || (*buf).error != 0 {
+pub unsafe extern "C" fn xmlBufIsEmpty(buf: xmlBufPtr) -> ::core::ffi::c_int {
+    let Some(buf) = (unsafe { buf.as_ref() }) else {
+        return -(1 as ::core::ffi::c_int);
+    };
+    if buf.error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    return ((*buf).use_0 == 0 as size_t) as ::core::ffi::c_int;
-}}
+    let mut buf = *buf;
+    sync_buf_compat_fields(&mut buf);
+    return (buf.use_0 == 0 as size_t) as ::core::ffi::c_int;
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufResize(mut buf: xmlBufPtr, mut size: size_t) -> ::core::ffi::c_int { unsafe {
-    let mut newSize: size_t = 0;
+pub unsafe extern "C" fn xmlBufResize(mut buf: xmlBufPtr, mut size: size_t) -> ::core::ffi::c_int {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
+        return 0 as ::core::ffi::c_int;
+    };
+    let mut new_size: size_t = 0;
     let mut rebuf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    let mut start_buf: size_t = 0;
-    if buf.is_null() || (*buf).error != 0 {
+    sync_buf_compat_fields(buf);
+    if buf.error != 0 {
         return 0 as ::core::ffi::c_int;
     }
-    if (*buf).size != (*buf).compat_size as size_t {
-        if (*buf).compat_size < INT_MAX as ::core::ffi::c_uint {
-            (*buf).size = (*buf).compat_size as size_t;
-        }
-    }
-    if (*buf).use_0 != (*buf).compat_use as size_t {
-        if (*buf).compat_use < INT_MAX as ::core::ffi::c_uint {
-            (*buf).use_0 = (*buf).compat_use as size_t;
-        }
-    }
-    if (*buf).alloc as ::core::ffi::c_uint
+    if buf.alloc as ::core::ffi::c_uint
         == XML_BUFFER_ALLOC_IMMUTABLE as ::core::ffi::c_int as ::core::ffi::c_uint
     {
         return 0 as ::core::ffi::c_int;
     }
-    if (*buf).alloc as ::core::ffi::c_uint
+    if buf.alloc as ::core::ffi::c_uint
         == XML_BUFFER_ALLOC_BOUNDED as ::core::ffi::c_int as ::core::ffi::c_uint
+        && size >= XML_MAX_TEXT_LENGTH as size_t
     {
-        if size >= XML_MAX_TEXT_LENGTH as size_t {
+        unsafe {
             xmlBufMemoryError(
                 buf,
                 b"buffer error: text too long\n\0" as *const u8 as *const ::core::ffi::c_char,
-            );
-            return 0 as ::core::ffi::c_int;
-        }
+            )
+        };
+        return 0 as ::core::ffi::c_int;
     }
-    if size < (*buf).size {
+    if size < buf.size {
         return 1 as ::core::ffi::c_int;
     }
-    match (*buf).alloc as ::core::ffi::c_uint {
+    match buf.alloc as ::core::ffi::c_uint {
         3 | 0 => {
-            if (*buf).size == 0 as size_t {
-                newSize = if size > SIZE_MAX.wrapping_sub(10 as size_t) {
+            new_size = if buf.size == 0 as size_t {
+                if size > SIZE_MAX.wrapping_sub(10 as size_t) {
                     SIZE_MAX
                 } else {
                     size.wrapping_add(10 as size_t)
-                };
+                }
             } else {
-                newSize = (*buf).size;
-            }
-            while size > newSize {
-                if newSize > SIZE_MAX.wrapping_div(2 as size_t) {
-                    xmlBufMemoryError(
-                        buf,
-                        b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
-                    );
+                buf.size
+            };
+            while size > new_size {
+                if new_size > SIZE_MAX.wrapping_div(2 as size_t) {
+                    unsafe {
+                        xmlBufMemoryError(
+                            buf,
+                            b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
+                        )
+                    };
                     return 0 as ::core::ffi::c_int;
                 }
-                newSize = newSize.wrapping_mul(2 as size_t);
+                new_size = new_size.wrapping_mul(2 as size_t);
             }
         }
         1 => {
-            newSize = if size > SIZE_MAX.wrapping_sub(10 as size_t) {
+            new_size = if size > SIZE_MAX.wrapping_sub(10 as size_t) {
                 SIZE_MAX
             } else {
                 size.wrapping_add(10 as size_t)
             };
         }
         4 => {
-            if (*buf).use_0 < BASE_BUFFER_SIZE as size_t {
-                newSize = size;
+            if buf.use_0 < BASE_BUFFER_SIZE as size_t {
+                new_size = size;
             } else {
-                newSize = (*buf).size;
-                while size > newSize {
-                    if newSize > SIZE_MAX.wrapping_div(2 as size_t) {
-                        xmlBufMemoryError(
-                            buf,
-                            b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
-                        );
+                new_size = buf.size;
+                while size > new_size {
+                    if new_size > SIZE_MAX.wrapping_div(2 as size_t) {
+                        unsafe {
+                            xmlBufMemoryError(
+                                buf,
+                                b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
+                            )
+                        };
                         return 0 as ::core::ffi::c_int;
                     }
-                    newSize = newSize.wrapping_mul(2 as size_t);
+                    new_size = new_size.wrapping_mul(2 as size_t);
                 }
             }
         }
         _ => {
-            newSize = if size > SIZE_MAX.wrapping_sub(10 as size_t) {
+            new_size = if size > SIZE_MAX.wrapping_sub(10 as size_t) {
                 SIZE_MAX
             } else {
                 size.wrapping_add(10 as size_t)
             };
         }
     }
-    if (*buf).alloc as ::core::ffi::c_uint
+    if buf.alloc as ::core::ffi::c_uint
         == XML_BUFFER_ALLOC_IO as ::core::ffi::c_int as ::core::ffi::c_uint
-        && !(*buf).contentIO.is_null()
+        && !buf.contentIO.is_null()
     {
-        start_buf = (*buf).content.offset_from((*buf).contentIO) as ::core::ffi::c_long as size_t;
-        if start_buf > newSize {
-            memmove(
-                (*buf).contentIO as *mut ::core::ffi::c_void,
-                (*buf).content as *const ::core::ffi::c_void,
-                (*buf).use_0,
-            );
-            (*buf).content = (*buf).contentIO;
-            *(*buf).content.offset((*buf).use_0 as isize) = 0 as xmlChar;
-            (*buf).size = (*buf).size.wrapping_add(start_buf);
-        } else {
-            rebuf = xmlRealloc.expect("non-null function pointer")(
-                (*buf).contentIO as *mut ::core::ffi::c_void,
-                start_buf.wrapping_add(newSize),
-            ) as *mut xmlChar;
-            if rebuf.is_null() {
-                xmlBufMemoryError(
-                    buf,
-                    b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
+        let start_buf =
+            unsafe { buf.content.offset_from(buf.contentIO) as ::core::ffi::c_long as size_t };
+        if start_buf > new_size {
+            unsafe {
+                memmove(
+                    buf.contentIO as *mut ::core::ffi::c_void,
+                    buf.content as *const ::core::ffi::c_void,
+                    buf.use_0,
                 );
+            }
+            buf.content = buf.contentIO;
+            unsafe { *buf.content.add(buf.use_0) = 0 as xmlChar };
+            buf.size = buf.size.wrapping_add(start_buf);
+        } else {
+            rebuf = unsafe {
+                xmlRealloc.expect("non-null function pointer")(
+                    buf.contentIO as *mut ::core::ffi::c_void,
+                    start_buf.wrapping_add(new_size),
+                ) as *mut xmlChar
+            };
+            if rebuf.is_null() {
+                unsafe {
+                    xmlBufMemoryError(
+                        buf,
+                        b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
+                    )
+                };
                 return 0 as ::core::ffi::c_int;
             }
-            (*buf).contentIO = rebuf;
-            (*buf).content = rebuf.offset(start_buf as isize);
+            buf.contentIO = rebuf;
+            buf.content = unsafe { rebuf.add(start_buf) };
         }
     } else {
-        if (*buf).content.is_null() {
-            rebuf = xmlMallocAtomic.expect("non-null function pointer")(newSize) as *mut xmlChar;
-        } else if (*buf).size.wrapping_sub((*buf).use_0) < 100 as size_t {
-            rebuf = xmlRealloc.expect("non-null function pointer")(
-                (*buf).content as *mut ::core::ffi::c_void,
-                newSize,
-            ) as *mut xmlChar;
+        if buf.content.is_null() {
+            rebuf = unsafe {
+                xmlMallocAtomic.expect("non-null function pointer")(new_size) as *mut xmlChar
+            };
+        } else if buf.size.wrapping_sub(buf.use_0) < 100 as size_t {
+            rebuf = unsafe {
+                xmlRealloc.expect("non-null function pointer")(
+                    buf.content as *mut ::core::ffi::c_void,
+                    new_size,
+                ) as *mut xmlChar
+            };
         } else {
-            rebuf = xmlMallocAtomic.expect("non-null function pointer")(newSize) as *mut xmlChar;
+            rebuf = unsafe {
+                xmlMallocAtomic.expect("non-null function pointer")(new_size) as *mut xmlChar
+            };
             if !rebuf.is_null() {
-                memcpy(
-                    rebuf as *mut ::core::ffi::c_void,
-                    (*buf).content as *const ::core::ffi::c_void,
-                    (*buf).use_0,
-                );
-                xmlFree.expect("non-null function pointer")(
-                    (*buf).content as *mut ::core::ffi::c_void,
-                );
-                *rebuf.offset((*buf).use_0 as isize) = 0 as xmlChar;
+                unsafe {
+                    memcpy(
+                        rebuf as *mut ::core::ffi::c_void,
+                        buf.content as *const ::core::ffi::c_void,
+                        buf.use_0,
+                    );
+                    xmlFree.expect("non-null function pointer")(buf.content as *mut ::core::ffi::c_void);
+                    *rebuf.add(buf.use_0) = 0 as xmlChar;
+                }
             }
         }
         if rebuf.is_null() {
-            xmlBufMemoryError(
-                buf,
-                b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            unsafe {
+                xmlBufMemoryError(
+                    buf,
+                    b"growing buffer\0" as *const u8 as *const ::core::ffi::c_char,
+                )
+            };
             return 0 as ::core::ffi::c_int;
         }
-        (*buf).content = rebuf;
+        buf.content = rebuf;
     }
-    (*buf).size = newSize;
-    if (*buf).size < INT_MAX as size_t {
-        (*buf).compat_size = (*buf).size as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_size = INT_MAX as ::core::ffi::c_uint;
-    }
-    if (*buf).use_0 < INT_MAX as size_t {
-        (*buf).compat_use = (*buf).use_0 as ::core::ffi::c_uint;
-    } else {
-        (*buf).compat_use = INT_MAX as ::core::ffi::c_uint;
-    }
+    buf.size = new_size;
+    update_buf_compat_fields(buf);
     return 1 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufAdd(
     mut buf: xmlBufPtr,

@@ -278,132 +278,117 @@ unsafe extern "C" fn xmlHashComputeQKey(
     return value.wrapping_rem((*table).size as ::core::ffi::c_ulong);
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlHashCreate(mut size: ::core::ffi::c_int) -> xmlHashTablePtr { unsafe {
+pub unsafe extern "C" fn xmlHashCreate(mut size: ::core::ffi::c_int) -> xmlHashTablePtr {
     let mut table: xmlHashTablePtr = ::core::ptr::null_mut::<xmlHashTable>();
     if size <= 0 as ::core::ffi::c_int {
         size = 256 as ::core::ffi::c_int;
     }
-    table = xmlMalloc.expect("non-null function pointer")(
+    table = unsafe { xmlMalloc.expect("non-null function pointer")(
         ::core::mem::size_of::<xmlHashTable>() as size_t
-    ) as xmlHashTablePtr;
+    ) as xmlHashTablePtr };
     if !table.is_null() {
-        (*table).dict = ::core::ptr::null_mut::<xmlDict>();
-        (*table).size = size;
-        (*table).nbElems = 0 as ::core::ffi::c_int;
-        (*table).table = xmlMalloc.expect("non-null function pointer")(
+        let table_ref = unsafe { &mut *table };
+        table_ref.dict = ::core::ptr::null_mut::<xmlDict>();
+        table_ref.size = size;
+        table_ref.nbElems = 0 as ::core::ffi::c_int;
+        table_ref.table = unsafe { xmlMalloc.expect("non-null function pointer")(
             (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
-        ) as *mut _xmlHashEntry;
-        if !(*table).table.is_null() {
-            memset(
-                (*table).table as *mut ::core::ffi::c_void,
+        ) as *mut _xmlHashEntry };
+        if !table_ref.table.is_null() {
+            unsafe { memset(
+                table_ref.table as *mut ::core::ffi::c_void,
                 0 as ::core::ffi::c_int,
                 (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
-            );
-            (*table).random_seed = __xmlRandom();
+            ) };
+            table_ref.random_seed = unsafe { __xmlRandom() };
             return table;
         }
-        xmlFree.expect("non-null function pointer")(table as *mut ::core::ffi::c_void);
+        unsafe { xmlFree.expect("non-null function pointer")(table as *mut ::core::ffi::c_void) };
     }
     return ::core::ptr::null_mut::<xmlHashTable>();
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashCreateDict(
     mut size: ::core::ffi::c_int,
     mut dict: xmlDictPtr,
-) -> xmlHashTablePtr { unsafe {
-    let mut table: xmlHashTablePtr = ::core::ptr::null_mut::<xmlHashTable>();
-    table = xmlHashCreate(size);
+) -> xmlHashTablePtr {
+    let mut table: xmlHashTablePtr = unsafe { xmlHashCreate(size) };
     if !table.is_null() {
-        (*table).dict = dict;
-        xmlDictReference(dict);
+        unsafe { (*table).dict = dict };
+        unsafe { xmlDictReference(dict) };
     }
     return table;
-}}
+}
 unsafe extern "C" fn xmlHashGrow(
     mut table: xmlHashTablePtr,
     mut size: ::core::ffi::c_int,
-) -> ::core::ffi::c_int { unsafe {
-    let mut key: ::core::ffi::c_ulong = 0;
-    let mut oldsize: ::core::ffi::c_int = 0;
-    let mut i: ::core::ffi::c_int = 0;
-    let mut iter: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    let mut next: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    let mut oldtable: *mut _xmlHashEntry = ::core::ptr::null_mut::<_xmlHashEntry>();
-    if table.is_null() {
+) -> ::core::ffi::c_int {
+    let Some(table) = (unsafe { table.as_mut() }) else {
         return -(1 as ::core::ffi::c_int);
-    }
+    };
     if size < 8 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
     if size > 8 as ::core::ffi::c_int * 2048 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
-    oldsize = (*table).size;
-    oldtable = (*table).table;
+    let oldsize = table.size;
+    let oldtable = table.table;
     if oldtable.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    (*table).table = xmlMalloc.expect("non-null function pointer")(
+    let newtable = unsafe { xmlMalloc.expect("non-null function pointer")(
         (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
-    ) as *mut _xmlHashEntry;
-    if (*table).table.is_null() {
-        (*table).table = oldtable;
+    ) as *mut _xmlHashEntry };
+    if newtable.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    memset(
-        (*table).table as *mut ::core::ffi::c_void,
+    unsafe { memset(
+        newtable as *mut ::core::ffi::c_void,
         0 as ::core::ffi::c_int,
         (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
-    );
-    (*table).size = size;
-    i = 0 as ::core::ffi::c_int;
-    while i < oldsize {
-        if !((*oldtable.offset(i as isize)).valid == 0 as ::core::ffi::c_int) {
-            key = xmlHashComputeKey(
-                table,
-                (*oldtable.offset(i as isize)).name,
-                (*oldtable.offset(i as isize)).name2,
-                (*oldtable.offset(i as isize)).name3,
-            );
-            memcpy(
-                (*table).table.offset(key as isize) as *mut _xmlHashEntry
-                    as *mut ::core::ffi::c_void,
-                oldtable.offset(i as isize) as *mut _xmlHashEntry as *const ::core::ffi::c_void,
-                ::core::mem::size_of::<xmlHashEntry>() as size_t,
-            );
-            let ref mut fresh0 = (*(*table).table.offset(key as isize)).next;
-            *fresh0 = ::core::ptr::null_mut::<_xmlHashEntry>();
+    ) };
+    table.table = newtable;
+    table.size = size;
+    let old_entries = unsafe { ::core::slice::from_raw_parts_mut(oldtable, oldsize as usize) };
+    let new_entries = unsafe { ::core::slice::from_raw_parts_mut(newtable, size as usize) };
+
+    for old_entry in old_entries.iter_mut() {
+        if old_entry.valid == 0 as ::core::ffi::c_int {
+            continue;
         }
-        i += 1;
+        let key = unsafe {
+            xmlHashComputeKey(
+                table,
+                old_entry.name,
+                old_entry.name2,
+                old_entry.name3,
+            )
+        } as usize;
+        new_entries[key] = *old_entry;
+        new_entries[key].next = ::core::ptr::null_mut::<_xmlHashEntry>();
     }
-    i = 0 as ::core::ffi::c_int;
-    while i < oldsize {
-        iter = (*oldtable.offset(i as isize)).next as xmlHashEntryPtr;
+    for old_entry in old_entries.iter_mut() {
+        let mut iter = old_entry.next as xmlHashEntryPtr;
         while !iter.is_null() {
-            next = (*iter).next as xmlHashEntryPtr;
-            key = xmlHashComputeKey(table, (*iter).name, (*iter).name2, (*iter).name3);
-            if (*(*table).table.offset(key as isize)).valid == 0 as ::core::ffi::c_int {
-                memcpy(
-                    (*table).table.offset(key as isize) as *mut _xmlHashEntry
-                        as *mut ::core::ffi::c_void,
-                    iter as *const ::core::ffi::c_void,
-                    ::core::mem::size_of::<xmlHashEntry>() as size_t,
-                );
-                let ref mut fresh1 = (*(*table).table.offset(key as isize)).next;
-                *fresh1 = ::core::ptr::null_mut::<_xmlHashEntry>();
-                xmlFree.expect("non-null function pointer")(iter as *mut ::core::ffi::c_void);
+            let next = unsafe { (*iter).next as xmlHashEntryPtr };
+            let key =
+                unsafe { xmlHashComputeKey(table, (*iter).name, (*iter).name2, (*iter).name3) }
+                    as usize;
+            if new_entries[key].valid == 0 as ::core::ffi::c_int {
+                new_entries[key] = unsafe { *iter };
+                new_entries[key].next = ::core::ptr::null_mut::<_xmlHashEntry>();
+                unsafe { xmlFree.expect("non-null function pointer")(iter as *mut ::core::ffi::c_void) };
             } else {
-                (*iter).next = (*(*table).table.offset(key as isize)).next;
-                let ref mut fresh2 = (*(*table).table.offset(key as isize)).next;
-                *fresh2 = iter as *mut _xmlHashEntry;
+                unsafe { (*iter).next = new_entries[key].next };
+                new_entries[key].next = iter as *mut _xmlHashEntry;
             }
             iter = next;
         }
-        i += 1;
     }
-    xmlFree.expect("non-null function pointer")(oldtable as *mut ::core::ffi::c_void);
+    unsafe { xmlFree.expect("non-null function pointer")(oldtable as *mut ::core::ffi::c_void) };
     return 0 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashFree(mut table: xmlHashTablePtr, mut f: xmlHashDeallocator) { unsafe {
     let mut i: ::core::ffi::c_int = 0;
@@ -467,48 +452,49 @@ pub unsafe extern "C" fn xmlHashFree(mut table: xmlHashTablePtr, mut f: xmlHashD
 pub unsafe extern "C" fn xmlHashDefaultDeallocator(
     mut entry: *mut ::core::ffi::c_void,
     mut _name: *const xmlChar,
-) { unsafe {
-    xmlFree.expect("non-null function pointer")(entry);
-}}
+) {
+    let free = unsafe { xmlFree.expect("non-null function pointer") };
+    unsafe { free(entry) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashAddEntry(
     mut table: xmlHashTablePtr,
     mut name: *const xmlChar,
     mut userdata: *mut ::core::ffi::c_void,
-) -> ::core::ffi::c_int { unsafe {
-    return xmlHashAddEntry3(
+) -> ::core::ffi::c_int {
+    return unsafe { xmlHashAddEntry3(
         table,
         name,
         ::core::ptr::null::<xmlChar>(),
         ::core::ptr::null::<xmlChar>(),
         userdata,
-    );
-}}
+    ) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashAddEntry2(
     mut table: xmlHashTablePtr,
     mut name: *const xmlChar,
     mut name2: *const xmlChar,
     mut userdata: *mut ::core::ffi::c_void,
-) -> ::core::ffi::c_int { unsafe {
-    return xmlHashAddEntry3(table, name, name2, ::core::ptr::null::<xmlChar>(), userdata);
-}}
+) -> ::core::ffi::c_int {
+    return unsafe { xmlHashAddEntry3(table, name, name2, ::core::ptr::null::<xmlChar>(), userdata) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashUpdateEntry(
     mut table: xmlHashTablePtr,
     mut name: *const xmlChar,
     mut userdata: *mut ::core::ffi::c_void,
     mut f: xmlHashDeallocator,
-) -> ::core::ffi::c_int { unsafe {
-    return xmlHashUpdateEntry3(
+) -> ::core::ffi::c_int {
+    return unsafe { xmlHashUpdateEntry3(
         table,
         name,
         ::core::ptr::null::<xmlChar>(),
         ::core::ptr::null::<xmlChar>(),
         userdata,
         f,
-    );
-}}
+    ) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashUpdateEntry2(
     mut table: xmlHashTablePtr,
@@ -516,43 +502,43 @@ pub unsafe extern "C" fn xmlHashUpdateEntry2(
     mut name2: *const xmlChar,
     mut userdata: *mut ::core::ffi::c_void,
     mut f: xmlHashDeallocator,
-) -> ::core::ffi::c_int { unsafe {
-    return xmlHashUpdateEntry3(
+) -> ::core::ffi::c_int {
+    return unsafe { xmlHashUpdateEntry3(
         table,
         name,
         name2,
         ::core::ptr::null::<xmlChar>(),
         userdata,
         f,
-    );
-}}
+    ) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashLookup(
     mut table: xmlHashTablePtr,
     mut name: *const xmlChar,
-) -> *mut ::core::ffi::c_void { unsafe {
-    return xmlHashLookup3(
+) -> *mut ::core::ffi::c_void {
+    return unsafe { xmlHashLookup3(
         table,
         name,
         ::core::ptr::null::<xmlChar>(),
         ::core::ptr::null::<xmlChar>(),
-    );
-}}
+    ) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashLookup2(
     mut table: xmlHashTablePtr,
     mut name: *const xmlChar,
     mut name2: *const xmlChar,
-) -> *mut ::core::ffi::c_void { unsafe {
-    return xmlHashLookup3(table, name, name2, ::core::ptr::null::<xmlChar>());
-}}
+) -> *mut ::core::ffi::c_void {
+    return unsafe { xmlHashLookup3(table, name, name2, ::core::ptr::null::<xmlChar>()) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashQLookup(
     mut table: xmlHashTablePtr,
     mut prefix: *const xmlChar,
     mut name: *const xmlChar,
-) -> *mut ::core::ffi::c_void { unsafe {
-    return xmlHashQLookup3(
+) -> *mut ::core::ffi::c_void {
+    return unsafe { xmlHashQLookup3(
         table,
         prefix,
         name,
@@ -560,8 +546,8 @@ pub unsafe extern "C" fn xmlHashQLookup(
         ::core::ptr::null::<xmlChar>(),
         ::core::ptr::null::<xmlChar>(),
         ::core::ptr::null::<xmlChar>(),
-    );
-}}
+    ) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashQLookup2(
     mut table: xmlHashTablePtr,
@@ -569,8 +555,8 @@ pub unsafe extern "C" fn xmlHashQLookup2(
     mut name: *const xmlChar,
     mut prefix2: *const xmlChar,
     mut name2: *const xmlChar,
-) -> *mut ::core::ffi::c_void { unsafe {
-    return xmlHashQLookup3(
+) -> *mut ::core::ffi::c_void {
+    return unsafe { xmlHashQLookup3(
         table,
         prefix,
         name,
@@ -578,8 +564,8 @@ pub unsafe extern "C" fn xmlHashQLookup2(
         name2,
         ::core::ptr::null::<xmlChar>(),
         ::core::ptr::null::<xmlChar>(),
-    );
-}}
+    ) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashAddEntry3(
     mut table: xmlHashTablePtr,
@@ -944,7 +930,7 @@ pub unsafe extern "C" fn xmlHashScan(
     mut table: xmlHashTablePtr,
     mut f: xmlHashScanner,
     mut data: *mut ::core::ffi::c_void,
-) { unsafe {
+) {
     let mut stubdata: stubData = stubData {
         hashscanner: None,
         data: ::core::ptr::null_mut::<::core::ffi::c_void>(),
@@ -954,7 +940,7 @@ pub unsafe extern "C" fn xmlHashScan(
     }
     stubdata.data = data;
     stubdata.hashscanner = f;
-    xmlHashScanFull(
+    unsafe { xmlHashScanFull(
         table,
         Some(
             stubHashScannerFull
@@ -967,8 +953,8 @@ pub unsafe extern "C" fn xmlHashScan(
                 ) -> (),
         ),
         &raw mut stubdata as *mut ::core::ffi::c_void,
-    );
-}}
+    ) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashScanFull(
     mut table: xmlHashTablePtr,
@@ -1032,7 +1018,7 @@ pub unsafe extern "C" fn xmlHashScan3(
     mut name3: *const xmlChar,
     mut f: xmlHashScanner,
     mut data: *mut ::core::ffi::c_void,
-) { unsafe {
+) {
     let mut stubdata: stubData = stubData {
         hashscanner: None,
         data: ::core::ptr::null_mut::<::core::ffi::c_void>(),
@@ -1042,7 +1028,7 @@ pub unsafe extern "C" fn xmlHashScan3(
     }
     stubdata.data = data;
     stubdata.hashscanner = f;
-    xmlHashScanFull3(
+    unsafe { xmlHashScanFull3(
         table,
         name,
         name2,
@@ -1058,8 +1044,8 @@ pub unsafe extern "C" fn xmlHashScan3(
                 ) -> (),
         ),
         &raw mut stubdata as *mut ::core::ffi::c_void,
-    );
-}}
+    ) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashScanFull3(
     mut table: xmlHashTablePtr,
@@ -1148,35 +1134,35 @@ pub unsafe extern "C" fn xmlHashCopy(
     return ret;
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlHashSize(mut table: xmlHashTablePtr) -> ::core::ffi::c_int { unsafe {
-    if table.is_null() {
+pub unsafe extern "C" fn xmlHashSize(mut table: xmlHashTablePtr) -> ::core::ffi::c_int {
+    let Some(table) = (unsafe { table.as_ref() }) else {
         return -(1 as ::core::ffi::c_int);
-    }
-    return (*table).nbElems;
-}}
+    };
+    return table.nbElems;
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashRemoveEntry(
     mut table: xmlHashTablePtr,
     mut name: *const xmlChar,
     mut f: xmlHashDeallocator,
-) -> ::core::ffi::c_int { unsafe {
-    return xmlHashRemoveEntry3(
+) -> ::core::ffi::c_int {
+    return unsafe { xmlHashRemoveEntry3(
         table,
         name,
         ::core::ptr::null::<xmlChar>(),
         ::core::ptr::null::<xmlChar>(),
         f,
-    );
-}}
+    ) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashRemoveEntry2(
     mut table: xmlHashTablePtr,
     mut name: *const xmlChar,
     mut name2: *const xmlChar,
     mut f: xmlHashDeallocator,
-) -> ::core::ffi::c_int { unsafe {
-    return xmlHashRemoveEntry3(table, name, name2, ::core::ptr::null::<xmlChar>(), f);
-}}
+) -> ::core::ffi::c_int {
+    return unsafe { xmlHashRemoveEntry3(table, name, name2, ::core::ptr::null::<xmlChar>(), f) };
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashRemoveEntry3(
     mut table: xmlHashTablePtr,

@@ -868,9 +868,9 @@ pub unsafe extern "C" fn xmlStrQEqual(
     mut pref: *const xmlChar,
     mut name: *const xmlChar,
     mut str: *const xmlChar,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     if pref.is_null() {
-        return xmlStrEqual(name, str);
+        return unsafe { xmlStrEqual(name, str) };
     }
     if name.is_null() {
         return 0 as ::core::ffi::c_int;
@@ -879,42 +879,42 @@ pub unsafe extern "C" fn xmlStrQEqual(
         return 0 as ::core::ffi::c_int;
     }
     loop {
-        let fresh10 = pref;
-        pref = pref.offset(1);
-        if *fresh10 as ::core::ffi::c_int != *str as ::core::ffi::c_int {
+        let pref_ch = unsafe { *pref };
+        pref = unsafe { pref.add(1) };
+        if pref_ch as ::core::ffi::c_int != unsafe { *str } as ::core::ffi::c_int {
             return 0 as ::core::ffi::c_int;
         }
-        let fresh11 = str;
-        str = str.offset(1);
-        if !(*fresh11 as ::core::ffi::c_int != 0 && *pref as ::core::ffi::c_int != 0) {
+        let str_ch = unsafe { *str };
+        str = unsafe { str.add(1) };
+        if !(str_ch as ::core::ffi::c_int != 0 && unsafe { *pref } as ::core::ffi::c_int != 0) {
             break;
         }
     }
-    let fresh12 = str;
-    str = str.offset(1);
-    if *fresh12 as ::core::ffi::c_int != ':' as i32 {
+    let str_ch = unsafe { *str };
+    str = unsafe { str.add(1) };
+    if str_ch as ::core::ffi::c_int != ':' as i32 {
         return 0 as ::core::ffi::c_int;
     }
     loop {
-        let fresh13 = name;
-        name = name.offset(1);
-        if *fresh13 as ::core::ffi::c_int != *str as ::core::ffi::c_int {
+        let name_ch = unsafe { *name };
+        name = unsafe { name.add(1) };
+        if name_ch as ::core::ffi::c_int != unsafe { *str } as ::core::ffi::c_int {
             return 0 as ::core::ffi::c_int;
         }
-        let fresh14 = str;
-        str = str.offset(1);
-        if !(*fresh14 != 0) {
+        let str_ch = unsafe { *str };
+        str = unsafe { str.add(1) };
+        if !(str_ch != 0) {
             break;
         }
     }
     return 1 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlStrncmp(
     mut str1: *const xmlChar,
     mut str2: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     if len <= 0 as ::core::ffi::c_int {
         return 0 as ::core::ffi::c_int;
     }
@@ -928,24 +928,23 @@ pub unsafe extern "C" fn xmlStrncmp(
         return 1 as ::core::ffi::c_int;
     }
     loop {
-        let fresh0 = str1;
-        str1 = str1.offset(1);
-        let mut tmp: ::core::ffi::c_int =
-            *fresh0 as ::core::ffi::c_int - *str2 as ::core::ffi::c_int;
+        let str1_ch = unsafe { *str1 };
+        let str2_ch = unsafe { *str2 };
+        str1 = unsafe { str1.add(1) };
+        let tmp: ::core::ffi::c_int = str1_ch as ::core::ffi::c_int - str2_ch as ::core::ffi::c_int;
         if tmp != 0 as ::core::ffi::c_int || {
             len -= 1;
             len == 0 as ::core::ffi::c_int
         } {
             return tmp;
         }
-        let fresh1 = str2;
-        str2 = str2.offset(1);
-        if !(*fresh1 as ::core::ffi::c_int != 0 as ::core::ffi::c_int) {
+        str2 = unsafe { str2.add(1) };
+        if !(str2_ch as ::core::ffi::c_int != 0 as ::core::ffi::c_int) {
             break;
         }
     }
     return 0 as ::core::ffi::c_int;
-}}
+}
 static casemap: [xmlChar; 256] = [
     0 as ::core::ffi::c_int as xmlChar,
     0x1 as ::core::ffi::c_int as xmlChar,
@@ -1208,7 +1207,7 @@ static casemap: [xmlChar; 256] = [
 pub unsafe extern "C" fn xmlStrcasecmp(
     mut str1: *const xmlChar,
     mut str2: *const xmlChar,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut tmp: ::core::ffi::c_int = 0;
     if str1 == str2 {
         return 0 as ::core::ffi::c_int;
@@ -1220,27 +1219,27 @@ pub unsafe extern "C" fn xmlStrcasecmp(
         return 1 as ::core::ffi::c_int;
     }
     loop {
-        let fresh6 = str1;
-        str1 = str1.offset(1);
-        tmp = casemap[*fresh6 as usize] as ::core::ffi::c_int
-            - casemap[*str2 as usize] as ::core::ffi::c_int;
+        let ch1 = unsafe { *str1 };
+        let ch2 = unsafe { *str2 };
+        str1 = unsafe { str1.add(1) };
+        tmp = casemap[ch1 as usize] as ::core::ffi::c_int
+            - casemap[ch2 as usize] as ::core::ffi::c_int;
         if tmp != 0 as ::core::ffi::c_int {
             return tmp;
         }
-        let fresh7 = str2;
-        str2 = str2.offset(1);
-        if !(*fresh7 as ::core::ffi::c_int != 0 as ::core::ffi::c_int) {
+        str2 = unsafe { str2.add(1) };
+        if !(ch2 as ::core::ffi::c_int != 0 as ::core::ffi::c_int) {
             break;
         }
     }
     return 0 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlStrncasecmp(
     mut str1: *const xmlChar,
     mut str2: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut tmp: ::core::ffi::c_int = 0;
     if len <= 0 as ::core::ffi::c_int {
         return 0 as ::core::ffi::c_int;
@@ -1255,42 +1254,42 @@ pub unsafe extern "C" fn xmlStrncasecmp(
         return 1 as ::core::ffi::c_int;
     }
     loop {
-        let fresh2 = str1;
-        str1 = str1.offset(1);
-        tmp = casemap[*fresh2 as usize] as ::core::ffi::c_int
-            - casemap[*str2 as usize] as ::core::ffi::c_int;
+        let ch1 = unsafe { *str1 };
+        let ch2 = unsafe { *str2 };
+        str1 = unsafe { str1.add(1) };
+        tmp = casemap[ch1 as usize] as ::core::ffi::c_int
+            - casemap[ch2 as usize] as ::core::ffi::c_int;
         if tmp != 0 as ::core::ffi::c_int || {
             len -= 1;
             len == 0 as ::core::ffi::c_int
         } {
             return tmp;
         }
-        let fresh3 = str2;
-        str2 = str2.offset(1);
-        if !(*fresh3 as ::core::ffi::c_int != 0 as ::core::ffi::c_int) {
+        str2 = unsafe { str2.add(1) };
+        if !(ch2 as ::core::ffi::c_int != 0 as ::core::ffi::c_int) {
             break;
         }
     }
     return 0 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlStrchr(mut str: *const xmlChar, mut val: xmlChar) -> *const xmlChar { unsafe {
+pub unsafe extern "C" fn xmlStrchr(mut str: *const xmlChar, mut val: xmlChar) -> *const xmlChar {
     if str.is_null() {
         return ::core::ptr::null::<xmlChar>();
     }
-    while *str as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
-        if *str as ::core::ffi::c_int == val as ::core::ffi::c_int {
+    while unsafe { *str } as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
+        if unsafe { *str } as ::core::ffi::c_int == val as ::core::ffi::c_int {
             return str as *mut xmlChar;
         }
-        str = str.offset(1);
+        str = unsafe { str.add(1) };
     }
     return ::core::ptr::null::<xmlChar>();
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlStrstr(
     mut str: *const xmlChar,
     mut val: *const xmlChar,
-) -> *const xmlChar { unsafe {
+) -> *const xmlChar {
     let mut n: ::core::ffi::c_int = 0;
     if str.is_null() {
         return ::core::ptr::null::<xmlChar>();
@@ -1298,25 +1297,26 @@ pub unsafe extern "C" fn xmlStrstr(
     if val.is_null() {
         return ::core::ptr::null::<xmlChar>();
     }
-    n = xmlStrlen(val);
+    n = unsafe { xmlStrlen(val) };
     if n == 0 as ::core::ffi::c_int {
         return str;
     }
-    while *str as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
-        if *str as ::core::ffi::c_int == *val as ::core::ffi::c_int {
-            if xmlStrncmp(str, val, n) == 0 {
+    let first = unsafe { *val };
+    while unsafe { *str } as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
+        if unsafe { *str } as ::core::ffi::c_int == first as ::core::ffi::c_int {
+            if unsafe { xmlStrncmp(str, val, n) } == 0 {
                 return str;
             }
         }
-        str = str.offset(1);
+        str = unsafe { str.add(1) };
     }
     return ::core::ptr::null::<xmlChar>();
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlStrcasestr(
     mut str: *const xmlChar,
     mut val: *const xmlChar,
-) -> *const xmlChar { unsafe {
+) -> *const xmlChar {
     let mut n: ::core::ffi::c_int = 0;
     if str.is_null() {
         return ::core::ptr::null::<xmlChar>();
@@ -1324,28 +1324,29 @@ pub unsafe extern "C" fn xmlStrcasestr(
     if val.is_null() {
         return ::core::ptr::null::<xmlChar>();
     }
-    n = xmlStrlen(val);
+    n = unsafe { xmlStrlen(val) };
     if n == 0 as ::core::ffi::c_int {
         return str;
     }
-    while *str as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
-        if casemap[*str as usize] as ::core::ffi::c_int
-            == casemap[*val as usize] as ::core::ffi::c_int
+    let first = unsafe { *val };
+    while unsafe { *str } as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
+        if casemap[unsafe { *str } as usize] as ::core::ffi::c_int
+            == casemap[first as usize] as ::core::ffi::c_int
         {
-            if xmlStrncasecmp(str, val, n) == 0 {
+            if unsafe { xmlStrncasecmp(str, val, n) } == 0 {
                 return str;
             }
         }
-        str = str.offset(1);
+        str = unsafe { str.add(1) };
     }
     return ::core::ptr::null::<xmlChar>();
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlStrsub(
     mut str: *const xmlChar,
     mut start: ::core::ffi::c_int,
     mut len: ::core::ffi::c_int,
-) -> *mut xmlChar { unsafe {
+) -> *mut xmlChar {
     let mut i: ::core::ffi::c_int = 0;
     if str.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
@@ -1358,25 +1359,25 @@ pub unsafe extern "C" fn xmlStrsub(
     }
     i = 0 as ::core::ffi::c_int;
     while i < start {
-        if *str as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
+        if unsafe { *str } as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
             return ::core::ptr::null_mut::<xmlChar>();
         }
-        str = str.offset(1);
+        str = unsafe { str.add(1) };
         i += 1;
     }
-    if *str as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
+    if unsafe { *str } as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    return xmlStrndup(str, len);
-}}
+    return unsafe { xmlStrndup(str, len) };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlStrlen(mut str: *const xmlChar) -> ::core::ffi::c_int { unsafe {
+pub unsafe extern "C" fn xmlStrlen(mut str: *const xmlChar) -> ::core::ffi::c_int {
     let mut len: size_t = 0 as size_t;
     if str.is_null() {
         return 0 as ::core::ffi::c_int;
     }
-    while *str as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
-        str = str.offset(1);
+    while unsafe { *str } as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
+        str = unsafe { str.add(1) };
         len = len.wrapping_add(1);
     }
     return (if len > INT_MAX as size_t {
@@ -1384,13 +1385,13 @@ pub unsafe extern "C" fn xmlStrlen(mut str: *const xmlChar) -> ::core::ffi::c_in
     } else {
         len
     }) as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlStrncat(
     mut cur: *mut xmlChar,
     mut add: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> *mut xmlChar { unsafe {
+) -> *mut xmlChar {
     let mut size: ::core::ffi::c_int = 0;
     let mut ret: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     if add.is_null() || len == 0 as ::core::ffi::c_int {
@@ -1400,188 +1401,179 @@ pub unsafe extern "C" fn xmlStrncat(
         return ::core::ptr::null_mut::<xmlChar>();
     }
     if cur.is_null() {
-        return xmlStrndup(add, len);
+        return unsafe { xmlStrndup(add, len) };
     }
-    size = xmlStrlen(cur);
+    size = unsafe { xmlStrlen(cur) };
     if size < 0 as ::core::ffi::c_int || size > INT_MAX - len {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    ret = xmlRealloc.expect("non-null function pointer")(
+    ret = unsafe { xmlRealloc.expect("non-null function pointer")(
         cur as *mut ::core::ffi::c_void,
         (size as size_t)
             .wrapping_add(len as size_t)
             .wrapping_add(1 as size_t)
             .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) as *mut xmlChar;
+    ) as *mut xmlChar };
     if ret.is_null() {
-        xmlErrMemory(
+        unsafe { xmlErrMemory(
             ::core::ptr::null_mut::<xmlParserCtxt>(),
             ::core::ptr::null::<::core::ffi::c_char>(),
-        );
+        ) };
         return cur;
     }
-    memcpy(
-        ret.offset(size as isize) as *mut xmlChar as *mut ::core::ffi::c_void,
+    unsafe { memcpy(
+        ret.add(size as usize) as *mut xmlChar as *mut ::core::ffi::c_void,
         add as *const ::core::ffi::c_void,
         (len as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    );
-    *ret.offset((size + len) as isize) = 0 as xmlChar;
+    ) };
+    unsafe { *ret.add((size + len) as usize) = 0 as xmlChar };
     return ret;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlStrncatNew(
     mut str1: *const xmlChar,
     mut str2: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> *mut xmlChar { unsafe {
+) -> *mut xmlChar {
     let mut size: ::core::ffi::c_int = 0;
     let mut ret: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     if len < 0 as ::core::ffi::c_int {
-        len = xmlStrlen(str2);
+        len = unsafe { xmlStrlen(str2) };
         if len < 0 as ::core::ffi::c_int {
             return ::core::ptr::null_mut::<xmlChar>();
         }
     }
     if str2.is_null() || len == 0 as ::core::ffi::c_int {
-        return xmlStrdup(str1);
+        return unsafe { xmlStrdup(str1) };
     }
     if str1.is_null() {
-        return xmlStrndup(str2, len);
+        return unsafe { xmlStrndup(str2, len) };
     }
-    size = xmlStrlen(str1);
+    size = unsafe { xmlStrlen(str1) };
     if size < 0 as ::core::ffi::c_int || size > INT_MAX - len {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    ret = xmlMalloc.expect("non-null function pointer")(
+    ret = unsafe { xmlMalloc.expect("non-null function pointer")(
         (size as size_t)
             .wrapping_add(len as size_t)
             .wrapping_add(1 as size_t)
             .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) as *mut xmlChar;
+    ) as *mut xmlChar };
     if ret.is_null() {
-        xmlErrMemory(
+        unsafe { xmlErrMemory(
             ::core::ptr::null_mut::<xmlParserCtxt>(),
             ::core::ptr::null::<::core::ffi::c_char>(),
-        );
-        return xmlStrndup(str1, size);
+        ) };
+        return unsafe { xmlStrndup(str1, size) };
     }
-    memcpy(
+    unsafe { memcpy(
         ret as *mut ::core::ffi::c_void,
         str1 as *const ::core::ffi::c_void,
         (size as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    );
-    memcpy(
-        ret.offset(size as isize) as *mut xmlChar as *mut ::core::ffi::c_void,
+    ) };
+    unsafe { memcpy(
+        ret.add(size as usize) as *mut xmlChar as *mut ::core::ffi::c_void,
         str2 as *const ::core::ffi::c_void,
         (len as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    );
-    *ret.offset((size + len) as isize) = 0 as xmlChar;
+    ) };
+    unsafe { *ret.add((size + len) as usize) = 0 as xmlChar };
     return ret;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlStrcat(mut cur: *mut xmlChar, mut add: *const xmlChar) -> *mut xmlChar { unsafe {
-    let mut p: *const xmlChar = add;
+pub unsafe extern "C" fn xmlStrcat(mut cur: *mut xmlChar, mut add: *const xmlChar) -> *mut xmlChar {
     if add.is_null() {
         return cur;
     }
     if cur.is_null() {
-        return xmlStrdup(add);
+        return unsafe { xmlStrdup(add) };
     }
-    while *p as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
-        p = p.offset(1);
-    }
-    return xmlStrncat(
+    let len = unsafe { xmlStrlen(add) };
+    return unsafe { xmlStrncat(
         cur,
         add,
-        p.offset_from(add) as ::core::ffi::c_long as ::core::ffi::c_int,
-    );
-}}
+        len,
+    ) };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUTF8Size(mut utf: *const xmlChar) -> ::core::ffi::c_int { unsafe {
+pub unsafe extern "C" fn xmlUTF8Size(mut utf: *const xmlChar) -> ::core::ffi::c_int {
     let mut mask: xmlChar = 0;
     let mut len: ::core::ffi::c_int = 0;
     if utf.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    if (*utf as ::core::ffi::c_int) < 0x80 as ::core::ffi::c_int {
+    let first = unsafe { *utf };
+    if (first as ::core::ffi::c_int) < 0x80 as ::core::ffi::c_int {
         return 1 as ::core::ffi::c_int;
     }
-    if *utf as ::core::ffi::c_int & 0x40 as ::core::ffi::c_int == 0 {
+    if first as ::core::ffi::c_int & 0x40 as ::core::ffi::c_int == 0 {
         return -(1 as ::core::ffi::c_int);
     }
     len = 2 as ::core::ffi::c_int;
     mask = 0x20 as xmlChar;
     while mask as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
-        if *utf as ::core::ffi::c_int & mask as ::core::ffi::c_int == 0 {
+        if first as ::core::ffi::c_int & mask as ::core::ffi::c_int == 0 {
             return len;
         }
         len += 1;
         mask = (mask as ::core::ffi::c_int >> 1 as ::core::ffi::c_int) as xmlChar;
     }
     return -(1 as ::core::ffi::c_int);
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUTF8Charcmp(
     mut utf1: *const xmlChar,
     mut utf2: *const xmlChar,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     if utf1.is_null() {
         if utf2.is_null() {
             return 0 as ::core::ffi::c_int;
         }
         return -(1 as ::core::ffi::c_int);
     }
-    return xmlStrncmp(utf1, utf2, xmlUTF8Size(utf1));
-}}
+    return unsafe { xmlStrncmp(utf1, utf2, xmlUTF8Size(utf1)) };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlUTF8Strlen(mut utf: *const xmlChar) -> ::core::ffi::c_int { unsafe {
+pub unsafe extern "C" fn xmlUTF8Strlen(mut utf: *const xmlChar) -> ::core::ffi::c_int {
     let mut ret: size_t = 0 as size_t;
     if utf.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    while *utf as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
-        if *utf.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            & 0x80 as ::core::ffi::c_int
+    while unsafe { *utf } as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
+        if unsafe { *utf } as ::core::ffi::c_int & 0x80 as ::core::ffi::c_int
             != 0
         {
-            if *utf.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                & 0xc0 as ::core::ffi::c_int
+            if unsafe { *utf.add(1) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
                 != 0x80 as ::core::ffi::c_int
             {
                 return -(1 as ::core::ffi::c_int);
             }
-            if *utf.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                & 0xe0 as ::core::ffi::c_int
+            if unsafe { *utf } as ::core::ffi::c_int & 0xe0 as ::core::ffi::c_int
                 == 0xe0 as ::core::ffi::c_int
             {
-                if *utf.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                    & 0xc0 as ::core::ffi::c_int
+                if unsafe { *utf.add(2) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
                     != 0x80 as ::core::ffi::c_int
                 {
                     return -(1 as ::core::ffi::c_int);
                 }
-                if *utf.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                    & 0xf0 as ::core::ffi::c_int
+                if unsafe { *utf } as ::core::ffi::c_int & 0xf0 as ::core::ffi::c_int
                     == 0xf0 as ::core::ffi::c_int
                 {
-                    if *utf.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                        & 0xf8 as ::core::ffi::c_int
+                    if unsafe { *utf } as ::core::ffi::c_int & 0xf8 as ::core::ffi::c_int
                         != 0xf0 as ::core::ffi::c_int
-                        || *utf.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                            & 0xc0 as ::core::ffi::c_int
+                        || unsafe { *utf.add(3) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
                             != 0x80 as ::core::ffi::c_int
                     {
                         return -(1 as ::core::ffi::c_int);
                     }
-                    utf = utf.offset(4 as ::core::ffi::c_int as isize);
+                    utf = unsafe { utf.add(4) };
                 } else {
-                    utf = utf.offset(3 as ::core::ffi::c_int as isize);
+                    utf = unsafe { utf.add(3) };
                 }
             } else {
-                utf = utf.offset(2 as ::core::ffi::c_int as isize);
+                utf = unsafe { utf.add(2) };
             }
         } else {
-            utf = utf.offset(1);
+            utf = unsafe { utf.add(1) };
         }
         ret = ret.wrapping_add(1);
     }
@@ -1590,122 +1582,86 @@ pub unsafe extern "C" fn xmlUTF8Strlen(mut utf: *const xmlChar) -> ::core::ffi::
     } else {
         ret
     }) as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlGetUTF8Char(
     mut utf: *const ::core::ffi::c_uchar,
     mut len: *mut ::core::ffi::c_int,
-) -> ::core::ffi::c_int { unsafe {
-    let mut current_block: u64;
-    let mut c: ::core::ffi::c_uint = 0;
-    if !utf.is_null() {
+) -> ::core::ffi::c_int {
+    if utf.is_null() || len.is_null() || unsafe { *len } < 1 as ::core::ffi::c_int {
         if !len.is_null() {
-            if !(*len < 1 as ::core::ffi::c_int) {
-                c = *utf.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_uint;
-                if c & 0x80 as ::core::ffi::c_uint != 0 {
-                    if *len < 2 as ::core::ffi::c_int {
-                        current_block = 9371366056570603848;
-                    } else if *utf.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                        & 0xc0 as ::core::ffi::c_int
-                        != 0x80 as ::core::ffi::c_int
-                    {
-                        current_block = 9371366056570603848;
-                    } else if c & 0xe0 as ::core::ffi::c_uint == 0xe0 as ::core::ffi::c_uint {
-                        if *len < 3 as ::core::ffi::c_int {
-                            current_block = 9371366056570603848;
-                        } else if *utf.offset(2 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int
-                            & 0xc0 as ::core::ffi::c_int
-                            != 0x80 as ::core::ffi::c_int
-                        {
-                            current_block = 9371366056570603848;
-                        } else if c & 0xf0 as ::core::ffi::c_uint == 0xf0 as ::core::ffi::c_uint {
-                            if *len < 4 as ::core::ffi::c_int {
-                                current_block = 9371366056570603848;
-                            } else if c & 0xf8 as ::core::ffi::c_uint != 0xf0 as ::core::ffi::c_uint
-                                || *utf.offset(3 as ::core::ffi::c_int as isize)
-                                    as ::core::ffi::c_int
-                                    & 0xc0 as ::core::ffi::c_int
-                                    != 0x80 as ::core::ffi::c_int
-                            {
-                                current_block = 9371366056570603848;
-                            } else {
-                                *len = 4 as ::core::ffi::c_int;
-                                c = ((*utf.offset(0 as ::core::ffi::c_int as isize)
-                                    as ::core::ffi::c_int
-                                    & 0x7 as ::core::ffi::c_int)
-                                    << 18 as ::core::ffi::c_int)
-                                    as ::core::ffi::c_uint;
-                                c |= ((*utf.offset(1 as ::core::ffi::c_int as isize)
-                                    as ::core::ffi::c_int
-                                    & 0x3f as ::core::ffi::c_int)
-                                    << 12 as ::core::ffi::c_int)
-                                    as ::core::ffi::c_uint;
-                                c |= ((*utf.offset(2 as ::core::ffi::c_int as isize)
-                                    as ::core::ffi::c_int
-                                    & 0x3f as ::core::ffi::c_int)
-                                    << 6 as ::core::ffi::c_int)
-                                    as ::core::ffi::c_uint;
-                                c |= (*utf.offset(3 as ::core::ffi::c_int as isize)
-                                    as ::core::ffi::c_int
-                                    & 0x3f as ::core::ffi::c_int)
-                                    as ::core::ffi::c_uint;
-                                current_block = 2719512138335094285;
-                            }
-                        } else {
-                            *len = 3 as ::core::ffi::c_int;
-                            c = ((*utf.offset(0 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int
-                                & 0xf as ::core::ffi::c_int)
-                                << 12 as ::core::ffi::c_int)
-                                as ::core::ffi::c_uint;
-                            c |= ((*utf.offset(1 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int
-                                & 0x3f as ::core::ffi::c_int)
-                                << 6 as ::core::ffi::c_int)
-                                as ::core::ffi::c_uint;
-                            c |= (*utf.offset(2 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int
-                                & 0x3f as ::core::ffi::c_int)
-                                as ::core::ffi::c_uint;
-                            current_block = 2719512138335094285;
-                        }
-                    } else {
-                        *len = 2 as ::core::ffi::c_int;
-                        c = ((*utf.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                            & 0x1f as ::core::ffi::c_int)
-                            << 6 as ::core::ffi::c_int)
-                            as ::core::ffi::c_uint;
-                        c |= (*utf.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                            & 0x3f as ::core::ffi::c_int)
-                            as ::core::ffi::c_uint;
-                        current_block = 2719512138335094285;
-                    }
-                } else {
-                    *len = 1 as ::core::ffi::c_int;
-                    current_block = 2719512138335094285;
-                }
-                match current_block {
-                    9371366056570603848 => {}
-                    _ => return c as ::core::ffi::c_int,
-                }
-            }
+            unsafe { *len = 0 as ::core::ffi::c_int };
         }
+        return -(1 as ::core::ffi::c_int);
     }
-    if !len.is_null() {
-        *len = 0 as ::core::ffi::c_int;
+    let first = unsafe { *utf } as ::core::ffi::c_uint;
+    if first & 0x80 as ::core::ffi::c_uint == 0 {
+        unsafe { *len = 1 as ::core::ffi::c_int };
+        return first as ::core::ffi::c_int;
     }
-    return -(1 as ::core::ffi::c_int);
-}}
+    if unsafe { *len } < 2 as ::core::ffi::c_int
+        || unsafe { *utf.add(1) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
+            != 0x80 as ::core::ffi::c_int
+    {
+        unsafe { *len = 0 as ::core::ffi::c_int };
+        return -(1 as ::core::ffi::c_int);
+    }
+    if first & 0xe0 as ::core::ffi::c_uint != 0xe0 as ::core::ffi::c_uint {
+        let mut c =
+            (((first as ::core::ffi::c_int) & 0x1f as ::core::ffi::c_int) << 6 as ::core::ffi::c_int)
+                as ::core::ffi::c_uint;
+        c |= (unsafe { *utf.add(1) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
+            as ::core::ffi::c_uint;
+        unsafe { *len = 2 as ::core::ffi::c_int };
+        return c as ::core::ffi::c_int;
+    }
+    if unsafe { *len } < 3 as ::core::ffi::c_int
+        || unsafe { *utf.add(2) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
+            != 0x80 as ::core::ffi::c_int
+    {
+        unsafe { *len = 0 as ::core::ffi::c_int };
+        return -(1 as ::core::ffi::c_int);
+    }
+    if first & 0xf0 as ::core::ffi::c_uint != 0xf0 as ::core::ffi::c_uint {
+        let mut c =
+            (((first as ::core::ffi::c_int) & 0xf as ::core::ffi::c_int) << 12 as ::core::ffi::c_int)
+                as ::core::ffi::c_uint;
+        c |= ((unsafe { *utf.add(1) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
+            << 6 as ::core::ffi::c_int) as ::core::ffi::c_uint;
+        c |= (unsafe { *utf.add(2) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
+            as ::core::ffi::c_uint;
+        unsafe { *len = 3 as ::core::ffi::c_int };
+        return c as ::core::ffi::c_int;
+    }
+    if unsafe { *len } < 4 as ::core::ffi::c_int
+        || first & 0xf8 as ::core::ffi::c_uint != 0xf0 as ::core::ffi::c_uint
+        || unsafe { *utf.add(3) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
+            != 0x80 as ::core::ffi::c_int
+    {
+        unsafe { *len = 0 as ::core::ffi::c_int };
+        return -(1 as ::core::ffi::c_int);
+    }
+    let mut c =
+        (((first as ::core::ffi::c_int) & 0x7 as ::core::ffi::c_int) << 18 as ::core::ffi::c_int)
+            as ::core::ffi::c_uint;
+    c |= ((unsafe { *utf.add(1) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
+        << 12 as ::core::ffi::c_int) as ::core::ffi::c_uint;
+    c |= ((unsafe { *utf.add(2) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
+        << 6 as ::core::ffi::c_int) as ::core::ffi::c_uint;
+    c |= (unsafe { *utf.add(3) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
+        as ::core::ffi::c_uint;
+    unsafe { *len = 4 as ::core::ffi::c_int };
+    return c as ::core::ffi::c_int;
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlCheckUTF8(mut utf: *const ::core::ffi::c_uchar) -> ::core::ffi::c_int { unsafe {
+pub unsafe extern "C" fn xmlCheckUTF8(mut utf: *const ::core::ffi::c_uchar) -> ::core::ffi::c_int {
     let mut ix: ::core::ffi::c_int = 0;
     let mut c: ::core::ffi::c_uchar = 0;
     if utf.is_null() {
         return 0 as ::core::ffi::c_int;
     }
     loop {
-        c = *utf.offset(0 as ::core::ffi::c_int as isize);
+        c = unsafe { *utf };
         if !(c != 0) {
             break;
         }
@@ -1714,8 +1670,7 @@ pub unsafe extern "C" fn xmlCheckUTF8(mut utf: *const ::core::ffi::c_uchar) -> :
             ix = 1 as ::core::ffi::c_int;
         } else if c as ::core::ffi::c_int & 0xe0 as ::core::ffi::c_int == 0xc0 as ::core::ffi::c_int
         {
-            if *utf.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                & 0xc0 as ::core::ffi::c_int
+            if unsafe { *utf.add(1) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
                 != 0x80 as ::core::ffi::c_int
             {
                 return 0 as ::core::ffi::c_int;
@@ -1723,11 +1678,9 @@ pub unsafe extern "C" fn xmlCheckUTF8(mut utf: *const ::core::ffi::c_uchar) -> :
             ix = 2 as ::core::ffi::c_int;
         } else if c as ::core::ffi::c_int & 0xf0 as ::core::ffi::c_int == 0xe0 as ::core::ffi::c_int
         {
-            if *utf.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                & 0xc0 as ::core::ffi::c_int
+            if unsafe { *utf.add(1) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
                 != 0x80 as ::core::ffi::c_int
-                || *utf.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                    & 0xc0 as ::core::ffi::c_int
+                || unsafe { *utf.add(2) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
                     != 0x80 as ::core::ffi::c_int
             {
                 return 0 as ::core::ffi::c_int;
@@ -1735,14 +1688,11 @@ pub unsafe extern "C" fn xmlCheckUTF8(mut utf: *const ::core::ffi::c_uchar) -> :
             ix = 3 as ::core::ffi::c_int;
         } else if c as ::core::ffi::c_int & 0xf8 as ::core::ffi::c_int == 0xf0 as ::core::ffi::c_int
         {
-            if *utf.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                & 0xc0 as ::core::ffi::c_int
+            if unsafe { *utf.add(1) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
                 != 0x80 as ::core::ffi::c_int
-                || *utf.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                    & 0xc0 as ::core::ffi::c_int
+                || unsafe { *utf.add(2) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
                     != 0x80 as ::core::ffi::c_int
-                || *utf.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                    & 0xc0 as ::core::ffi::c_int
+                || unsafe { *utf.add(3) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
                     != 0x80 as ::core::ffi::c_int
             {
                 return 0 as ::core::ffi::c_int;
@@ -1751,15 +1701,15 @@ pub unsafe extern "C" fn xmlCheckUTF8(mut utf: *const ::core::ffi::c_uchar) -> :
         } else {
             return 0 as ::core::ffi::c_int;
         }
-        utf = utf.offset(ix as isize);
+        utf = unsafe { utf.add(ix as usize) };
     }
     return 1 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUTF8Strsize(
     mut utf: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut ptr: *const xmlChar = utf;
     let mut ch: ::core::ffi::c_int = 0;
     let mut ret: size_t = 0;
@@ -1775,64 +1725,63 @@ pub unsafe extern "C" fn xmlUTF8Strsize(
         if !(fresh15 > 0 as ::core::ffi::c_int) {
             break;
         }
-        if *ptr == 0 {
+        if unsafe { *ptr } == 0 {
             break;
         }
-        let fresh16 = ptr;
-        ptr = ptr.offset(1);
-        ch = *fresh16 as ::core::ffi::c_int;
+        ch = unsafe { *ptr } as ::core::ffi::c_int;
+        ptr = unsafe { ptr.add(1) };
         if ch & 0x80 as ::core::ffi::c_int != 0 {
             loop {
                 ch <<= 1 as ::core::ffi::c_int;
                 if !(ch & 0x80 as ::core::ffi::c_int != 0) {
                     break;
                 }
-                if *ptr as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
+                if unsafe { *ptr } as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
                     break;
                 }
-                ptr = ptr.offset(1);
+                ptr = unsafe { ptr.add(1) };
             }
         }
     }
-    ret = ptr.offset_from(utf) as ::core::ffi::c_long as size_t;
+    ret = unsafe { ptr.offset_from(utf) as ::core::ffi::c_long as size_t };
     return (if ret > INT_MAX as size_t {
         0 as size_t
     } else {
         ret
     }) as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUTF8Strndup(
     mut utf: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> *mut xmlChar { unsafe {
+) -> *mut xmlChar {
     let mut ret: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     let mut i: ::core::ffi::c_int = 0;
     if utf.is_null() || len < 0 as ::core::ffi::c_int {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    i = xmlUTF8Strsize(utf, len);
-    ret = xmlMallocAtomic.expect("non-null function pointer")(
+    i = unsafe { xmlUTF8Strsize(utf, len) };
+    ret = unsafe { xmlMallocAtomic.expect("non-null function pointer")(
         (i as size_t)
             .wrapping_add(1 as size_t)
             .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) as *mut xmlChar;
+    ) as *mut xmlChar };
     if ret.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    memcpy(
+    unsafe { memcpy(
         ret as *mut ::core::ffi::c_void,
         utf as *const ::core::ffi::c_void,
         (i as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    );
-    *ret.offset(i as isize) = 0 as xmlChar;
+    ) };
+    unsafe { *ret.add(i as usize) = 0 as xmlChar };
     return ret;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUTF8Strpos(
     mut utf: *const xmlChar,
     mut pos: ::core::ffi::c_int,
-) -> *const xmlChar { unsafe {
+) -> *const xmlChar {
     let mut ch: ::core::ffi::c_int = 0;
     if utf.is_null() {
         return ::core::ptr::null::<xmlChar>();
@@ -1846,9 +1795,8 @@ pub unsafe extern "C" fn xmlUTF8Strpos(
         if !(fresh17 != 0) {
             break;
         }
-        let fresh18 = utf;
-        utf = utf.offset(1);
-        ch = *fresh18 as ::core::ffi::c_int;
+        ch = unsafe { *utf } as ::core::ffi::c_int;
+        utf = unsafe { utf.add(1) };
         if ch == 0 as ::core::ffi::c_int {
             return ::core::ptr::null::<xmlChar>();
         }
@@ -1861,9 +1809,9 @@ pub unsafe extern "C" fn xmlUTF8Strpos(
                 if !(ch & 0x80 as ::core::ffi::c_int != 0) {
                     break;
                 }
-                let fresh19 = utf;
-                utf = utf.offset(1);
-                if *fresh19 as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
+                let cont = unsafe { *utf } as ::core::ffi::c_int;
+                utf = unsafe { utf.add(1) };
+                if cont & 0xc0 as ::core::ffi::c_int
                     != 0x80 as ::core::ffi::c_int
                 {
                     return ::core::ptr::null::<xmlChar>();
@@ -1872,33 +1820,33 @@ pub unsafe extern "C" fn xmlUTF8Strpos(
         }
     }
     return utf as *mut xmlChar;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUTF8Strloc(
     mut utf: *const xmlChar,
     mut utfchar: *const xmlChar,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut i: size_t = 0;
     let mut size: ::core::ffi::c_int = 0;
     let mut ch: ::core::ffi::c_int = 0;
     if utf.is_null() || utfchar.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    size = xmlUTF8Strsize(utfchar, 1 as ::core::ffi::c_int);
+    size = unsafe { xmlUTF8Strsize(utfchar, 1 as ::core::ffi::c_int) };
     i = 0 as size_t;
     loop {
-        ch = *utf as ::core::ffi::c_int;
+        ch = unsafe { *utf } as ::core::ffi::c_int;
         if !(ch != 0 as ::core::ffi::c_int) {
             break;
         }
-        if xmlStrncmp(utf, utfchar, size) == 0 as ::core::ffi::c_int {
+        if unsafe { xmlStrncmp(utf, utfchar, size) } == 0 as ::core::ffi::c_int {
             return (if i > INT_MAX as size_t {
                 0 as size_t
             } else {
                 i
             }) as ::core::ffi::c_int;
         }
-        utf = utf.offset(1);
+        utf = unsafe { utf.add(1) };
         if ch & 0x80 as ::core::ffi::c_int != 0 {
             if ch & 0xc0 as ::core::ffi::c_int != 0xc0 as ::core::ffi::c_int {
                 return -(1 as ::core::ffi::c_int);
@@ -1908,9 +1856,9 @@ pub unsafe extern "C" fn xmlUTF8Strloc(
                 if !(ch & 0x80 as ::core::ffi::c_int != 0) {
                     break;
                 }
-                let fresh20 = utf;
-                utf = utf.offset(1);
-                if *fresh20 as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
+                let cont = unsafe { *utf } as ::core::ffi::c_int;
+                utf = unsafe { utf.add(1) };
+                if cont & 0xc0 as ::core::ffi::c_int
                     != 0x80 as ::core::ffi::c_int
                 {
                     return -(1 as ::core::ffi::c_int);
@@ -1920,13 +1868,13 @@ pub unsafe extern "C" fn xmlUTF8Strloc(
         i = i.wrapping_add(1);
     }
     return -(1 as ::core::ffi::c_int);
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlUTF8Strsub(
     mut utf: *const xmlChar,
     mut start: ::core::ffi::c_int,
     mut len: ::core::ffi::c_int,
-) -> *mut xmlChar { unsafe {
+) -> *mut xmlChar {
     let mut i: ::core::ffi::c_int = 0;
     let mut ch: ::core::ffi::c_int = 0;
     if utf.is_null() {
@@ -1940,9 +1888,8 @@ pub unsafe extern "C" fn xmlUTF8Strsub(
     }
     i = 0 as ::core::ffi::c_int;
     while i < start {
-        let fresh21 = utf;
-        utf = utf.offset(1);
-        ch = *fresh21 as ::core::ffi::c_int;
+        ch = unsafe { *utf } as ::core::ffi::c_int;
+        utf = unsafe { utf.add(1) };
         if ch == 0 as ::core::ffi::c_int {
             return ::core::ptr::null_mut::<xmlChar>();
         }
@@ -1955,9 +1902,9 @@ pub unsafe extern "C" fn xmlUTF8Strsub(
                 if !(ch & 0x80 as ::core::ffi::c_int != 0) {
                     break;
                 }
-                let fresh22 = utf;
-                utf = utf.offset(1);
-                if *fresh22 as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
+                let cont = unsafe { *utf } as ::core::ffi::c_int;
+                utf = unsafe { utf.add(1) };
+                if cont & 0xc0 as ::core::ffi::c_int
                     != 0x80 as ::core::ffi::c_int
                 {
                     return ::core::ptr::null_mut::<xmlChar>();
@@ -1966,60 +1913,60 @@ pub unsafe extern "C" fn xmlUTF8Strsub(
         }
         i += 1;
     }
-    return xmlUTF8Strndup(utf, len);
-}}
+    return unsafe { xmlUTF8Strndup(utf, len) };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlEscapeFormatString(mut msg: *mut *mut xmlChar) -> *mut xmlChar { unsafe {
+pub unsafe extern "C" fn xmlEscapeFormatString(mut msg: *mut *mut xmlChar) -> *mut xmlChar {
     let mut msgPtr: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     let mut result: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     let mut resultPtr: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     let mut count: size_t = 0 as size_t;
     let mut msgLen: size_t = 0 as size_t;
     let mut resultLen: size_t = 0 as size_t;
-    if msg.is_null() || (*msg).is_null() {
+    if msg.is_null() || unsafe { (*msg).is_null() } {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    msgPtr = *msg;
-    while *msgPtr as ::core::ffi::c_int != '\0' as i32 {
+    msgPtr = unsafe { *msg };
+    while unsafe { *msgPtr } as ::core::ffi::c_int != '\0' as i32 {
         msgLen = msgLen.wrapping_add(1);
-        if *msgPtr as ::core::ffi::c_int == '%' as i32 {
+        if unsafe { *msgPtr } as ::core::ffi::c_int == '%' as i32 {
             count = count.wrapping_add(1);
         }
-        msgPtr = msgPtr.offset(1);
+        msgPtr = unsafe { msgPtr.add(1) };
     }
     if count == 0 as size_t {
-        return *msg;
+        return unsafe { *msg };
     }
     if count > INT_MAX as size_t || msgLen > (INT_MAX as size_t).wrapping_sub(count) {
         return ::core::ptr::null_mut::<xmlChar>();
     }
     resultLen = msgLen.wrapping_add(count).wrapping_add(1 as size_t);
-    result = xmlMallocAtomic.expect("non-null function pointer")(
+    result = unsafe { xmlMallocAtomic.expect("non-null function pointer")(
         resultLen.wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) as *mut xmlChar;
+    ) as *mut xmlChar };
     if result.is_null() {
-        xmlFree.expect("non-null function pointer")(*msg as *mut ::core::ffi::c_void);
-        *msg = ::core::ptr::null_mut::<xmlChar>();
-        xmlErrMemory(
+        unsafe { xmlFree.expect("non-null function pointer")(*msg as *mut ::core::ffi::c_void) };
+        unsafe { *msg = ::core::ptr::null_mut::<xmlChar>() };
+        unsafe { xmlErrMemory(
             ::core::ptr::null_mut::<xmlParserCtxt>(),
             ::core::ptr::null::<::core::ffi::c_char>(),
-        );
+        ) };
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    msgPtr = *msg;
+    msgPtr = unsafe { *msg };
     resultPtr = result;
-    while *msgPtr as ::core::ffi::c_int != '\0' as i32 {
-        *resultPtr = *msgPtr;
-        if *msgPtr as ::core::ffi::c_int == '%' as i32 {
-            resultPtr = resultPtr.offset(1);
-            *resultPtr = '%' as i32 as xmlChar;
+    while unsafe { *msgPtr } as ::core::ffi::c_int != '\0' as i32 {
+        unsafe { *resultPtr = *msgPtr };
+        if unsafe { *msgPtr } as ::core::ffi::c_int == '%' as i32 {
+            resultPtr = unsafe { resultPtr.add(1) };
+            unsafe { *resultPtr = '%' as i32 as xmlChar };
         }
-        msgPtr = msgPtr.offset(1);
-        resultPtr = resultPtr.offset(1);
+        msgPtr = unsafe { msgPtr.add(1) };
+        resultPtr = unsafe { resultPtr.add(1) };
     }
-    *result.offset(resultLen.wrapping_sub(1 as size_t) as isize) = '\0' as i32 as xmlChar;
-    xmlFree.expect("non-null function pointer")(*msg as *mut ::core::ffi::c_void);
-    *msg = result;
-    return *msg;
-}}
+    unsafe { *result.add(resultLen.wrapping_sub(1 as size_t)) = '\0' as i32 as xmlChar };
+    unsafe { xmlFree.expect("non-null function pointer")(*msg as *mut ::core::ffi::c_void) };
+    unsafe { *msg = result };
+    return unsafe { *msg };
+}
 pub const __INT_MAX__: ::core::ffi::c_int = 2147483647 as ::core::ffi::c_int;

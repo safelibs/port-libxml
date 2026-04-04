@@ -782,204 +782,172 @@ unsafe extern "C" fn xmlDictComputeFastQKey(
     return value;
 }}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictCreate() -> xmlDictPtr { unsafe {
+pub unsafe extern "C" fn xmlDictCreate() -> xmlDictPtr {
     let mut dict: xmlDictPtr = ::core::ptr::null_mut::<xmlDict>();
-    if xmlDictInitialized == 0 {
-        if __xmlInitializeDict() == 0 {
+    if unsafe { xmlDictInitialized } == 0 {
+        if unsafe { __xmlInitializeDict() } == 0 {
             return ::core::ptr::null_mut::<xmlDict>();
         }
     }
-    dict = xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<xmlDict>() as size_t)
-        as xmlDictPtr;
+    dict = unsafe {
+        xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<xmlDict>() as size_t)
+            as xmlDictPtr
+    };
     if !dict.is_null() {
-        (*dict).ref_counter = 1 as ::core::ffi::c_int;
-        (*dict).limit = 0 as size_t;
-        (*dict).size = MIN_DICT_SIZE as size_t;
-        (*dict).nbElems = 0 as ::core::ffi::c_uint;
-        (*dict).dict = xmlMalloc.expect("non-null function pointer")(
+        let dict_ref = unsafe { &mut *dict };
+        dict_ref.ref_counter = 1 as ::core::ffi::c_int;
+        dict_ref.limit = 0 as size_t;
+        dict_ref.size = MIN_DICT_SIZE as size_t;
+        dict_ref.nbElems = 0 as ::core::ffi::c_uint;
+        dict_ref.dict = unsafe { xmlMalloc.expect("non-null function pointer")(
             (MIN_DICT_SIZE as size_t)
                 .wrapping_mul(::core::mem::size_of::<xmlDictEntry>() as size_t),
-        ) as *mut _xmlDictEntry;
-        (*dict).strings = ::core::ptr::null_mut::<xmlDictStrings>();
-        (*dict).subdict = ::core::ptr::null_mut::<_xmlDict>();
-        if !(*dict).dict.is_null() {
-            memset(
-                (*dict).dict as *mut ::core::ffi::c_void,
+        ) as *mut _xmlDictEntry };
+        dict_ref.strings = ::core::ptr::null_mut::<xmlDictStrings>();
+        dict_ref.subdict = ::core::ptr::null_mut::<_xmlDict>();
+        if !dict_ref.dict.is_null() {
+            unsafe { memset(
+                dict_ref.dict as *mut ::core::ffi::c_void,
                 0 as ::core::ffi::c_int,
                 (MIN_DICT_SIZE as size_t)
                     .wrapping_mul(::core::mem::size_of::<xmlDictEntry>() as size_t),
-            );
-            (*dict).seed = __xmlRandom();
+            ) };
+            dict_ref.seed = unsafe { __xmlRandom() };
             return dict;
         }
-        xmlFree.expect("non-null function pointer")(dict as *mut ::core::ffi::c_void);
+        unsafe { xmlFree.expect("non-null function pointer")(dict as *mut ::core::ffi::c_void) };
     }
     return ::core::ptr::null_mut::<xmlDict>();
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictCreateSub(mut sub: xmlDictPtr) -> xmlDictPtr { unsafe {
-    let mut dict: xmlDictPtr = xmlDictCreate();
+pub unsafe extern "C" fn xmlDictCreateSub(mut sub: xmlDictPtr) -> xmlDictPtr {
+    let mut dict: xmlDictPtr = unsafe { xmlDictCreate() };
     if !dict.is_null() && !sub.is_null() {
-        (*dict).seed = (*sub).seed;
-        (*dict).subdict = sub as *mut _xmlDict;
-        xmlDictReference((*dict).subdict as xmlDictPtr);
+        unsafe {
+            (*dict).seed = (*sub).seed;
+            (*dict).subdict = sub as *mut _xmlDict;
+            xmlDictReference((*dict).subdict as xmlDictPtr);
+        }
     }
     return dict;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictReference(mut dict: xmlDictPtr) -> ::core::ffi::c_int { unsafe {
-    if xmlDictInitialized == 0 {
-        if __xmlInitializeDict() == 0 {
+pub unsafe extern "C" fn xmlDictReference(mut dict: xmlDictPtr) -> ::core::ffi::c_int {
+    if unsafe { xmlDictInitialized } == 0 {
+        if unsafe { __xmlInitializeDict() } == 0 {
             return -(1 as ::core::ffi::c_int);
         }
     }
     if dict.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    xmlRMutexLock(xmlDictMutex);
-    (*dict).ref_counter += 1;
-    xmlRMutexUnlock(xmlDictMutex);
+    unsafe { xmlRMutexLock(xmlDictMutex) };
+    unsafe { (*dict).ref_counter += 1 };
+    unsafe { xmlRMutexUnlock(xmlDictMutex) };
     return 0 as ::core::ffi::c_int;
-}}
-unsafe extern "C" fn xmlDictGrow(mut dict: xmlDictPtr, mut size: size_t) -> ::core::ffi::c_int { unsafe {
-    let mut key: ::core::ffi::c_ulong = 0;
-    let mut okey: ::core::ffi::c_ulong = 0;
-    let mut oldsize: size_t = 0;
-    let mut i: size_t = 0;
-    let mut iter: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-    let mut next: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-    let mut olddict: *mut _xmlDictEntry = ::core::ptr::null_mut::<_xmlDictEntry>();
-    let mut ret: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
-    let mut keep_keys: ::core::ffi::c_int = 1 as ::core::ffi::c_int;
-    if dict.is_null() {
+}
+unsafe extern "C" fn xmlDictGrow(mut dict: xmlDictPtr, mut size: size_t) -> ::core::ffi::c_int {
+    let Some(dict) = (unsafe { dict.as_mut() }) else {
         return -(1 as ::core::ffi::c_int);
-    }
+    };
     if size < 8 as size_t {
         return -(1 as ::core::ffi::c_int);
     }
     if size > (8 as ::core::ffi::c_int * 2048 as ::core::ffi::c_int) as size_t {
         return -(1 as ::core::ffi::c_int);
     }
-    oldsize = (*dict).size;
-    olddict = (*dict).dict;
+    let oldsize = dict.size;
+    let olddict = dict.dict;
     if olddict.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    if oldsize == MIN_DICT_SIZE as size_t {
-        keep_keys = 0 as ::core::ffi::c_int;
-    }
-    (*dict).dict = xmlMalloc.expect("non-null function pointer")(
-        size.wrapping_mul(::core::mem::size_of::<xmlDictEntry>() as size_t),
-    ) as *mut _xmlDictEntry;
-    if (*dict).dict.is_null() {
-        (*dict).dict = olddict;
+    let keep_keys = (oldsize != MIN_DICT_SIZE as size_t) as ::core::ffi::c_int;
+    let newdict = unsafe {
+        xmlMalloc.expect("non-null function pointer")(
+            size.wrapping_mul(::core::mem::size_of::<xmlDictEntry>() as size_t),
+        ) as *mut _xmlDictEntry
+    };
+    if newdict.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    memset(
-        (*dict).dict as *mut ::core::ffi::c_void,
-        0 as ::core::ffi::c_int,
-        size.wrapping_mul(::core::mem::size_of::<xmlDictEntry>() as size_t),
-    );
-    (*dict).size = size;
-    i = 0 as size_t;
-    while i < oldsize {
-        if !((*olddict.offset(i as isize)).valid == 0 as ::core::ffi::c_int) {
-            if keep_keys != 0 {
-                okey = (*olddict.offset(i as isize)).okey;
-            } else {
-                okey = if (*dict).size == MIN_DICT_SIZE as size_t {
-                    xmlDictComputeFastKey(
-                        (*olddict.offset(i as isize)).name,
-                        (*olddict.offset(i as isize)).len as ::core::ffi::c_int,
-                        (*dict).seed,
-                    )
-                } else {
-                    xmlDictComputeBigKey(
-                        (*olddict.offset(i as isize)).name,
-                        (*olddict.offset(i as isize)).len as ::core::ffi::c_int,
-                        (*dict).seed,
-                    ) as ::core::ffi::c_ulong
-                };
-            }
-            key = (okey as size_t).wrapping_rem((*dict).size) as ::core::ffi::c_ulong;
-            if (*(*dict).dict.offset(key as isize)).valid == 0 as ::core::ffi::c_int {
-                memcpy(
-                    (*dict).dict.offset(key as isize) as *mut _xmlDictEntry
-                        as *mut ::core::ffi::c_void,
-                    olddict.offset(i as isize) as *mut _xmlDictEntry as *const ::core::ffi::c_void,
-                    ::core::mem::size_of::<xmlDictEntry>() as size_t,
-                );
-                let ref mut fresh0 = (*(*dict).dict.offset(key as isize)).next;
-                *fresh0 = ::core::ptr::null_mut::<_xmlDictEntry>();
-                (*(*dict).dict.offset(key as isize)).okey = okey;
-            } else {
-                let mut entry: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-                entry = xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<
-                    xmlDictEntry,
-                >() as size_t) as xmlDictEntryPtr;
-                if !entry.is_null() {
-                    (*entry).name = (*olddict.offset(i as isize)).name;
-                    (*entry).len = (*olddict.offset(i as isize)).len;
-                    (*entry).okey = okey;
-                    (*entry).next = (*(*dict).dict.offset(key as isize)).next;
-                    (*entry).valid = 1 as ::core::ffi::c_int;
-                    let ref mut fresh1 = (*(*dict).dict.offset(key as isize)).next;
-                    *fresh1 = entry as *mut _xmlDictEntry;
-                } else {
-                    ret = -(1 as ::core::ffi::c_int);
-                }
-            }
-        }
-        i = i.wrapping_add(1);
+    unsafe {
+        memset(
+            newdict as *mut ::core::ffi::c_void,
+            0 as ::core::ffi::c_int,
+            size.wrapping_mul(::core::mem::size_of::<xmlDictEntry>() as size_t),
+        );
     }
-    i = 0 as size_t;
-    while i < oldsize {
-        iter = (*olddict.offset(i as isize)).next as xmlDictEntryPtr;
-        while !iter.is_null() {
-            next = (*iter).next as xmlDictEntryPtr;
-            if keep_keys != 0 {
-                okey = (*iter).okey;
-            } else {
-                okey = if (*dict).size == MIN_DICT_SIZE as size_t {
-                    xmlDictComputeFastKey(
-                        (*iter).name,
-                        (*iter).len as ::core::ffi::c_int,
-                        (*dict).seed,
-                    )
-                } else {
-                    xmlDictComputeBigKey(
-                        (*iter).name,
-                        (*iter).len as ::core::ffi::c_int,
-                        (*dict).seed,
-                    ) as ::core::ffi::c_ulong
-                };
-            }
-            key = (okey as size_t).wrapping_rem((*dict).size) as ::core::ffi::c_ulong;
-            if (*(*dict).dict.offset(key as isize)).valid == 0 as ::core::ffi::c_int {
-                memcpy(
-                    (*dict).dict.offset(key as isize) as *mut _xmlDictEntry
-                        as *mut ::core::ffi::c_void,
-                    iter as *const ::core::ffi::c_void,
+    dict.dict = newdict;
+    dict.size = size;
+    let old_entries = unsafe { ::core::slice::from_raw_parts_mut(olddict, oldsize) };
+    let new_entries = unsafe { ::core::slice::from_raw_parts_mut(newdict, size) };
+    let mut ret = 0 as ::core::ffi::c_int;
+
+    for old_entry in old_entries.iter_mut() {
+        if old_entry.valid == 0 as ::core::ffi::c_int {
+            continue;
+        }
+        let okey = if keep_keys != 0 {
+            old_entry.okey
+        } else if dict.size == MIN_DICT_SIZE as size_t {
+            unsafe { xmlDictComputeFastKey(old_entry.name, old_entry.len as ::core::ffi::c_int, dict.seed) }
+        } else {
+            unsafe { xmlDictComputeBigKey(old_entry.name, old_entry.len as ::core::ffi::c_int, dict.seed) as ::core::ffi::c_ulong }
+        };
+        let key = (okey as size_t).wrapping_rem(dict.size) as usize;
+        if new_entries[key].valid == 0 as ::core::ffi::c_int {
+            new_entries[key] = *old_entry;
+            new_entries[key].next = ::core::ptr::null_mut::<_xmlDictEntry>();
+            new_entries[key].okey = okey;
+        } else {
+            let entry = unsafe {
+                xmlMalloc.expect("non-null function pointer")(
                     ::core::mem::size_of::<xmlDictEntry>() as size_t,
-                );
-                let ref mut fresh2 = (*(*dict).dict.offset(key as isize)).next;
-                *fresh2 = ::core::ptr::null_mut::<_xmlDictEntry>();
-                (*(*dict).dict.offset(key as isize)).valid = 1 as ::core::ffi::c_int;
-                (*(*dict).dict.offset(key as isize)).okey = okey;
-                xmlFree.expect("non-null function pointer")(iter as *mut ::core::ffi::c_void);
+                ) as xmlDictEntryPtr
+            };
+            if entry.is_null() {
+                ret = -(1 as ::core::ffi::c_int);
+                continue;
+            }
+            let entry_ref = unsafe { &mut *entry };
+            entry_ref.name = old_entry.name;
+            entry_ref.len = old_entry.len;
+            entry_ref.okey = okey;
+            entry_ref.next = new_entries[key].next;
+            entry_ref.valid = 1 as ::core::ffi::c_int;
+            new_entries[key].next = entry as *mut _xmlDictEntry;
+        }
+    }
+
+    for old_entry in old_entries.iter_mut() {
+        let mut iter = old_entry.next as xmlDictEntryPtr;
+        while !iter.is_null() {
+            let next = unsafe { (*iter).next as xmlDictEntryPtr };
+            let okey = if keep_keys != 0 {
+                unsafe { (*iter).okey }
+            } else if dict.size == MIN_DICT_SIZE as size_t {
+                unsafe { xmlDictComputeFastKey((*iter).name, (*iter).len as ::core::ffi::c_int, dict.seed) }
             } else {
-                (*iter).next = (*(*dict).dict.offset(key as isize)).next;
-                (*iter).okey = okey;
-                let ref mut fresh3 = (*(*dict).dict.offset(key as isize)).next;
-                *fresh3 = iter as *mut _xmlDictEntry;
+                unsafe { xmlDictComputeBigKey((*iter).name, (*iter).len as ::core::ffi::c_int, dict.seed) as ::core::ffi::c_ulong }
+            };
+            let key = (okey as size_t).wrapping_rem(dict.size) as usize;
+            if new_entries[key].valid == 0 as ::core::ffi::c_int {
+                new_entries[key] = unsafe { *iter };
+                new_entries[key].next = ::core::ptr::null_mut::<_xmlDictEntry>();
+                new_entries[key].valid = 1 as ::core::ffi::c_int;
+                new_entries[key].okey = okey;
+                unsafe { xmlFree.expect("non-null function pointer")(iter as *mut ::core::ffi::c_void) };
+            } else {
+                unsafe { (*iter).next = new_entries[key].next };
+                unsafe { (*iter).okey = okey };
+                new_entries[key].next = iter as *mut _xmlDictEntry;
             }
             iter = next;
         }
-        i = i.wrapping_add(1);
     }
-    xmlFree.expect("non-null function pointer")(olddict as *mut ::core::ffi::c_void);
+    unsafe { xmlFree.expect("non-null function pointer")(olddict as *mut ::core::ffi::c_void) };
     return ret;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDictFree(mut dict: xmlDictPtr) { unsafe {
     let mut i: size_t = 0;
@@ -1455,59 +1423,62 @@ pub unsafe extern "C" fn xmlDictQLookup(
 pub unsafe extern "C" fn xmlDictOwns(
     mut dict: xmlDictPtr,
     mut str: *const xmlChar,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut pool: xmlDictStringsPtr = ::core::ptr::null_mut::<xmlDictStrings>();
-    if dict.is_null() || str.is_null() {
+    let Some(dict) = (unsafe { dict.as_ref() }) else {
+        return -(1 as ::core::ffi::c_int);
+    };
+    if str.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    pool = (*dict).strings;
+    pool = dict.strings;
     while !pool.is_null() {
+        let start = unsafe { ::core::ptr::addr_of!((*pool).array).cast::<xmlChar>() } as *const xmlChar;
+        let end = unsafe { (*pool).free } as *const xmlChar;
         if str
-            >= (&raw mut (*pool).array as *mut xmlChar).offset(0 as ::core::ffi::c_int as isize)
-                as *mut xmlChar as *const xmlChar
-            && str <= (*pool).free as *const xmlChar
+            >= start
+            && str <= end
         {
             return 1 as ::core::ffi::c_int;
         }
-        pool = (*pool).next;
+        pool = unsafe { (*pool).next };
     }
-    if !(*dict).subdict.is_null() {
-        return xmlDictOwns((*dict).subdict as xmlDictPtr, str);
+    if !dict.subdict.is_null() {
+        return unsafe { xmlDictOwns(dict.subdict as xmlDictPtr, str) };
     }
     return 0 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictSize(mut dict: xmlDictPtr) -> ::core::ffi::c_int { unsafe {
-    if dict.is_null() {
+pub unsafe extern "C" fn xmlDictSize(mut dict: xmlDictPtr) -> ::core::ffi::c_int {
+    let Some(dict) = (unsafe { dict.as_ref() }) else {
         return -(1 as ::core::ffi::c_int);
+    };
+    if !dict.subdict.is_null() {
+        return dict.nbElems.wrapping_add(unsafe { (*dict.subdict).nbElems }) as ::core::ffi::c_int;
     }
-    if !(*dict).subdict.is_null() {
-        return (*dict).nbElems.wrapping_add((*(*dict).subdict).nbElems) as ::core::ffi::c_int;
-    }
-    return (*dict).nbElems as ::core::ffi::c_int;
-}}
+    return dict.nbElems as ::core::ffi::c_int;
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictSetLimit(mut dict: xmlDictPtr, mut limit: size_t) -> size_t { unsafe {
-    let mut ret: size_t = 0;
-    if dict.is_null() {
+pub unsafe extern "C" fn xmlDictSetLimit(mut dict: xmlDictPtr, mut limit: size_t) -> size_t {
+    let Some(dict) = (unsafe { dict.as_mut() }) else {
         return 0 as size_t;
-    }
-    ret = (*dict).limit;
-    (*dict).limit = limit;
+    };
+    let ret = dict.limit;
+    dict.limit = limit;
     return ret;
-}}
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictGetUsage(mut dict: xmlDictPtr) -> size_t { unsafe {
+pub unsafe extern "C" fn xmlDictGetUsage(mut dict: xmlDictPtr) -> size_t {
     let mut pool: xmlDictStringsPtr = ::core::ptr::null_mut::<xmlDictStrings>();
     let mut limit: size_t = 0 as size_t;
-    if dict.is_null() {
+    let Some(dict) = (unsafe { dict.as_ref() }) else {
         return 0 as size_t;
-    }
-    pool = (*dict).strings;
+    };
+    pool = dict.strings;
     while !pool.is_null() {
-        limit = limit.wrapping_add((*pool).size);
-        pool = (*pool).next;
+        limit = limit.wrapping_add(unsafe { (*pool).size });
+        pool = unsafe { (*pool).next };
     }
     return limit;
-}}
+}
 pub const __INT_MAX__: ::core::ffi::c_int = 2147483647 as ::core::ffi::c_int;
