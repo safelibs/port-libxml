@@ -48,7 +48,7 @@ diff -u "$SRC_DIR/reader1.res" "$WORK_DIR/reader1.tmp"
 diff -u "$SRC_DIR/reader1.res" "$WORK_DIR/reader2.tmp"
 "$BUILD_DIR/reader3" >"$WORK_DIR/reader3.tmp"
 diff -u "$SRC_DIR/reader3.res" "$WORK_DIR/reader3.tmp"
-"$BUILD_DIR/reader4" "$WORK_DIR/test1.xml" "$WORK_DIR/test2.xml" "$WORK_DIR/test3.xml" >"$WORK_DIR/reader4.tmp"
+"$BUILD_DIR/reader4" test1.xml test2.xml test3.xml >"$WORK_DIR/reader4.tmp"
 diff -u "$SRC_DIR/reader4.res" "$WORK_DIR/reader4.tmp"
 "$BUILD_DIR/testWriter"
 for index in 1 2 3 4; do

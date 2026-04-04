@@ -27,6 +27,7 @@ pub mod foundation {
 }
 
 pub mod internal_ffi;
+pub mod tree_io;
 
 pub const MODULE_MANIFEST: &str = include_str!("../build/modules.toml");
 

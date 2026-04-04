@@ -54,12 +54,12 @@ enabled = false
 [[module]]
 name = "encoding"
 source = "../original/encoding.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "entities"
 source = "../original/entities.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "error"
@@ -84,7 +84,7 @@ provider = "c_fallback"
 [[module]]
 name = "HTMLtree"
 source = "../original/HTMLtree.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "legacy"
@@ -99,12 +99,12 @@ provider = "rust"
 [[module]]
 name = "nanoftp"
 source = "../original/nanoftp.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "nanohttp"
 source = "../original/nanohttp.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "parser"
@@ -149,12 +149,12 @@ provider = "rust"
 [[module]]
 name = "tree"
 source = "../original/tree.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "uri"
 source = "../original/uri.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "valid"
@@ -174,7 +174,7 @@ provider = "c_fallback"
 [[module]]
 name = "xmlIO"
 source = "../original/xmlIO.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xmlmemory"
@@ -249,4 +249,4 @@ provider = "c_fallback"
 [[module]]
 name = "xzlib"
 source = "../original/xzlib.c"
-provider = "c_fallback"
+provider = "rust"
