@@ -2161,6 +2161,7 @@ unsafe extern "C" fn xmlParserEntityCheck(
     if ctxt.is_null() || (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int != 0 {
         return 0 as ::core::ffi::c_int;
     }
+    let current_depth = ((*ctxt).depth.max(0 as ::core::ffi::c_int)) as u32;
     let budget_depth = (*ctxt).depth.max((*ctxt).inputNr).max((*ctxt).nodeNr);
     if budget_depth > 0 {
         SHARED_BUDGET.note_recursion_depth(budget_depth as u32);
@@ -2177,7 +2178,7 @@ unsafe extern "C" fn xmlParserEntityCheck(
     if budget_bytes != 0 {
         SHARED_BUDGET.note_entity_expansion(
             budget_bytes,
-            ((*ctxt).depth.max(0 as ::core::ffi::c_int)) as u32,
+            current_depth,
         );
     }
     if (*ctxt).lastError.code == XML_ERR_ENTITY_LOOP as ::core::ffi::c_int {
@@ -2244,9 +2245,14 @@ unsafe extern "C" fn xmlParserEntityCheck(
                 ) as size_t as size_t;
             i += 1;
         }
-        if (*ctxt).nbentities as size_t
-            > consumed.wrapping_mul(XML_PARSER_NON_LINEAR as size_t)
-        {
+        consumed = SHARED_BUDGET.parser_progress(consumed);
+        if SHARED_BUDGET.entity_limit_exceeded(
+            current_depth,
+            consumed,
+            (*ctxt).nbentities as usize,
+            1 as ::core::ffi::c_int != 0,
+            0 as ::core::ffi::c_int != 0,
+        ) {
             xmlFatalErr(
                 ctxt,
                 XML_ERR_ENTITY_LOOP,
@@ -2271,6 +2277,21 @@ unsafe extern "C" fn xmlParserEntityCheck(
         }
         consumed = (consumed as ::core::ffi::c_ulong).wrapping_add((*ctxt).sizeentities)
             as size_t as size_t;
+        consumed = SHARED_BUDGET.parser_progress(consumed);
+        if SHARED_BUDGET.entity_limit_exceeded(
+            current_depth,
+            consumed,
+            (*ctxt).nbentities as usize,
+            0 as ::core::ffi::c_int != 0,
+            0 as ::core::ffi::c_int != 0,
+        ) {
+            xmlFatalErr(
+                ctxt,
+                XML_ERR_ENTITY_LOOP,
+                ::core::ptr::null::<::core::ffi::c_char>(),
+            );
+            return 1 as ::core::ffi::c_int;
+        }
         if replacement < (XML_PARSER_NON_LINEAR as size_t).wrapping_mul(consumed) {
             return 0 as ::core::ffi::c_int;
         }
@@ -2288,6 +2309,21 @@ unsafe extern "C" fn xmlParserEntityCheck(
         }
         consumed = (consumed as ::core::ffi::c_ulong).wrapping_add((*ctxt).sizeentities)
             as size_t as size_t;
+        consumed = SHARED_BUDGET.parser_progress(consumed);
+        if SHARED_BUDGET.entity_limit_exceeded(
+            current_depth,
+            consumed,
+            (*ctxt).nbentities as usize,
+            0 as ::core::ffi::c_int != 0,
+            0 as ::core::ffi::c_int != 0,
+        ) {
+            xmlFatalErr(
+                ctxt,
+                XML_ERR_ENTITY_LOOP,
+                ::core::ptr::null::<::core::ffi::c_char>(),
+            );
+            return 1 as ::core::ffi::c_int;
+        }
         if size < (XML_PARSER_NON_LINEAR as size_t).wrapping_mul(consumed)
             && ((*ctxt).nbentities as size_t).wrapping_mul(3 as size_t)
                 < (XML_PARSER_NON_LINEAR as size_t).wrapping_mul(consumed)
@@ -2306,6 +2342,21 @@ unsafe extern "C" fn xmlParserEntityCheck(
         }
         consumed = (consumed as ::core::ffi::c_ulong).wrapping_add((*ctxt).sizeentities)
             as size_t as size_t;
+        consumed = SHARED_BUDGET.parser_progress(consumed);
+        if SHARED_BUDGET.entity_limit_exceeded(
+            current_depth,
+            consumed,
+            (*ctxt).nbentities as usize,
+            0 as ::core::ffi::c_int != 0,
+            0 as ::core::ffi::c_int != 0,
+        ) {
+            xmlFatalErr(
+                ctxt,
+                XML_ERR_ENTITY_LOOP,
+                ::core::ptr::null::<::core::ffi::c_char>(),
+            );
+            return 1 as ::core::ffi::c_int;
+        }
         if size.wrapping_mul(3 as size_t)
             < consumed.wrapping_mul(XML_PARSER_NON_LINEAR as size_t)
         {
@@ -2315,6 +2366,14 @@ unsafe extern "C" fn xmlParserEntityCheck(
         && (*ctxt).lastError.code != XML_WAR_UNDECLARED_ENTITY as ::core::ffi::c_int
         || (*ctxt).nbentities <= 10000 as ::core::ffi::c_ulong
     {
+        return 0 as ::core::ffi::c_int
+    } else if !SHARED_BUDGET.entity_limit_exceeded(
+        current_depth,
+        0 as usize,
+        (*ctxt).nbentities as usize,
+        0 as ::core::ffi::c_int != 0,
+        0 as ::core::ffi::c_int != 0,
+    ) {
         return 0 as ::core::ffi::c_int
     }
     xmlFatalErr(ctxt, XML_ERR_ENTITY_LOOP, ::core::ptr::null::<::core::ffi::c_char>());
@@ -4026,10 +4085,12 @@ pub unsafe extern "C" fn nodePush(
         (*ctxt).nodeTab = tmp;
         (*ctxt).nodeMax *= 2 as ::core::ffi::c_int;
     }
-    if (*ctxt).nodeNr as ::core::ffi::c_uint > xmlParserMaxDepth
-        && (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int
-    {
+    SHARED_BUDGET.note_recursion_depth((*ctxt).nodeNr as u32);
+    if SHARED_BUDGET.document_depth_limit_exceeded(
+        (*ctxt).nodeNr as u32,
+        xmlParserMaxDepth,
+        (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int != 0,
+    ) {
         xmlFatalErrMsgInt(
             ctxt,
             XML_ERR_INTERNAL_ERROR,
@@ -4471,10 +4532,13 @@ pub unsafe extern "C" fn xmlPushInput(
             (*input).cur,
         );
     }
-    if (*ctxt).inputNr > 40 as ::core::ffi::c_int
-        && (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int || (*ctxt).inputNr > 1024 as ::core::ffi::c_int
-    {
+    SHARED_BUDGET.note_dtd_depth((*ctxt).inputNr as u32);
+    if SHARED_BUDGET.dtd_depth_limit_exceeded(
+        (*ctxt).inputNr as u32,
+        40 as u32,
+        1024 as u32,
+        (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int != 0,
+    ) {
         xmlFatalErr(
             ctxt,
             XML_ERR_ENTITY_LOOP,
@@ -11194,10 +11258,13 @@ unsafe extern "C" fn xmlParseElementChildrenContentDeclPriv(
     let mut op: xmlElementContentPtr = ::core::ptr::null_mut::<xmlElementContent>();
     let mut elem: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut type_0: xmlChar = 0 as xmlChar;
-    if depth > 128 as ::core::ffi::c_int
-        && (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int || depth > 2048 as ::core::ffi::c_int
-    {
+    SHARED_BUDGET.note_dtd_depth(depth as u32);
+    if SHARED_BUDGET.dtd_depth_limit_exceeded(
+        depth as u32,
+        128 as u32,
+        2048 as u32,
+        (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int != 0,
+    ) {
         xmlFatalErrMsgInt(
             ctxt,
             XML_ERR_ELEMCONTENT_NOT_FINISHED,
@@ -16186,10 +16253,12 @@ unsafe extern "C" fn xmlParseElementStart(
     let mut tlen: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     let mut ret: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     let mut nsNr: ::core::ffi::c_int = (*ctxt).nsNr;
-    if (*ctxt).nameNr as ::core::ffi::c_uint > xmlParserMaxDepth
-        && (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int
-    {
+    SHARED_BUDGET.note_recursion_depth((*ctxt).nameNr as u32);
+    if SHARED_BUDGET.document_depth_limit_exceeded(
+        (*ctxt).nameNr as u32,
+        xmlParserMaxDepth,
+        (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int != 0,
+    ) {
         xmlFatalErrMsgInt(
             ctxt,
             XML_ERR_INTERNAL_ERROR,

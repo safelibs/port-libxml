@@ -2078,6 +2078,22 @@ unsafe extern "C" fn htmlnamePush(
             return 0 as ::core::ffi::c_int;
         }
     }
+    SHARED_BUDGET.note_recursion_depth((*ctxt).nameNr as u32);
+    if SHARED_BUDGET.document_depth_limit_exceeded(
+        (*ctxt).nameNr as u32,
+        256 as u32,
+        (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int != 0,
+    ) {
+        htmlParseErrInt(
+            ctxt as xmlParserCtxtPtr,
+            XML_ERR_INTERNAL_ERROR,
+            b"Excessive depth in document: %d use XML_PARSE_HUGE option\n\0" as *const u8
+                as *const ::core::ffi::c_char,
+            256 as ::core::ffi::c_int,
+        );
+        (*ctxt).instate = XML_PARSER_EOF;
+        return -(1 as ::core::ffi::c_int);
+    }
     let ref mut fresh2 = *(*ctxt).nameTab.offset((*ctxt).nameNr as isize);
     *fresh2 = value;
     (*ctxt).name = value;
