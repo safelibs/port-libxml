@@ -5,6 +5,7 @@
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
     unused_mut,
     unused_unsafe
 )]
@@ -17,6 +18,7 @@ pub mod common;
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
     unused_mut,
     unused_unsafe
 )]
@@ -28,6 +30,7 @@ pub mod tree;
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
     unused_mut,
     unused_unsafe
 )]
@@ -39,6 +42,7 @@ pub mod entities;
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
     unused_mut,
     unused_unsafe
 )]
@@ -50,6 +54,7 @@ pub mod uri;
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
     unused_mut,
     unused_unsafe
 )]
@@ -61,6 +66,7 @@ pub mod encoding;
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
     unused_mut,
     unused_unsafe
 )]
@@ -72,6 +78,7 @@ pub mod xml_io;
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
     unused_mut,
     unused_unsafe
 )]
@@ -83,6 +90,7 @@ pub mod nanohttp;
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
     unused_mut,
     unused_unsafe
 )]
@@ -94,6 +102,7 @@ pub mod nanoftp;
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
     unused_mut,
     unused_unsafe
 )]
@@ -105,6 +114,7 @@ pub mod xzlib;
     non_camel_case_types,
     non_snake_case,
     non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
     unused_mut,
     unused_unsafe
 )]
