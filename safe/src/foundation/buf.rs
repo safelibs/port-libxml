@@ -1699,14 +1699,13 @@ pub unsafe extern "C" fn xmlBufErase(mut buf: xmlBufPtr, mut len: size_t) -> ::c
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufLength(buf: xmlBufPtr) -> size_t {
-    let Some(buf) = (unsafe { buf.as_ref() }) else {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
         return 0 as size_t;
     };
     if buf.error != 0 {
         return 0 as size_t;
     }
-    let mut buf = *buf;
-    sync_buf_compat_fields(&mut buf);
+    sync_buf_compat_fields(buf);
     return buf.use_0;
 }
 #[no_mangle]
@@ -1716,26 +1715,24 @@ pub unsafe extern "C" fn xmlBufUse(buf: xmlBufPtr) -> size_t {
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufAvail(buf: xmlBufPtr) -> size_t {
-    let Some(buf) = (unsafe { buf.as_ref() }) else {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
         return 0 as size_t;
     };
     if buf.error != 0 {
         return 0 as size_t;
     }
-    let mut buf = *buf;
-    sync_buf_compat_fields(&mut buf);
+    sync_buf_compat_fields(buf);
     return buf.size.wrapping_sub(buf.use_0);
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlBufIsEmpty(buf: xmlBufPtr) -> ::core::ffi::c_int {
-    let Some(buf) = (unsafe { buf.as_ref() }) else {
+    let Some(buf) = (unsafe { buf.as_mut() }) else {
         return -(1 as ::core::ffi::c_int);
     };
     if buf.error != 0 {
         return -(1 as ::core::ffi::c_int);
     }
-    let mut buf = *buf;
-    sync_buf_compat_fields(&mut buf);
+    sync_buf_compat_fields(buf);
     return (buf.use_0 == 0 as size_t) as ::core::ffi::c_int;
 }
 #[no_mangle]

@@ -10,19 +10,9 @@ ARTIFACTS_ENV="$ROOT/safe/target/build-artifacts.env"
 RELEASE_BINDIR="$ROOT/safe/target/release"
 
 ensure_release_artifacts() {
-  local need_build=0
-  if [[ ! -f "$ARTIFACTS_ENV" ]]; then
-    need_build=1
-  fi
-  if [[ ! -f "$ROOT/safe/target/release/libxml2.a" || ! -f "$ROOT/safe/target/release/libxml2.so" ]]; then
-    need_build=1
-  fi
-  if [[ ! -x "$RELEASE_BINDIR/xmllint" || ! -x "$RELEASE_BINDIR/xmlcatalog" ]]; then
-    need_build=1
-  fi
-  if [[ "$need_build" -eq 1 ]]; then
-    cargo build --manifest-path "$ROOT/safe/Cargo.toml" --release --lib --bins
-  fi
+  RUSTFLAGS="${RUSTFLAGS:-} -C relocation-model=pic" \
+    cargo rustc --manifest-path "$ROOT/safe/Cargo.toml" --release --lib --crate-type staticlib
+  cargo build --manifest-path "$ROOT/safe/Cargo.toml" --release --bins
 }
 
 ensure_release_artifacts
@@ -36,11 +26,12 @@ BINDIR="$STAGE/usr/bin"
 INCLUDEDIR="$STAGE/usr/include/libxml2/libxml"
 PKGDIR="$LIBDIR/pkgconfig"
 ACLOCALDIR="$STAGE/usr/share/aclocal"
-MANDIR="$STAGE/usr/share/man/man1"
+MAN1DIR="$STAGE/usr/share/man/man1"
+MAN3DIR="$STAGE/usr/share/man/man3"
 PYTHONDIR="$STAGE/usr/lib/python3/dist-packages"
 
 rm -rf "$STAGE"
-mkdir -p "$LIBDIR" "$BINDIR" "$INCLUDEDIR" "$PKGDIR" "$ACLOCALDIR" "$MANDIR" "$PYTHONDIR"
+mkdir -p "$LIBDIR" "$BINDIR" "$INCLUDEDIR" "$PKGDIR" "$ACLOCALDIR" "$MAN1DIR" "$MAN3DIR" "$PYTHONDIR"
 
 cp "$LIBXML2_NATIVE_STATIC" "$LIBDIR/libxml2.a"
 cc -shared \
@@ -166,8 +157,10 @@ EOF
 chmod +x "$BINDIR/xml2-config"
 install -m 0755 "$RELEASE_BINDIR/xmllint" "$BINDIR/xmllint"
 install -m 0755 "$RELEASE_BINDIR/xmlcatalog" "$BINDIR/xmlcatalog"
-install -m 0644 "$ROOT/original/doc/xmllint.1" "$MANDIR/xmllint.1"
-install -m 0644 "$ROOT/original/doc/xmlcatalog.1" "$MANDIR/xmlcatalog.1"
+install -m 0644 "$ROOT/original/doc/xmllint.1" "$MAN1DIR/xmllint.1"
+install -m 0644 "$ROOT/original/doc/xmlcatalog.1" "$MAN1DIR/xmlcatalog.1"
+install -m 0644 "$ROOT/original/xml2-config.1" "$MAN1DIR/xml2-config.1"
+install -m 0644 "$ROOT/original/libxml.3" "$MAN3DIR/libxml.3"
 
 make -C "$ROOT/safe/python" \
   STAGE="$STAGE" \

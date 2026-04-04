@@ -930,11 +930,7 @@ pub unsafe extern "C" fn xmlDebugDumpDocument(output: *mut FILE, doc: xmlDocPtr)
     let mut ctxt = DumpCtxt {
         output: unsafe { output_or_stdout(output) },
         depth: 0,
-        dict: if doc.is_null() {
-            null_mut()
-        } else {
-            unsafe { (*doc).dict as *mut c_void }
-        },
+        dict: null_mut(),
         options: DUMP_TEXT_TYPE,
     };
     unsafe { dump_document(&mut ctxt, doc) };
@@ -945,11 +941,7 @@ pub unsafe extern "C" fn xmlDebugDumpDocumentHead(output: *mut FILE, doc: xmlDoc
     let ctxt = DumpCtxt {
         output: unsafe { output_or_stdout(output) },
         depth: 0,
-        dict: if doc.is_null() {
-            null_mut()
-        } else {
-            unsafe { (*doc).dict as *mut c_void }
-        },
+        dict: null_mut(),
         options: DUMP_TEXT_TYPE,
     };
     unsafe { dump_document_head(&ctxt, doc) };
@@ -990,12 +982,8 @@ pub unsafe extern "C" fn xmlDebugDumpNode(output: *mut FILE, node: xmlNodePtr, d
     let mut ctxt = DumpCtxt {
         output: unsafe { output_or_stdout(output) },
         depth,
-        dict: if node.is_null() || unsafe { (*node).doc.is_null() } {
-            null_mut()
-        } else {
-            unsafe { (*(*node).doc).dict as *mut c_void }
-        },
-        options: DUMP_TEXT_TYPE,
+        dict: null_mut(),
+        options: 0,
     };
     unsafe { dump_node(&mut ctxt, node) };
 }
@@ -1005,12 +993,8 @@ pub unsafe extern "C" fn xmlDebugDumpNodeList(output: *mut FILE, node: xmlNodePt
     let mut ctxt = DumpCtxt {
         output: unsafe { output_or_stdout(output) },
         depth,
-        dict: if node.is_null() || unsafe { (*node).doc.is_null() } {
-            null_mut()
-        } else {
-            unsafe { (*(*node).doc).dict as *mut c_void }
-        },
-        options: DUMP_TEXT_TYPE,
+        dict: null_mut(),
+        options: 0,
     };
     unsafe { dump_node_list(&mut ctxt, node) };
 }
@@ -1020,12 +1004,8 @@ pub unsafe extern "C" fn xmlDebugDumpOneNode(output: *mut FILE, node: xmlNodePtr
     let mut ctxt = DumpCtxt {
         output: unsafe { output_or_stdout(output) },
         depth,
-        dict: if node.is_null() || unsafe { (*node).doc.is_null() } {
-            null_mut()
-        } else {
-            unsafe { (*(*node).doc).dict as *mut c_void }
-        },
-        options: DUMP_TEXT_TYPE,
+        dict: null_mut(),
+        options: 0,
     };
     unsafe { dump_one_node(&mut ctxt, node) };
 }

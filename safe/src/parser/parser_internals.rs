@@ -1976,7 +1976,7 @@ pub unsafe extern "C" fn xmlParserInputGrow(
     if (*(*in_0).buf).buffer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    indx = (*in_0).cur.offset_from((*in_0).base) as ::core::ffi::c_long as size_t;
+    indx = ((*in_0).cur as usize).wrapping_sub((*in_0).base as usize) as size_t;
     if xmlBufUse((*(*in_0).buf).buffer)
         > (indx as ::core::ffi::c_uint).wrapping_add(INPUT_CHUNK as ::core::ffi::c_uint) as size_t
     {
@@ -1989,7 +1989,7 @@ pub unsafe extern "C" fn xmlParserInputGrow(
     }
     content = xmlBufContent((*(*in_0).buf).buffer as *const xmlBuf);
     if (*in_0).base != content {
-        indx = (*in_0).cur.offset_from((*in_0).base) as ::core::ffi::c_long as size_t;
+        indx = ((*in_0).cur as usize).wrapping_sub((*in_0).base as usize) as size_t;
         (*in_0).base = content;
         (*in_0).cur = content.offset(indx as isize) as *const xmlChar;
     }
@@ -2035,7 +2035,7 @@ pub unsafe extern "C" fn xmlParserInputShrink(mut in_0: xmlParserInputPtr) {
     xmlParserInputBufferRead((*in_0).buf, 2 as ::core::ffi::c_int * INPUT_CHUNK);
     content = xmlBufContent((*(*in_0).buf).buffer as *const xmlBuf);
     if (*in_0).base != content {
-        indx = (*in_0).cur.offset_from((*in_0).base) as ::core::ffi::c_long as size_t;
+        indx = ((*in_0).cur as usize).wrapping_sub((*in_0).base as usize) as size_t;
         (*in_0).base = content;
         (*in_0).cur = content.offset(indx as isize) as *const xmlChar;
     }

@@ -1,0 +1,34 @@
+#!/usr/bin/make -f
+export DH_VERBOSE=1
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+export DEB_CFLAGS_MAINT_APPEND = -Wall -O2
+export DEB_BUILD_OPTIONS += noautodbgsym
+export RUSTFLAGS := $(strip $(RUSTFLAGS) -C relocation-model=pic)
+
+include /usr/share/dpkg/architecture.mk
+
+override_dh_auto_configure:
+	: no configure step for the safe Rust-backed build
+
+override_dh_auto_build:
+	cargo rustc --manifest-path $(CURDIR)/Cargo.toml --release --lib --crate-type staticlib
+	cargo build --manifest-path $(CURDIR)/Cargo.toml --release --bins
+
+override_dh_auto_test:
+	: tests are run explicitly against the built packages
+
+override_dh_auto_install:
+	scripts/install-staging.sh $(CURDIR)/debian/tmp
+	sed -i -e 's,/lib/$(DEB_HOST_MULTIARCH),/lib,g' \
+		debian/tmp/usr/bin/xml2-config \
+		debian/tmp/usr/lib/$(DEB_HOST_MULTIARCH)/xml2Conf.sh
+
+override_dh_makeshlibs:
+	dh_makeshlibs -plibxml2 -V 'libxml2 (>= 2.9.11)' -- -c4
+	dh_makeshlibs --remaining-packages
+
+override_dh_auto_clean:
+	rm -rf $(CURDIR)/debian/tmp $(CURDIR)/target
+
+%:
+	dh $@

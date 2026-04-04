@@ -29,7 +29,7 @@ if [[ ! -f "$ROOT/dependents.json" ]]; then
   exit 1
 fi
 
-git ls-files -z -- original dependents.json | tar --null -T - -cf - | tar -xf - -C "$BUILD_CONTEXT"
+git ls-files -z -- original safe dependents.json | tar --null -T - -cf - | tar -xf - -C "$BUILD_CONTEXT"
 
 docker build -t "$IMAGE_TAG" -f - "$BUILD_CONTEXT" <<'DOCKERFILE'
 FROM ubuntu:24.04
@@ -82,7 +82,7 @@ COPY . /work
 WORKDIR /work
 DOCKERFILE
 
-docker run --rm -i "$IMAGE_TAG" bash <<'CONTAINER_SCRIPT'
+docker run --rm -i -e LIBXML_PACKAGE_MODE="$PACKAGE_MODE" "$IMAGE_TAG" bash <<'CONTAINER_SCRIPT'
 set -euo pipefail
 
 export LANG=C.UTF-8
@@ -90,6 +90,7 @@ export LC_ALL=C.UTF-8
 
 ROOT=/work
 SRC_ROOT=/tmp/libxml-original
+PACKAGE_MODE="${LIBXML_PACKAGE_MODE:-original}"
 
 log_step() {
   printf '\n==> %s\n' "$1"
@@ -158,20 +159,111 @@ build_original_libxml() {
   cd /
 }
 
-expected_libxml2_path() {
-  if [[ "$PACKAGE_MODE" == "safe" ]]; then
-    dpkg-query -L libxml2 | grep '/libxml2\.so\.2$' | head -n 1
-  else
-    printf '/usr/local/lib/libxml2.so.2\n'
-  fi
+build_safe_packages() {
+  log_step "Building safe libxml2 Debian packages"
+  apt-get update
+  if ! apt-get build-dep -y "$ROOT/safe"; then
+    mapfile -t safe_build_deps < <(python3 <<'PY'
+from pathlib import Path
+import re
+
+source_stanza = Path("/work/safe/debian/control").read_text(encoding="utf-8").split("\n\n", 1)[0]
+fields = {}
+current = None
+for line in source_stanza.splitlines():
+    if line[:1].isspace():
+        if current is None:
+            raise SystemExit(f"unexpected continuation line: {line!r}")
+        fields[current] += " " + line.strip()
+        continue
+    key, value = line.split(":", 1)
+    current = key
+    fields[current] = value.strip()
+
+mapping = {
+    "debhelper-compat": "debhelper",
+    "dh-sequence-python3": "dh-python",
 }
 
-assert_original_libxml_is_used() {
+deps = []
+for field_name in ("Build-Depends", "Build-Depends-Arch"):
+    raw = fields.get(field_name, "")
+    for clause in raw.split(","):
+        clause = re.sub(r"<[^>]+>", "", clause).strip()
+        if not clause:
+            continue
+        clause = clause.split("|", 1)[0].strip()
+        clause = re.sub(r"\[[^]]+\]", "", clause).strip()
+        clause = re.sub(r"\([^)]*\)", "", clause).strip()
+        clause = re.sub(r":\w+$", "", clause).strip()
+        clause = mapping.get(clause, clause)
+        if clause and clause not in deps:
+            deps.append(clause)
+
+print("\n".join(deps))
+PY
+)
+    if [[ ${#safe_build_deps[@]} -eq 0 ]]; then
+      printf 'failed to derive safe build dependencies from %s\n' "$ROOT/safe/debian/control" >&2
+      exit 1
+    fi
+    apt-get install -y "${safe_build_deps[@]}"
+  fi
+  "$ROOT/safe/scripts/build-deb.sh" --inside-current-env
+  "$ROOT/safe/scripts/run-debian-autopkgtests.sh" "$ROOT/safe/target/debs" --inside-current-env
+}
+
+installed_package_libxml2_paths() {
+  dpkg-query -L libxml2 | grep -E '^/(usr/)?lib/.*/libxml2\.so\.2$' | sort -u
+}
+
+binary_libxml2_path() {
+  local log_path="$1"
+
+  awk '/libxml2\.so\.2[[:space:]]*=>/ { print $3; exit }' "$log_path"
+}
+
+assert_binary_uses_expected_libxml() {
+  local binary="$1"
+  local log_path="$2"
+  local actual
+  local candidate
+
+  ldd "$binary" > "$log_path"
+  if [[ "$PACKAGE_MODE" != "safe" ]]; then
+    require_contains "$log_path" "/usr/local/lib/libxml2.so.2"
+    return
+  fi
+
+  actual="$(binary_libxml2_path "$log_path")"
+  if [[ -z "$actual" ]]; then
+    printf 'failed to determine loaded libxml2 path for %s\n' "$binary" >&2
+    printf -- '--- %s ---\n' "$log_path" >&2
+    cat "$log_path" >&2
+    exit 1
+  fi
+
+  while IFS= read -r candidate; do
+    [[ -n "$candidate" ]] || continue
+    if [[ "$actual" == "$candidate" ]]; then
+      return
+    fi
+    if [[ "$(readlink -f -- "$actual")" == "$(readlink -f -- "$candidate")" ]]; then
+      return
+    fi
+  done < <(installed_package_libxml2_paths)
+
+  printf 'loaded libxml2 path for %s is not owned by the installed replacement package: %s\n' "$binary" "$actual" >&2
+  printf 'package candidates were:\n' >&2
+  installed_package_libxml2_paths >&2
+  printf -- '--- %s ---\n' "$log_path" >&2
+  cat "$log_path" >&2
+  exit 1
+}
+
+assert_selected_libxml_is_used() {
   log_step "Verifying dynamic linker preference"
-  local expected
-  expected="$(expected_libxml2_path)"
-  ldd "$(command -v xmlstarlet)" > /tmp/xmlstarlet-ldd.log
-  require_contains /tmp/xmlstarlet-ldd.log "$expected"
+  assert_binary_uses_expected_libxml "$(command -v xmlstarlet)" /tmp/xmlstarlet-ldd.log
 }
 
 test_libvirt_daemon() {
@@ -561,6 +653,7 @@ XML
 
 test_llvm_toolchain() {
   log_step "llvm-toolchain-18"
+  local llvm_binary=/tmp/llvm-src/build/bin/llvm-mt
   mkdir -p /tmp/llvm-src
   (
     cd /tmp/llvm-src
@@ -580,22 +673,25 @@ test_llvm_toolchain() {
       -DLLVM_TARGETS_TO_BUILD=X86 \
       >/tmp/llvm-cmake.log 2>&1
     ninja -C build llvm-mt >/tmp/llvm-ninja.log 2>&1
-    ldd build/bin/llvm-mt > /tmp/llvm-ldd.log
-    build/bin/llvm-mt \
+    "$llvm_binary" \
       /manifest "$src_dir/llvm/test/tools/llvm-mt/Inputs/test_manifest.manifest" \
       /manifest "$src_dir/llvm/test/tools/llvm-mt/Inputs/additional.manifest" \
       /out:/tmp/merged.manifest \
       >/tmp/llvm-mt.log 2>&1
   )
 
-  require_contains /tmp/llvm-ldd.log "/usr/local/lib/libxml2.so.2"
+  assert_binary_uses_expected_libxml "$llvm_binary" /tmp/llvm-ldd.log
   require_contains /tmp/merged.manifest '<assemblyIdentity program="displayDriver"/>'
   require_contains /tmp/merged.manifest '<supportedOS Id="FooOS"/>'
 }
 
 validate_dependents_inventory
-build_original_libxml
-assert_original_libxml_is_used
+if [[ "$PACKAGE_MODE" == "safe" ]]; then
+  build_safe_packages
+else
+  build_original_libxml
+fi
+assert_selected_libxml_is_used
 test_libvirt_daemon
 test_postgresql
 test_php_xml

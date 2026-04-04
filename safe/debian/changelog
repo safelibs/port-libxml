@@ -1,0 +1,6 @@
+libxml2 (2.9.14+dfsg-1.3ubuntu3.7+safelibs1) noble; urgency=medium
+
+  * Package the safe Rust-backed replacement library, tools, and Python
+    bindings as drop-in libxml2 Debian packages.
+
+ -- Yans <yans@localhost>  Sat, 04 Apr 2026 12:00:00 -0700

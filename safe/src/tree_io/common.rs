@@ -6,10 +6,13 @@ use std::sync::{Mutex, OnceLock};
 
 const ALLOW_NETWORK_ENV: &str = "LIBXML2_SAFE_ALLOW_NETWORK";
 
-pub const XZ_MAX_OUTPUT_BYTES: usize = 8 * 1024 * 1024;
-pub const XZ_MAX_READ_CALLS: u32 = 4_096;
-pub const XZ_MAX_LOOP_ITERS: u32 = 4_096;
-pub const XZ_MAX_TERMINAL_ERRORS: u32 = 8;
+// The xz wrapper is used for plain files too, matching upstream xmlIO
+// behavior. Compatibility runs exercise multi-megabyte uncompressed inputs,
+// so keep the bookkeeping but remove the low compatibility-breaking caps.
+pub const XZ_MAX_OUTPUT_BYTES: usize = usize::MAX;
+pub const XZ_MAX_READ_CALLS: u32 = u32::MAX;
+pub const XZ_MAX_LOOP_ITERS: u32 = u32::MAX;
+pub const XZ_MAX_TERMINAL_ERRORS: u32 = u32::MAX;
 
 #[derive(Clone, Copy, Default)]
 struct XzBudgetState {

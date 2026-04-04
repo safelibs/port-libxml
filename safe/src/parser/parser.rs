@@ -14033,7 +14033,8 @@ unsafe extern "C" fn xmlParseAttValueInternal(
             return ::core::ptr::null_mut::<xmlChar>();
         }
         if oldbase != (*(*ctxt).input).base {
-            let mut delta: ptrdiff_t = (*(*ctxt).input).base.offset_from(oldbase) as ptrdiff_t;
+            let mut delta: ptrdiff_t =
+                ((*(*ctxt).input).base as isize).wrapping_sub(oldbase as isize) as ptrdiff_t;
             start = start.offset(delta as isize);
             in_0 = in_0.offset(delta as isize);
         }
@@ -14068,8 +14069,9 @@ unsafe extern "C" fn xmlParseAttValueInternal(
                     return ::core::ptr::null_mut::<xmlChar>();
                 }
                 if oldbase_0 != (*(*ctxt).input).base {
-                    let mut delta_0: ptrdiff_t =
-                        (*(*ctxt).input).base.offset_from(oldbase_0) as ptrdiff_t;
+                    let mut delta_0: ptrdiff_t = ((*(*ctxt).input).base as isize)
+                        .wrapping_sub(oldbase_0 as isize)
+                        as ptrdiff_t;
                     start = start.offset(delta_0 as isize);
                     in_0 = in_0.offset(delta_0 as isize);
                 }
@@ -14113,8 +14115,9 @@ unsafe extern "C" fn xmlParseAttValueInternal(
                     return ::core::ptr::null_mut::<xmlChar>();
                 }
                 if oldbase_1 != (*(*ctxt).input).base {
-                    let mut delta_1: ptrdiff_t =
-                        (*(*ctxt).input).base.offset_from(oldbase_1) as ptrdiff_t;
+                    let mut delta_1: ptrdiff_t = ((*(*ctxt).input).base as isize)
+                        .wrapping_sub(oldbase_1 as isize)
+                        as ptrdiff_t;
                     start = start.offset(delta_1 as isize);
                     in_0 = in_0.offset(delta_1 as isize);
                 }
@@ -14164,8 +14167,9 @@ unsafe extern "C" fn xmlParseAttValueInternal(
                     return ::core::ptr::null_mut::<xmlChar>();
                 }
                 if oldbase_2 != (*(*ctxt).input).base {
-                    let mut delta_2: ptrdiff_t =
-                        (*(*ctxt).input).base.offset_from(oldbase_2) as ptrdiff_t;
+                    let mut delta_2: ptrdiff_t = ((*(*ctxt).input).base as isize)
+                        .wrapping_sub(oldbase_2 as isize)
+                        as ptrdiff_t;
                     start = start.offset(delta_2 as isize);
                     in_0 = in_0.offset(delta_2 as isize);
                     last = last.offset(delta_2 as isize);
@@ -14218,8 +14222,9 @@ unsafe extern "C" fn xmlParseAttValueInternal(
                     return ::core::ptr::null_mut::<xmlChar>();
                 }
                 if oldbase_3 != (*(*ctxt).input).base {
-                    let mut delta_3: ptrdiff_t =
-                        (*(*ctxt).input).base.offset_from(oldbase_3) as ptrdiff_t;
+                    let mut delta_3: ptrdiff_t = ((*(*ctxt).input).base as isize)
+                        .wrapping_sub(oldbase_3 as isize)
+                        as ptrdiff_t;
                     start = start.offset(delta_3 as isize);
                     in_0 = in_0.offset(delta_3 as isize);
                 }
