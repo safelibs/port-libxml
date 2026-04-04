@@ -1,2 +1,3 @@
-usr/lib/python3*/*-packages/*.py*
-usr/lib/python3*/*-packages/*.so
+usr/lib/python3*/dist-packages/drv_libxml2.py
+usr/lib/python3*/dist-packages/libxml2.py
+usr/lib/python3*/dist-packages/libxml2mod.so

@@ -55,8 +55,7 @@ def build_extension(argv: list[str]) -> int:
     build_temp.mkdir(parents=True, exist_ok=True)
     build_lib.mkdir(parents=True, exist_ok=True)
 
-    ext_suffix = subprocess.check_output(["python3-config", "--extension-suffix"], text=True).strip()
-    output = build_lib / f"libxml2mod{ext_suffix}"
+    output = build_lib / "libxml2mod.so"
 
     cmd = [
         "cc",

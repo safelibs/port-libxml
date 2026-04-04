@@ -20,7 +20,7 @@ install: build
 	mkdir -p "$(SITE_PACKAGES)"
 	install -m 0644 "$(ROOT)/python/libxml2.py" "$(SITE_PACKAGES)/libxml2.py"
 	install -m 0644 "$(ROOT)/python/drv_libxml2.py" "$(SITE_PACKAGES)/drv_libxml2.py"
-	install -m 0755 "$(BUILD_ROOT)"/lib/libxml2mod*.so "$(SITE_PACKAGES)/"
+	install -m 0755 "$(BUILD_ROOT)/lib/libxml2mod.so" "$(SITE_PACKAGES)/libxml2mod.so"
 
 clean:
 	rm -rf "$(BUILD_ROOT)"
