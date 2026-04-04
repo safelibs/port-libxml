@@ -2108,142 +2108,173 @@ pub unsafe extern "C" fn __xmlSimpleError(
     mut node: xmlNodePtr,
     mut msg: *const ::core::ffi::c_char,
     mut extra: *const ::core::ffi::c_char,
-) { unsafe {
+) {
     if code == XML_ERR_NO_MEMORY as ::core::ffi::c_int {
         if !extra.is_null() {
-            __xmlRaiseError(
-                None,
-                None,
-                NULL,
-                NULL,
-                node as *mut ::core::ffi::c_void,
-                domain,
-                XML_ERR_NO_MEMORY as ::core::ffi::c_int,
-                XML_ERR_FATAL,
-                ::core::ptr::null::<::core::ffi::c_char>(),
-                0 as ::core::ffi::c_int,
-                extra,
-                ::core::ptr::null::<::core::ffi::c_char>(),
-                ::core::ptr::null::<::core::ffi::c_char>(),
-                0 as ::core::ffi::c_int,
-                0 as ::core::ffi::c_int,
-                b"Memory allocation failed : %s\n\0" as *const u8 as *const ::core::ffi::c_char,
-                extra,
-            );
+            unsafe {
+                __xmlRaiseError(
+                    None,
+                    None,
+                    NULL,
+                    NULL,
+                    node as *mut ::core::ffi::c_void,
+                    domain,
+                    XML_ERR_NO_MEMORY as ::core::ffi::c_int,
+                    XML_ERR_FATAL,
+                    ::core::ptr::null::<::core::ffi::c_char>(),
+                    0 as ::core::ffi::c_int,
+                    extra,
+                    ::core::ptr::null::<::core::ffi::c_char>(),
+                    ::core::ptr::null::<::core::ffi::c_char>(),
+                    0 as ::core::ffi::c_int,
+                    0 as ::core::ffi::c_int,
+                    b"Memory allocation failed : %s\n\0" as *const u8
+                        as *const ::core::ffi::c_char,
+                    extra,
+                );
+            }
         } else {
-            __xmlRaiseError(
-                None,
-                None,
-                NULL,
-                NULL,
-                node as *mut ::core::ffi::c_void,
-                domain,
-                XML_ERR_NO_MEMORY as ::core::ffi::c_int,
-                XML_ERR_FATAL,
-                ::core::ptr::null::<::core::ffi::c_char>(),
-                0 as ::core::ffi::c_int,
-                ::core::ptr::null::<::core::ffi::c_char>(),
-                ::core::ptr::null::<::core::ffi::c_char>(),
-                ::core::ptr::null::<::core::ffi::c_char>(),
-                0 as ::core::ffi::c_int,
-                0 as ::core::ffi::c_int,
-                b"Memory allocation failed\n\0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            unsafe {
+                __xmlRaiseError(
+                    None,
+                    None,
+                    NULL,
+                    NULL,
+                    node as *mut ::core::ffi::c_void,
+                    domain,
+                    XML_ERR_NO_MEMORY as ::core::ffi::c_int,
+                    XML_ERR_FATAL,
+                    ::core::ptr::null::<::core::ffi::c_char>(),
+                    0 as ::core::ffi::c_int,
+                    ::core::ptr::null::<::core::ffi::c_char>(),
+                    ::core::ptr::null::<::core::ffi::c_char>(),
+                    ::core::ptr::null::<::core::ffi::c_char>(),
+                    0 as ::core::ffi::c_int,
+                    0 as ::core::ffi::c_int,
+                    b"Memory allocation failed\n\0" as *const u8
+                        as *const ::core::ffi::c_char,
+                );
+            }
         }
     } else {
-        __xmlRaiseError(
-            None,
-            None,
-            NULL,
-            NULL,
-            node as *mut ::core::ffi::c_void,
-            domain,
-            code,
-            XML_ERR_ERROR,
-            ::core::ptr::null::<::core::ffi::c_char>(),
-            0 as ::core::ffi::c_int,
-            extra,
-            ::core::ptr::null::<::core::ffi::c_char>(),
-            ::core::ptr::null::<::core::ffi::c_char>(),
-            0 as ::core::ffi::c_int,
-            0 as ::core::ffi::c_int,
-            msg,
-            extra,
-        );
-    };
-}}
+        unsafe {
+            __xmlRaiseError(
+                None,
+                None,
+                NULL,
+                NULL,
+                node as *mut ::core::ffi::c_void,
+                domain,
+                code,
+                XML_ERR_ERROR,
+                ::core::ptr::null::<::core::ffi::c_char>(),
+                0 as ::core::ffi::c_int,
+                extra,
+                ::core::ptr::null::<::core::ffi::c_char>(),
+                ::core::ptr::null::<::core::ffi::c_char>(),
+                0 as ::core::ffi::c_int,
+                0 as ::core::ffi::c_int,
+                msg,
+                extra,
+            );
+        }
+    }
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlGetLastError() -> xmlErrorPtr { unsafe {
-    if (*__xmlLastError()).code == XML_ERR_OK as ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlGetLastError() -> xmlErrorPtr {
+    let last_error = unsafe { __xmlLastError() };
+    if unsafe { (*last_error).code == XML_ERR_OK as ::core::ffi::c_int } {
         return ::core::ptr::null_mut::<xmlError>();
     }
-    return __xmlLastError();
-}}
+    return last_error;
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlResetError(mut err: xmlErrorPtr) { unsafe {
+pub unsafe extern "C" fn xmlResetError(mut err: xmlErrorPtr) {
     if err.is_null() {
         return;
     }
-    if (*err).code == XML_ERR_OK as ::core::ffi::c_int {
+    if unsafe { (*err).code == XML_ERR_OK as ::core::ffi::c_int } {
         return;
     }
-    if !(*err).message.is_null() {
-        xmlFree.expect("non-null function pointer")((*err).message as *mut ::core::ffi::c_void);
+    let message = unsafe { (*err).message };
+    if !message.is_null() {
+        unsafe {
+            xmlFree.expect("non-null function pointer")(message as *mut ::core::ffi::c_void);
+        }
     }
-    if !(*err).file.is_null() {
-        xmlFree.expect("non-null function pointer")((*err).file as *mut ::core::ffi::c_void);
+    let file = unsafe { (*err).file };
+    if !file.is_null() {
+        unsafe {
+            xmlFree.expect("non-null function pointer")(file as *mut ::core::ffi::c_void);
+        }
     }
-    if !(*err).str1.is_null() {
-        xmlFree.expect("non-null function pointer")((*err).str1 as *mut ::core::ffi::c_void);
+    let str1 = unsafe { (*err).str1 };
+    if !str1.is_null() {
+        unsafe {
+            xmlFree.expect("non-null function pointer")(str1 as *mut ::core::ffi::c_void);
+        }
     }
-    if !(*err).str2.is_null() {
-        xmlFree.expect("non-null function pointer")((*err).str2 as *mut ::core::ffi::c_void);
+    let str2 = unsafe { (*err).str2 };
+    if !str2.is_null() {
+        unsafe {
+            xmlFree.expect("non-null function pointer")(str2 as *mut ::core::ffi::c_void);
+        }
     }
-    if !(*err).str3.is_null() {
-        xmlFree.expect("non-null function pointer")((*err).str3 as *mut ::core::ffi::c_void);
+    let str3 = unsafe { (*err).str3 };
+    if !str3.is_null() {
+        unsafe {
+            xmlFree.expect("non-null function pointer")(str3 as *mut ::core::ffi::c_void);
+        }
     }
-    memset(
-        err as *mut ::core::ffi::c_void,
-        0 as ::core::ffi::c_int,
-        ::core::mem::size_of::<xmlError>() as size_t,
-    );
-    (*err).code = XML_ERR_OK as ::core::ffi::c_int;
-}}
+    unsafe {
+        memset(
+            err as *mut ::core::ffi::c_void,
+            0 as ::core::ffi::c_int,
+            ::core::mem::size_of::<xmlError>() as size_t,
+        );
+        (*err).code = XML_ERR_OK as ::core::ffi::c_int;
+    }
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlResetLastError() { unsafe {
-    if (*__xmlLastError()).code == XML_ERR_OK as ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlResetLastError() {
+    let last_error = unsafe { __xmlLastError() };
+    if unsafe { (*last_error).code == XML_ERR_OK as ::core::ffi::c_int } {
         return;
     }
-    xmlResetError(__xmlLastError());
-}}
+    unsafe { xmlResetError(last_error) };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlCtxtGetLastError(mut ctx: *mut ::core::ffi::c_void) -> xmlErrorPtr { unsafe {
+pub unsafe extern "C" fn xmlCtxtGetLastError(mut ctx: *mut ::core::ffi::c_void) -> xmlErrorPtr {
     let mut ctxt: xmlParserCtxtPtr = ctx as xmlParserCtxtPtr;
     if ctxt.is_null() {
         return ::core::ptr::null_mut::<xmlError>();
     }
-    if (*ctxt).lastError.code == XML_ERR_OK as ::core::ffi::c_int {
+    if unsafe { (*ctxt).lastError.code == XML_ERR_OK as ::core::ffi::c_int } {
         return ::core::ptr::null_mut::<xmlError>();
     }
-    return &raw mut (*ctxt).lastError;
-}}
+    return unsafe { &raw mut (*ctxt).lastError };
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlCtxtResetLastError(mut ctx: *mut ::core::ffi::c_void) { unsafe {
+pub unsafe extern "C" fn xmlCtxtResetLastError(mut ctx: *mut ::core::ffi::c_void) {
     let mut ctxt: xmlParserCtxtPtr = ctx as xmlParserCtxtPtr;
     if ctxt.is_null() {
         return;
     }
-    (*ctxt).errNo = XML_ERR_OK as ::core::ffi::c_int;
-    if (*ctxt).lastError.code == XML_ERR_OK as ::core::ffi::c_int {
+    unsafe {
+        (*ctxt).errNo = XML_ERR_OK as ::core::ffi::c_int;
+    }
+    if unsafe { (*ctxt).lastError.code == XML_ERR_OK as ::core::ffi::c_int } {
         return;
     }
-    xmlResetError(&raw mut (*ctxt).lastError);
-}}
+    unsafe {
+        xmlResetError(&raw mut (*ctxt).lastError);
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlCopyError(
     mut from: xmlErrorPtr,
     mut to: xmlErrorPtr,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut message: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut file: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut str1: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
@@ -2252,39 +2283,58 @@ pub unsafe extern "C" fn xmlCopyError(
     if from.is_null() || to.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    message = xmlStrdup((*from).message as *mut xmlChar) as *mut ::core::ffi::c_char;
-    file = xmlStrdup((*from).file as *mut xmlChar) as *mut ::core::ffi::c_char;
-    str1 = xmlStrdup((*from).str1 as *mut xmlChar) as *mut ::core::ffi::c_char;
-    str2 = xmlStrdup((*from).str2 as *mut xmlChar) as *mut ::core::ffi::c_char;
-    str3 = xmlStrdup((*from).str3 as *mut xmlChar) as *mut ::core::ffi::c_char;
-    if !(*to).message.is_null() {
-        xmlFree.expect("non-null function pointer")((*to).message as *mut ::core::ffi::c_void);
+    unsafe {
+        message = xmlStrdup((*from).message as *mut xmlChar) as *mut ::core::ffi::c_char;
+        file = xmlStrdup((*from).file as *mut xmlChar) as *mut ::core::ffi::c_char;
+        str1 = xmlStrdup((*from).str1 as *mut xmlChar) as *mut ::core::ffi::c_char;
+        str2 = xmlStrdup((*from).str2 as *mut xmlChar) as *mut ::core::ffi::c_char;
+        str3 = xmlStrdup((*from).str3 as *mut xmlChar) as *mut ::core::ffi::c_char;
     }
-    if !(*to).file.is_null() {
-        xmlFree.expect("non-null function pointer")((*to).file as *mut ::core::ffi::c_void);
+    let old_message = unsafe { (*to).message };
+    if !old_message.is_null() {
+        unsafe {
+            xmlFree.expect("non-null function pointer")(old_message as *mut ::core::ffi::c_void);
+        }
     }
-    if !(*to).str1.is_null() {
-        xmlFree.expect("non-null function pointer")((*to).str1 as *mut ::core::ffi::c_void);
+    let old_file = unsafe { (*to).file };
+    if !old_file.is_null() {
+        unsafe {
+            xmlFree.expect("non-null function pointer")(old_file as *mut ::core::ffi::c_void);
+        }
     }
-    if !(*to).str2.is_null() {
-        xmlFree.expect("non-null function pointer")((*to).str2 as *mut ::core::ffi::c_void);
+    let old_str1 = unsafe { (*to).str1 };
+    if !old_str1.is_null() {
+        unsafe {
+            xmlFree.expect("non-null function pointer")(old_str1 as *mut ::core::ffi::c_void);
+        }
     }
-    if !(*to).str3.is_null() {
-        xmlFree.expect("non-null function pointer")((*to).str3 as *mut ::core::ffi::c_void);
+    let old_str2 = unsafe { (*to).str2 };
+    if !old_str2.is_null() {
+        unsafe {
+            xmlFree.expect("non-null function pointer")(old_str2 as *mut ::core::ffi::c_void);
+        }
     }
-    (*to).domain = (*from).domain;
-    (*to).code = (*from).code;
-    (*to).level = (*from).level;
-    (*to).line = (*from).line;
-    (*to).node = (*from).node;
-    (*to).int1 = (*from).int1;
-    (*to).int2 = (*from).int2;
-    (*to).node = (*from).node;
-    (*to).ctxt = (*from).ctxt;
-    (*to).message = message;
-    (*to).file = file;
-    (*to).str1 = str1;
-    (*to).str2 = str2;
-    (*to).str3 = str3;
+    let old_str3 = unsafe { (*to).str3 };
+    if !old_str3.is_null() {
+        unsafe {
+            xmlFree.expect("non-null function pointer")(old_str3 as *mut ::core::ffi::c_void);
+        }
+    }
+    unsafe {
+        (*to).domain = (*from).domain;
+        (*to).code = (*from).code;
+        (*to).level = (*from).level;
+        (*to).line = (*from).line;
+        (*to).node = (*from).node;
+        (*to).int1 = (*from).int1;
+        (*to).int2 = (*from).int2;
+        (*to).node = (*from).node;
+        (*to).ctxt = (*from).ctxt;
+        (*to).message = message;
+        (*to).file = file;
+        (*to).str1 = str1;
+        (*to).str2 = str2;
+        (*to).str3 = str3;
+    }
     return 0 as ::core::ffi::c_int;
-}}
+}

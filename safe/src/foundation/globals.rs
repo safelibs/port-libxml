@@ -722,11 +722,13 @@ pub const BASE_BUFFER_SIZE: ::core::ffi::c_int = 4096 as ::core::ffi::c_int;
 pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 static mut xmlThrDefMutex: xmlMutexPtr = ::core::ptr::null::<xmlMutex>() as *mut xmlMutex;
 #[no_mangle]
-pub unsafe extern "C" fn xmlInitGlobals() { unsafe {
-    if xmlThrDefMutex.is_null() {
-        xmlThrDefMutex = xmlNewMutex();
+pub unsafe extern "C" fn xmlInitGlobals() {
+    if unsafe { xmlThrDefMutex.is_null() } {
+        unsafe {
+            xmlThrDefMutex = xmlNewMutex();
+        }
     }
-}}
+}
 #[no_mangle]
 pub static mut xmlFree: xmlFreeFunc =
     unsafe { Some(free as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()) };
@@ -1314,216 +1316,236 @@ pub static mut docbDefaultSAXHandler: xmlSAXHandlerV1 = unsafe {
     }
 };
 #[no_mangle]
-pub unsafe extern "C" fn xmlInitializeGlobalState(mut gs: xmlGlobalStatePtr) { unsafe {
-    if xmlThrDefMutex.is_null() {
-        xmlInitGlobals();
+pub unsafe extern "C" fn xmlInitializeGlobalState(mut gs: xmlGlobalStatePtr) {
+    if unsafe { xmlThrDefMutex.is_null() } {
+        unsafe { xmlInitGlobals() };
     }
-    xmlMutexLock(xmlThrDefMutex);
-    initdocbDefaultSAXHandler(&raw mut (*gs).docbDefaultSAXHandler);
-    inithtmlDefaultSAXHandler(&raw mut (*gs).htmlDefaultSAXHandler);
-    (*gs).oldXMLWDcompatibility = 0 as ::core::ffi::c_int;
-    (*gs).xmlBufferAllocScheme = xmlBufferAllocSchemeThrDef;
-    (*gs).xmlDefaultBufferSize = xmlDefaultBufferSizeThrDef;
-    initxmlDefaultSAXHandler(&raw mut (*gs).xmlDefaultSAXHandler, 1 as ::core::ffi::c_int);
-    (*gs).xmlDefaultSAXLocator.getPublicId = Some(
-        xmlSAX2GetPublicId as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    )
-        as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>;
-    (*gs).xmlDefaultSAXLocator.getSystemId = Some(
-        xmlSAX2GetSystemId as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    )
-        as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>;
-    (*gs).xmlDefaultSAXLocator.getLineNumber = Some(
-        xmlSAX2GetLineNumber
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    )
-        as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
-    (*gs).xmlDefaultSAXLocator.getColumnNumber = Some(
-        xmlSAX2GetColumnNumber
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    )
-        as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
-    (*gs).xmlDoValidityCheckingDefaultValue = xmlDoValidityCheckingDefaultValueThrDef;
-    (*gs).xmlFree = ::core::mem::transmute::<
-        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>,
-        xmlFreeFunc,
-    >(Some(
-        free as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ));
-    (*gs).xmlMalloc = ::core::mem::transmute::<
-        Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void>,
-        xmlMallocFunc,
-    >(Some(
-        malloc as unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void,
-    ));
-    (*gs).xmlMallocAtomic = ::core::mem::transmute::<
-        Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void>,
-        xmlMallocFunc,
-    >(Some(
-        malloc as unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void,
-    ));
-    (*gs).xmlRealloc = ::core::mem::transmute::<
-        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t) -> *mut ::core::ffi::c_void>,
-        xmlReallocFunc,
-    >(Some(
-        realloc
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t) -> *mut ::core::ffi::c_void,
-    ));
-    (*gs).xmlMemStrdup = ::core::mem::transmute::<
-        Option<unsafe extern "C" fn(*const xmlChar) -> *mut xmlChar>,
-        xmlStrdupFunc,
-    >(Some(
-        xmlStrdup as unsafe extern "C" fn(*const xmlChar) -> *mut xmlChar,
-    ));
-    (*gs).xmlGetWarningsDefaultValue = xmlGetWarningsDefaultValueThrDef;
-    (*gs).xmlIndentTreeOutput = xmlIndentTreeOutputThrDef;
-    (*gs).xmlTreeIndentString = xmlTreeIndentStringThrDef;
-    (*gs).xmlKeepBlanksDefaultValue = xmlKeepBlanksDefaultValueThrDef;
-    (*gs).xmlLineNumbersDefaultValue = xmlLineNumbersDefaultValueThrDef;
-    (*gs).xmlLoadExtDtdDefaultValue = xmlLoadExtDtdDefaultValueThrDef;
-    (*gs).xmlParserDebugEntities = xmlParserDebugEntitiesThrDef;
-    (*gs).xmlParserVersion = LIBXML_VERSION_STRING.as_ptr();
-    (*gs).xmlPedanticParserDefaultValue = xmlPedanticParserDefaultValueThrDef;
-    (*gs).xmlSaveNoEmptyTags = xmlSaveNoEmptyTagsThrDef;
-    (*gs).xmlSubstituteEntitiesDefaultValue = xmlSubstituteEntitiesDefaultValueThrDef;
-    (*gs).xmlGenericError = xmlGenericErrorThrDef;
-    (*gs).xmlStructuredError = xmlStructuredErrorThrDef;
-    (*gs).xmlGenericErrorContext = xmlGenericErrorContextThrDef;
-    (*gs).xmlStructuredErrorContext = xmlStructuredErrorContextThrDef;
-    (*gs).xmlRegisterNodeDefaultValue = xmlRegisterNodeDefaultValueThrDef;
-    (*gs).xmlDeregisterNodeDefaultValue = xmlDeregisterNodeDefaultValueThrDef;
-    (*gs).xmlParserInputBufferCreateFilenameValue = xmlParserInputBufferCreateFilenameValueThrDef;
-    (*gs).xmlOutputBufferCreateFilenameValue = xmlOutputBufferCreateFilenameValueThrDef;
-    memset(
-        &raw mut (*gs).xmlLastError as *mut ::core::ffi::c_void,
-        0 as ::core::ffi::c_int,
-        ::core::mem::size_of::<xmlError>() as size_t,
-    );
-    xmlMutexUnlock(xmlThrDefMutex);
-}}
+    unsafe {
+        xmlMutexLock(xmlThrDefMutex);
+        initdocbDefaultSAXHandler(&raw mut (*gs).docbDefaultSAXHandler);
+        inithtmlDefaultSAXHandler(&raw mut (*gs).htmlDefaultSAXHandler);
+        (*gs).oldXMLWDcompatibility = 0 as ::core::ffi::c_int;
+        (*gs).xmlBufferAllocScheme = xmlBufferAllocSchemeThrDef;
+        (*gs).xmlDefaultBufferSize = xmlDefaultBufferSizeThrDef;
+        initxmlDefaultSAXHandler(&raw mut (*gs).xmlDefaultSAXHandler, 1 as ::core::ffi::c_int);
+        (*gs).xmlDefaultSAXLocator.getPublicId = Some(
+            xmlSAX2GetPublicId as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
+        ) as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>;
+        (*gs).xmlDefaultSAXLocator.getSystemId = Some(
+            xmlSAX2GetSystemId as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
+        ) as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>;
+        (*gs).xmlDefaultSAXLocator.getLineNumber = Some(
+            xmlSAX2GetLineNumber
+                as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
+        ) as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+        (*gs).xmlDefaultSAXLocator.getColumnNumber = Some(
+            xmlSAX2GetColumnNumber
+                as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
+        ) as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+        (*gs).xmlDoValidityCheckingDefaultValue = xmlDoValidityCheckingDefaultValueThrDef;
+        (*gs).xmlFree = ::core::mem::transmute::<
+            Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>,
+            xmlFreeFunc,
+        >(Some(
+            free as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
+        ));
+        (*gs).xmlMalloc = ::core::mem::transmute::<
+            Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void>,
+            xmlMallocFunc,
+        >(Some(
+            malloc as unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void,
+        ));
+        (*gs).xmlMallocAtomic = ::core::mem::transmute::<
+            Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void>,
+            xmlMallocFunc,
+        >(Some(
+            malloc as unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void,
+        ));
+        (*gs).xmlRealloc = ::core::mem::transmute::<
+            Option<unsafe extern "C" fn(
+                *mut ::core::ffi::c_void,
+                size_t,
+            ) -> *mut ::core::ffi::c_void>,
+            xmlReallocFunc,
+        >(Some(
+            realloc
+                as unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t) -> *mut ::core::ffi::c_void,
+        ));
+        (*gs).xmlMemStrdup = ::core::mem::transmute::<
+            Option<unsafe extern "C" fn(*const xmlChar) -> *mut xmlChar>,
+            xmlStrdupFunc,
+        >(Some(
+            xmlStrdup as unsafe extern "C" fn(*const xmlChar) -> *mut xmlChar,
+        ));
+        (*gs).xmlGetWarningsDefaultValue = xmlGetWarningsDefaultValueThrDef;
+        (*gs).xmlIndentTreeOutput = xmlIndentTreeOutputThrDef;
+        (*gs).xmlTreeIndentString = xmlTreeIndentStringThrDef;
+        (*gs).xmlKeepBlanksDefaultValue = xmlKeepBlanksDefaultValueThrDef;
+        (*gs).xmlLineNumbersDefaultValue = xmlLineNumbersDefaultValueThrDef;
+        (*gs).xmlLoadExtDtdDefaultValue = xmlLoadExtDtdDefaultValueThrDef;
+        (*gs).xmlParserDebugEntities = xmlParserDebugEntitiesThrDef;
+        (*gs).xmlParserVersion = LIBXML_VERSION_STRING.as_ptr();
+        (*gs).xmlPedanticParserDefaultValue = xmlPedanticParserDefaultValueThrDef;
+        (*gs).xmlSaveNoEmptyTags = xmlSaveNoEmptyTagsThrDef;
+        (*gs).xmlSubstituteEntitiesDefaultValue = xmlSubstituteEntitiesDefaultValueThrDef;
+        (*gs).xmlGenericError = xmlGenericErrorThrDef;
+        (*gs).xmlStructuredError = xmlStructuredErrorThrDef;
+        (*gs).xmlGenericErrorContext = xmlGenericErrorContextThrDef;
+        (*gs).xmlStructuredErrorContext = xmlStructuredErrorContextThrDef;
+        (*gs).xmlRegisterNodeDefaultValue = xmlRegisterNodeDefaultValueThrDef;
+        (*gs).xmlDeregisterNodeDefaultValue = xmlDeregisterNodeDefaultValueThrDef;
+        (*gs).xmlParserInputBufferCreateFilenameValue =
+            xmlParserInputBufferCreateFilenameValueThrDef;
+        (*gs).xmlOutputBufferCreateFilenameValue = xmlOutputBufferCreateFilenameValueThrDef;
+        memset(
+            &raw mut (*gs).xmlLastError as *mut ::core::ffi::c_void,
+            0 as ::core::ffi::c_int,
+            ::core::mem::size_of::<xmlError>() as size_t,
+        );
+        xmlMutexUnlock(xmlThrDefMutex);
+    }
+}
 #[no_mangle]
-pub unsafe extern "C" fn xmlCleanupGlobals() { unsafe {
-    xmlResetError(&raw mut xmlLastError);
-    if !xmlThrDefMutex.is_null() {
-        xmlFreeMutex(xmlThrDefMutex);
-        xmlThrDefMutex = ::core::ptr::null_mut::<xmlMutex>();
+pub unsafe extern "C" fn xmlCleanupGlobals() {
+    unsafe {
+        xmlResetError(&raw mut xmlLastError);
+        if !xmlThrDefMutex.is_null() {
+            xmlFreeMutex(xmlThrDefMutex);
+            xmlThrDefMutex = ::core::ptr::null_mut::<xmlMutex>();
+        }
+        __xmlGlobalInitMutexDestroy();
     }
-    __xmlGlobalInitMutexDestroy();
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlThrDefSetGenericErrorFunc(
     mut ctx: *mut ::core::ffi::c_void,
     mut handler: xmlGenericErrorFunc,
-) { unsafe {
-    xmlMutexLock(xmlThrDefMutex);
-    xmlGenericErrorContextThrDef = ctx;
-    if handler.is_some() {
-        xmlGenericErrorThrDef = handler;
-    } else {
-        xmlGenericErrorThrDef = Some(
-            xmlGenericErrorDefaultFunc
-                as unsafe extern "C" fn(
-                    *mut ::core::ffi::c_void,
-                    *const ::core::ffi::c_char,
-                    ...
-                ) -> (),
-        ) as xmlGenericErrorFunc;
+) {
+    unsafe {
+        xmlMutexLock(xmlThrDefMutex);
+        xmlGenericErrorContextThrDef = ctx;
+        if handler.is_some() {
+            xmlGenericErrorThrDef = handler;
+        } else {
+            xmlGenericErrorThrDef = Some(
+                xmlGenericErrorDefaultFunc
+                    as unsafe extern "C" fn(
+                        *mut ::core::ffi::c_void,
+                        *const ::core::ffi::c_char,
+                        ...
+                    ) -> (),
+            ) as xmlGenericErrorFunc;
+        }
+        xmlMutexUnlock(xmlThrDefMutex);
     }
-    xmlMutexUnlock(xmlThrDefMutex);
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlThrDefSetStructuredErrorFunc(
     mut ctx: *mut ::core::ffi::c_void,
     mut handler: xmlStructuredErrorFunc,
-) { unsafe {
-    xmlMutexLock(xmlThrDefMutex);
-    xmlStructuredErrorContextThrDef = ctx;
-    xmlStructuredErrorThrDef = handler;
-    xmlMutexUnlock(xmlThrDefMutex);
-}}
+) {
+    unsafe {
+        xmlMutexLock(xmlThrDefMutex);
+        xmlStructuredErrorContextThrDef = ctx;
+        xmlStructuredErrorThrDef = handler;
+        xmlMutexUnlock(xmlThrDefMutex);
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlRegisterNodeDefault(
     mut func: xmlRegisterNodeFunc,
-) -> xmlRegisterNodeFunc { unsafe {
-    let mut old: xmlRegisterNodeFunc = xmlRegisterNodeDefaultValue;
-    __xmlRegisterCallbacks = 1 as ::core::ffi::c_int;
-    xmlRegisterNodeDefaultValue = func;
+) -> xmlRegisterNodeFunc {
+    let old = unsafe { xmlRegisterNodeDefaultValue };
+    unsafe {
+        __xmlRegisterCallbacks = 1 as ::core::ffi::c_int;
+        xmlRegisterNodeDefaultValue = func;
+    }
     return old;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlThrDefRegisterNodeDefault(
     mut func: xmlRegisterNodeFunc,
-) -> xmlRegisterNodeFunc { unsafe {
-    let mut old: xmlRegisterNodeFunc = None;
-    xmlMutexLock(xmlThrDefMutex);
-    old = xmlRegisterNodeDefaultValueThrDef;
-    __xmlRegisterCallbacks = 1 as ::core::ffi::c_int;
-    xmlRegisterNodeDefaultValueThrDef = func;
-    xmlMutexUnlock(xmlThrDefMutex);
+) -> xmlRegisterNodeFunc {
+    let old: xmlRegisterNodeFunc;
+    unsafe {
+        xmlMutexLock(xmlThrDefMutex);
+        old = xmlRegisterNodeDefaultValueThrDef;
+        __xmlRegisterCallbacks = 1 as ::core::ffi::c_int;
+        xmlRegisterNodeDefaultValueThrDef = func;
+        xmlMutexUnlock(xmlThrDefMutex);
+    }
     return old;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDeregisterNodeDefault(
     mut func: xmlDeregisterNodeFunc,
-) -> xmlDeregisterNodeFunc { unsafe {
-    let mut old: xmlDeregisterNodeFunc = xmlDeregisterNodeDefaultValue;
-    __xmlRegisterCallbacks = 1 as ::core::ffi::c_int;
-    xmlDeregisterNodeDefaultValue = func;
+) -> xmlDeregisterNodeFunc {
+    let old = unsafe { xmlDeregisterNodeDefaultValue };
+    unsafe {
+        __xmlRegisterCallbacks = 1 as ::core::ffi::c_int;
+        xmlDeregisterNodeDefaultValue = func;
+    }
     return old;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlThrDefDeregisterNodeDefault(
     mut func: xmlDeregisterNodeFunc,
-) -> xmlDeregisterNodeFunc { unsafe {
-    let mut old: xmlDeregisterNodeFunc = None;
-    xmlMutexLock(xmlThrDefMutex);
-    old = xmlDeregisterNodeDefaultValueThrDef;
-    __xmlRegisterCallbacks = 1 as ::core::ffi::c_int;
-    xmlDeregisterNodeDefaultValueThrDef = func;
-    xmlMutexUnlock(xmlThrDefMutex);
+) -> xmlDeregisterNodeFunc {
+    let old: xmlDeregisterNodeFunc;
+    unsafe {
+        xmlMutexLock(xmlThrDefMutex);
+        old = xmlDeregisterNodeDefaultValueThrDef;
+        __xmlRegisterCallbacks = 1 as ::core::ffi::c_int;
+        xmlDeregisterNodeDefaultValueThrDef = func;
+        xmlMutexUnlock(xmlThrDefMutex);
+    }
     return old;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlThrDefParserInputBufferCreateFilenameDefault(
     mut func: xmlParserInputBufferCreateFilenameFunc,
-) -> xmlParserInputBufferCreateFilenameFunc { unsafe {
+) -> xmlParserInputBufferCreateFilenameFunc {
     let mut old: xmlParserInputBufferCreateFilenameFunc = None;
-    xmlMutexLock(xmlThrDefMutex);
-    old = xmlParserInputBufferCreateFilenameValueThrDef;
-    if old.is_none() {
-        old = Some(
-            __xmlParserInputBufferCreateFilename
-                as unsafe extern "C" fn(
-                    *const ::core::ffi::c_char,
-                    xmlCharEncoding,
-                ) -> xmlParserInputBufferPtr,
-        ) as xmlParserInputBufferCreateFilenameFunc;
+    unsafe {
+        xmlMutexLock(xmlThrDefMutex);
+        old = xmlParserInputBufferCreateFilenameValueThrDef;
+        if old.is_none() {
+            old = Some(
+                __xmlParserInputBufferCreateFilename
+                    as unsafe extern "C" fn(
+                        *const ::core::ffi::c_char,
+                        xmlCharEncoding,
+                    ) -> xmlParserInputBufferPtr,
+            ) as xmlParserInputBufferCreateFilenameFunc;
+        }
+        xmlParserInputBufferCreateFilenameValueThrDef = func;
+        xmlMutexUnlock(xmlThrDefMutex);
     }
-    xmlParserInputBufferCreateFilenameValueThrDef = func;
-    xmlMutexUnlock(xmlThrDefMutex);
     return old;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlThrDefOutputBufferCreateFilenameDefault(
     mut func: xmlOutputBufferCreateFilenameFunc,
-) -> xmlOutputBufferCreateFilenameFunc { unsafe {
+) -> xmlOutputBufferCreateFilenameFunc {
     let mut old: xmlOutputBufferCreateFilenameFunc = None;
-    xmlMutexLock(xmlThrDefMutex);
-    old = xmlOutputBufferCreateFilenameValueThrDef;
-    if old.is_none() {
-        old = Some(
-            __xmlOutputBufferCreateFilename
-                as unsafe extern "C" fn(
-                    *const ::core::ffi::c_char,
-                    xmlCharEncodingHandlerPtr,
-                    ::core::ffi::c_int,
-                ) -> xmlOutputBufferPtr,
-        ) as xmlOutputBufferCreateFilenameFunc;
+    unsafe {
+        xmlMutexLock(xmlThrDefMutex);
+        old = xmlOutputBufferCreateFilenameValueThrDef;
+        if old.is_none() {
+            old = Some(
+                __xmlOutputBufferCreateFilename
+                    as unsafe extern "C" fn(
+                        *const ::core::ffi::c_char,
+                        xmlCharEncodingHandlerPtr,
+                        ::core::ffi::c_int,
+                    ) -> xmlOutputBufferPtr,
+            ) as xmlOutputBufferCreateFilenameFunc;
+        }
+        xmlOutputBufferCreateFilenameValueThrDef = func;
+        xmlMutexUnlock(xmlThrDefMutex);
     }
-    xmlOutputBufferCreateFilenameValueThrDef = func;
-    xmlMutexUnlock(xmlThrDefMutex);
     return old;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn __docbDefaultSAXHandler() -> *mut xmlSAXHandlerV1 { unsafe {
     if xmlIsMainThread() != 0 {
