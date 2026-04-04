@@ -135,9 +135,21 @@ def compile_entry(entry: dict, target_dir: Path, mode: str) -> Path:
     )
     return output
 
+def stage_helper_dsos(binary: Path, entry: dict, cwd: Path) -> None:
+    helper_dsos = entry.get("helper_dsos", [])
+    if not helper_dsos:
+        return
+    helper_dir = cwd / ".libs"
+    helper_dir.mkdir(parents=True, exist_ok=True)
+    for helper in helper_dsos:
+        source = binary.parent / f"{helper}.so"
+        dest = helper_dir / f"{helper}.so"
+        shutil.copy2(source, dest)
+
 def run_entry(binary: Path, entry: dict, mode: str) -> subprocess.CompletedProcess[str]:
     cwd = root / entry["cwd"]
     cwd.mkdir(parents=True, exist_ok=True)
+    stage_helper_dsos(binary, entry, cwd)
     env = os.environ.copy()
     env.update(entry.get("env", {}))
     if mode == "safe":
