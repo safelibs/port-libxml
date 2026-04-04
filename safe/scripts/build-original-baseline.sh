@@ -73,6 +73,46 @@ ensure_makefile_test_target() {
   record_oracle "original/testSAX" "materialized" "built explicitly with make testSAX"
 }
 
+ensure_original_test_helpers() {
+  local helpers=(
+    "$ORIGINAL/.libs/testSAX|original/.libs/testSAX|testSAX"
+    "$ORIGINAL/.libs/testXPath|original/.libs/testXPath|testXPath"
+    "$ORIGINAL/.libs/testHTML|original/.libs/testHTML|testHTML"
+    "$ORIGINAL/.libs/testC14N|original/.libs/testC14N|testC14N"
+    "$ORIGINAL/.libs/testRegexp|original/.libs/testRegexp|testRegexp"
+    "$ORIGINAL/.libs/testAutomata|original/.libs/testAutomata|testAutomata"
+    "$ORIGINAL/.libs/testModule|original/.libs/testModule|testModule"
+    "$ORIGINAL/.libs/testdso.so|original/.libs/testdso.so|testdso.la"
+  )
+  local missing=()
+  local entry path label target
+
+  for entry in "${helpers[@]}"; do
+    IFS='|' read -r path label target <<<"$entry"
+    if have_file "$path"; then
+      record_oracle "$label" "found" "preexisting helper oracle"
+    else
+      missing+=("$entry")
+    fi
+  done
+
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    (
+      cd "$ORIGINAL"
+      make -j"$(nproc)" testSAX testXPath testHTML testC14N testRegexp testAutomata testModule testdso.la
+    )
+  fi
+
+  for entry in "${missing[@]}"; do
+    IFS='|' read -r path label target <<<"$entry"
+    if ! have_file "$path"; then
+      printf 'failed to materialize %s at %s\n' "$label" "$path" >&2
+      exit 1
+    fi
+    record_oracle "$label" "materialized" "built explicitly with make $target"
+  done
+}
+
 ensure_dba100000() {
   if have_file "$ORIGINAL/dba100000.xml"; then
     record_oracle "original/dba100000.xml" "found" "preexisting generated corpus"
@@ -99,6 +139,7 @@ ensure_file "$ORIGINAL/xml2-config" "original/xml2-config"
 ensure_file "$ORIGINAL/xml2Conf.sh" "original/xml2Conf.sh"
 ensure_file "$ORIGINAL/libxml-2.0.pc" "original/libxml-2.0.pc"
 ensure_makefile_test_target
+ensure_original_test_helpers
 ensure_dba100000
 
 for optional in \

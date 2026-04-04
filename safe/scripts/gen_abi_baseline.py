@@ -381,13 +381,11 @@ def resolve_install_entry(package: str, line: str, triplet: str, version: str) -
         return ["/usr/bin/xmllint"]
 
     if package == "python3-libxml2" and line == "usr/lib/python3*/*-packages/*.py*":
-        python_dir = python_install_dir()
+        python_dir = python_install_dir_from_manifest(line)
         return [python_dir] + [f"{python_dir}/{name}" for name in parse_makefile_words(ORIGINAL / "python" / "Makefile.am", "dist_python_DATA")]
     if package == "python3-libxml2" and line == "usr/lib/python3*/*-packages/*.so":
-        python_dir = python_install_dir()
-        module_names = sorted(path.name for path in (ORIGINAL / "python" / ".libs").glob("libxml2mod*.so"))
-        if not module_names:
-            module_names = [Path(name).stem + ".so" for name in parse_makefile_words(ORIGINAL / "python" / "Makefile.am", "python_LTLIBRARIES")]
+        python_dir = python_install_dir_from_manifest(line)
+        module_names = [Path(name).stem + ".so" for name in parse_makefile_words(ORIGINAL / "python" / "Makefile.am", "python_LTLIBRARIES")]
         return [python_dir] + [f"{python_dir}/{name}" for name in module_names]
 
     raise SystemExit(f"unhandled install manifest entry {package}: {line}")
@@ -400,15 +398,10 @@ def resolve_manpage_entry(line: str) -> list[str]:
     return [str(Path(path).parent), path]
 
 
-def python_install_dir() -> str:
-    text = (ORIGINAL / "python" / "Makefile").read_text(encoding="utf-8")
-    match = re.search(r"^PYTHON_SITE_PACKAGES\s*=\s*(.+)$", text, re.M)
-    if not match:
-        raise SystemExit("failed to determine Python install dir from original/python/Makefile")
-    value = match.group(1).strip()
-    value = value.replace("${exec_prefix}", "/usr").replace("${prefix}", "/usr")
-    value = value.replace("/usr/local", "/usr").replace("site-packages", "dist-packages")
-    return value
+def python_install_dir_from_manifest(pattern: str) -> str:
+    parent = Path(pattern).parent.as_posix()
+    parent = parent.replace("python3*", "python3").replace("*-packages", "dist-packages")
+    return "/" + parent.lstrip("/")
 
 
 def parse_makefile_words(path: Path, variable: str) -> list[str]:

@@ -10,6 +10,14 @@ original/xml2-config	found	preexisting local oracle
 original/xml2Conf.sh	found	preexisting local oracle
 original/libxml-2.0.pc	found	preexisting local oracle
 original/testSAX	found	preexisting explicit target
+original/.libs/testSAX	found	preexisting helper oracle
+original/.libs/testXPath	found	preexisting helper oracle
+original/.libs/testHTML	found	preexisting helper oracle
+original/.libs/testC14N	found	preexisting helper oracle
+original/.libs/testRegexp	found	preexisting helper oracle
+original/.libs/testAutomata	found	preexisting helper oracle
+original/.libs/testModule	found	preexisting helper oracle
+original/.libs/testdso.so	found	preexisting helper oracle
 original/dba100000.xml	found	preexisting generated corpus
 check-xml-test-suite.log	found	preexisting optional oracle
 check-xinclude-test-suite.log	found	preexisting optional oracle
