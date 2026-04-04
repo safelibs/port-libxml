@@ -23,6 +23,22 @@ compile_helper() {
     -o "$output"
 }
 
+compile_fuzz_helper() {
+  local output="$1"
+  shift
+  cc -DHAVE_CONFIG_H \
+    -I"$ROOT/safe/include" \
+    -I"$ROOT/original" \
+    -I"$ROOT/original/fuzz" \
+    -I"$STAGE/usr/include/libxml2" \
+    "$@" \
+    -L"$STAGE/usr/lib/$TRIPLET" \
+    -Wl,-rpath,'$ORIGIN/../stage/usr/lib/'"$TRIPLET" \
+    -Wl,--enable-new-dtags \
+    -lxml2 -lz -llzma -lm -ldl -lpthread \
+    -o "$output"
+}
+
 compile_helper "$ROOT/original/runtest.c" "$OUT/runtest"
 compile_helper "$ROOT/original/testrecurse.c" "$OUT/testrecurse"
 compile_helper "$ROOT/original/testapi.c" "$OUT/testapi"
@@ -41,6 +57,8 @@ compile_helper "$ROOT/original/testAutomata.c" "$OUT/testAutomata"
 compile_helper "$ROOT/original/testC14N.c" "$OUT/testC14N"
 compile_helper "$ROOT/original/testModule.c" "$OUT/testModule"
 compile_helper "$ROOT/original/example/gjobread.c" "$OUT/gjobread"
+compile_fuzz_helper "$OUT/genSeed" "$ROOT/original/fuzz/genSeed.c" "$ROOT/original/fuzz/fuzz.c"
+compile_fuzz_helper "$OUT/testFuzzer" "$ROOT/original/fuzz/testFuzzer.c" "$ROOT/original/fuzz/fuzz.c"
 
 cc -shared -fPIC -DHAVE_CONFIG_H \
   -I"$ROOT/safe/include" \
