@@ -9,6 +9,14 @@ publish = false
 name = "xml2"
 crate-type = ["cdylib", "staticlib", "rlib"]
 
+[[bin]]
+name = "xmllint"
+path = "src/bin/xmllint.rs"
+
+[[bin]]
+name = "xmlcatalog"
+path = "src/bin/xmlcatalog.rs"
+
 [build-dependencies]
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"

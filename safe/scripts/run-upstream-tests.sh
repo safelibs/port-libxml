@@ -6,6 +6,10 @@ SUBSET="${1:?usage: run-upstream-tests.sh <subset>}"
 TRIPLET="$(gcc -print-multiarch)"
 STAGE="$ROOT/safe/target/stage"
 
+if [[ ! -x "$STAGE/usr/bin/xmllint" || ! -x "$STAGE/usr/bin/xmlcatalog" ]]; then
+  "$ROOT/safe/scripts/install-staging.sh" "$STAGE"
+fi
+
 export PATH="$STAGE/usr/bin:$PATH"
 export PKG_CONFIG_PATH="$STAGE/usr/lib/$TRIPLET/pkgconfig"
 export LD_LIBRARY_PATH="$STAGE/usr/lib/$TRIPLET:${LD_LIBRARY_PATH:-}"

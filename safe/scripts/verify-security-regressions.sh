@@ -54,7 +54,7 @@ print(
     f"{len(relevant_entries)} relevant CVEs from {len(all_ids)} authoritative corpus entries"
 )
 
-if subset not in {"tree-io", "xpath-valid", ""}:
+if subset not in {"tree-io", "xpath-valid", "cli-shell", ""}:
     raise SystemExit(0)
 
 stage_candidates = sorted((root / "safe/target/stage").glob("usr/lib/*/libxml2.so.2.9.14"))
@@ -430,4 +430,48 @@ if subset in {"xpath-valid", ""}:
         "hold, XInclude honors nonet and self-recursion failures, and recursive XPath "
         "re-entry stops with a recoverable depth error"
     )
+
+
+if subset in {"cli-shell", ""}:
+    script_dir = root / "original" / "test" / "scripts"
+    result_dir = root / "original" / "result" / "scripts"
+    script_path = script_dir / "long_command.script"
+    xml_path = script_dir / "long_command.xml"
+    expected_path = result_dir / "long_command"
+
+    for path in (stage_xmllint, script_path, xml_path, expected_path):
+        if not path.exists():
+            raise SystemExit(f"missing cli-shell security fixture or tool: {path}")
+
+    try:
+        completed = subprocess.run(
+            [str(stage_xmllint), "--shell", str(xml_path)],
+            cwd=script_dir,
+            env=stage_env(),
+            text=True,
+            stdin=script_path.open("r", encoding="utf-8"),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            timeout=10,
+            check=False,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise SystemExit("xmllint shell long command fixture timed out after 10s") from exc
+
+    if completed.returncode != 0:
+        raise SystemExit(
+            f"xmllint shell long command fixture failed with exit {completed.returncode}\n"
+            f"stdout:\n{completed.stdout}\n"
+            f"stderr:\n{completed.stderr}"
+        )
+
+    expected = expected_path.read_text(encoding="utf-8")
+    if completed.stdout != expected:
+        raise SystemExit(
+            "xmllint shell long command fixture drifted from the checked-in expected output:\n"
+            f"stdout:\n{completed.stdout}\n"
+            f"expected:\n{expected}"
+        )
+
+    print("cli-shell security checks passed: bounded long-command shell fixture matches expected output")
 PY

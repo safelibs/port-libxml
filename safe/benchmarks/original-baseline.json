@@ -1,0 +1,47 @@
+{
+  "meta": {
+    "generator": "safe/scripts/verify-performance.sh",
+    "oracle_record": "safe/abi/baseline/original-oracles.txt",
+    "original_root": "original",
+    "original_testSAX": "original/testSAX",
+    "original_xmllint": "original/.libs/xmllint",
+    "thresholds": {
+      "dom_time_ratio": 2.5,
+      "stream_rss_abs_kib": 16384,
+      "stream_rss_ratio": 1.5,
+      "stream_time_ratio": 2.0
+    }
+  },
+  "workloads": {
+    "testsax_repeat": {
+      "elapsed_sec": 2.5,
+      "max_rss_kib": 2532,
+      "stderr": "Parsing took 2494 ms\n",
+      "stdout": "30000600 callbacks generated\n"
+    },
+    "xmllint_repeat_dom": {
+      "elapsed_sec": 0.07,
+      "max_rss_kib": 3904,
+      "stderr": "100 iterations took 78 ms\n",
+      "stdout": ""
+    },
+    "xmllint_repeat_valid": {
+      "elapsed_sec": 0.17,
+      "max_rss_kib": 4504,
+      "stderr": "100 iterations took 173 ms\n",
+      "stdout": ""
+    },
+    "xmllint_stream_file": {
+      "elapsed_sec": 0.05,
+      "max_rss_kib": 2676,
+      "stderr": "Parsing took 56 ms\n",
+      "stdout": ""
+    },
+    "xmllint_stream_memory": {
+      "elapsed_sec": 0.06,
+      "max_rss_kib": 16308,
+      "stderr": "Parsing took 60 ms\n",
+      "stdout": ""
+    }
+  }
+}

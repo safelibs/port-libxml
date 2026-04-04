@@ -38,7 +38,7 @@ provider = "rust"
 [[module]]
 name = "debugXML"
 source = "../original/debugXML.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "dict"
@@ -239,6 +239,21 @@ provider = "c_shim"
 [[module]]
 name = "xmlreader_varargs"
 source = "shims/xmlreader_varargs.c"
+provider = "c_shim"
+
+[[module]]
+name = "debugXML_hidden"
+source = "shims/debugXML_hidden.c"
+provider = "c_shim"
+
+[[module]]
+name = "xmllint_main"
+source = "shims/xmllint_main.c"
+provider = "c_shim"
+
+[[module]]
+name = "xmlcatalog_main"
+source = "shims/xmlcatalog_main.c"
 provider = "c_shim"
 
 [[module]]

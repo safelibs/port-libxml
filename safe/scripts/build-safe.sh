@@ -6,8 +6,8 @@ PROFILE="${PROFILE:-release}"
 
 "$ROOT/safe/scripts/build-original-baseline.sh"
 if [[ "$PROFILE" == "release" ]]; then
-  cargo build --manifest-path "$ROOT/safe/Cargo.toml" --release
+  cargo build --manifest-path "$ROOT/safe/Cargo.toml" --release --lib --bins
 else
-  cargo build --manifest-path "$ROOT/safe/Cargo.toml"
+  cargo build --manifest-path "$ROOT/safe/Cargo.toml" --lib --bins
 fi
 "$ROOT/safe/scripts/install-staging.sh" "$ROOT/safe/target/stage"

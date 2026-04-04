@@ -1,0 +1,30 @@
+#define xmlBoolToText xml2_hidden_xmlBoolToText
+#define xmlDebugDumpAttr xml2_hidden_xmlDebugDumpAttr
+#define xmlDebugDumpAttrList xml2_hidden_xmlDebugDumpAttrList
+#define xmlDebugDumpDTD xml2_hidden_xmlDebugDumpDTD
+#define xmlDebugDumpDocument xml2_hidden_xmlDebugDumpDocument
+#define xmlDebugDumpDocumentHead xml2_hidden_xmlDebugDumpDocumentHead
+#define xmlDebugDumpEntities xml2_hidden_xmlDebugDumpEntities
+#define xmlDebugDumpNode xml2_hidden_xmlDebugDumpNode
+#define xmlDebugDumpNodeList xml2_hidden_xmlDebugDumpNodeList
+#define xmlDebugDumpOneNode xml2_hidden_xmlDebugDumpOneNode
+#define xmlDebugDumpString xml2_hidden_xmlDebugDumpString
+#define xmlDebugCheckDocument xml2_hidden_xmlDebugCheckDocument
+#define xmlLsCountNode xml2_hidden_xmlLsCountNode
+#define xmlLsOneNode xml2_hidden_xmlLsOneNode
+#define xmlShell xml2_hidden_xmlShell
+#define xmlShellBase xml2_hidden_xmlShellBase
+#define xmlShellCat xml2_hidden_xmlShellCat
+#define xmlShellDir xml2_hidden_xmlShellDir
+#define xmlShellDu xml2_hidden_xmlShellDu
+#define xmlShellList xml2_hidden_xmlShellList
+#define xmlShellLoad xml2_hidden_xmlShellLoad
+#define xmlShellPrintNode xml2_hidden_xmlShellPrintNode
+#define xmlShellPrintXPathError xml2_hidden_xmlShellPrintXPathError
+#define xmlShellPrintXPathResult xml2_hidden_xmlShellPrintXPathResult
+#define xmlShellPwd xml2_hidden_xmlShellPwd
+#define xmlShellSave xml2_hidden_xmlShellSave
+#define xmlShellValidate xml2_hidden_xmlShellValidate
+#define xmlShellWrite xml2_hidden_xmlShellWrite
+
+#include "../../original/debugXML.c"

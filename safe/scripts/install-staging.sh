@@ -4,10 +4,25 @@ set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 STAGE="${1:-$ROOT/safe/target/stage}"
 ARTIFACTS_ENV="$ROOT/safe/target/build-artifacts.env"
+RELEASE_BINDIR="$ROOT/safe/target/release"
 
-if [[ ! -f "$ARTIFACTS_ENV" ]]; then
-  cargo build --manifest-path "$ROOT/safe/Cargo.toml" --release
-fi
+ensure_release_artifacts() {
+  local need_build=0
+  if [[ ! -f "$ARTIFACTS_ENV" ]]; then
+    need_build=1
+  fi
+  if [[ ! -f "$ROOT/safe/target/release/libxml2.a" || ! -f "$ROOT/safe/target/release/libxml2.so" ]]; then
+    need_build=1
+  fi
+  if [[ ! -x "$RELEASE_BINDIR/xmllint" || ! -x "$RELEASE_BINDIR/xmlcatalog" ]]; then
+    need_build=1
+  fi
+  if [[ "$need_build" -eq 1 ]]; then
+    cargo build --manifest-path "$ROOT/safe/Cargo.toml" --release --lib --bins
+  fi
+}
+
+ensure_release_artifacts
 
 # shellcheck disable=SC1090
 source "$ARTIFACTS_ENV"
@@ -18,9 +33,10 @@ BINDIR="$STAGE/usr/bin"
 INCLUDEDIR="$STAGE/usr/include/libxml2/libxml"
 PKGDIR="$LIBDIR/pkgconfig"
 ACLOCALDIR="$STAGE/usr/share/aclocal"
+MANDIR="$STAGE/usr/share/man/man1"
 
 rm -rf "$STAGE"
-mkdir -p "$LIBDIR" "$BINDIR" "$INCLUDEDIR" "$PKGDIR" "$ACLOCALDIR"
+mkdir -p "$LIBDIR" "$BINDIR" "$INCLUDEDIR" "$PKGDIR" "$ACLOCALDIR" "$MANDIR"
 
 cp "$LIBXML2_NATIVE_STATIC" "$LIBDIR/libxml2.a"
 cc -shared \
@@ -144,21 +160,7 @@ if [[ -n "\$cflags\$libs" ]]; then
 fi
 EOF
 chmod +x "$BINDIR/xml2-config"
-
-compile_stage_binary() {
-  local source="$1"
-  local output="$2"
-  cc -DHAVE_CONFIG_H \
-    -I"$ROOT/safe/include" \
-    -I"$ROOT/original" \
-    -I"$STAGE/usr/include/libxml2" \
-    "$source" \
-    -L"$LIBDIR" \
-    -Wl,-rpath,'$ORIGIN/../lib/'"$TRIPLET" \
-    -Wl,--enable-new-dtags \
-    -lxml2 -lz -llzma -lm -ldl -lpthread \
-    -o "$output"
-}
-
-compile_stage_binary "$ROOT/original/xmllint.c" "$BINDIR/xmllint"
-compile_stage_binary "$ROOT/original/xmlcatalog.c" "$BINDIR/xmlcatalog"
+install -m 0755 "$RELEASE_BINDIR/xmllint" "$BINDIR/xmllint"
+install -m 0755 "$RELEASE_BINDIR/xmlcatalog" "$BINDIR/xmlcatalog"
+install -m 0644 "$ROOT/original/doc/xmllint.1" "$MANDIR/xmllint.1"
+install -m 0644 "$ROOT/original/doc/xmlcatalog.1" "$MANDIR/xmlcatalog.1"
