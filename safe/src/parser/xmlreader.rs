@@ -1,9 +1,8 @@
 use super::budget;
 use crate::abi::opaque::{
     _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict, _xmlHashTable, _xmlList, _xmlPattern,
-    _xmlRelaxNG, _xmlRelaxNGParserCtxt, _xmlRelaxNGValidCtxt, _xmlSchema,
-    _xmlSchemaParserCtxt, _xmlSchemaSAXPlug, _xmlSchemaValidCtxt, _xmlStartTag, _xmlValidState,
-    _xmlXIncludeCtxt,
+    _xmlRelaxNG, _xmlRelaxNGParserCtxt, _xmlRelaxNGValidCtxt, _xmlSchema, _xmlSchemaParserCtxt,
+    _xmlSchemaSAXPlug, _xmlSchemaValidCtxt, _xmlStartTag, _xmlValidState, _xmlXIncludeCtxt,
 };
 
 extern "C" {
@@ -52,11 +51,7 @@ extern "C" {
     fn xmlIsBlankNode(node: *const xmlNode) -> ::core::ffi::c_int;
     fn xmlUnlinkNode(cur: xmlNodePtr);
     fn xmlFreeNode(cur: xmlNodePtr);
-    fn xmlSearchNs(
-        doc: xmlDocPtr,
-        node: xmlNodePtr,
-        nameSpace: *const xmlChar,
-    ) -> xmlNsPtr;
+    fn xmlSearchNs(doc: xmlDocPtr, node: xmlNodePtr, nameSpace: *const xmlChar) -> xmlNsPtr;
     fn xmlGetNoNsProp(node: *const xmlNode, name: *const xmlChar) -> *mut xmlChar;
     fn xmlGetNsProp(
         node: *const xmlNode,
@@ -80,40 +75,17 @@ extern "C" {
         format: ::core::ffi::c_int,
     ) -> ::core::ffi::c_int;
     fn xmlHashFree(table: xmlHashTablePtr, f: xmlHashDeallocator);
-    fn xmlHashLookup(
-        table: xmlHashTablePtr,
-        name: *const xmlChar,
-    ) -> *mut ::core::ffi::c_void;
-    fn xmlParserError(
-        ctx: *mut ::core::ffi::c_void,
-        msg: *const ::core::ffi::c_char,
-        ...
-    );
-    fn xmlParserWarning(
-        ctx: *mut ::core::ffi::c_void,
-        msg: *const ::core::ffi::c_char,
-        ...
-    );
-    fn xmlParserValidityError(
-        ctx: *mut ::core::ffi::c_void,
-        msg: *const ::core::ffi::c_char,
-        ...
-    );
+    fn xmlHashLookup(table: xmlHashTablePtr, name: *const xmlChar) -> *mut ::core::ffi::c_void;
+    fn xmlParserError(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
+    fn xmlParserWarning(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
+    fn xmlParserValidityError(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
     fn xmlParserValidityWarning(
         ctx: *mut ::core::ffi::c_void,
         msg: *const ::core::ffi::c_char,
         ...
     );
-    fn xmlTextReaderError(
-        ctxt: *mut ::core::ffi::c_void,
-        msg: *const ::core::ffi::c_char,
-        ...
-    );
-    fn xmlTextReaderWarning(
-        ctxt: *mut ::core::ffi::c_void,
-        msg: *const ::core::ffi::c_char,
-        ...
-    );
+    fn xmlTextReaderError(ctxt: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
+    fn xmlTextReaderWarning(ctxt: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
     fn xmlTextReaderValidityError(
         ctxt: *mut ::core::ffi::c_void,
         msg: *const ::core::ffi::c_char,
@@ -137,11 +109,7 @@ extern "C" {
     fn xmlListWalk(l: xmlListPtr, walker: xmlListWalker, user: *mut ::core::ffi::c_void);
     fn xmlIsID(doc: xmlDocPtr, elem: xmlNodePtr, attr: xmlAttrPtr) -> ::core::ffi::c_int;
     fn xmlFreeRefTable(table: xmlRefTablePtr);
-    fn xmlIsRef(
-        doc: xmlDocPtr,
-        elem: xmlNodePtr,
-        attr: xmlAttrPtr,
-    ) -> ::core::ffi::c_int;
+    fn xmlIsRef(doc: xmlDocPtr, elem: xmlNodePtr, attr: xmlAttrPtr) -> ::core::ffi::c_int;
     fn xmlValidatePushElement(
         ctxt: xmlValidCtxtPtr,
         doc: xmlDocPtr,
@@ -159,9 +127,7 @@ extern "C" {
         elem: xmlNodePtr,
         qname: *const xmlChar,
     ) -> ::core::ffi::c_int;
-    fn xmlFindCharEncodingHandler(
-        name: *const ::core::ffi::c_char,
-    ) -> xmlCharEncodingHandlerPtr;
+    fn xmlFindCharEncodingHandler(name: *const ::core::ffi::c_char) -> xmlCharEncodingHandlerPtr;
     fn xmlAllocParserInputBuffer(enc: xmlCharEncoding) -> xmlParserInputBufferPtr;
     fn xmlParserInputBufferCreateFilename(
         URI: *const ::core::ffi::c_char,
@@ -187,9 +153,7 @@ extern "C" {
         len: ::core::ffi::c_int,
     ) -> ::core::ffi::c_int;
     fn xmlFreeParserInputBuffer(in_0: xmlParserInputBufferPtr);
-    fn xmlParserGetDirectory(
-        filename: *const ::core::ffi::c_char,
-    ) -> *mut ::core::ffi::c_char;
+    fn xmlParserGetDirectory(filename: *const ::core::ffi::c_char) -> *mut ::core::ffi::c_char;
     fn xmlStopParser(ctxt: xmlParserCtxtPtr);
     fn xmlNewParserCtxt() -> xmlParserCtxtPtr;
     fn xmlFreeParserCtxt(ctxt: xmlParserCtxtPtr);
@@ -214,23 +178,16 @@ extern "C" {
     ) -> ::core::ffi::c_int;
     fn xmlByteConsumed(ctxt: xmlParserCtxtPtr) -> ::core::ffi::c_long;
     fn xmlCtxtReset(ctxt: xmlParserCtxtPtr);
-    fn xmlCtxtUseOptions(
-        ctxt: xmlParserCtxtPtr,
-        options: ::core::ffi::c_int,
-    ) -> ::core::ffi::c_int;
-    fn xmlSAXVersion(
-        hdlr: *mut xmlSAXHandler,
-        version: ::core::ffi::c_int,
-    ) -> ::core::ffi::c_int;
+    fn xmlCtxtUseOptions(ctxt: xmlParserCtxtPtr, options: ::core::ffi::c_int)
+        -> ::core::ffi::c_int;
+    fn xmlSAXVersion(hdlr: *mut xmlSAXHandler, version: ::core::ffi::c_int) -> ::core::ffi::c_int;
     static mut xmlMalloc: xmlMallocFunc;
     static mut xmlRealloc: xmlReallocFunc;
     static mut xmlFree: xmlFreeFunc;
     fn __xmlGenericError() -> *mut xmlGenericErrorFunc;
     fn __xmlGenericErrorContext() -> *mut *mut ::core::ffi::c_void;
     fn __xmlDeregisterNodeDefaultValue() -> *mut xmlDeregisterNodeFunc;
-    fn xmlRelaxNGNewParserCtxt(
-        URL: *const ::core::ffi::c_char,
-    ) -> xmlRelaxNGParserCtxtPtr;
+    fn xmlRelaxNGNewParserCtxt(URL: *const ::core::ffi::c_char) -> xmlRelaxNGParserCtxtPtr;
     fn xmlRelaxNGFreeParserCtxt(ctxt: xmlRelaxNGParserCtxtPtr);
     fn xmlRelaxNGSetParserErrors(
         ctxt: xmlRelaxNGParserCtxtPtr,
@@ -321,10 +278,7 @@ extern "C" {
         flags: ::core::ffi::c_int,
     ) -> ::core::ffi::c_int;
     fn xmlXIncludeFreeContext(ctxt: xmlXIncludeCtxtPtr);
-    fn xmlXIncludeProcessNode(
-        ctxt: xmlXIncludeCtxtPtr,
-        tree: xmlNodePtr,
-    ) -> ::core::ffi::c_int;
+    fn xmlXIncludeProcessNode(ctxt: xmlXIncludeCtxtPtr, tree: xmlNodePtr) -> ::core::ffi::c_int;
     fn xmlFreePattern(comp: xmlPatternPtr);
     fn xmlPatterncompile(
         pattern: *const xmlChar,
@@ -356,12 +310,9 @@ pub type va_list = __builtin_va_list;
 pub type xmlChar = ::core::ffi::c_uchar;
 pub type size_t = usize;
 pub type xmlFreeFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
-pub type xmlMallocFunc = Option<
-    unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void,
->;
-pub type xmlReallocFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t) -> *mut ::core::ffi::c_void,
->;
+pub type xmlMallocFunc = Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void>;
+pub type xmlReallocFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t) -> *mut ::core::ffi::c_void>;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _xmlParserInputBuffer {
@@ -405,9 +356,8 @@ pub type xmlCharEncodingInputFunc = Option<
         *mut ::core::ffi::c_int,
     ) -> ::core::ffi::c_int,
 >;
-pub type xmlInputCloseCallback = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type xmlInputCloseCallback =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type xmlInputReadCallback = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -757,12 +707,10 @@ pub type xmlAutomata = _xmlAutomata;
 pub type xmlValidState = _xmlValidState;
 pub type xmlDocPtr = *mut xmlDoc;
 pub type xmlDoc = _xmlDoc;
-pub type xmlValidityWarningFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type xmlValidityErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlValidityWarningFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type xmlValidityErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlParserNodeInfoSeq = _xmlParserNodeInfoSeq;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -807,9 +755,8 @@ pub struct _xmlSAXHandler {
     pub endElementNs: endElementNsSAX2Func,
     pub serror: xmlStructuredErrorFunc,
 }
-pub type xmlStructuredErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> (),
->;
+pub type xmlStructuredErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> ()>;
 pub type xmlErrorPtr = *mut xmlError;
 pub type endElementNsSAX2Func = Option<
     unsafe extern "C" fn(
@@ -841,15 +788,10 @@ pub type externalSubsetSAXFunc = Option<
     ) -> (),
 >;
 pub type cdataBlockSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type getParameterEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getParameterEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type xmlEntityPtr = *mut xmlEntity;
 pub type xmlEntity = _xmlEntity;
 #[derive(Copy, Clone)]
@@ -882,74 +824,43 @@ pub const XML_INTERNAL_PARAMETER_ENTITY: xmlEntityType = 4;
 pub const XML_EXTERNAL_GENERAL_UNPARSED_ENTITY: xmlEntityType = 3;
 pub const XML_EXTERNAL_GENERAL_PARSED_ENTITY: xmlEntityType = 2;
 pub const XML_INTERNAL_GENERAL_ENTITY: xmlEntityType = 1;
-pub type fatalErrorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type errorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type warningSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type commentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type processingInstructionSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> (),
->;
+pub type fatalErrorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type errorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type warningSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type commentSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type processingInstructionSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> ()>;
 pub type ignorableWhitespaceSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
 pub type charactersSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type referenceSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type endElementSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
+pub type referenceSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type endElementSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
 pub type startElementSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        *mut *const xmlChar,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *mut *const xmlChar) -> (),
 >;
-pub type endDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type startDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type setDocumentLocatorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
->;
+pub type endDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type startDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type setDocumentLocatorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> ()>;
 pub type xmlSAXLocatorPtr = *mut xmlSAXLocator;
 pub type xmlSAXLocator = _xmlSAXLocator;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _xmlSAXLocator {
-    pub getPublicId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getSystemId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getLineNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
-    pub getColumnNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
+    pub getPublicId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getSystemId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getLineNumber: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
+    pub getColumnNumber:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
 }
 pub type unparsedEntityDeclSAXFunc = Option<
     unsafe extern "C" fn(
@@ -1028,9 +939,8 @@ pub type entityDeclSAXFunc = Option<
         *mut xmlChar,
     ) -> (),
 >;
-pub type getEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type resolveEntitySAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -1038,15 +948,12 @@ pub type resolveEntitySAXFunc = Option<
         *const xmlChar,
     ) -> xmlParserInputPtr,
 >;
-pub type hasExternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type hasInternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type isStandaloneSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type hasExternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type hasInternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type isStandaloneSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type internalSubsetSAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -1103,12 +1010,10 @@ pub struct _xmlRef {
 }
 pub type xmlRef = _xmlRef;
 pub type xmlRefPtr = *mut xmlRef;
-pub type xmlHashDeallocator = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type xmlGenericErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlHashDeallocator =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type xmlGenericErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlList = _xmlList;
 pub type xmlListPtr = *mut xmlList;
 pub type xmlListWalker = Option<
@@ -1174,24 +1079,20 @@ pub const XML_PARSE_RECOVER: C2RustUnnamed = 1;
 pub type xmlDeregisterNodeFunc = Option<unsafe extern "C" fn(xmlNodePtr) -> ()>;
 pub type xmlRelaxNG = _xmlRelaxNG;
 pub type xmlRelaxNGPtr = *mut xmlRelaxNG;
-pub type xmlRelaxNGValidityErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type xmlRelaxNGValidityWarningFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlRelaxNGValidityErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type xmlRelaxNGValidityWarningFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlRelaxNGParserCtxt = _xmlRelaxNGParserCtxt;
 pub type xmlRelaxNGParserCtxtPtr = *mut xmlRelaxNGParserCtxt;
 pub type xmlRelaxNGValidCtxt = _xmlRelaxNGValidCtxt;
 pub type xmlRelaxNGValidCtxtPtr = *mut xmlRelaxNGValidCtxt;
 pub type xmlSchema = _xmlSchema;
 pub type xmlSchemaPtr = *mut xmlSchema;
-pub type xmlSchemaValidityErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type xmlSchemaValidityWarningFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlSchemaValidityErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type xmlSchemaValidityWarningFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlSchemaParserCtxt = _xmlSchemaParserCtxt;
 pub type xmlSchemaParserCtxtPtr = *mut xmlSchemaParserCtxt;
 pub type xmlSchemaValidCtxt = _xmlSchemaValidCtxt;
@@ -1323,18 +1224,16 @@ pub const XML_TEXTREADER_VALIDATE_DTD: xmlTextReaderValidate = 1;
 pub const XML_TEXTREADER_NOT_VALIDATE: xmlTextReaderValidate = 0;
 pub type xmlTextReader = _xmlTextReader;
 pub type xmlTextReaderPtr = *mut xmlTextReader;
-pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const XML_DETECT_IDS: ::core::ffi::c_int = 2 as ::core::ffi::c_int;
 pub const XML_COMPLETE_ATTRS: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const XML_SAX2_MAGIC: ::core::ffi::c_uint = 0xdeedbeaf as ::core::ffi::c_uint;
 pub const XINCLUDE_NS: *const xmlChar = b"http://www.w3.org/2003/XInclude\0" as *const u8
     as *const ::core::ffi::c_char as *const xmlChar;
-pub const XINCLUDE_OLD_NS: *const xmlChar = b"http://www.w3.org/2001/XInclude\0"
-    as *const u8 as *const ::core::ffi::c_char as *const xmlChar;
-pub const XINCLUDE_NODE: *const xmlChar = b"include\0" as *const u8
+pub const XINCLUDE_OLD_NS: *const xmlChar = b"http://www.w3.org/2001/XInclude\0" as *const u8
     as *const ::core::ffi::c_char as *const xmlChar;
+pub const XINCLUDE_NODE: *const xmlChar =
+    b"include\0" as *const u8 as *const ::core::ffi::c_char as *const xmlChar;
 pub const MAX_ERR_MSG_SIZE: ::core::ffi::c_int = 64000 as ::core::ffi::c_int;
 pub const MAX_FREE_NODES: ::core::ffi::c_int = 100 as ::core::ffi::c_int;
 pub const CHUNK_SIZE: ::core::ffi::c_int = 512 as ::core::ffi::c_int;
@@ -1353,24 +1252,20 @@ unsafe extern "C" fn xmlFreeID(mut id: xmlIDPtr) {
     }
     if !(*id).value.is_null() {
         if !(*id).value.is_null()
-            && (dict.is_null()
-                || xmlDictOwns(dict, (*id).value) == 0 as ::core::ffi::c_int)
+            && (dict.is_null() || xmlDictOwns(dict, (*id).value) == 0 as ::core::ffi::c_int)
         {
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )((*id).value as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(
+                (*id).value as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+            );
         }
     }
     if !(*id).name.is_null() {
         if !(*id).name.is_null()
-            && (dict.is_null()
-                || xmlDictOwns(dict, (*id).name) == 0 as ::core::ffi::c_int)
+            && (dict.is_null() || xmlDictOwns(dict, (*id).name) == 0 as ::core::ffi::c_int)
         {
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )((*id).name as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(
+                (*id).name as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+            );
         }
     }
     xmlFree.expect("non-null function pointer")(id as *mut ::core::ffi::c_void);
@@ -1458,10 +1353,7 @@ unsafe extern "C" fn xmlTextReaderRemoveRef(
     );
     return 0 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn xmlTextReaderFreeProp(
-    mut reader: xmlTextReaderPtr,
-    mut cur: xmlAttrPtr,
-) {
+unsafe extern "C" fn xmlTextReaderFreeProp(mut reader: xmlTextReaderPtr, mut cur: xmlAttrPtr) {
     let mut dict: xmlDictPtr = ::core::ptr::null_mut::<xmlDict>();
     if !reader.is_null() && !(*reader).ctxt.is_null() {
         dict = (*(*reader).ctxt).dict;
@@ -1472,12 +1364,14 @@ unsafe extern "C" fn xmlTextReaderFreeProp(
         return;
     }
     if __xmlRegisterCallbacks != 0 && (*__xmlDeregisterNodeDefaultValue()).is_some() {
-        (*__xmlDeregisterNodeDefaultValue())
-            .expect("non-null function pointer")(cur as xmlNodePtr);
+        (*__xmlDeregisterNodeDefaultValue()).expect("non-null function pointer")(cur as xmlNodePtr);
     }
     if !(*cur).parent.is_null() && !(*(*cur).parent).doc.is_null() {
-        if xmlIsID((*(*cur).parent).doc as xmlDocPtr, (*cur).parent as xmlNodePtr, cur)
-            != 0
+        if xmlIsID(
+            (*(*cur).parent).doc as xmlDocPtr,
+            (*cur).parent as xmlNodePtr,
+            cur,
+        ) != 0
         {
             xmlTextReaderRemoveID((*(*cur).parent).doc as xmlDocPtr, cur);
         }
@@ -1498,12 +1392,12 @@ unsafe extern "C" fn xmlTextReaderFreeProp(
     if !(*cur).name.is_null()
         && (dict.is_null() || xmlDictOwns(dict, (*cur).name) == 0 as ::core::ffi::c_int)
     {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*cur).name as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(
+            (*cur).name as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+        );
     }
-    if !reader.is_null() && !(*reader).ctxt.is_null()
+    if !reader.is_null()
+        && !(*reader).ctxt.is_null()
         && (*(*reader).ctxt).freeAttrsNr < MAX_FREE_NODES
     {
         (*cur).next = (*(*reader).ctxt).freeAttrs as *mut _xmlAttr;
@@ -1513,10 +1407,7 @@ unsafe extern "C" fn xmlTextReaderFreeProp(
         xmlFree.expect("non-null function pointer")(cur as *mut ::core::ffi::c_void);
     };
 }
-unsafe extern "C" fn xmlTextReaderFreePropList(
-    mut reader: xmlTextReaderPtr,
-    mut cur: xmlAttrPtr,
-) {
+unsafe extern "C" fn xmlTextReaderFreePropList(mut reader: xmlTextReaderPtr, mut cur: xmlAttrPtr) {
     let mut next: xmlAttrPtr = ::core::ptr::null_mut::<xmlAttr>();
     while !cur.is_null() {
         next = (*cur).next as xmlAttrPtr;
@@ -1524,10 +1415,7 @@ unsafe extern "C" fn xmlTextReaderFreePropList(
         cur = next;
     }
 }
-unsafe extern "C" fn xmlTextReaderFreeNodeList(
-    mut reader: xmlTextReaderPtr,
-    mut cur: xmlNodePtr,
-) {
+unsafe extern "C" fn xmlTextReaderFreeNodeList(mut reader: xmlTextReaderPtr, mut cur: xmlNodePtr) {
     let mut next: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     let mut parent: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     let mut dict: xmlDictPtr = ::core::ptr::null_mut::<xmlDict>();
@@ -1559,7 +1447,8 @@ unsafe extern "C" fn xmlTextReaderFreeNodeList(
             != XML_DTD_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
             && (*cur).type_0 as ::core::ffi::c_uint
                 != XML_ENTITY_REF_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
-            && !(*cur).children.is_null() && (*(*cur).children).parent == cur
+            && !(*cur).children.is_null()
+            && (*(*cur).children).parent == cur
         {
             cur = (*cur).children as xmlNodePtr;
             depth = depth.wrapping_add(1 as size_t);
@@ -1569,11 +1458,8 @@ unsafe extern "C" fn xmlTextReaderFreeNodeList(
         if (*cur).type_0 as ::core::ffi::c_uint
             != XML_DTD_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
         {
-            if __xmlRegisterCallbacks != 0
-                && (*__xmlDeregisterNodeDefaultValue()).is_some()
-            {
-                (*__xmlDeregisterNodeDefaultValue())
-                    .expect("non-null function pointer")(cur);
+            if __xmlRegisterCallbacks != 0 && (*__xmlDeregisterNodeDefaultValue()).is_some() {
+                (*__xmlDeregisterNodeDefaultValue()).expect("non-null function pointer")(cur);
             }
             if ((*cur).type_0 as ::core::ffi::c_uint
                 == XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
@@ -1600,12 +1486,8 @@ unsafe extern "C" fn xmlTextReaderFreeNodeList(
                         || xmlDictOwns(dict, (*cur).content as *const xmlChar)
                             == 0 as ::core::ffi::c_int)
                 {
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(
-                        (*cur).content as *mut ::core::ffi::c_char
-                            as *mut ::core::ffi::c_void,
+                    xmlFree.expect("non-null function pointer")(
+                        (*cur).content as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
                     );
                 }
             }
@@ -1625,15 +1507,10 @@ unsafe extern "C" fn xmlTextReaderFreeNodeList(
                     != XML_COMMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
             {
                 if !(*cur).name.is_null()
-                    && (dict.is_null()
-                        || xmlDictOwns(dict, (*cur).name) == 0 as ::core::ffi::c_int)
+                    && (dict.is_null() || xmlDictOwns(dict, (*cur).name) == 0 as ::core::ffi::c_int)
                 {
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(
-                        (*cur).name as *mut ::core::ffi::c_char
-                            as *mut ::core::ffi::c_void,
+                    xmlFree.expect("non-null function pointer")(
+                        (*cur).name as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
                     );
                 }
             }
@@ -1641,17 +1518,15 @@ unsafe extern "C" fn xmlTextReaderFreeNodeList(
                 == XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                 || (*cur).type_0 as ::core::ffi::c_uint
                     == XML_TEXT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint)
-                && !reader.is_null() && !(*reader).ctxt.is_null()
+                && !reader.is_null()
+                && !(*reader).ctxt.is_null()
                 && (*(*reader).ctxt).freeElemsNr < MAX_FREE_NODES
             {
                 (*cur).next = (*(*reader).ctxt).freeElems as *mut _xmlNode;
                 (*(*reader).ctxt).freeElems = cur;
                 (*(*reader).ctxt).freeElemsNr += 1;
             } else {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(cur as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(cur as *mut ::core::ffi::c_void);
             }
         }
         if !next.is_null() {
@@ -1664,12 +1539,9 @@ unsafe extern "C" fn xmlTextReaderFreeNodeList(
             cur = parent;
             (*cur).children = ::core::ptr::null_mut::<_xmlNode>();
         }
-    };
+    }
 }
-unsafe extern "C" fn xmlTextReaderFreeNode(
-    mut reader: xmlTextReaderPtr,
-    mut cur: xmlNodePtr,
-) {
+unsafe extern "C" fn xmlTextReaderFreeNode(mut reader: xmlTextReaderPtr, mut cur: xmlNodePtr) {
     let mut dict: xmlDictPtr = ::core::ptr::null_mut::<xmlDict>();
     if !reader.is_null() && !(*reader).ctxt.is_null() {
         dict = (*(*reader).ctxt).dict;
@@ -1728,13 +1600,9 @@ unsafe extern "C" fn xmlTextReaderFreeNode(
     {
         if !(*cur).content.is_null()
             && (dict.is_null()
-                || xmlDictOwns(dict, (*cur).content as *const xmlChar)
-                    == 0 as ::core::ffi::c_int)
+                || xmlDictOwns(dict, (*cur).content as *const xmlChar) == 0 as ::core::ffi::c_int)
         {
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )(
+            xmlFree.expect("non-null function pointer")(
                 (*cur).content as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
             );
         }
@@ -1755,20 +1623,19 @@ unsafe extern "C" fn xmlTextReaderFreeNode(
             != XML_COMMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
     {
         if !(*cur).name.is_null()
-            && (dict.is_null()
-                || xmlDictOwns(dict, (*cur).name) == 0 as ::core::ffi::c_int)
+            && (dict.is_null() || xmlDictOwns(dict, (*cur).name) == 0 as ::core::ffi::c_int)
         {
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )((*cur).name as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(
+                (*cur).name as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+            );
         }
     }
     if ((*cur).type_0 as ::core::ffi::c_uint
         == XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
         || (*cur).type_0 as ::core::ffi::c_uint
             == XML_TEXT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint)
-        && !reader.is_null() && !(*reader).ctxt.is_null()
+        && !reader.is_null()
+        && !(*reader).ctxt.is_null()
         && (*(*reader).ctxt).freeElemsNr < MAX_FREE_NODES
     {
         (*cur).next = (*(*reader).ctxt).freeElems as *mut _xmlNode;
@@ -1793,18 +1660,14 @@ unsafe extern "C" fn xmlTextReaderFreeIDTable(mut table: xmlIDTablePtr) {
         ),
     );
 }
-unsafe extern "C" fn xmlTextReaderFreeDoc(
-    mut reader: xmlTextReaderPtr,
-    mut cur: xmlDocPtr,
-) {
+unsafe extern "C" fn xmlTextReaderFreeDoc(mut reader: xmlTextReaderPtr, mut cur: xmlDocPtr) {
     let mut extSubset: xmlDtdPtr = ::core::ptr::null_mut::<xmlDtd>();
     let mut intSubset: xmlDtdPtr = ::core::ptr::null_mut::<xmlDtd>();
     if cur.is_null() {
         return;
     }
     if __xmlRegisterCallbacks != 0 && (*__xmlDeregisterNodeDefaultValue()).is_some() {
-        (*__xmlDeregisterNodeDefaultValue())
-            .expect("non-null function pointer")(cur as xmlNodePtr);
+        (*__xmlDeregisterNodeDefaultValue()).expect("non-null function pointer")(cur as xmlNodePtr);
     }
     if !(*cur).ids.is_null() {
         xmlTextReaderFreeIDTable((*cur).ids as xmlIDTablePtr);
@@ -1833,31 +1696,25 @@ unsafe extern "C" fn xmlTextReaderFreeDoc(
         xmlTextReaderFreeNodeList(reader, (*cur).children as xmlNodePtr);
     }
     if !(*cur).version.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*cur).version as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(
+            (*cur).version as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+        );
     }
     if !(*cur).name.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*cur).name as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*cur).name as *mut ::core::ffi::c_void);
     }
     if !(*cur).encoding.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*cur).encoding as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(
+            (*cur).encoding as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+        );
     }
     if !(*cur).oldNs.is_null() {
         xmlFreeNsList((*cur).oldNs as xmlNsPtr);
     }
     if !(*cur).URL.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*cur).URL as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(
+            (*cur).URL as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+        );
     }
     if !(*cur).dict.is_null() {
         xmlDictFree((*cur).dict as xmlDictPtr);
@@ -1870,18 +1727,12 @@ unsafe extern "C" fn xmlTextReaderEntPush(
 ) -> ::core::ffi::c_int {
     if (*reader).entMax <= 0 as ::core::ffi::c_int {
         (*reader).entMax = 10 as ::core::ffi::c_int;
-        (*reader).entTab = xmlMalloc
-            .expect(
-                "non-null function pointer",
-            )(
+        (*reader).entTab = xmlMalloc.expect("non-null function pointer")(
             ((*reader).entMax as size_t)
                 .wrapping_mul(::core::mem::size_of::<xmlNodePtr>() as size_t),
         ) as *mut xmlNodePtr;
         if (*reader).entTab.is_null() {
-            (*__xmlGenericError())
-                .expect(
-                    "non-null function pointer",
-                )(
+            (*__xmlGenericError()).expect("non-null function pointer")(
                 *__xmlGenericErrorContext(),
                 b"xmlMalloc failed !\n\0" as *const u8 as *const ::core::ffi::c_char,
             );
@@ -1890,19 +1741,13 @@ unsafe extern "C" fn xmlTextReaderEntPush(
     }
     if (*reader).entNr >= (*reader).entMax {
         (*reader).entMax *= 2 as ::core::ffi::c_int;
-        (*reader).entTab = xmlRealloc
-            .expect(
-                "non-null function pointer",
-            )(
+        (*reader).entTab = xmlRealloc.expect("non-null function pointer")(
             (*reader).entTab as *mut ::core::ffi::c_void,
             ((*reader).entMax as size_t)
                 .wrapping_mul(::core::mem::size_of::<xmlNodePtr>() as size_t),
         ) as *mut xmlNodePtr;
         if (*reader).entTab.is_null() {
-            (*__xmlGenericError())
-                .expect(
-                    "non-null function pointer",
-                )(
+            (*__xmlGenericError()).expect("non-null function pointer")(
                 *__xmlGenericErrorContext(),
                 b"xmlRealloc failed !\n\0" as *const u8 as *const ::core::ffi::c_char,
             );
@@ -1943,12 +1788,17 @@ unsafe extern "C" fn xmlTextReaderStartElement(
     let mut reader: xmlTextReaderPtr = (*ctxt)._private as xmlTextReaderPtr;
     if !reader.is_null() && (*reader).startElement.is_some() {
         (*reader).startElement.expect("non-null function pointer")(ctx, fullname, atts);
-        if !(*ctxt).node.is_null() && !(*ctxt).input.is_null()
+        if !(*ctxt).node.is_null()
+            && !(*ctxt).input.is_null()
             && !(*(*ctxt).input).cur.is_null()
-            && *(*(*ctxt).input).cur.offset(0 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == '/' as i32
-            && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == '>' as i32
+            && *(*(*ctxt).input)
+                .cur
+                .offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == '/' as i32
+            && *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == '>' as i32
         {
             (*(*ctxt).node).extra = ((*(*ctxt).node).extra as ::core::ffi::c_uint
                 & (15 as ::core::ffi::c_uint) << 12 as ::core::ffi::c_int
@@ -1985,11 +1835,7 @@ unsafe extern "C" fn xmlTextReaderStartElementNs(
     let mut ctxt: xmlParserCtxtPtr = ctx as xmlParserCtxtPtr;
     let mut reader: xmlTextReaderPtr = (*ctxt)._private as xmlTextReaderPtr;
     if !reader.is_null() && (*reader).startElementNs.is_some() {
-        (*reader)
-            .startElementNs
-            .expect(
-                "non-null function pointer",
-            )(
+        (*reader).startElementNs.expect("non-null function pointer")(
             ctx,
             localname,
             prefix,
@@ -2000,12 +1846,17 @@ unsafe extern "C" fn xmlTextReaderStartElementNs(
             nb_defaulted,
             attributes,
         );
-        if !(*ctxt).node.is_null() && !(*ctxt).input.is_null()
+        if !(*ctxt).node.is_null()
+            && !(*ctxt).input.is_null()
             && !(*(*ctxt).input).cur.is_null()
-            && *(*(*ctxt).input).cur.offset(0 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == '/' as i32
-            && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == '>' as i32
+            && *(*(*ctxt).input)
+                .cur
+                .offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == '/' as i32
+            && *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == '>' as i32
         {
             (*(*ctxt).node).extra = ((*(*ctxt).node).extra as ::core::ffi::c_uint
                 & (15 as ::core::ffi::c_uint) << 12 as ::core::ffi::c_int
@@ -2027,9 +1878,7 @@ unsafe extern "C" fn xmlTextReaderEndElementNs(
     let mut ctxt: xmlParserCtxtPtr = ctx as xmlParserCtxtPtr;
     let mut reader: xmlTextReaderPtr = (*ctxt)._private as xmlTextReaderPtr;
     if !reader.is_null() && (*reader).endElementNs.is_some() {
-        (*reader)
-            .endElementNs
-            .expect("non-null function pointer")(ctx, localname, prefix, URI);
+        (*reader).endElementNs.expect("non-null function pointer")(ctx, localname, prefix, URI);
     }
 }
 unsafe extern "C" fn xmlTextReaderCharacters(
@@ -2054,9 +1903,7 @@ unsafe extern "C" fn xmlTextReaderCDataBlock(
         (*reader).cdataBlock.expect("non-null function pointer")(ctx, ch, len);
     }
 }
-unsafe extern "C" fn xmlTextReaderPushData(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn xmlTextReaderPushData(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     let mut inbuf: xmlBufPtr = ::core::ptr::null_mut::<xmlBuf>();
     let mut val: ::core::ffi::c_int = 0;
     let mut s: ::core::ffi::c_int = 0;
@@ -2069,11 +1916,11 @@ unsafe extern "C" fn xmlTextReaderPushData(
     (*reader).state = XML_TEXTREADER_NONE;
     inbuf = (*(*reader).input).buffer;
     alloc = xmlBufGetAllocationScheme(inbuf);
-    while (*reader).state as ::core::ffi::c_int
-        == XML_TEXTREADER_NONE as ::core::ffi::c_int
-    {
+    while (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_NONE as ::core::ffi::c_int {
         if xmlBufUse(inbuf)
-            < (*reader).cur.wrapping_add(CHUNK_SIZE as ::core::ffi::c_uint) as size_t
+            < (*reader)
+                .cur
+                .wrapping_add(CHUNK_SIZE as ::core::ffi::c_uint) as size_t
         {
             if !((*reader).mode != XML_TEXTREADER_MODE_EOF as ::core::ffi::c_int) {
                 break;
@@ -2092,8 +1939,7 @@ unsafe extern "C" fn xmlTextReaderPushData(
             } else if val < 0 as ::core::ffi::c_int {
                 (*reader).mode = XML_TEXTREADER_MODE_EOF as ::core::ffi::c_int;
                 (*reader).state = oldstate;
-                if oldstate as ::core::ffi::c_int
-                    != XML_TEXTREADER_START as ::core::ffi::c_int
+                if oldstate as ::core::ffi::c_int != XML_TEXTREADER_START as ::core::ffi::c_int
                     || !(*(*reader).ctxt).myDoc.is_null()
                 {
                     return val;
@@ -2104,7 +1950,9 @@ unsafe extern "C" fn xmlTextReaderPushData(
             }
         }
         if xmlBufUse(inbuf)
-            >= (*reader).cur.wrapping_add(CHUNK_SIZE as ::core::ffi::c_uint) as size_t
+            >= (*reader)
+                .cur
+                .wrapping_add(CHUNK_SIZE as ::core::ffi::c_uint) as size_t
         {
             budget::note_reader_bytes((*reader).ctxt, CHUNK_SIZE as usize);
             val = xmlParseChunk(
@@ -2124,8 +1972,7 @@ unsafe extern "C" fn xmlTextReaderPushData(
                 break;
             }
         } else {
-            s = xmlBufUse(inbuf).wrapping_sub((*reader).cur as size_t)
-                as ::core::ffi::c_int;
+            s = xmlBufUse(inbuf).wrapping_sub((*reader).cur as size_t) as ::core::ffi::c_int;
             if s > 0 as ::core::ffi::c_int {
                 budget::note_reader_bytes((*reader).ctxt, s as usize);
             }
@@ -2146,23 +1993,17 @@ unsafe extern "C" fn xmlTextReaderPushData(
     if (*reader).mode == XML_TEXTREADER_MODE_INTERACTIVE as ::core::ffi::c_int {
         if alloc != XML_BUFFER_ALLOC_IMMUTABLE as ::core::ffi::c_int {
             if (*reader).cur >= 4096 as ::core::ffi::c_uint
-                && xmlBufUse(inbuf).wrapping_sub((*reader).cur as size_t)
-                    <= CHUNK_SIZE as size_t
+                && xmlBufUse(inbuf).wrapping_sub((*reader).cur as size_t) <= CHUNK_SIZE as size_t
             {
                 val = xmlBufShrink(inbuf, (*reader).cur as size_t) as ::core::ffi::c_int;
                 if val >= 0 as ::core::ffi::c_int {
-                    (*reader).cur = (*reader)
-                        .cur
-                        .wrapping_sub(val as ::core::ffi::c_uint);
+                    (*reader).cur = (*reader).cur.wrapping_sub(val as ::core::ffi::c_uint);
                 }
             }
         }
     } else if (*reader).mode == XML_TEXTREADER_MODE_EOF as ::core::ffi::c_int {
-        if (*reader).state as ::core::ffi::c_int
-            != XML_TEXTREADER_DONE as ::core::ffi::c_int
-        {
-            s = xmlBufUse(inbuf).wrapping_sub((*reader).cur as size_t)
-                as ::core::ffi::c_int;
+        if (*reader).state as ::core::ffi::c_int != XML_TEXTREADER_DONE as ::core::ffi::c_int {
+            s = xmlBufUse(inbuf).wrapping_sub((*reader).cur as size_t) as ::core::ffi::c_int;
             if s > 0 as ::core::ffi::c_int {
                 budget::note_reader_bytes((*reader).ctxt, s as usize);
             }
@@ -2179,7 +2020,7 @@ unsafe extern "C" fn xmlTextReaderPushData(
                 if (*(*reader).ctxt).wellFormed != 0 {
                     (*(*reader).ctxt).wellFormed = 0 as ::core::ffi::c_int;
                 } else {
-                    return -(1 as ::core::ffi::c_int)
+                    return -(1 as ::core::ffi::c_int);
                 }
             }
         }
@@ -2199,13 +2040,12 @@ unsafe extern "C" fn xmlTextReaderValidatePush(mut reader: xmlTextReaderPtr) {
         && (*(*reader).ctxt).validate == 1 as ::core::ffi::c_int
     {
         if (*node).ns.is_null() || (*(*node).ns).prefix.is_null() {
-            (*(*reader).ctxt).valid
-                &= xmlValidatePushElement(
-                    &raw mut (*(*reader).ctxt).vctxt,
-                    (*(*reader).ctxt).myDoc,
-                    node,
-                    (*node).name,
-                );
+            (*(*reader).ctxt).valid &= xmlValidatePushElement(
+                &raw mut (*(*reader).ctxt).vctxt,
+                (*(*reader).ctxt).myDoc,
+                node,
+                (*node).name,
+            );
         } else {
             let mut qname: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
             qname = xmlStrdup((*(*node).ns).prefix);
@@ -2214,18 +2054,14 @@ unsafe extern "C" fn xmlTextReaderValidatePush(mut reader: xmlTextReaderPtr) {
                 b":\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
             );
             qname = xmlStrcat(qname, (*node).name);
-            (*(*reader).ctxt).valid
-                &= xmlValidatePushElement(
-                    &raw mut (*(*reader).ctxt).vctxt,
-                    (*(*reader).ctxt).myDoc,
-                    node,
-                    qname,
-                );
+            (*(*reader).ctxt).valid &= xmlValidatePushElement(
+                &raw mut (*(*reader).ctxt).vctxt,
+                (*(*reader).ctxt).myDoc,
+                node,
+                qname,
+            );
             if !qname.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(qname as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(qname as *mut ::core::ffi::c_void);
             }
         }
     }
@@ -2237,11 +2073,7 @@ unsafe extern "C" fn xmlTextReaderValidatePush(mut reader: xmlTextReaderPtr) {
         if !(*reader).rngFullNode.is_null() {
             return;
         }
-        ret = xmlRelaxNGValidatePushElement(
-            (*reader).rngValidCtxt,
-            (*(*reader).ctxt).myDoc,
-            node,
-        );
+        ret = xmlRelaxNGValidatePushElement((*reader).rngValidCtxt, (*(*reader).ctxt).myDoc, node);
         if ret == 0 as ::core::ffi::c_int {
             node = xmlTextReaderExpand(reader);
             if node.is_null() {
@@ -2270,8 +2102,8 @@ unsafe extern "C" fn xmlTextReaderValidateCData(
         && !(*reader).ctxt.is_null()
         && (*(*reader).ctxt).validate == 1 as ::core::ffi::c_int
     {
-        (*(*reader).ctxt).valid
-            &= xmlValidatePushCData(&raw mut (*(*reader).ctxt).vctxt, data, len);
+        (*(*reader).ctxt).valid &=
+            xmlValidatePushCData(&raw mut (*(*reader).ctxt).vctxt, data, len);
     }
     if (*reader).validate as ::core::ffi::c_uint
         == XML_TEXTREADER_VALIDATE_RNG as ::core::ffi::c_int as ::core::ffi::c_uint
@@ -2295,13 +2127,12 @@ unsafe extern "C" fn xmlTextReaderValidatePop(mut reader: xmlTextReaderPtr) {
         && (*(*reader).ctxt).validate == 1 as ::core::ffi::c_int
     {
         if (*node).ns.is_null() || (*(*node).ns).prefix.is_null() {
-            (*(*reader).ctxt).valid
-                &= xmlValidatePopElement(
-                    &raw mut (*(*reader).ctxt).vctxt,
-                    (*(*reader).ctxt).myDoc,
-                    node,
-                    (*node).name,
-                );
+            (*(*reader).ctxt).valid &= xmlValidatePopElement(
+                &raw mut (*(*reader).ctxt).vctxt,
+                (*(*reader).ctxt).myDoc,
+                node,
+                (*node).name,
+            );
         } else {
             let mut qname: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
             qname = xmlStrdup((*(*node).ns).prefix);
@@ -2310,18 +2141,14 @@ unsafe extern "C" fn xmlTextReaderValidatePop(mut reader: xmlTextReaderPtr) {
                 b":\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
             );
             qname = xmlStrcat(qname, (*node).name);
-            (*(*reader).ctxt).valid
-                &= xmlValidatePopElement(
-                    &raw mut (*(*reader).ctxt).vctxt,
-                    (*(*reader).ctxt).myDoc,
-                    node,
-                    qname,
-                );
+            (*(*reader).ctxt).valid &= xmlValidatePopElement(
+                &raw mut (*(*reader).ctxt).vctxt,
+                (*(*reader).ctxt).myDoc,
+                node,
+                qname,
+            );
             if !qname.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(qname as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(qname as *mut ::core::ffi::c_void);
             }
         }
     }
@@ -2336,11 +2163,7 @@ unsafe extern "C" fn xmlTextReaderValidatePop(mut reader: xmlTextReaderPtr) {
             }
             return;
         }
-        ret = xmlRelaxNGValidatePopElement(
-            (*reader).rngValidCtxt,
-            (*(*reader).ctxt).myDoc,
-            node,
-        );
+        ret = xmlRelaxNGValidatePopElement((*reader).rngValidCtxt, (*(*reader).ctxt).myDoc, node);
         if ret != 1 as ::core::ffi::c_int {
             (*reader).rngValidErrors += 1;
         }
@@ -2377,14 +2200,9 @@ unsafe extern "C" fn xmlTextReaderValidateEntity(mut reader: xmlTextReaderPtr) {
             } else if (*node).type_0 as ::core::ffi::c_uint
                 == XML_TEXT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                 || (*node).type_0 as ::core::ffi::c_uint
-                    == XML_CDATA_SECTION_NODE as ::core::ffi::c_int
-                        as ::core::ffi::c_uint
+                    == XML_CDATA_SECTION_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
             {
-                xmlTextReaderValidateCData(
-                    reader,
-                    (*node).content,
-                    xmlStrlen((*node).content),
-                );
+                xmlTextReaderValidateCData(reader, (*node).content, xmlStrlen((*node).content));
             }
             if !(*node).children.is_null() {
                 node = (*node).children as xmlNodePtr;
@@ -2406,8 +2224,7 @@ unsafe extern "C" fn xmlTextReaderValidateEntity(mut reader: xmlTextReaderPtr) {
                     loop {
                         node = (*node).parent as xmlNodePtr;
                         if (*node).type_0 as ::core::ffi::c_uint
-                            == XML_ELEMENT_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            == XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         {
                             let mut tmp: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
                             if (*reader).entNr == 0 as ::core::ffi::c_int {
@@ -2417,7 +2234,8 @@ unsafe extern "C" fn xmlTextReaderValidateEntity(mut reader: xmlTextReaderPtr) {
                                         break;
                                     }
                                     if !((*tmp).extra as ::core::ffi::c_uint
-                                        & !((15 as ::core::ffi::c_uint) << 12 as ::core::ffi::c_int)
+                                        & !((15 as ::core::ffi::c_uint)
+                                            << 12 as ::core::ffi::c_int)
                                         & NODE_IS_PRESERVED as ::core::ffi::c_uint
                                         == 0 as ::core::ffi::c_uint)
                                     {
@@ -2431,8 +2249,8 @@ unsafe extern "C" fn xmlTextReaderValidateEntity(mut reader: xmlTextReaderPtr) {
                             xmlTextReaderValidatePop(reader);
                         }
                         if (*node).type_0 as ::core::ffi::c_uint
-                            == XML_ENTITY_DECL as ::core::ffi::c_int
-                                as ::core::ffi::c_uint && !(*reader).ent.is_null()
+                            == XML_ENTITY_DECL as ::core::ffi::c_int as ::core::ffi::c_uint
+                            && !(*reader).ent.is_null()
                             && (*(*reader).ent).children == node
                         {
                             node = xmlTextReaderEntPop(reader);
@@ -2478,17 +2296,13 @@ unsafe extern "C" fn xmlTextReaderGetSuccessor(mut cur: xmlNodePtr) -> xmlNodePt
     }
     return cur;
 }
-unsafe extern "C" fn xmlTextReaderDoExpand(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn xmlTextReaderDoExpand(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     let mut val: ::core::ffi::c_int = 0;
     if reader.is_null() || (*reader).node.is_null() || (*reader).ctxt.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
     loop {
-        if (*(*reader).ctxt).instate as ::core::ffi::c_int
-            == XML_PARSER_EOF as ::core::ffi::c_int
-        {
+        if (*(*reader).ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int {
             return 1 as ::core::ffi::c_int;
         }
         if !xmlTextReaderGetSuccessor((*reader).node).is_null() {
@@ -2533,10 +2347,7 @@ unsafe extern "C" fn xmlTextReaderCollectSiblings(mut node: xmlNodePtr) -> *mut 
                 let mut tmp: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                 tmp = xmlTextReaderCollectSiblings((*node).children as xmlNodePtr);
                 xmlBufferCat(buffer, tmp);
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(tmp as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(tmp as *mut ::core::ffi::c_void);
             }
             _ => {}
         }
@@ -2548,9 +2359,7 @@ unsafe extern "C" fn xmlTextReaderCollectSiblings(mut node: xmlNodePtr) -> *mut 
     return ret;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderRead(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextReaderRead(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     let mut current_block: u64;
     let mut val: ::core::ffi::c_int = 0;
     let mut olddepth: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
@@ -2620,33 +2429,29 @@ pub unsafe extern "C" fn xmlTextReaderRead(
             4558939109239118982 => {
                 if (*reader).node.is_null() {
                     if (*reader).mode == XML_TEXTREADER_MODE_EOF as ::core::ffi::c_int {
-                        return 0 as ::core::ffi::c_int
+                        return 0 as ::core::ffi::c_int;
                     } else {
-                        return -(1 as ::core::ffi::c_int)
+                        return -(1 as ::core::ffi::c_int);
                     }
                 }
-                while !(*reader).node.is_null() && (*(*reader).node).next.is_null()
+                while !(*reader).node.is_null()
+                    && (*(*reader).node).next.is_null()
                     && (*(*reader).ctxt).nodeNr == olddepth
                     && (oldstate as ::core::ffi::c_int
                         == XML_TEXTREADER_BACKTRACK as ::core::ffi::c_int
                         || (*(*reader).node).children.is_null()
                         || (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_ENTITY_REF_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            == XML_ENTITY_REF_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         || !(*(*reader).node).children.is_null()
-                            && (*(*(*reader).node).children).type_0
-                                as ::core::ffi::c_uint
-                                == XML_TEXT_NODE as ::core::ffi::c_int
-                                    as ::core::ffi::c_uint
+                            && (*(*(*reader).node).children).type_0 as ::core::ffi::c_uint
+                                == XML_TEXT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                             && (*(*(*reader).node).children).next.is_null()
                         || (*(*reader).node).type_0 as ::core::ffi::c_uint
                             == XML_DTD_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         || (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_DOCUMENT_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            == XML_DOCUMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         || (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_HTML_DOCUMENT_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint)
+                            == XML_HTML_DOCUMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint)
                     && ((*(*reader).ctxt).node.is_null()
                         || (*(*reader).ctxt).node == (*reader).node
                         || (*(*reader).ctxt).node == (*(*reader).node).parent)
@@ -2663,16 +2468,13 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                         break '_get_next_node;
                     }
                 }
-                if oldstate as ::core::ffi::c_int
-                    != XML_TEXTREADER_BACKTRACK as ::core::ffi::c_int
+                if oldstate as ::core::ffi::c_int != XML_TEXTREADER_BACKTRACK as ::core::ffi::c_int
                 {
                     if !(*(*reader).node).children.is_null()
                         && (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            != XML_ENTITY_REF_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            != XML_ENTITY_REF_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         && (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            != XML_XINCLUDE_START as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            != XML_XINCLUDE_START as ::core::ffi::c_int as ::core::ffi::c_uint
                         && (*(*reader).node).type_0 as ::core::ffi::c_uint
                             != XML_DTD_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                     {
@@ -2687,8 +2489,7 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                     if oldstate as ::core::ffi::c_int
                         == XML_TEXTREADER_ELEMENT as ::core::ffi::c_int
                         && (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_ELEMENT_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            == XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         && (*(*reader).node).children.is_null()
                         && (*(*reader).node).extra as ::core::ffi::c_uint
                             & !((15 as ::core::ffi::c_uint) << 12 as ::core::ffi::c_int)
@@ -2701,15 +2502,15 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                     } else {
                         if (*reader).validate as ::core::ffi::c_uint != 0
                             && (*(*reader).node).type_0 as ::core::ffi::c_uint
-                                == XML_ELEMENT_NODE as ::core::ffi::c_int
-                                    as ::core::ffi::c_uint
+                                == XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         {
                             xmlTextReaderValidatePop(reader);
                         }
                         if (*reader).preserves > 0 as ::core::ffi::c_int
                             && (*(*reader).node).extra as ::core::ffi::c_uint
                                 & !((15 as ::core::ffi::c_uint) << 12 as ::core::ffi::c_int)
-                                & NODE_IS_SPRESERVED as ::core::ffi::c_uint != 0
+                                & NODE_IS_SPRESERVED as ::core::ffi::c_uint
+                                != 0
                         {
                             (*reader).preserves -= 1;
                         }
@@ -2722,8 +2523,7 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                             && (*(*(*reader).node).prev).type_0 as ::core::ffi::c_uint
                                 != XML_DTD_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         {
-                            let mut tmp: xmlNodePtr = (*(*reader).node).prev
-                                as xmlNodePtr;
+                            let mut tmp: xmlNodePtr = (*(*reader).node).prev as xmlNodePtr;
                             if (*tmp).extra as ::core::ffi::c_uint
                                 & !((15 as ::core::ffi::c_uint) << 12 as ::core::ffi::c_int)
                                 & NODE_IS_PRESERVED as ::core::ffi::c_uint
@@ -2752,36 +2552,30 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                     current_block = 9604905064405801039;
                 } else {
                     if (*reader).validate as ::core::ffi::c_uint
-                        != XML_TEXTREADER_NOT_VALIDATE as ::core::ffi::c_int
-                            as ::core::ffi::c_uint
+                        != XML_TEXTREADER_NOT_VALIDATE as ::core::ffi::c_int as ::core::ffi::c_uint
                         && (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_ELEMENT_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            == XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                     {
                         xmlTextReaderValidatePop(reader);
                     }
                     if (*reader).preserves > 0 as ::core::ffi::c_int
                         && (*(*reader).node).extra as ::core::ffi::c_uint
                             & !((15 as ::core::ffi::c_uint) << 12 as ::core::ffi::c_int)
-                            & NODE_IS_SPRESERVED as ::core::ffi::c_uint != 0
+                            & NODE_IS_SPRESERVED as ::core::ffi::c_uint
+                            != 0
                     {
                         (*reader).preserves -= 1;
                     }
                     (*reader).node = (*(*reader).node).parent as xmlNodePtr;
                     if (*reader).node.is_null()
                         || (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_DOCUMENT_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            == XML_DOCUMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         || (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_DOCB_DOCUMENT_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            == XML_DOCB_DOCUMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         || (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_HTML_DOCUMENT_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            == XML_HTML_DOCUMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                     {
-                        if (*reader).mode
-                            != XML_TEXTREADER_MODE_EOF as ::core::ffi::c_int
-                        {
+                        if (*reader).mode != XML_TEXTREADER_MODE_EOF as ::core::ffi::c_int {
                             val = xmlParseChunk(
                                 (*reader).ctxt,
                                 b"\0" as *const u8 as *const ::core::ffi::c_char,
@@ -2820,8 +2614,7 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                                 & NODE_IS_PRESERVED as ::core::ffi::c_uint
                                 == 0 as ::core::ffi::c_uint
                         {
-                            let mut tmp_0: xmlNodePtr = (*(*reader).node).last
-                                as xmlNodePtr;
+                            let mut tmp_0: xmlNodePtr = (*(*reader).node).last as xmlNodePtr;
                             xmlUnlinkNode(tmp_0);
                             xmlTextReaderFreeNode(reader, tmp_0);
                         }
@@ -2832,12 +2625,12 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                 }
             }
             _ => {
-                if !(*reader).node.is_null() && (*(*reader).node).next.is_null()
+                if !(*reader).node.is_null()
+                    && (*(*reader).node).next.is_null()
                     && ((*(*reader).node).type_0 as ::core::ffi::c_uint
                         == XML_TEXT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                         || (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_CDATA_SECTION_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint)
+                            == XML_CDATA_SECTION_NODE as ::core::ffi::c_int as ::core::ffi::c_uint)
                 {
                     if xmlTextReaderExpand(reader).is_null() {
                         return -(1 as ::core::ffi::c_int);
@@ -2852,17 +2645,13 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                         == XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                     && !(*(*reader).node).ns.is_null()
                     && (xmlStrEqual((*(*(*reader).node).ns).href, XINCLUDE_NS) != 0
-                        || xmlStrEqual((*(*(*reader).node).ns).href, XINCLUDE_OLD_NS)
-                            != 0)
+                        || xmlStrEqual((*(*(*reader).node).ns).href, XINCLUDE_OLD_NS) != 0)
                 {
                     if (*reader).xincctxt.is_null() {
-                        (*reader).xincctxt = xmlXIncludeNewContext(
-                            (*(*reader).ctxt).myDoc,
-                        );
+                        (*reader).xincctxt = xmlXIncludeNewContext((*(*reader).ctxt).myDoc);
                         xmlXIncludeSetFlags(
                             (*reader).xincctxt,
-                            (*reader).parserFlags
-                                & !(XML_PARSE_NOXINCNODE as ::core::ffi::c_int),
+                            (*reader).parserFlags & !(XML_PARSE_NOXINCNODE as ::core::ffi::c_int),
                         );
                     }
                     if xmlTextReaderExpand(reader).is_null() {
@@ -2872,8 +2661,7 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                 }
                 if !(*reader).node.is_null()
                     && (*(*reader).node).type_0 as ::core::ffi::c_uint
-                        == XML_XINCLUDE_START as ::core::ffi::c_int
-                            as ::core::ffi::c_uint
+                        == XML_XINCLUDE_START as ::core::ffi::c_int as ::core::ffi::c_uint
                 {
                     (*reader).in_xinclude += 1;
                     current_block = 4558939109239118982;
@@ -2886,33 +2674,30 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                 } else {
                     if !(*reader).node.is_null()
                         && (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_ENTITY_REF_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint && !(*reader).ctxt.is_null()
+                            == XML_ENTITY_REF_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
+                        && !(*reader).ctxt.is_null()
                         && (*(*reader).ctxt).replaceEntities == 1 as ::core::ffi::c_int
                     {
                         if !(*(*reader).node).children.is_null()
-                            && (*(*(*reader).node).children).type_0
-                                as ::core::ffi::c_uint
-                                == XML_ENTITY_DECL as ::core::ffi::c_int
-                                    as ::core::ffi::c_uint
+                            && (*(*(*reader).node).children).type_0 as ::core::ffi::c_uint
+                                == XML_ENTITY_DECL as ::core::ffi::c_int as ::core::ffi::c_uint
                             && !(*(*(*reader).node).children).children.is_null()
                         {
                             xmlTextReaderEntPush(reader, (*reader).node);
-                            (*reader).node = (*(*(*reader).node).children).children
-                                as xmlNodePtr;
+                            (*reader).node = (*(*(*reader).node).children).children as xmlNodePtr;
                         }
                     } else if !(*reader).node.is_null()
                         && (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_ENTITY_REF_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint && !(*reader).ctxt.is_null()
+                            == XML_ENTITY_REF_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
+                        && !(*reader).ctxt.is_null()
                         && (*reader).validate as ::core::ffi::c_uint != 0
                     {
                         xmlTextReaderValidateEntity(reader);
                     }
                     if !(*reader).node.is_null()
                         && (*(*reader).node).type_0 as ::core::ffi::c_uint
-                            == XML_ENTITY_DECL as ::core::ffi::c_int
-                                as ::core::ffi::c_uint && !(*reader).ent.is_null()
+                            == XML_ENTITY_DECL as ::core::ffi::c_int as ::core::ffi::c_uint
+                        && !(*reader).ent.is_null()
                         && (*(*reader).ent).children == (*reader).node
                     {
                         (*reader).node = xmlTextReaderEntPop(reader);
@@ -2921,12 +2706,12 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                     } else {
                         if (*reader).validate as ::core::ffi::c_uint
                             != XML_TEXTREADER_NOT_VALIDATE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint && !(*reader).node.is_null()
+                                as ::core::ffi::c_uint
+                            && !(*reader).node.is_null()
                         {
                             let mut node: xmlNodePtr = (*reader).node;
                             if (*node).type_0 as ::core::ffi::c_uint
-                                == XML_ELEMENT_NODE as ::core::ffi::c_int
-                                    as ::core::ffi::c_uint
+                                == XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                                 && ((*reader).state as ::core::ffi::c_int
                                     != XML_TEXTREADER_END as ::core::ffi::c_int
                                     && (*reader).state as ::core::ffi::c_int
@@ -2934,8 +2719,7 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                             {
                                 xmlTextReaderValidatePush(reader);
                             } else if (*node).type_0 as ::core::ffi::c_uint
-                                == XML_TEXT_NODE as ::core::ffi::c_int
-                                    as ::core::ffi::c_uint
+                                == XML_TEXT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                                 || (*node).type_0 as ::core::ffi::c_uint
                                     == XML_CDATA_SECTION_NODE as ::core::ffi::c_int
                                         as ::core::ffi::c_uint
@@ -2974,9 +2758,9 @@ pub unsafe extern "C" fn xmlTextReaderRead(
                             && (*reader).xsdValidErrors == 0 as ::core::ffi::c_int
                             && !(*reader).xsdValidCtxt.is_null()
                         {
-                            (*reader).xsdValidErrors = (xmlSchemaIsValid(
-                                (*reader).xsdValidCtxt,
-                            ) == 0) as ::core::ffi::c_int;
+                            (*reader).xsdValidErrors = (xmlSchemaIsValid((*reader).xsdValidCtxt)
+                                == 0)
+                                as ::core::ffi::c_int;
                         }
                         return 1 as ::core::ffi::c_int;
                     }
@@ -2997,9 +2781,7 @@ pub unsafe extern "C" fn xmlTextReaderReadState(
     return (*reader).mode;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderExpand(
-    mut reader: xmlTextReaderPtr,
-) -> xmlNodePtr {
+pub unsafe extern "C" fn xmlTextReaderExpand(mut reader: xmlTextReaderPtr) -> xmlNodePtr {
     if reader.is_null() || (*reader).node.is_null() {
         return ::core::ptr::null_mut::<xmlNode>();
     }
@@ -3015,9 +2797,7 @@ pub unsafe extern "C" fn xmlTextReaderExpand(
     return (*reader).node;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderNext(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextReaderNext(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     let mut ret: ::core::ffi::c_int = 0;
     let mut cur: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() {
@@ -3034,14 +2814,14 @@ pub unsafe extern "C" fn xmlTextReaderNext(
         return xmlTextReaderRead(reader);
     }
     if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int
-        || (*reader).state as ::core::ffi::c_int
-            == XML_TEXTREADER_BACKTRACK as ::core::ffi::c_int
+        || (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_BACKTRACK as ::core::ffi::c_int
     {
         return xmlTextReaderRead(reader);
     }
     if (*cur).extra as ::core::ffi::c_uint
         & !((15 as ::core::ffi::c_uint) << 12 as ::core::ffi::c_int)
-        & NODE_IS_EMPTY as ::core::ffi::c_uint != 0
+        & NODE_IS_EMPTY as ::core::ffi::c_uint
+        != 0
     {
         return xmlTextReaderRead(reader);
     }
@@ -3057,9 +2837,7 @@ pub unsafe extern "C" fn xmlTextReaderNext(
     return xmlTextReaderRead(reader);
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderReadInnerXml(
-    mut reader: xmlTextReaderPtr,
-) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlTextReaderReadInnerXml(mut reader: xmlTextReaderPtr) -> *mut xmlChar {
     let mut resbuf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     let mut cur_node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
@@ -3102,9 +2880,7 @@ pub unsafe extern "C" fn xmlTextReaderReadInnerXml(
     return resbuf;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderReadOuterXml(
-    mut reader: xmlTextReaderPtr,
-) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlTextReaderReadOuterXml(mut reader: xmlTextReaderPtr) -> *mut xmlChar {
     let mut resbuf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     let mut buff: xmlBufferPtr = ::core::ptr::null_mut::<xmlBuffer>();
@@ -3122,8 +2898,13 @@ pub unsafe extern "C" fn xmlTextReaderReadOuterXml(
         node = xmlDocCopyNode(node, doc, 1 as ::core::ffi::c_int);
     }
     buff = xmlBufferCreate();
-    if xmlNodeDump(buff, doc, node, 0 as ::core::ffi::c_int, 0 as ::core::ffi::c_int)
-        == -(1 as ::core::ffi::c_int)
+    if xmlNodeDump(
+        buff,
+        doc,
+        node,
+        0 as ::core::ffi::c_int,
+        0 as ::core::ffi::c_int,
+    ) == -(1 as ::core::ffi::c_int)
     {
         xmlFreeNode(node);
         xmlBufferFree(buff);
@@ -3136,14 +2917,16 @@ pub unsafe extern "C" fn xmlTextReaderReadOuterXml(
     return resbuf;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderReadString(
-    mut reader: xmlTextReaderPtr,
-) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlTextReaderReadString(mut reader: xmlTextReaderPtr) -> *mut xmlChar {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() || (*reader).node.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    node = if !(*reader).curnode.is_null() { (*reader).curnode } else { (*reader).node };
+    node = if !(*reader).curnode.is_null() {
+        (*reader).curnode
+    } else {
+        (*reader).node
+    };
     match (*node).type_0 as ::core::ffi::c_uint {
         3 => {
             if !(*node).content.is_null() {
@@ -3156,15 +2939,11 @@ pub unsafe extern "C" fn xmlTextReaderReadString(
             }
         }
         2 => {
-            (*__xmlGenericError())
-                .expect(
-                    "non-null function pointer",
-                )(
+            (*__xmlGenericError()).expect("non-null function pointer")(
                 *__xmlGenericErrorContext(),
-                b"Unimplemented block at %s:%d\n\0" as *const u8
+                b"Unimplemented block at %s:%d\n\0" as *const u8 as *const ::core::ffi::c_char,
+                b"/home/yans/code/safelibs/ported/libxml/original/xmlreader.c\0" as *const u8
                     as *const ::core::ffi::c_char,
-                b"/home/yans/code/safelibs/ported/libxml/original/xmlreader.c\0"
-                    as *const u8 as *const ::core::ffi::c_char,
                 1879 as ::core::ffi::c_int,
             );
         }
@@ -3172,14 +2951,11 @@ pub unsafe extern "C" fn xmlTextReaderReadString(
     }
     return ::core::ptr::null_mut::<xmlChar>();
 }
-unsafe extern "C" fn xmlTextReaderNextTree(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn xmlTextReaderNextTree(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     if reader.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int
-    {
+    if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int {
         return 0 as ::core::ffi::c_int;
     }
     if (*reader).node.is_null() {
@@ -3191,9 +2967,7 @@ unsafe extern "C" fn xmlTextReaderNextTree(
         (*reader).state = XML_TEXTREADER_START;
         return 1 as ::core::ffi::c_int;
     }
-    if (*reader).state as ::core::ffi::c_int
-        != XML_TEXTREADER_BACKTRACK as ::core::ffi::c_int
-    {
+    if (*reader).state as ::core::ffi::c_int != XML_TEXTREADER_BACKTRACK as ::core::ffi::c_int {
         if !(*(*reader).node).next.is_null() {
             (*reader).node = (*(*reader).node).next as xmlNodePtr;
             (*reader).state = XML_TEXTREADER_START;
@@ -3222,12 +2996,9 @@ unsafe extern "C" fn xmlTextReaderNextTree(
     (*reader).state = XML_TEXTREADER_END;
     return 1 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn xmlTextReaderReadTree(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn xmlTextReaderReadTree(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     let mut current_block: u64;
-    if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int
-    {
+    if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int {
         return 0 as ::core::ffi::c_int;
     }
     loop {
@@ -3272,8 +3043,7 @@ unsafe extern "C" fn xmlTextReaderReadTree(
                         (*reader).state = XML_TEXTREADER_START;
                     } else if !(*(*reader).node).parent.is_null() {
                         if (*(*(*reader).node).parent).type_0 as ::core::ffi::c_uint
-                            == XML_DOCUMENT_NODE as ::core::ffi::c_int
-                                as ::core::ffi::c_uint
+                            == XML_DOCUMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                             || (*(*(*reader).node).parent).type_0 as ::core::ffi::c_uint
                                 == XML_HTML_DOCUMENT_NODE as ::core::ffi::c_int
                                     as ::core::ffi::c_uint
@@ -3310,8 +3080,7 @@ pub unsafe extern "C" fn xmlTextReaderNextSibling(
     if (*reader).doc.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int
-    {
+    if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int {
         return 0 as ::core::ffi::c_int;
     }
     if (*reader).node.is_null() {
@@ -3333,18 +3102,13 @@ pub unsafe extern "C" fn xmlNewTextReader(
     if input.is_null() {
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
-    ret = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextReader>() as size_t) as xmlTextReaderPtr;
+    ret = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextReader>() as size_t
+    ) as xmlTextReaderPtr;
     if ret.is_null() {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
-            b"xmlNewTextReader : malloc failed\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlNewTextReader : malloc failed\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
@@ -3361,32 +3125,22 @@ pub unsafe extern "C" fn xmlNewTextReader(
     (*ret).buffer = xmlBufCreateSize(100 as size_t);
     if (*ret).buffer.is_null() {
         xmlFree.expect("non-null function pointer")(ret as *mut ::core::ffi::c_void);
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
-            b"xmlNewTextReader : malloc failed\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlNewTextReader : malloc failed\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
     xmlBufSetAllocationScheme((*ret).buffer, XML_BUFFER_ALLOC_BOUNDED);
-    (*ret).sax = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlSAXHandler>() as size_t) as *mut xmlSAXHandler
-        as xmlSAXHandlerPtr;
+    (*ret).sax = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlSAXHandler>() as size_t,
+    ) as *mut xmlSAXHandler as xmlSAXHandlerPtr;
     if (*ret).sax.is_null() {
         xmlBufFree((*ret).buffer);
         xmlFree.expect("non-null function pointer")(ret as *mut ::core::ffi::c_void);
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
-            b"xmlNewTextReader : malloc failed\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlNewTextReader : malloc failed\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
@@ -3471,8 +3225,7 @@ pub unsafe extern "C" fn xmlNewTextReader(
         (*ret).ctxt = xmlCreatePushParserCtxt(
             (*ret).sax,
             NULL,
-            xmlBufContent((*(*ret).input).buffer as *const xmlBuf)
-                as *const ::core::ffi::c_char,
+            xmlBufContent((*(*ret).input).buffer as *const xmlBuf) as *const ::core::ffi::c_char,
             4 as ::core::ffi::c_int,
             URI,
         );
@@ -3490,17 +3243,12 @@ pub unsafe extern "C" fn xmlNewTextReader(
         (*ret).cur = 0 as ::core::ffi::c_uint;
     }
     if (*ret).ctxt.is_null() {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
-            b"xmlNewTextReader : malloc failed\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlNewTextReader : malloc failed\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         xmlBufFree((*ret).buffer);
-        xmlFree
-            .expect("non-null function pointer")((*ret).sax as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*ret).sax as *mut ::core::ffi::c_void);
         xmlFree.expect("non-null function pointer")(ret as *mut ::core::ffi::c_void);
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
@@ -3523,9 +3271,7 @@ unsafe fn xmlTextReaderLoadExternalInput(
 ) -> xmlParserInputBufferPtr {
     let mut ctxt: xmlParserCtxtPtr = ::core::ptr::null_mut::<xmlParserCtxt>();
     let mut stream: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     if !loaded_uri.is_null() {
         *loaded_uri = ::core::ptr::null_mut::<::core::ffi::c_char>();
     }
@@ -3539,11 +3285,7 @@ unsafe fn xmlTextReaderLoadExternalInput(
     if ctxt.is_null() {
         return ::core::ptr::null_mut::<xmlParserInputBuffer>();
     }
-    stream = xmlLoadExternalEntity(
-        uri,
-        ::core::ptr::null::<::core::ffi::c_char>(),
-        ctxt,
-    );
+    stream = xmlLoadExternalEntity(uri, ::core::ptr::null::<::core::ffi::c_char>(), ctxt);
     if stream.is_null() {
         xmlFreeParserCtxt(ctxt);
         return ::core::ptr::null_mut::<xmlParserInputBuffer>();
@@ -3571,24 +3313,13 @@ unsafe fn xmlTextReaderLoadExternalInput(
 pub unsafe extern "C" fn xmlNewTextReaderFilename(
     mut URI: *const ::core::ffi::c_char,
 ) -> xmlTextReaderPtr {
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     let mut ret: xmlTextReaderPtr = ::core::ptr::null_mut::<xmlTextReader>();
-    let mut loaded_uri: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
-        ::core::ffi::c_char,
-    >();
-    let mut loaded_directory: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
-        ::core::ffi::c_char,
-    >();
-    let mut directory: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
-        ::core::ffi::c_char,
-    >();
-    input = xmlTextReaderLoadExternalInput(
-        URI,
-        &raw mut loaded_uri,
-        &raw mut loaded_directory,
-    );
+    let mut loaded_uri: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
+    let mut loaded_directory: *mut ::core::ffi::c_char =
+        ::core::ptr::null_mut::<::core::ffi::c_char>();
+    let mut directory: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
+    input = xmlTextReaderLoadExternalInput(URI, &raw mut loaded_uri, &raw mut loaded_directory);
     if input.is_null() {
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
@@ -3603,8 +3334,7 @@ pub unsafe extern "C" fn xmlNewTextReaderFilename(
     if ret.is_null() {
         xmlFreeParserInputBuffer(input);
         if !loaded_uri.is_null() {
-            xmlFree
-                .expect("non-null function pointer")(loaded_uri as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(loaded_uri as *mut ::core::ffi::c_void);
         }
         if !loaded_directory.is_null() {
             xmlFree.expect("non-null function pointer")(
@@ -3626,19 +3356,16 @@ pub unsafe extern "C" fn xmlNewTextReaderFilename(
         directory = xmlParserGetDirectory(URI);
     }
     if (*(*ret).ctxt).directory.is_null() && !directory.is_null() {
-        (*(*ret).ctxt).directory = xmlStrdup(directory as *mut xmlChar)
-            as *mut ::core::ffi::c_char;
+        (*(*ret).ctxt).directory = xmlStrdup(directory as *mut xmlChar) as *mut ::core::ffi::c_char;
     }
     if !directory.is_null() {
-        xmlFree
-            .expect("non-null function pointer")(directory as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(directory as *mut ::core::ffi::c_void);
     }
     if !loaded_uri.is_null() {
         xmlFree.expect("non-null function pointer")(loaded_uri as *mut ::core::ffi::c_void);
     }
     if !loaded_directory.is_null() {
-        xmlFree
-            .expect("non-null function pointer")(loaded_directory as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(loaded_directory as *mut ::core::ffi::c_void);
     }
     return ret;
 }
@@ -3683,10 +3410,9 @@ pub unsafe extern "C" fn xmlFreeTextReader(mut reader: xmlTextReaderPtr) {
             }
             i += 1;
         }
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*reader).patternTab as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(
+            (*reader).patternTab as *mut ::core::ffi::c_void,
+        );
     }
     if !(*reader).faketext.is_null() {
         xmlFreeNode((*reader).faketext);
@@ -3706,10 +3432,9 @@ pub unsafe extern "C" fn xmlFreeTextReader(mut reader: xmlTextReaderPtr) {
                     ::core::ptr::null::<xmlChar>(),
                 );
             }
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )((*(*reader).ctxt).vctxt.vstateTab as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(
+                (*(*reader).ctxt).vctxt.vstateTab as *mut ::core::ffi::c_void,
+            );
             (*(*reader).ctxt).vctxt.vstateTab = ::core::ptr::null_mut::<xmlValidState>();
             (*(*reader).ctxt).vctxt.vstateMax = 0 as ::core::ffi::c_int;
         }
@@ -3724,10 +3449,7 @@ pub unsafe extern "C" fn xmlFreeTextReader(mut reader: xmlTextReaderPtr) {
         }
     }
     if !(*reader).sax.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*reader).sax as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*reader).sax as *mut ::core::ffi::c_void);
     }
     if !(*reader).input.is_null() && (*reader).allocs & XML_TEXTREADER_INPUT != 0 {
         xmlFreeParserInputBuffer((*reader).input);
@@ -3736,10 +3458,7 @@ pub unsafe extern "C" fn xmlFreeTextReader(mut reader: xmlTextReaderPtr) {
         xmlBufFree((*reader).buffer);
     }
     if !(*reader).entTab.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*reader).entTab as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*reader).entTab as *mut ::core::ffi::c_void);
     }
     if !(*reader).dict.is_null() {
         xmlDictFree((*reader).dict);
@@ -3747,9 +3466,7 @@ pub unsafe extern "C" fn xmlFreeTextReader(mut reader: xmlTextReaderPtr) {
     xmlFree.expect("non-null function pointer")(reader as *mut ::core::ffi::c_void);
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderClose(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextReaderClose(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     if reader.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -3820,9 +3537,7 @@ pub unsafe extern "C" fn xmlTextReaderGetAttributeNo(
         1 as ::core::ffi::c_int,
     );
     if ret.is_null() {
-        return xmlStrdup(
-            b"\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-        );
+        return xmlStrdup(b"\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar);
     }
     return ret;
 }
@@ -3945,9 +3660,7 @@ pub unsafe extern "C" fn xmlTextReaderGetAttributeNs(
 pub unsafe extern "C" fn xmlTextReaderGetRemainder(
     mut reader: xmlTextReaderPtr,
 ) -> xmlParserInputBufferPtr {
-    let mut ret: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut ret: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     if reader.is_null() {
         return ::core::ptr::null_mut::<xmlParserInputBuffer>();
     }
@@ -3971,13 +3684,9 @@ pub unsafe extern "C" fn xmlTextReaderGetRemainder(
         (*reader).input = ::core::ptr::null_mut::<xmlParserInputBuffer>();
         (*reader).allocs -= XML_TEXTREADER_INPUT;
     } else {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
-            b"Unimplemented block at %s:%d\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"Unimplemented block at %s:%d\n\0" as *const u8 as *const ::core::ffi::c_char,
             b"/home/yans/code/safelibs/ported/libxml/original/xmlreader.c\0" as *const u8
                 as *const ::core::ffi::c_char,
             2611 as ::core::ffi::c_int,
@@ -4124,7 +3833,8 @@ pub unsafe extern "C" fn xmlTextReaderMoveToAttribute(
                 current_block = 15522376522818903970;
                 break;
             }
-            if xmlStrEqual((*prop).name, localname) != 0 && !(*prop).ns.is_null()
+            if xmlStrEqual((*prop).name, localname) != 0
+                && !(*prop).ns.is_null()
                 && xmlStrEqual((*(*prop).ns).prefix, prefix) != 0
             {
                 (*reader).curnode = prop as xmlNodePtr;
@@ -4138,31 +3848,19 @@ pub unsafe extern "C" fn xmlTextReaderMoveToAttribute(
     match current_block {
         5620638749647636526 => {
             if !localname.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(localname as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(localname as *mut ::core::ffi::c_void);
             }
             if !prefix.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(prefix as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(prefix as *mut ::core::ffi::c_void);
             }
             return 1 as ::core::ffi::c_int;
         }
         _ => {
             if !localname.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(localname as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(localname as *mut ::core::ffi::c_void);
             }
             if !prefix.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(prefix as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(prefix as *mut ::core::ffi::c_void);
             }
             return 0 as ::core::ffi::c_int;
         }
@@ -4218,8 +3916,7 @@ pub unsafe extern "C" fn xmlTextReaderMoveToAttributeNs(
     prop = (*node).properties as xmlAttrPtr;
     while !prop.is_null() {
         if xmlStrEqual((*prop).name, localName) != 0
-            && (!(*prop).ns.is_null()
-                && xmlStrEqual((*(*prop).ns).href, namespaceURI) != 0)
+            && (!(*prop).ns.is_null() && xmlStrEqual((*(*prop).ns).href, namespaceURI) != 0)
         {
             (*reader).curnode = prop as xmlNodePtr;
             return 1 as ::core::ffi::c_int;
@@ -4345,10 +4042,9 @@ pub unsafe extern "C" fn xmlTextReaderReadAttributeValue(
                 && (*(*reader).faketext).content
                     != &raw mut (*(*reader).faketext).properties as *mut xmlChar
             {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )((*(*reader).faketext).content as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(
+                    (*(*reader).faketext).content as *mut ::core::ffi::c_void,
+                );
             }
             (*(*reader).faketext).content = xmlStrdup((*ns).href);
         }
@@ -4378,9 +4074,9 @@ pub unsafe extern "C" fn xmlTextReaderConstEncoding(
         return ::core::ptr::null::<xmlChar>();
     }
     if (*doc).encoding.is_null() {
-        return ::core::ptr::null::<xmlChar>()
+        return ::core::ptr::null::<xmlChar>();
     } else {
-        return xmlDictLookup((*reader).dict, (*doc).encoding, -(1 as ::core::ffi::c_int))
+        return xmlDictLookup((*reader).dict, (*doc).encoding, -(1 as ::core::ffi::c_int));
     };
 }
 #[no_mangle]
@@ -4408,8 +4104,7 @@ pub unsafe extern "C" fn xmlTextReaderAttributeCount(
         return 0 as ::core::ffi::c_int;
     }
     if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int
-        || (*reader).state as ::core::ffi::c_int
-            == XML_TEXTREADER_BACKTRACK as ::core::ffi::c_int
+        || (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_BACKTRACK as ::core::ffi::c_int
     {
         return 0 as ::core::ffi::c_int;
     }
@@ -4427,9 +4122,7 @@ pub unsafe extern "C" fn xmlTextReaderAttributeCount(
     return ret;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderNodeType(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextReaderNodeType(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() {
         return -(1 as ::core::ffi::c_int);
@@ -4444,8 +4137,7 @@ pub unsafe extern "C" fn xmlTextReaderNodeType(
     }
     match (*node).type_0 as ::core::ffi::c_uint {
         1 => {
-            if (*reader).state as ::core::ffi::c_int
-                == XML_TEXTREADER_END as ::core::ffi::c_int
+            if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int
                 || (*reader).state as ::core::ffi::c_int
                     == XML_TEXTREADER_BACKTRACK as ::core::ffi::c_int
             {
@@ -4457,12 +4149,12 @@ pub unsafe extern "C" fn xmlTextReaderNodeType(
         3 => {
             if xmlIsBlankNode((*reader).node as *const xmlNode) != 0 {
                 if xmlNodeGetSpacePreserve((*reader).node as *const xmlNode) != 0 {
-                    return XML_READER_TYPE_SIGNIFICANT_WHITESPACE as ::core::ffi::c_int
+                    return XML_READER_TYPE_SIGNIFICANT_WHITESPACE as ::core::ffi::c_int;
                 } else {
-                    return XML_READER_TYPE_WHITESPACE as ::core::ffi::c_int
+                    return XML_READER_TYPE_WHITESPACE as ::core::ffi::c_int;
                 }
             } else {
-                return XML_READER_TYPE_TEXT as ::core::ffi::c_int
+                return XML_READER_TYPE_TEXT as ::core::ffi::c_int;
             }
         }
         4 => return XML_READER_TYPE_CDATA as ::core::ffi::c_int,
@@ -4497,8 +4189,7 @@ pub unsafe extern "C" fn xmlTextReaderIsEmptyElement(
     if !(*(*reader).node).children.is_null() {
         return 0 as ::core::ffi::c_int;
     }
-    if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int
-    {
+    if (*reader).state as ::core::ffi::c_int == XML_TEXTREADER_END as ::core::ffi::c_int {
         return 0 as ::core::ffi::c_int;
     }
     if !(*reader).doc.is_null() {
@@ -4509,13 +4200,11 @@ pub unsafe extern "C" fn xmlTextReaderIsEmptyElement(
     }
     return ((*(*reader).node).extra as ::core::ffi::c_uint
         & !((15 as ::core::ffi::c_uint) << 12 as ::core::ffi::c_int)
-        & NODE_IS_EMPTY as ::core::ffi::c_uint != 0 as ::core::ffi::c_uint)
-        as ::core::ffi::c_int;
+        & NODE_IS_EMPTY as ::core::ffi::c_uint
+        != 0 as ::core::ffi::c_uint) as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderLocalName(
-    mut reader: xmlTextReaderPtr,
-) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlTextReaderLocalName(mut reader: xmlTextReaderPtr) -> *mut xmlChar {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() || (*reader).node.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
@@ -4532,9 +4221,9 @@ pub unsafe extern "C" fn xmlTextReaderLocalName(
         if (*ns).prefix.is_null() {
             return xmlStrdup(
                 b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-            )
+            );
         } else {
-            return xmlStrdup((*ns).prefix)
+            return xmlStrdup((*ns).prefix);
         }
     }
     if (*node).type_0 as ::core::ffi::c_uint
@@ -4568,9 +4257,9 @@ pub unsafe extern "C" fn xmlTextReaderConstLocalName(
                 (*reader).dict,
                 b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 -(1 as ::core::ffi::c_int),
-            )
+            );
         } else {
-            return (*ns).prefix
+            return (*ns).prefix;
         }
     }
     if (*node).type_0 as ::core::ffi::c_uint
@@ -4583,9 +4272,7 @@ pub unsafe extern "C" fn xmlTextReaderConstLocalName(
     return (*node).name;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderName(
-    mut reader: xmlTextReaderPtr,
-) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlTextReaderName(mut reader: xmlTextReaderPtr) -> *mut xmlChar {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     let mut ret: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     if reader.is_null() || (*reader).node.is_null() {
@@ -4616,8 +4303,7 @@ pub unsafe extern "C" fn xmlTextReaderName(
         }
         4 => {
             return xmlStrdup(
-                b"#cdata-section\0" as *const u8 as *const ::core::ffi::c_char
-                    as *mut xmlChar,
+                b"#cdata-section\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
             );
         }
         6 | 5 => return xmlStrdup((*node).name),
@@ -4634,17 +4320,14 @@ pub unsafe extern "C" fn xmlTextReaderName(
         }
         11 => {
             return xmlStrdup(
-                b"#document-fragment\0" as *const u8 as *const ::core::ffi::c_char
-                    as *mut xmlChar,
+                b"#document-fragment\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
             );
         }
         12 => return xmlStrdup((*node).name),
         10 | 14 => return xmlStrdup((*node).name),
         18 => {
             let mut ns: xmlNsPtr = node as xmlNsPtr;
-            ret = xmlStrdup(
-                b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-            );
+            ret = xmlStrdup(b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar);
             if (*ns).prefix.is_null() {
                 return ret;
             }
@@ -4661,9 +4344,7 @@ pub unsafe extern "C" fn xmlTextReaderName(
     return ::core::ptr::null_mut::<xmlChar>();
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderConstName(
-    mut reader: xmlTextReaderPtr,
-) -> *const xmlChar {
+pub unsafe extern "C" fn xmlTextReaderConstName(mut reader: xmlTextReaderPtr) -> *const xmlChar {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() || (*reader).node.is_null() {
         return ::core::ptr::null::<xmlChar>();
@@ -4690,24 +4371,15 @@ pub unsafe extern "C" fn xmlTextReaderConstName(
         4 => {
             return xmlDictLookup(
                 (*reader).dict,
-                b"#cdata-section\0" as *const u8 as *const ::core::ffi::c_char
-                    as *mut xmlChar,
+                b"#cdata-section\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 -(1 as ::core::ffi::c_int),
             );
         }
         6 | 5 => {
-            return xmlDictLookup(
-                (*reader).dict,
-                (*node).name,
-                -(1 as ::core::ffi::c_int),
-            );
+            return xmlDictLookup((*reader).dict, (*node).name, -(1 as ::core::ffi::c_int));
         }
         7 => {
-            return xmlDictLookup(
-                (*reader).dict,
-                (*node).name,
-                -(1 as ::core::ffi::c_int),
-            );
+            return xmlDictLookup((*reader).dict, (*node).name, -(1 as ::core::ffi::c_int));
         }
         8 => {
             return xmlDictLookup(
@@ -4719,40 +4391,29 @@ pub unsafe extern "C" fn xmlTextReaderConstName(
         9 | 13 | 21 => {
             return xmlDictLookup(
                 (*reader).dict,
-                b"#document\0" as *const u8 as *const ::core::ffi::c_char
-                    as *mut xmlChar,
+                b"#document\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 -(1 as ::core::ffi::c_int),
             );
         }
         11 => {
             return xmlDictLookup(
                 (*reader).dict,
-                b"#document-fragment\0" as *const u8 as *const ::core::ffi::c_char
-                    as *mut xmlChar,
+                b"#document-fragment\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 -(1 as ::core::ffi::c_int),
             );
         }
         12 => {
-            return xmlDictLookup(
-                (*reader).dict,
-                (*node).name,
-                -(1 as ::core::ffi::c_int),
-            );
+            return xmlDictLookup((*reader).dict, (*node).name, -(1 as ::core::ffi::c_int));
         }
         10 | 14 => {
-            return xmlDictLookup(
-                (*reader).dict,
-                (*node).name,
-                -(1 as ::core::ffi::c_int),
-            );
+            return xmlDictLookup((*reader).dict, (*node).name, -(1 as ::core::ffi::c_int));
         }
         18 => {
             let mut ns: xmlNsPtr = node as xmlNsPtr;
             if (*ns).prefix.is_null() {
                 return xmlDictLookup(
                     (*reader).dict,
-                    b"xmlns\0" as *const u8 as *const ::core::ffi::c_char
-                        as *mut xmlChar,
+                    b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                     -(1 as ::core::ffi::c_int),
                 );
             }
@@ -4768,9 +4429,7 @@ pub unsafe extern "C" fn xmlTextReaderConstName(
     return ::core::ptr::null::<xmlChar>();
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderPrefix(
-    mut reader: xmlTextReaderPtr,
-) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlTextReaderPrefix(mut reader: xmlTextReaderPtr) -> *mut xmlChar {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() || (*reader).node.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
@@ -4787,9 +4446,7 @@ pub unsafe extern "C" fn xmlTextReaderPrefix(
         if (*ns).prefix.is_null() {
             return ::core::ptr::null_mut::<xmlChar>();
         }
-        return xmlStrdup(
-            b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-        );
+        return xmlStrdup(b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar);
     }
     if (*node).type_0 as ::core::ffi::c_uint
         != XML_ELEMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
@@ -4804,9 +4461,7 @@ pub unsafe extern "C" fn xmlTextReaderPrefix(
     return ::core::ptr::null_mut::<xmlChar>();
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderConstPrefix(
-    mut reader: xmlTextReaderPtr,
-) -> *const xmlChar {
+pub unsafe extern "C" fn xmlTextReaderConstPrefix(mut reader: xmlTextReaderPtr) -> *const xmlChar {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() || (*reader).node.is_null() {
         return ::core::ptr::null::<xmlChar>();
@@ -4846,9 +4501,7 @@ pub unsafe extern "C" fn xmlTextReaderConstPrefix(
     return ::core::ptr::null::<xmlChar>();
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderNamespaceUri(
-    mut reader: xmlTextReaderPtr,
-) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlTextReaderNamespaceUri(mut reader: xmlTextReaderPtr) -> *mut xmlChar {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() || (*reader).node.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
@@ -4918,9 +4571,7 @@ pub unsafe extern "C" fn xmlTextReaderConstNamespaceUri(
     return ::core::ptr::null::<xmlChar>();
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderBaseUri(
-    mut reader: xmlTextReaderPtr,
-) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlTextReaderBaseUri(mut reader: xmlTextReaderPtr) -> *mut xmlChar {
     if reader.is_null() || (*reader).node.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
     }
@@ -4930,9 +4581,7 @@ pub unsafe extern "C" fn xmlTextReaderBaseUri(
     );
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderConstBaseUri(
-    mut reader: xmlTextReaderPtr,
-) -> *const xmlChar {
+pub unsafe extern "C" fn xmlTextReaderConstBaseUri(mut reader: xmlTextReaderPtr) -> *const xmlChar {
     let mut tmp: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     let mut ret: *const xmlChar = ::core::ptr::null::<xmlChar>();
     if reader.is_null() || (*reader).node.is_null() {
@@ -4950,9 +4599,7 @@ pub unsafe extern "C" fn xmlTextReaderConstBaseUri(
     return ret;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderDepth(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextReaderDepth(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     if reader.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4996,9 +4643,7 @@ pub unsafe extern "C" fn xmlTextReaderHasAttributes(
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderHasValue(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextReaderHasValue(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() {
         return -(1 as ::core::ffi::c_int);
@@ -5018,9 +4663,7 @@ pub unsafe extern "C" fn xmlTextReaderHasValue(
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderValue(
-    mut reader: xmlTextReaderPtr,
-) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlTextReaderValue(mut reader: xmlTextReaderPtr) -> *mut xmlChar {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
@@ -5042,13 +4685,13 @@ pub unsafe extern "C" fn xmlTextReaderValue(
                     (*(*attr).parent).doc as xmlDocPtr,
                     (*attr).children,
                     1 as ::core::ffi::c_int,
-                )
+                );
             } else {
                 return xmlNodeListGetString(
                     ::core::ptr::null_mut::<xmlDoc>(),
                     (*attr).children,
                     1 as ::core::ffi::c_int,
-                )
+                );
             }
         }
         3 | 4 | 7 | 8 => {
@@ -5061,9 +4704,7 @@ pub unsafe extern "C" fn xmlTextReaderValue(
     return ::core::ptr::null_mut::<xmlChar>();
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderConstValue(
-    mut reader: xmlTextReaderPtr,
-) -> *const xmlChar {
+pub unsafe extern "C" fn xmlTextReaderConstValue(mut reader: xmlTextReaderPtr) -> *const xmlChar {
     let mut node: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() {
         return ::core::ptr::null::<xmlChar>();
@@ -5086,25 +4727,19 @@ pub unsafe extern "C" fn xmlTextReaderConstValue(
                     == XML_TEXT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                 && (*(*attr).children).next.is_null()
             {
-                return (*(*attr).children).content
+                return (*(*attr).children).content;
             } else {
                 if (*reader).buffer.is_null() {
                     (*reader).buffer = xmlBufCreateSize(100 as size_t);
                     if (*reader).buffer.is_null() {
-                        (*__xmlGenericError())
-                            .expect(
-                                "non-null function pointer",
-                            )(
+                        (*__xmlGenericError()).expect("non-null function pointer")(
                             *__xmlGenericErrorContext(),
                             b"xmlTextReaderSetup : malloc failed\n\0" as *const u8
                                 as *const ::core::ffi::c_char,
                         );
                         return ::core::ptr::null::<xmlChar>();
                     }
-                    xmlBufSetAllocationScheme(
-                        (*reader).buffer,
-                        XML_BUFFER_ALLOC_BOUNDED,
-                    );
+                    xmlBufSetAllocationScheme((*reader).buffer, XML_BUFFER_ALLOC_BOUNDED);
                 } else {
                     xmlBufEmpty((*reader).buffer);
                 }
@@ -5113,12 +4748,8 @@ pub unsafe extern "C" fn xmlTextReaderConstValue(
                 if ret.is_null() {
                     xmlBufFree((*reader).buffer);
                     (*reader).buffer = xmlBufCreateSize(100 as size_t);
-                    xmlBufSetAllocationScheme(
-                        (*reader).buffer,
-                        XML_BUFFER_ALLOC_BOUNDED,
-                    );
-                    ret = b"\0" as *const u8 as *const ::core::ffi::c_char
-                        as *mut xmlChar;
+                    xmlBufSetAllocationScheme((*reader).buffer, XML_BUFFER_ALLOC_BOUNDED);
+                    ret = b"\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar;
                 }
                 return ret;
             }
@@ -5147,9 +4778,7 @@ pub unsafe extern "C" fn xmlTextReaderQuoteChar(
     return '"' as i32;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderXmlLang(
-    mut reader: xmlTextReaderPtr,
-) -> *mut xmlChar {
+pub unsafe extern "C" fn xmlTextReaderXmlLang(mut reader: xmlTextReaderPtr) -> *mut xmlChar {
     if reader.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
     }
@@ -5159,9 +4788,7 @@ pub unsafe extern "C" fn xmlTextReaderXmlLang(
     return xmlNodeGetLang((*reader).node as *const xmlNode);
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderConstXmlLang(
-    mut reader: xmlTextReaderPtr,
-) -> *const xmlChar {
+pub unsafe extern "C" fn xmlTextReaderConstXmlLang(mut reader: xmlTextReaderPtr) -> *const xmlChar {
     let mut tmp: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     let mut ret: *const xmlChar = ::core::ptr::null::<xmlChar>();
     if reader.is_null() {
@@ -5213,9 +4840,7 @@ pub unsafe extern "C" fn xmlTextReaderSetParserProp(
         1 => {
             if value != 0 as ::core::ffi::c_int {
                 if (*ctxt).loadsubset == 0 as ::core::ffi::c_int {
-                    if (*reader).mode
-                        != XML_TEXTREADER_MODE_INITIAL as ::core::ffi::c_int
-                    {
+                    if (*reader).mode != XML_TEXTREADER_MODE_INITIAL as ::core::ffi::c_int {
                         return -(1 as ::core::ffi::c_int);
                     }
                     (*ctxt).loadsubset = XML_DETECT_IDS;
@@ -5294,8 +4919,7 @@ pub unsafe extern "C" fn xmlTextReaderGetParserProp(
 pub unsafe extern "C" fn xmlTextReaderGetParserLineNumber(
     mut reader: xmlTextReaderPtr,
 ) -> ::core::ffi::c_int {
-    if reader.is_null() || (*reader).ctxt.is_null() || (*(*reader).ctxt).input.is_null()
-    {
+    if reader.is_null() || (*reader).ctxt.is_null() || (*(*reader).ctxt).input.is_null() {
         return 0 as ::core::ffi::c_int;
     }
     return (*(*(*reader).ctxt).input).line;
@@ -5304,16 +4928,13 @@ pub unsafe extern "C" fn xmlTextReaderGetParserLineNumber(
 pub unsafe extern "C" fn xmlTextReaderGetParserColumnNumber(
     mut reader: xmlTextReaderPtr,
 ) -> ::core::ffi::c_int {
-    if reader.is_null() || (*reader).ctxt.is_null() || (*(*reader).ctxt).input.is_null()
-    {
+    if reader.is_null() || (*reader).ctxt.is_null() || (*(*reader).ctxt).input.is_null() {
         return 0 as ::core::ffi::c_int;
     }
     return (*(*(*reader).ctxt).input).col;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderCurrentNode(
-    mut reader: xmlTextReaderPtr,
-) -> xmlNodePtr {
+pub unsafe extern "C" fn xmlTextReaderCurrentNode(mut reader: xmlTextReaderPtr) -> xmlNodePtr {
     if reader.is_null() {
         return ::core::ptr::null_mut::<xmlNode>();
     }
@@ -5323,9 +4944,7 @@ pub unsafe extern "C" fn xmlTextReaderCurrentNode(
     return (*reader).node;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderPreserve(
-    mut reader: xmlTextReaderPtr,
-) -> xmlNodePtr {
+pub unsafe extern "C" fn xmlTextReaderPreserve(mut reader: xmlTextReaderPtr) -> xmlNodePtr {
     let mut cur: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     let mut parent: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     if reader.is_null() {
@@ -5389,18 +5008,12 @@ pub unsafe extern "C" fn xmlTextReaderPreservePattern(
     }
     if (*reader).patternMax <= 0 as ::core::ffi::c_int {
         (*reader).patternMax = 4 as ::core::ffi::c_int;
-        (*reader).patternTab = xmlMalloc
-            .expect(
-                "non-null function pointer",
-            )(
+        (*reader).patternTab = xmlMalloc.expect("non-null function pointer")(
             ((*reader).patternMax as size_t)
                 .wrapping_mul(::core::mem::size_of::<xmlPatternPtr>() as size_t),
         ) as *mut xmlPatternPtr;
         if (*reader).patternTab.is_null() {
-            (*__xmlGenericError())
-                .expect(
-                    "non-null function pointer",
-                )(
+            (*__xmlGenericError()).expect("non-null function pointer")(
                 *__xmlGenericErrorContext(),
                 b"xmlMalloc failed !\n\0" as *const u8 as *const ::core::ffi::c_char,
             );
@@ -5410,19 +5023,13 @@ pub unsafe extern "C" fn xmlTextReaderPreservePattern(
     if (*reader).patternNr >= (*reader).patternMax {
         let mut tmp: *mut xmlPatternPtr = ::core::ptr::null_mut::<xmlPatternPtr>();
         (*reader).patternMax *= 2 as ::core::ffi::c_int;
-        tmp = xmlRealloc
-            .expect(
-                "non-null function pointer",
-            )(
+        tmp = xmlRealloc.expect("non-null function pointer")(
             (*reader).patternTab as *mut ::core::ffi::c_void,
             ((*reader).patternMax as size_t)
                 .wrapping_mul(::core::mem::size_of::<xmlPatternPtr>() as size_t),
         ) as *mut xmlPatternPtr;
         if tmp.is_null() {
-            (*__xmlGenericError())
-                .expect(
-                    "non-null function pointer",
-                )(
+            (*__xmlGenericError()).expect("non-null function pointer")(
                 *__xmlGenericErrorContext(),
                 b"xmlRealloc failed !\n\0" as *const u8 as *const ::core::ffi::c_char,
             );
@@ -5438,9 +5045,7 @@ pub unsafe extern "C" fn xmlTextReaderPreservePattern(
     return fresh5;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderCurrentDoc(
-    mut reader: xmlTextReaderPtr,
-) -> xmlDocPtr {
+pub unsafe extern "C" fn xmlTextReaderCurrentDoc(mut reader: xmlTextReaderPtr) -> xmlDocPtr {
     if reader.is_null() {
         return ::core::ptr::null_mut::<xmlDoc>();
     }
@@ -5459,9 +5064,7 @@ unsafe extern "C" fn xmlTextReaderValidityStructuredRelay(
 ) {
     let mut reader: xmlTextReaderPtr = userData as xmlTextReaderPtr;
     if (*reader).sErrorFunc.is_some() {
-        (*reader)
-            .sErrorFunc
-            .expect("non-null function pointer")((*reader).errorFuncArg, error);
+        (*reader).sErrorFunc.expect("non-null function pointer")((*reader).errorFuncArg, error);
     } else {
         xmlTextReaderStructuredError(reader as *mut ::core::ffi::c_void, error);
     };
@@ -5734,9 +5337,7 @@ unsafe extern "C" fn xmlTextReaderRelaxNGValidateInternal(
         return 0 as ::core::ffi::c_int;
     }
     if !rng.is_null() {
-        let mut pctxt: xmlRelaxNGParserCtxtPtr = ::core::ptr::null_mut::<
-            xmlRelaxNGParserCtxt,
-        >();
+        let mut pctxt: xmlRelaxNGParserCtxtPtr = ::core::ptr::null_mut::<xmlRelaxNGParserCtxt>();
         pctxt = xmlRelaxNGNewParserCtxt(rng);
         if (*reader).errorFunc.is_some() {
             xmlRelaxNGSetParserErrors(
@@ -5765,10 +5366,7 @@ unsafe extern "C" fn xmlTextReaderRelaxNGValidateInternal(
                 (*reader).rngValidCtxt,
                 Some(
                     xmlTextReaderValidityStructuredRelay
-                        as unsafe extern "C" fn(
-                            *mut ::core::ffi::c_void,
-                            xmlErrorPtr,
-                        ) -> (),
+                        as unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> (),
                 ),
                 reader as *mut ::core::ffi::c_void,
             );
@@ -5862,9 +5460,7 @@ unsafe extern "C" fn xmlTextReaderSchemaValidateInternal(
         return 0 as ::core::ffi::c_int;
     }
     if !xsd.is_null() {
-        let mut pctxt: xmlSchemaParserCtxtPtr = ::core::ptr::null_mut::<
-            xmlSchemaParserCtxt,
-        >();
+        let mut pctxt: xmlSchemaParserCtxtPtr = ::core::ptr::null_mut::<xmlSchemaParserCtxt>();
         pctxt = xmlSchemaNewParserCtxt(xsd);
         if (*reader).errorFunc.is_some() {
             xmlSchemaSetParserErrors(
@@ -6042,9 +5638,9 @@ pub unsafe extern "C" fn xmlTextReaderIsNamespaceDecl(
     if XML_NAMESPACE_DECL as ::core::ffi::c_int as ::core::ffi::c_uint
         == (*node).type_0 as ::core::ffi::c_uint
     {
-        return 1 as ::core::ffi::c_int
+        return 1 as ::core::ffi::c_int;
     } else {
-        return 0 as ::core::ffi::c_int
+        return 0 as ::core::ffi::c_int;
     };
 }
 #[no_mangle]
@@ -6064,9 +5660,9 @@ pub unsafe extern "C" fn xmlTextReaderConstXmlVersion(
         return ::core::ptr::null::<xmlChar>();
     }
     if (*doc).version.is_null() {
-        return ::core::ptr::null::<xmlChar>()
+        return ::core::ptr::null::<xmlChar>();
     } else {
-        return xmlDictLookup((*reader).dict, (*doc).version, -(1 as ::core::ffi::c_int))
+        return xmlDictLookup((*reader).dict, (*doc).version, -(1 as ::core::ffi::c_int));
     };
 }
 #[no_mangle]
@@ -6124,10 +5720,7 @@ pub unsafe extern "C" fn xmlTextReaderLocatorBaseURI(
         return ::core::ptr::null_mut::<xmlChar>();
     }
     if !(*ctx).node.is_null() {
-        ret = xmlNodeGetBase(
-            ::core::ptr::null::<xmlDoc>(),
-            (*ctx).node as *const xmlNode,
-        );
+        ret = xmlNodeGetBase(::core::ptr::null::<xmlDoc>(), (*ctx).node as *const xmlNode);
     } else {
         let mut input: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
         input = (*ctx).input;
@@ -6154,11 +5747,12 @@ pub unsafe extern "C" fn xmlTextReaderGenericError(
     let mut reader: xmlTextReaderPtr = (*ctx)._private as xmlTextReaderPtr;
     if !str.is_null() {
         if (*reader).errorFunc.is_some() {
-            (*reader)
-                .errorFunc
-                .expect(
-                    "non-null function pointer",
-                )((*reader).errorFuncArg, str, severity, ctx as xmlTextReaderLocatorPtr);
+            (*reader).errorFunc.expect("non-null function pointer")(
+                (*reader).errorFuncArg,
+                str,
+                severity,
+                ctx as xmlTextReaderLocatorPtr,
+            );
         }
         xmlFree.expect("non-null function pointer")(str as *mut ::core::ffi::c_void);
     }
@@ -6176,11 +5770,12 @@ pub unsafe extern "C" fn safeXmlTextReaderValidityRelayMessage(
     if (*reader).errorFunc.is_none() {
         xmlTextReaderGenericError((*reader).ctxt as *mut ::core::ffi::c_void, severity, str);
     } else {
-        (*reader)
-            .errorFunc
-            .expect(
-                "non-null function pointer",
-            )((*reader).errorFuncArg, str, severity, NULL);
+        (*reader).errorFunc.expect("non-null function pointer")(
+            (*reader).errorFuncArg,
+            str,
+            severity,
+            NULL,
+        );
         xmlFree.expect("non-null function pointer")(str as *mut ::core::ffi::c_void);
     }
 }
@@ -6191,9 +5786,7 @@ unsafe extern "C" fn xmlTextReaderStructuredError(
     let mut ctx: xmlParserCtxtPtr = ctxt as xmlParserCtxtPtr;
     let mut reader: xmlTextReaderPtr = (*ctx)._private as xmlTextReaderPtr;
     if !error.is_null() && (*reader).sErrorFunc.is_some() {
-        (*reader)
-            .sErrorFunc
-            .expect("non-null function pointer")((*reader).errorFuncArg, error);
+        (*reader).sErrorFunc.expect("non-null function pointer")((*reader).errorFuncArg, error);
     }
 }
 #[no_mangle]
@@ -6407,10 +6000,7 @@ pub unsafe extern "C" fn xmlTextReaderSetStructuredErrorHandler(
                 (*reader).rngValidCtxt,
                 Some(
                     xmlTextReaderValidityStructuredRelay
-                        as unsafe extern "C" fn(
-                            *mut ::core::ffi::c_void,
-                            xmlErrorPtr,
-                        ) -> (),
+                        as unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> (),
                 ),
                 reader as *mut ::core::ffi::c_void,
             );
@@ -6426,10 +6016,7 @@ pub unsafe extern "C" fn xmlTextReaderSetStructuredErrorHandler(
                 (*reader).xsdValidCtxt,
                 Some(
                     xmlTextReaderValidityStructuredRelay
-                        as unsafe extern "C" fn(
-                            *mut ::core::ffi::c_void,
-                            xmlErrorPtr,
-                        ) -> (),
+                        as unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> (),
                 ),
                 reader as *mut ::core::ffi::c_void,
             );
@@ -6500,26 +6087,21 @@ pub unsafe extern "C" fn xmlTextReaderSetStructuredErrorHandler(
     };
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextReaderIsValid(
-    mut reader: xmlTextReaderPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextReaderIsValid(mut reader: xmlTextReaderPtr) -> ::core::ffi::c_int {
     if reader.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
     if (*reader).validate as ::core::ffi::c_uint
         == XML_TEXTREADER_VALIDATE_RNG as ::core::ffi::c_int as ::core::ffi::c_uint
     {
-        return ((*reader).rngValidErrors == 0 as ::core::ffi::c_int)
-            as ::core::ffi::c_int;
+        return ((*reader).rngValidErrors == 0 as ::core::ffi::c_int) as ::core::ffi::c_int;
     }
     if (*reader).validate as ::core::ffi::c_uint
         == XML_TEXTREADER_VALIDATE_XSD as ::core::ffi::c_int as ::core::ffi::c_uint
     {
-        return ((*reader).xsdValidErrors == 0 as ::core::ffi::c_int)
-            as ::core::ffi::c_int;
+        return ((*reader).xsdValidErrors == 0 as ::core::ffi::c_int) as ::core::ffi::c_int;
     }
-    if !(*reader).ctxt.is_null() && (*(*reader).ctxt).validate == 1 as ::core::ffi::c_int
-    {
+    if !(*reader).ctxt.is_null() && (*(*reader).ctxt).validate == 1 as ::core::ffi::c_int {
         return (*(*reader).ctxt).valid;
     }
     return 0 as ::core::ffi::c_int;
@@ -6556,7 +6138,8 @@ pub unsafe extern "C" fn xmlTextReaderSetup(
     (*reader).entNr = 0 as ::core::ffi::c_int;
     (*reader).parserFlags = options;
     (*reader).validate = XML_TEXTREADER_NOT_VALIDATE;
-    if !input.is_null() && !(*reader).input.is_null()
+    if !input.is_null()
+        && !(*reader).input.is_null()
         && (*reader).allocs & XML_TEXTREADER_INPUT != 0
     {
         xmlFreeParserInputBuffer((*reader).input);
@@ -6571,32 +6154,22 @@ pub unsafe extern "C" fn xmlTextReaderSetup(
         (*reader).buffer = xmlBufCreateSize(100 as size_t);
     }
     if (*reader).buffer.is_null() {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
-            b"xmlTextReaderSetup : malloc failed\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlTextReaderSetup : malloc failed\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return -(1 as ::core::ffi::c_int);
     }
     xmlBufSetAllocationScheme((*reader).buffer, XML_BUFFER_ALLOC_BOUNDED);
     if (*reader).sax.is_null() {
-        (*reader).sax = xmlMalloc
-            .expect(
-                "non-null function pointer",
-            )(::core::mem::size_of::<xmlSAXHandler>() as size_t) as *mut xmlSAXHandler
-            as xmlSAXHandlerPtr;
+        (*reader).sax = xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<
+            xmlSAXHandler,
+        >() as size_t) as *mut xmlSAXHandler as xmlSAXHandlerPtr;
     }
     if (*reader).sax.is_null() {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
-            b"xmlTextReaderSetup : malloc failed\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlTextReaderSetup : malloc failed\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return -(1 as ::core::ffi::c_int);
     }
@@ -6702,12 +6275,8 @@ pub unsafe extern "C" fn xmlTextReaderSetup(
                 (*reader).cur = 0 as ::core::ffi::c_uint;
             }
         } else {
-            let mut inputStream: xmlParserInputPtr = ::core::ptr::null_mut::<
-                xmlParserInput,
-            >();
-            let mut buf: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-                xmlParserInputBuffer,
-            >();
+            let mut inputStream: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
+            let mut buf: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
             let mut enc: xmlCharEncoding = XML_CHAR_ENCODING_NONE;
             xmlCtxtReset((*reader).ctxt);
             buf = xmlAllocParserInputBuffer(enc);
@@ -6722,8 +6291,8 @@ pub unsafe extern "C" fn xmlTextReaderSetup(
             if URL.is_null() {
                 (*inputStream).filename = ::core::ptr::null::<::core::ffi::c_char>();
             } else {
-                (*inputStream).filename = xmlCanonicPath(URL as *const xmlChar)
-                    as *mut ::core::ffi::c_char;
+                (*inputStream).filename =
+                    xmlCanonicPath(URL as *const xmlChar) as *mut ::core::ffi::c_char;
             }
             (*inputStream).buf = buf;
             xmlBufResetInput((*buf).buffer, inputStream);
@@ -6731,10 +6300,7 @@ pub unsafe extern "C" fn xmlTextReaderSetup(
             (*reader).cur = 0 as ::core::ffi::c_uint;
         }
         if (*reader).ctxt.is_null() {
-            (*__xmlGenericError())
-                .expect(
-                    "non-null function pointer",
-                )(
+            (*__xmlGenericError()).expect("non-null function pointer")(
                 *__xmlGenericErrorContext(),
                 b"xmlTextReaderSetup : malloc failed\n\0" as *const u8
                     as *const ::core::ffi::c_char,
@@ -6768,11 +6334,8 @@ pub unsafe extern "C" fn xmlTextReaderSetup(
     }
     if options & XML_PARSE_XINCLUDE as ::core::ffi::c_int != 0 {
         (*reader).xinclude = 1 as ::core::ffi::c_int;
-        (*reader).xinclude_name = xmlDictLookup(
-            (*reader).dict,
-            XINCLUDE_NODE,
-            -(1 as ::core::ffi::c_int),
-        );
+        (*reader).xinclude_name =
+            xmlDictLookup((*reader).dict, XINCLUDE_NODE, -(1 as ::core::ffi::c_int));
         options -= XML_PARSE_XINCLUDE as ::core::ffi::c_int;
     } else {
         (*reader).xinclude = 0 as ::core::ffi::c_int;
@@ -6786,9 +6349,7 @@ pub unsafe extern "C" fn xmlTextReaderSetup(
         (*reader).patternNr -= 1;
         if !(*(*reader).patternTab.offset((*reader).patternNr as isize)).is_null() {
             xmlFreePattern(*(*reader).patternTab.offset((*reader).patternNr as isize));
-            let ref mut fresh0 = *(*reader)
-                .patternTab
-                .offset((*reader).patternNr as isize);
+            let ref mut fresh0 = *(*reader).patternTab.offset((*reader).patternNr as isize);
             *fresh0 = ::core::ptr::null_mut::<xmlPattern>();
         }
     }
@@ -6797,19 +6358,18 @@ pub unsafe extern "C" fn xmlTextReaderSetup(
     }
     xmlCtxtUseOptions((*reader).ctxt, options);
     if !encoding.is_null() {
-        let mut hdlr: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<
-            xmlCharEncodingHandler,
-        >();
+        let mut hdlr: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<xmlCharEncodingHandler>();
         hdlr = xmlFindCharEncodingHandler(encoding);
         if !hdlr.is_null() {
             xmlSwitchToEncoding((*reader).ctxt, hdlr);
         }
     }
-    if !URL.is_null() && !(*(*reader).ctxt).input.is_null()
+    if !URL.is_null()
+        && !(*(*reader).ctxt).input.is_null()
         && (*(*(*reader).ctxt).input).filename.is_null()
     {
-        (*(*(*reader).ctxt).input).filename = xmlStrdup(URL as *const xmlChar)
-            as *mut ::core::ffi::c_char;
+        (*(*(*reader).ctxt).input).filename =
+            xmlStrdup(URL as *const xmlChar) as *mut ::core::ffi::c_char;
     }
     (*reader).doc = ::core::ptr::null_mut::<xmlDoc>();
     return 0 as ::core::ffi::c_int;
@@ -6829,18 +6389,13 @@ pub unsafe extern "C" fn xmlReaderWalker(mut doc: xmlDocPtr) -> xmlTextReaderPtr
     if doc.is_null() {
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
-    ret = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextReader>() as size_t) as xmlTextReaderPtr;
+    ret = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextReader>() as size_t
+    ) as xmlTextReaderPtr;
     if ret.is_null() {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
-            b"xmlNewTextReader : malloc failed\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlNewTextReader : malloc failed\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
@@ -6911,9 +6466,7 @@ pub unsafe extern "C" fn xmlReaderForMemory(
     mut options: ::core::ffi::c_int,
 ) -> xmlTextReaderPtr {
     let mut reader: xmlTextReaderPtr = ::core::ptr::null_mut::<xmlTextReader>();
-    let mut buf: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut buf: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     buf = xmlParserInputBufferCreateStatic(buffer, size, XML_CHAR_ENCODING_NONE);
     if buf.is_null() {
         return ::core::ptr::null_mut::<xmlTextReader>();
@@ -6941,9 +6494,7 @@ pub unsafe extern "C" fn xmlReaderForFd(
     mut options: ::core::ffi::c_int,
 ) -> xmlTextReaderPtr {
     let mut reader: xmlTextReaderPtr = ::core::ptr::null_mut::<xmlTextReader>();
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     if fd < 0 as ::core::ffi::c_int {
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
@@ -6977,9 +6528,7 @@ pub unsafe extern "C" fn xmlReaderForIO(
     mut options: ::core::ffi::c_int,
 ) -> xmlTextReaderPtr {
     let mut reader: xmlTextReaderPtr = ::core::ptr::null_mut::<xmlTextReader>();
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     if ioread.is_none() {
         return ::core::ptr::null_mut::<xmlTextReader>();
     }
@@ -7073,15 +6622,10 @@ pub unsafe extern "C" fn xmlReaderNewFile(
     mut encoding: *const ::core::ffi::c_char,
     mut options: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
-    let mut loaded_uri: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
-        ::core::ffi::c_char,
-    >();
-    let mut loaded_directory: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
-        ::core::ffi::c_char,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
+    let mut loaded_uri: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<::core::ffi::c_char>();
+    let mut loaded_directory: *mut ::core::ffi::c_char =
+        ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut ret: ::core::ffi::c_int = 0;
     if filename.is_null() {
         return -(1 as ::core::ffi::c_int);
@@ -7089,11 +6633,8 @@ pub unsafe extern "C" fn xmlReaderNewFile(
     if reader.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    input = xmlTextReaderLoadExternalInput(
-        filename,
-        &raw mut loaded_uri,
-        &raw mut loaded_directory,
-    );
+    input =
+        xmlTextReaderLoadExternalInput(filename, &raw mut loaded_uri, &raw mut loaded_directory);
     if input.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -7108,8 +6649,10 @@ pub unsafe extern "C" fn xmlReaderNewFile(
         encoding,
         options,
     );
-    if ret == 0 as ::core::ffi::c_int && !loaded_directory.is_null()
-        && !reader.is_null() && !(*reader).ctxt.is_null()
+    if ret == 0 as ::core::ffi::c_int
+        && !loaded_directory.is_null()
+        && !reader.is_null()
+        && !(*reader).ctxt.is_null()
     {
         if !(*(*reader).ctxt).directory.is_null() {
             xmlFree.expect("non-null function pointer")(
@@ -7123,8 +6666,7 @@ pub unsafe extern "C" fn xmlReaderNewFile(
         xmlFree.expect("non-null function pointer")(loaded_uri as *mut ::core::ffi::c_void);
     }
     if !loaded_directory.is_null() {
-        xmlFree
-            .expect("non-null function pointer")(loaded_directory as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(loaded_directory as *mut ::core::ffi::c_void);
     }
     return ret;
 }
@@ -7137,9 +6679,7 @@ pub unsafe extern "C" fn xmlReaderNewMemory(
     mut encoding: *const ::core::ffi::c_char,
     mut options: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     if reader.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -7160,9 +6700,7 @@ pub unsafe extern "C" fn xmlReaderNewFd(
     mut encoding: *const ::core::ffi::c_char,
     mut options: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     if fd < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -7186,9 +6724,7 @@ pub unsafe extern "C" fn xmlReaderNewIO(
     mut encoding: *const ::core::ffi::c_char,
     mut options: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     if ioread.is_none() {
         return -(1 as ::core::ffi::c_int);
     }

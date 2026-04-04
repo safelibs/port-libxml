@@ -36,28 +36,17 @@ extern "C" {
         msg: *const ::core::ffi::c_char,
         ...
     );
-    fn xmlListCreate(
-        deallocator: xmlListDeallocator,
-        compare: xmlListDataCompare,
-    ) -> xmlListPtr;
+    fn xmlListCreate(deallocator: xmlListDeallocator, compare: xmlListDataCompare) -> xmlListPtr;
     fn xmlListDelete(l: xmlListPtr);
-    fn xmlListSearch(
-        l: xmlListPtr,
-        data: *mut ::core::ffi::c_void,
-    ) -> *mut ::core::ffi::c_void;
+    fn xmlListSearch(l: xmlListPtr, data: *mut ::core::ffi::c_void) -> *mut ::core::ffi::c_void;
     fn xmlListEmpty(l: xmlListPtr) -> ::core::ffi::c_int;
     fn xmlListFront(l: xmlListPtr) -> xmlLinkPtr;
     fn xmlListSize(l: xmlListPtr) -> ::core::ffi::c_int;
     fn xmlListPopFront(l: xmlListPtr);
-    fn xmlListPushFront(
-        l: xmlListPtr,
-        data: *mut ::core::ffi::c_void,
-    ) -> ::core::ffi::c_int;
+    fn xmlListPushFront(l: xmlListPtr, data: *mut ::core::ffi::c_void) -> ::core::ffi::c_int;
     fn xmlLinkGetData(lk: xmlLinkPtr) -> *mut ::core::ffi::c_void;
     fn xmlEncodeSpecialChars(doc: *const xmlDoc, input: *const xmlChar) -> *mut xmlChar;
-    fn xmlFindCharEncodingHandler(
-        name: *const ::core::ffi::c_char,
-    ) -> xmlCharEncodingHandlerPtr;
+    fn xmlFindCharEncodingHandler(name: *const ::core::ffi::c_char) -> xmlCharEncodingHandlerPtr;
     fn xmlOutputBufferCreateFilename(
         URI: *const ::core::ffi::c_char,
         encoder: xmlCharEncodingHandlerPtr,
@@ -104,19 +93,14 @@ extern "C" {
         atts: *mut *const xmlChar,
     );
     fn xmlSAX2EndElement(ctx: *mut ::core::ffi::c_void, name: *const xmlChar);
-    fn xmlSAX2InitDefaultSAXHandler(
-        hdlr: *mut xmlSAXHandler,
-        warning: ::core::ffi::c_int,
-    );
+    fn xmlSAX2InitDefaultSAXHandler(hdlr: *mut xmlSAXHandler, warning: ::core::ffi::c_int);
     static mut xmlMalloc: xmlMallocFunc;
     static mut xmlFree: xmlFreeFunc;
     fn xmlCanonicPath(path: *const xmlChar) -> *mut xmlChar;
     fn htmlNewDocNoDtD(URI: *const xmlChar, ExternalID: *const xmlChar) -> htmlDocPtr;
     fn xmlBufCreateSize(size: size_t) -> xmlBufPtr;
-    fn xmlCharEncOutput(
-        output: xmlOutputBufferPtr,
-        init: ::core::ffi::c_int,
-    ) -> ::core::ffi::c_int;
+    fn xmlCharEncOutput(output: xmlOutputBufferPtr, init: ::core::ffi::c_int)
+        -> ::core::ffi::c_int;
     fn xmlBufAttrSerializeTxtContent(
         buf: xmlBufPtr,
         doc: xmlDocPtr,
@@ -137,9 +121,7 @@ pub type va_list = __builtin_va_list;
 pub type xmlChar = ::core::ffi::c_uchar;
 pub type size_t = usize;
 pub type xmlFreeFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
-pub type xmlMallocFunc = Option<
-    unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void,
->;
+pub type xmlMallocFunc = Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void>;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _xmlParserInputBuffer {
@@ -183,9 +165,8 @@ pub type xmlCharEncodingInputFunc = Option<
         *mut ::core::ffi::c_int,
     ) -> ::core::ffi::c_int,
 >;
-pub type xmlInputCloseCallback = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type xmlInputCloseCallback =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type xmlInputReadCallback = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -207,9 +188,8 @@ pub struct _xmlOutputBuffer {
     pub written: ::core::ffi::c_int,
     pub error: ::core::ffi::c_int,
 }
-pub type xmlOutputCloseCallback = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type xmlOutputCloseCallback =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type xmlOutputWriteCallback = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -559,12 +539,10 @@ pub type xmlAutomata = _xmlAutomata;
 pub type xmlValidState = _xmlValidState;
 pub type xmlDocPtr = *mut xmlDoc;
 pub type xmlDoc = _xmlDoc;
-pub type xmlValidityWarningFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type xmlValidityErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlValidityWarningFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type xmlValidityErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlParserNodeInfoSeq = _xmlParserNodeInfoSeq;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -609,9 +587,8 @@ pub struct _xmlSAXHandler {
     pub endElementNs: endElementNsSAX2Func,
     pub serror: xmlStructuredErrorFunc,
 }
-pub type xmlStructuredErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> (),
->;
+pub type xmlStructuredErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> ()>;
 pub type xmlErrorPtr = *mut xmlError;
 pub type endElementNsSAX2Func = Option<
     unsafe extern "C" fn(
@@ -643,15 +620,10 @@ pub type externalSubsetSAXFunc = Option<
     ) -> (),
 >;
 pub type cdataBlockSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type getParameterEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getParameterEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type xmlEntityPtr = *mut xmlEntity;
 pub type xmlEntity = _xmlEntity;
 #[derive(Copy, Clone)]
@@ -684,74 +656,43 @@ pub const XML_INTERNAL_PARAMETER_ENTITY: xmlEntityType = 4;
 pub const XML_EXTERNAL_GENERAL_UNPARSED_ENTITY: xmlEntityType = 3;
 pub const XML_EXTERNAL_GENERAL_PARSED_ENTITY: xmlEntityType = 2;
 pub const XML_INTERNAL_GENERAL_ENTITY: xmlEntityType = 1;
-pub type fatalErrorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type errorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type warningSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type commentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type processingInstructionSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> (),
->;
+pub type fatalErrorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type errorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type warningSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type commentSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type processingInstructionSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> ()>;
 pub type ignorableWhitespaceSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
 pub type charactersSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type referenceSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type endElementSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
+pub type referenceSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type endElementSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
 pub type startElementSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        *mut *const xmlChar,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *mut *const xmlChar) -> (),
 >;
-pub type endDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type startDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type setDocumentLocatorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
->;
+pub type endDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type startDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type setDocumentLocatorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> ()>;
 pub type xmlSAXLocatorPtr = *mut xmlSAXLocator;
 pub type xmlSAXLocator = _xmlSAXLocator;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _xmlSAXLocator {
-    pub getPublicId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getSystemId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getLineNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
-    pub getColumnNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
+    pub getPublicId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getSystemId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getLineNumber: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
+    pub getColumnNumber:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
 }
 pub type unparsedEntityDeclSAXFunc = Option<
     unsafe extern "C" fn(
@@ -830,9 +771,8 @@ pub type entityDeclSAXFunc = Option<
         *mut xmlChar,
     ) -> (),
 >;
-pub type getEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type resolveEntitySAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -840,15 +780,12 @@ pub type resolveEntitySAXFunc = Option<
         *const xmlChar,
     ) -> xmlParserInputPtr,
 >;
-pub type hasExternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type hasInternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type isStandaloneSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type hasExternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type hasInternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type isStandaloneSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type internalSubsetSAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -1646,9 +1583,8 @@ pub const XML_ERR_DOCUMENT_START: xmlParserErrors = 3;
 pub const XML_ERR_NO_MEMORY: xmlParserErrors = 2;
 pub const XML_ERR_INTERNAL_ERROR: xmlParserErrors = 1;
 pub const XML_ERR_OK: xmlParserErrors = 0;
-pub type xmlGenericErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlGenericErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlLink = _xmlLink;
 pub type xmlLinkPtr = *mut xmlLink;
 pub type xmlList = _xmlList;
@@ -1712,16 +1648,12 @@ pub const XML_TEXTWRITER_ATTRIBUTE: xmlTextWriterState = 2;
 pub const XML_TEXTWRITER_NAME: xmlTextWriterState = 1;
 pub const XML_TEXTWRITER_NONE: xmlTextWriterState = 0;
 pub const BUFSIZ: ::core::ffi::c_int = 8192 as ::core::ffi::c_int;
-pub const XML_DEFAULT_VERSION: [::core::ffi::c_char; 4] = unsafe {
-    ::core::mem::transmute::<[u8; 4], [::core::ffi::c_char; 4]>(*b"1.0\0")
-};
-pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const XML_DEFAULT_VERSION: [::core::ffi::c_char; 4] =
+    unsafe { ::core::mem::transmute::<[u8; 4], [::core::ffi::c_char; 4]>(*b"1.0\0") };
+pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const B64LINELEN: ::core::ffi::c_int = 72 as ::core::ffi::c_int;
-pub const B64CRLF: [::core::ffi::c_char; 3] = unsafe {
-    ::core::mem::transmute::<[u8; 3], [::core::ffi::c_char; 3]>(*b"\r\n\0")
-};
+pub const B64CRLF: [::core::ffi::c_char; 3] =
+    unsafe { ::core::mem::transmute::<[u8; 3], [::core::ffi::c_char; 3]>(*b"\r\n\0") };
 unsafe extern "C" fn xmlWriterErrMsg(
     mut ctxt: xmlTextWriterPtr,
     mut error: xmlParserErrors,
@@ -1818,20 +1750,16 @@ unsafe extern "C" fn xmlWriterErrMsgInt(
     };
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlNewTextWriter(
-    mut out: xmlOutputBufferPtr,
-) -> xmlTextWriterPtr {
+pub unsafe extern "C" fn xmlNewTextWriter(mut out: xmlOutputBufferPtr) -> xmlTextWriterPtr {
     let mut ret: xmlTextWriterPtr = ::core::ptr::null_mut::<xmlTextWriter>();
-    ret = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextWriter>() as size_t) as xmlTextWriterPtr;
+    ret = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextWriter>() as size_t
+    ) as xmlTextWriterPtr;
     if ret.is_null() {
         xmlWriterErrMsg(
             ::core::ptr::null_mut::<xmlTextWriter>(),
             XML_ERR_NO_MEMORY,
-            b"xmlNewTextWriter : out of memory!\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlNewTextWriter : out of memory!\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlTextWriter>();
     }
@@ -1854,8 +1782,7 @@ pub unsafe extern "C" fn xmlNewTextWriter(
         xmlWriterErrMsg(
             ::core::ptr::null_mut::<xmlTextWriter>(),
             XML_ERR_NO_MEMORY,
-            b"xmlNewTextWriter : out of memory!\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlNewTextWriter : out of memory!\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         xmlFree.expect("non-null function pointer")(ret as *mut ::core::ffi::c_void);
         return ::core::ptr::null_mut::<xmlTextWriter>();
@@ -1874,17 +1801,14 @@ pub unsafe extern "C" fn xmlNewTextWriter(
         xmlWriterErrMsg(
             ::core::ptr::null_mut::<xmlTextWriter>(),
             XML_ERR_NO_MEMORY,
-            b"xmlNewTextWriter : out of memory!\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlNewTextWriter : out of memory!\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         xmlListDelete((*ret).nodes);
         xmlFree.expect("non-null function pointer")(ret as *mut ::core::ffi::c_void);
         return ::core::ptr::null_mut::<xmlTextWriter>();
     }
     (*ret).out = out;
-    (*ret).ichar = xmlStrdup(
-        b" \0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-    );
+    (*ret).ichar = xmlStrdup(b" \0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar);
     (*ret).qchar = '"' as i32 as ::core::ffi::c_char;
     if (*ret).ichar.is_null() {
         xmlListDelete((*ret).nodes);
@@ -1893,8 +1817,7 @@ pub unsafe extern "C" fn xmlNewTextWriter(
         xmlWriterErrMsg(
             ::core::ptr::null_mut::<xmlTextWriter>(),
             XML_ERR_NO_MEMORY,
-            b"xmlNewTextWriter : out of memory!\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlNewTextWriter : out of memory!\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlTextWriter>();
     }
@@ -1945,10 +1868,7 @@ pub unsafe extern "C" fn xmlNewTextWriterMemory(
 ) -> xmlTextWriterPtr {
     let mut ret: xmlTextWriterPtr = ::core::ptr::null_mut::<xmlTextWriter>();
     let mut out: xmlOutputBufferPtr = ::core::ptr::null_mut::<xmlOutputBuffer>();
-    out = xmlOutputBufferCreateBuffer(
-        buf,
-        ::core::ptr::null_mut::<xmlCharEncodingHandler>(),
-    );
+    out = xmlOutputBufferCreateBuffer(buf, ::core::ptr::null_mut::<xmlCharEncodingHandler>());
     if out.is_null() {
         xmlWriterErrMsg(
             ::core::ptr::null_mut::<xmlTextWriter>(),
@@ -2007,8 +1927,8 @@ pub unsafe extern "C" fn xmlNewTextWriterPushParser(
         xmlWriterErrMsg(
             ::core::ptr::null_mut::<xmlTextWriter>(),
             XML_ERR_INTERNAL_ERROR,
-            b"xmlNewTextWriterPushParser : error at xmlOutputBufferCreateIO!\n\0"
-                as *const u8 as *const ::core::ffi::c_char,
+            b"xmlNewTextWriterPushParser : error at xmlOutputBufferCreateIO!\n\0" as *const u8
+                as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlTextWriter>();
     }
@@ -2074,8 +1994,7 @@ pub unsafe extern "C" fn xmlNewTextWriterDoc(
     );
     xmlSAX2InitDefaultSAXHandler(&raw mut saxHandler, 1 as ::core::ffi::c_int);
     saxHandler.startDocument = Some(
-        xmlTextWriterStartDocumentCallback
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
+        xmlTextWriterStartDocumentCallback as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
     ) as startDocumentSAXFunc;
     saxHandler.startElement = Some(
         xmlSAX2StartElement
@@ -2086,8 +2005,7 @@ pub unsafe extern "C" fn xmlNewTextWriterDoc(
             ) -> (),
     ) as startElementSAXFunc;
     saxHandler.endElement = Some(
-        xmlSAX2EndElement
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2EndElement as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as endElementSAXFunc;
     ctxt = xmlCreatePushParserCtxt(
         &raw mut saxHandler,
@@ -2124,8 +2042,8 @@ pub unsafe extern "C" fn xmlNewTextWriterDoc(
         xmlWriterErrMsg(
             ::core::ptr::null_mut::<xmlTextWriter>(),
             XML_ERR_INTERNAL_ERROR,
-            b"xmlNewTextWriterDoc : error at xmlNewTextWriterPushParser!\n\0"
-                as *const u8 as *const ::core::ffi::c_char,
+            b"xmlNewTextWriterDoc : error at xmlNewTextWriterPushParser!\n\0" as *const u8
+                as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlTextWriter>();
     }
@@ -2194,8 +2112,7 @@ pub unsafe extern "C" fn xmlNewTextWriterTree(
     );
     xmlSAX2InitDefaultSAXHandler(&raw mut saxHandler, 1 as ::core::ffi::c_int);
     saxHandler.startDocument = Some(
-        xmlTextWriterStartDocumentCallback
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
+        xmlTextWriterStartDocumentCallback as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
     ) as startDocumentSAXFunc;
     saxHandler.startElement = Some(
         xmlSAX2StartElement
@@ -2206,8 +2123,7 @@ pub unsafe extern "C" fn xmlNewTextWriterTree(
             ) -> (),
     ) as startElementSAXFunc;
     saxHandler.endElement = Some(
-        xmlSAX2EndElement
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2EndElement as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as endElementSAXFunc;
     ctxt = xmlCreatePushParserCtxt(
         &raw mut saxHandler,
@@ -2232,8 +2148,8 @@ pub unsafe extern "C" fn xmlNewTextWriterTree(
         xmlWriterErrMsg(
             ::core::ptr::null_mut::<xmlTextWriter>(),
             XML_ERR_INTERNAL_ERROR,
-            b"xmlNewTextWriterDoc : error at xmlNewTextWriterPushParser!\n\0"
-                as *const u8 as *const ::core::ffi::c_char,
+            b"xmlNewTextWriterDoc : error at xmlNewTextWriterPushParser!\n\0" as *const u8
+                as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlTextWriter>();
     }
@@ -2258,9 +2174,7 @@ pub unsafe extern "C" fn xmlFreeTextWriter(mut writer: xmlTextWriterPtr) {
         xmlListDelete((*writer).nsstack);
     }
     if !(*writer).ctxt.is_null() {
-        if !(*(*writer).ctxt).myDoc.is_null()
-            && (*writer).no_doc_free == 0 as ::core::ffi::c_int
-        {
+        if !(*(*writer).ctxt).myDoc.is_null() && (*writer).no_doc_free == 0 as ::core::ffi::c_int {
             xmlFreeDoc((*(*writer).ctxt).myDoc);
             (*(*writer).ctxt).myDoc = ::core::ptr::null_mut::<xmlDoc>();
         }
@@ -2270,10 +2184,7 @@ pub unsafe extern "C" fn xmlFreeTextWriter(mut writer: xmlTextWriterPtr) {
         xmlFreeDoc((*writer).doc);
     }
     if !(*writer).ichar.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*writer).ichar as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*writer).ichar as *mut ::core::ffi::c_void);
     }
     xmlFree.expect("non-null function pointer")(writer as *mut ::core::ffi::c_void);
 }
@@ -2287,9 +2198,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDocument(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut encoder: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<
-        xmlCharEncodingHandler,
-    >();
+    let mut encoder: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<xmlCharEncodingHandler>();
     if writer.is_null() || (*writer).out.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -2329,9 +2238,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDocument(
         }
         xmlCharEncOutput((*writer).out, 1 as ::core::ffi::c_int);
         if !(*writer).doc.is_null() && (*(*writer).doc).encoding.is_null() {
-            (*(*writer).doc).encoding = xmlStrdup(
-                (*(*(*writer).out).encoder).name as *mut xmlChar,
-            );
+            (*(*writer).doc).encoding = xmlStrdup((*(*(*writer).out).encoder).name as *mut xmlChar);
         }
     } else {
         (*(*writer).out).conv = ::core::ptr::null_mut::<xmlBuf>();
@@ -2393,10 +2300,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDocument(
             return -(1 as ::core::ffi::c_int);
         }
         sum += count;
-        count = xmlOutputBufferWriteString(
-            (*writer).out,
-            (*(*(*writer).out).encoder).name,
-        );
+        count = xmlOutputBufferWriteString((*writer).out, (*(*(*writer).out).encoder).name);
         if count < 0 as ::core::ffi::c_int {
             return -(1 as ::core::ffi::c_int);
         }
@@ -2461,9 +2365,7 @@ pub unsafe extern "C" fn xmlTextWriterEndDocument(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -2542,9 +2444,7 @@ pub unsafe extern "C" fn xmlTextWriterStartComment(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -2591,11 +2491,9 @@ pub unsafe extern "C" fn xmlTextWriterStartComment(
             }
         }
     }
-    p = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t)
-        as *mut xmlTextWriterStackEntry;
+    p = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t,
+    ) as *mut xmlTextWriterStackEntry;
     if p.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -2632,9 +2530,7 @@ pub unsafe extern "C" fn xmlTextWriterEndComment(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -2718,9 +2614,7 @@ pub unsafe extern "C" fn xmlTextWriterStartElement(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() || name.is_null() || *name as ::core::ffi::c_int == '\0' as i32 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -2774,11 +2668,9 @@ pub unsafe extern "C" fn xmlTextWriterStartElement(
             }
         }
     }
-    p = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t)
-        as *mut xmlTextWriterStackEntry;
+    p = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t,
+    ) as *mut xmlTextWriterStackEntry;
     if p.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -2813,10 +2705,7 @@ pub unsafe extern "C" fn xmlTextWriterStartElement(
         return -(1 as ::core::ffi::c_int);
     }
     sum += count;
-    count = xmlOutputBufferWriteString(
-        (*writer).out,
-        (*p).name as *const ::core::ffi::c_char,
-    );
+    count = xmlOutputBufferWriteString((*writer).out, (*p).name as *const ::core::ffi::c_char);
     if count < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -2853,11 +2742,10 @@ pub unsafe extern "C" fn xmlTextWriterStartElementNS(
     }
     sum += count;
     if !namespaceURI.is_null() {
-        let mut p: *mut xmlTextWriterNsStackEntry = xmlMalloc
-            .expect(
-                "non-null function pointer",
-            )(::core::mem::size_of::<xmlTextWriterNsStackEntry>() as size_t)
-            as *mut xmlTextWriterNsStackEntry;
+        let mut p: *mut xmlTextWriterNsStackEntry =
+            xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<
+                xmlTextWriterNsStackEntry,
+            >() as size_t) as *mut xmlTextWriterNsStackEntry;
         if p.is_null() {
             xmlWriterErrMsg(
                 writer,
@@ -2867,9 +2755,7 @@ pub unsafe extern "C" fn xmlTextWriterStartElementNS(
             );
             return -(1 as ::core::ffi::c_int);
         }
-        buf = xmlStrdup(
-            b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-        );
+        buf = xmlStrdup(b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar);
         if !prefix.is_null() {
             buf = xmlStrcat(
                 buf,
@@ -2901,9 +2787,7 @@ pub unsafe extern "C" fn xmlTextWriterEndElement(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -2951,10 +2835,8 @@ pub unsafe extern "C" fn xmlTextWriterEndElement(
                 return -(1 as ::core::ffi::c_int);
             }
             sum += count;
-            count = xmlOutputBufferWriteString(
-                (*writer).out,
-                (*p).name as *const ::core::ffi::c_char,
-            );
+            count =
+                xmlOutputBufferWriteString((*writer).out, (*p).name as *const ::core::ffi::c_char);
             if count < 0 as ::core::ffi::c_int {
                 return -(1 as ::core::ffi::c_int);
             }
@@ -3009,9 +2891,7 @@ pub unsafe extern "C" fn xmlTextWriterFullEndElement(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -3078,10 +2958,7 @@ pub unsafe extern "C" fn xmlTextWriterFullEndElement(
         return -(1 as ::core::ffi::c_int);
     }
     sum += count;
-    count = xmlOutputBufferWriteString(
-        (*writer).out,
-        (*p).name as *const ::core::ffi::c_char,
-    );
+    count = xmlOutputBufferWriteString((*writer).out, (*p).name as *const ::core::ffi::c_char);
     if count < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -3113,9 +2990,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteRawLen(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -3148,11 +3023,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteRawLen(
         (*writer).doindent = 0 as ::core::ffi::c_int;
     }
     if !content.is_null() {
-        count = xmlOutputBufferWrite(
-            (*writer).out,
-            len,
-            content as *const ::core::ffi::c_char,
-        );
+        count = xmlOutputBufferWrite((*writer).out, len, content as *const ::core::ffi::c_char);
         if count < 0 as ::core::ffi::c_int {
             return -(1 as ::core::ffi::c_int);
         }
@@ -3175,9 +3046,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteString(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     if writer.is_null() || content.is_null() {
         return -(1 as ::core::ffi::c_int);
@@ -3304,10 +3173,8 @@ unsafe extern "C" fn xmlOutputBufferWriteBase64(
         let mut c: ::core::ffi::c_int = 0;
         let mut n: ::core::ffi::c_int = 0;
         igroup[2 as ::core::ffi::c_int as usize] = 0 as ::core::ffi::c_uchar;
-        igroup[1 as ::core::ffi::c_int as usize] = igroup[2 as ::core::ffi::c_int
-            as usize];
-        igroup[0 as ::core::ffi::c_int as usize] = igroup[1 as ::core::ffi::c_int
-            as usize];
+        igroup[1 as ::core::ffi::c_int as usize] = igroup[2 as ::core::ffi::c_int as usize];
+        igroup[0 as ::core::ffi::c_int as usize] = igroup[1 as ::core::ffi::c_int as usize];
         n = 0 as ::core::ffi::c_int;
         while n < 3 as ::core::ffi::c_int && i < len {
             c = *data.offset(i as isize) as ::core::ffi::c_int;
@@ -3316,36 +3183,32 @@ unsafe extern "C" fn xmlOutputBufferWriteBase64(
             i += 1;
         }
         if n > 0 as ::core::ffi::c_int {
-            ogroup[0 as ::core::ffi::c_int as usize] = dtable[(igroup[0
-                as ::core::ffi::c_int as usize] as ::core::ffi::c_int
-                >> 2 as ::core::ffi::c_int) as usize];
-            ogroup[1 as ::core::ffi::c_int as usize] = dtable[((igroup[0
-                as ::core::ffi::c_int as usize] as ::core::ffi::c_int
-                & 3 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int
-                | igroup[1 as ::core::ffi::c_int as usize] as ::core::ffi::c_int
-                    >> 4 as ::core::ffi::c_int) as usize];
-            ogroup[2 as ::core::ffi::c_int as usize] = dtable[((igroup[1
-                as ::core::ffi::c_int as usize] as ::core::ffi::c_int
-                & 0xf as ::core::ffi::c_int) << 2 as ::core::ffi::c_int
-                | igroup[2 as ::core::ffi::c_int as usize] as ::core::ffi::c_int
-                    >> 6 as ::core::ffi::c_int) as usize];
-            ogroup[3 as ::core::ffi::c_int as usize] = dtable[(igroup[2
-                as ::core::ffi::c_int as usize] as ::core::ffi::c_int
-                & 0x3f as ::core::ffi::c_int) as usize];
+            ogroup[0 as ::core::ffi::c_int as usize] =
+                dtable[(igroup[0 as ::core::ffi::c_int as usize] as ::core::ffi::c_int
+                    >> 2 as ::core::ffi::c_int) as usize];
+            ogroup[1 as ::core::ffi::c_int as usize] =
+                dtable[((igroup[0 as ::core::ffi::c_int as usize] as ::core::ffi::c_int
+                    & 3 as ::core::ffi::c_int)
+                    << 4 as ::core::ffi::c_int
+                    | igroup[1 as ::core::ffi::c_int as usize] as ::core::ffi::c_int
+                        >> 4 as ::core::ffi::c_int) as usize];
+            ogroup[2 as ::core::ffi::c_int as usize] =
+                dtable[((igroup[1 as ::core::ffi::c_int as usize] as ::core::ffi::c_int
+                    & 0xf as ::core::ffi::c_int)
+                    << 2 as ::core::ffi::c_int
+                    | igroup[2 as ::core::ffi::c_int as usize] as ::core::ffi::c_int
+                        >> 6 as ::core::ffi::c_int) as usize];
+            ogroup[3 as ::core::ffi::c_int as usize] =
+                dtable[(igroup[2 as ::core::ffi::c_int as usize] as ::core::ffi::c_int
+                    & 0x3f as ::core::ffi::c_int) as usize];
             if n < 3 as ::core::ffi::c_int {
-                ogroup[3 as ::core::ffi::c_int as usize] = '=' as i32
-                    as ::core::ffi::c_uchar;
+                ogroup[3 as ::core::ffi::c_int as usize] = '=' as i32 as ::core::ffi::c_uchar;
                 if n < 2 as ::core::ffi::c_int {
-                    ogroup[2 as ::core::ffi::c_int as usize] = '=' as i32
-                        as ::core::ffi::c_uchar;
+                    ogroup[2 as ::core::ffi::c_int as usize] = '=' as i32 as ::core::ffi::c_uchar;
                 }
             }
             if linelen >= B64LINELEN {
-                count = xmlOutputBufferWrite(
-                    out,
-                    2 as ::core::ffi::c_int,
-                    B64CRLF.as_ptr(),
-                );
+                count = xmlOutputBufferWrite(out, 2 as ::core::ffi::c_int, B64CRLF.as_ptr());
                 if count == -(1 as ::core::ffi::c_int) {
                     return -(1 as ::core::ffi::c_int);
                 }
@@ -3355,8 +3218,7 @@ unsafe extern "C" fn xmlOutputBufferWriteBase64(
             count = xmlOutputBufferWrite(
                 out,
                 4 as ::core::ffi::c_int,
-                &raw mut ogroup as *mut ::core::ffi::c_uchar
-                    as *const ::core::ffi::c_char,
+                &raw mut ogroup as *mut ::core::ffi::c_uchar as *const ::core::ffi::c_char,
             );
             if count == -(1 as ::core::ffi::c_int) {
                 return -(1 as ::core::ffi::c_int);
@@ -3380,10 +3242,10 @@ pub unsafe extern "C" fn xmlTextWriterWriteBase64(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
-    if writer.is_null() || data.is_null() || start < 0 as ::core::ffi::c_int
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
+    if writer.is_null()
+        || data.is_null()
+        || start < 0 as ::core::ffi::c_int
         || len < 0 as ::core::ffi::c_int
     {
         return -(1 as ::core::ffi::c_int);
@@ -3449,11 +3311,10 @@ unsafe extern "C" fn xmlOutputBufferWriteBinHex(
         count = xmlOutputBufferWrite(
             out,
             1 as ::core::ffi::c_int,
-            (&raw mut hex as *mut ::core::ffi::c_char)
-                .offset(
-                    (*data.offset(i as isize) as ::core::ffi::c_int
-                        >> 4 as ::core::ffi::c_int) as isize,
-                ) as *mut ::core::ffi::c_char as *const ::core::ffi::c_char,
+            (&raw mut hex as *mut ::core::ffi::c_char).offset(
+                (*data.offset(i as isize) as ::core::ffi::c_int >> 4 as ::core::ffi::c_int)
+                    as isize,
+            ) as *mut ::core::ffi::c_char as *const ::core::ffi::c_char,
         );
         if count == -(1 as ::core::ffi::c_int) {
             return -(1 as ::core::ffi::c_int);
@@ -3462,11 +3323,10 @@ unsafe extern "C" fn xmlOutputBufferWriteBinHex(
         count = xmlOutputBufferWrite(
             out,
             1 as ::core::ffi::c_int,
-            (&raw mut hex as *mut ::core::ffi::c_char)
-                .offset(
-                    (*data.offset(i as isize) as ::core::ffi::c_int
-                        & 0xf as ::core::ffi::c_int) as isize,
-                ) as *mut ::core::ffi::c_char as *const ::core::ffi::c_char,
+            (&raw mut hex as *mut ::core::ffi::c_char).offset(
+                (*data.offset(i as isize) as ::core::ffi::c_int & 0xf as ::core::ffi::c_int)
+                    as isize,
+            ) as *mut ::core::ffi::c_char as *const ::core::ffi::c_char,
         );
         if count == -(1 as ::core::ffi::c_int) {
             return -(1 as ::core::ffi::c_int);
@@ -3486,10 +3346,10 @@ pub unsafe extern "C" fn xmlTextWriterWriteBinHex(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
-    if writer.is_null() || data.is_null() || start < 0 as ::core::ffi::c_int
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
+    if writer.is_null()
+        || data.is_null()
+        || start < 0 as ::core::ffi::c_int
         || len < 0 as ::core::ffi::c_int
     {
         return -(1 as ::core::ffi::c_int);
@@ -3528,9 +3388,7 @@ pub unsafe extern "C" fn xmlTextWriterStartAttribute(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() || name.is_null() || *name as ::core::ffi::c_int == '\0' as i32 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -3562,10 +3420,7 @@ pub unsafe extern "C" fn xmlTextWriterStartAttribute(
         return -(1 as ::core::ffi::c_int);
     }
     sum += count;
-    count = xmlOutputBufferWriteString(
-        (*writer).out,
-        name as *const ::core::ffi::c_char,
-    );
+    count = xmlOutputBufferWriteString((*writer).out, name as *const ::core::ffi::c_char);
     if count < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -3600,9 +3455,8 @@ pub unsafe extern "C" fn xmlTextWriterStartAttributeNS(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut buf: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    let mut p: *mut xmlTextWriterNsStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterNsStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterNsStackEntry =
+        ::core::ptr::null_mut::<xmlTextWriterNsStackEntry>();
     if writer.is_null() || name.is_null() || *name as ::core::ffi::c_int == '\0' as i32 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -3612,12 +3466,9 @@ pub unsafe extern "C" fn xmlTextWriterStartAttributeNS(
             uri: ::core::ptr::null_mut::<xmlChar>(),
             elem: ::core::ptr::null_mut::<xmlLink>(),
         };
-        let mut curns: *mut xmlTextWriterNsStackEntry = ::core::ptr::null_mut::<
-            xmlTextWriterNsStackEntry,
-        >();
-        buf = xmlStrdup(
-            b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-        );
+        let mut curns: *mut xmlTextWriterNsStackEntry =
+            ::core::ptr::null_mut::<xmlTextWriterNsStackEntry>();
+        buf = xmlStrdup(b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar);
         if !prefix.is_null() {
             buf = xmlStrcat(
                 buf,
@@ -3637,15 +3488,13 @@ pub unsafe extern "C" fn xmlTextWriterStartAttributeNS(
             if xmlStrcmp((*curns).uri, namespaceURI) == 0 as ::core::ffi::c_int {
                 buf = ::core::ptr::null_mut::<xmlChar>();
             } else {
-                return -(1 as ::core::ffi::c_int)
+                return -(1 as ::core::ffi::c_int);
             }
         }
         if !buf.is_null() {
-            p = xmlMalloc
-                .expect(
-                    "non-null function pointer",
-                )(::core::mem::size_of::<xmlTextWriterNsStackEntry>() as size_t)
-                as *mut xmlTextWriterNsStackEntry;
+            p = xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<
+                xmlTextWriterNsStackEntry,
+            >() as size_t) as *mut xmlTextWriterNsStackEntry;
             if p.is_null() {
                 xmlWriterErrMsg(
                     writer,
@@ -3664,8 +3513,7 @@ pub unsafe extern "C" fn xmlTextWriterStartAttributeNS(
                     b"xmlTextWriterStartAttributeNS : out of memory!\n\0" as *const u8
                         as *const ::core::ffi::c_char,
                 );
-                xmlFree
-                    .expect("non-null function pointer")(p as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(p as *mut ::core::ffi::c_void);
                 return -(1 as ::core::ffi::c_int);
             }
             (*p).elem = xmlListFront((*writer).nodes);
@@ -3697,9 +3545,7 @@ pub unsafe extern "C" fn xmlTextWriterEndAttribute(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -3853,12 +3699,8 @@ pub unsafe extern "C" fn xmlTextWriterStartPI(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
-    if writer.is_null() || target.is_null()
-        || *target as ::core::ffi::c_int == '\0' as i32
-    {
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
+    if writer.is_null() || target.is_null() || *target as ::core::ffi::c_int == '\0' as i32 {
         return -(1 as ::core::ffi::c_int);
     }
     if xmlStrcasecmp(
@@ -3927,17 +3769,14 @@ pub unsafe extern "C" fn xmlTextWriterStartPI(
             }
         }
     }
-    p = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t)
-        as *mut xmlTextWriterStackEntry;
+    p = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t,
+    ) as *mut xmlTextWriterStackEntry;
     if p.is_null() {
         xmlWriterErrMsg(
             writer,
             XML_ERR_NO_MEMORY,
-            b"xmlTextWriterStartPI : out of memory!\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlTextWriterStartPI : out of memory!\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return -(1 as ::core::ffi::c_int);
     }
@@ -3946,8 +3785,7 @@ pub unsafe extern "C" fn xmlTextWriterStartPI(
         xmlWriterErrMsg(
             writer,
             XML_ERR_NO_MEMORY,
-            b"xmlTextWriterStartPI : out of memory!\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xmlTextWriterStartPI : out of memory!\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         xmlFree.expect("non-null function pointer")(p as *mut ::core::ffi::c_void);
         return -(1 as ::core::ffi::c_int);
@@ -3962,10 +3800,7 @@ pub unsafe extern "C" fn xmlTextWriterStartPI(
         return -(1 as ::core::ffi::c_int);
     }
     sum += count;
-    count = xmlOutputBufferWriteString(
-        (*writer).out,
-        (*p).name as *const ::core::ffi::c_char,
-    );
+    count = xmlOutputBufferWriteString((*writer).out, (*p).name as *const ::core::ffi::c_char);
     if count < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -3973,15 +3808,11 @@ pub unsafe extern "C" fn xmlTextWriterStartPI(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterEndPI(
-    mut writer: xmlTextWriterPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextWriterEndPI(mut writer: xmlTextWriterPtr) -> ::core::ffi::c_int {
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4055,9 +3886,7 @@ pub unsafe extern "C" fn xmlTextWriterStartCDATA(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4114,11 +3943,9 @@ pub unsafe extern "C" fn xmlTextWriterStartCDATA(
             }
         }
     }
-    p = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t)
-        as *mut xmlTextWriterStackEntry;
+    p = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t,
+    ) as *mut xmlTextWriterStackEntry;
     if p.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -4142,15 +3969,11 @@ pub unsafe extern "C" fn xmlTextWriterStartCDATA(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterEndCDATA(
-    mut writer: xmlTextWriterPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextWriterEndCDATA(mut writer: xmlTextWriterPtr) -> ::core::ffi::c_int {
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4216,9 +4039,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDTD(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() || name.is_null() || *name as ::core::ffi::c_int == '\0' as i32 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4233,11 +4054,9 @@ pub unsafe extern "C" fn xmlTextWriterStartDTD(
         );
         return -(1 as ::core::ffi::c_int);
     }
-    p = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t)
-        as *mut xmlTextWriterStackEntry;
+    p = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t,
+    ) as *mut xmlTextWriterStackEntry;
     if p.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -4268,10 +4087,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDTD(
         return -(1 as ::core::ffi::c_int);
     }
     sum += count;
-    count = xmlOutputBufferWriteString(
-        (*writer).out,
-        name as *const ::core::ffi::c_char,
-    );
+    count = xmlOutputBufferWriteString((*writer).out, name as *const ::core::ffi::c_char);
     if count < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4320,10 +4136,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDTD(
             return -(1 as ::core::ffi::c_int);
         }
         sum += count;
-        count = xmlOutputBufferWriteString(
-            (*writer).out,
-            pubid as *const ::core::ffi::c_char,
-        );
+        count = xmlOutputBufferWriteString((*writer).out, pubid as *const ::core::ffi::c_char);
         if count < 0 as ::core::ffi::c_int {
             return -(1 as ::core::ffi::c_int);
         }
@@ -4392,10 +4205,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDTD(
             return -(1 as ::core::ffi::c_int);
         }
         sum += count;
-        count = xmlOutputBufferWriteString(
-            (*writer).out,
-            sysid as *const ::core::ffi::c_char,
-        );
+        count = xmlOutputBufferWriteString((*writer).out, sysid as *const ::core::ffi::c_char);
         if count < 0 as ::core::ffi::c_int {
             return -(1 as ::core::ffi::c_int);
         }
@@ -4413,16 +4223,12 @@ pub unsafe extern "C" fn xmlTextWriterStartDTD(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterEndDTD(
-    mut writer: xmlTextWriterPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextWriterEndDTD(mut writer: xmlTextWriterPtr) -> ::core::ffi::c_int {
     let mut loop_0: ::core::ffi::c_int = 0;
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4539,9 +4345,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDTDElement(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() || name.is_null() || *name as ::core::ffi::c_int == '\0' as i32 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4578,11 +4382,9 @@ pub unsafe extern "C" fn xmlTextWriterStartDTDElement(
             _ => return -(1 as ::core::ffi::c_int),
         }
     }
-    p = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t)
-        as *mut xmlTextWriterStackEntry;
+    p = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t,
+    ) as *mut xmlTextWriterStackEntry;
     if p.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -4620,10 +4422,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDTDElement(
         return -(1 as ::core::ffi::c_int);
     }
     sum += count;
-    count = xmlOutputBufferWriteString(
-        (*writer).out,
-        name as *const ::core::ffi::c_char,
-    );
+    count = xmlOutputBufferWriteString((*writer).out, name as *const ::core::ffi::c_char);
     if count < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4637,9 +4436,7 @@ pub unsafe extern "C" fn xmlTextWriterEndDTDElement(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4715,9 +4512,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDTDAttlist(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() || name.is_null() || *name as ::core::ffi::c_int == '\0' as i32 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4754,11 +4549,9 @@ pub unsafe extern "C" fn xmlTextWriterStartDTDAttlist(
             _ => return -(1 as ::core::ffi::c_int),
         }
     }
-    p = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t)
-        as *mut xmlTextWriterStackEntry;
+    p = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t,
+    ) as *mut xmlTextWriterStackEntry;
     if p.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -4796,10 +4589,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDTDAttlist(
         return -(1 as ::core::ffi::c_int);
     }
     sum += count;
-    count = xmlOutputBufferWriteString(
-        (*writer).out,
-        name as *const ::core::ffi::c_char,
-    );
+    count = xmlOutputBufferWriteString((*writer).out, name as *const ::core::ffi::c_char);
     if count < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4813,9 +4603,7 @@ pub unsafe extern "C" fn xmlTextWriterEndDTDAttlist(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4892,9 +4680,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDTDEntity(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() || name.is_null() || *name as ::core::ffi::c_int == '\0' as i32 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -4930,11 +4716,9 @@ pub unsafe extern "C" fn xmlTextWriterStartDTDEntity(
             }
         }
     }
-    p = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t)
-        as *mut xmlTextWriterStackEntry;
+    p = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlTextWriterStackEntry>() as size_t,
+    ) as *mut xmlTextWriterStackEntry;
     if p.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -4986,10 +4770,7 @@ pub unsafe extern "C" fn xmlTextWriterStartDTDEntity(
         }
         sum += count;
     }
-    count = xmlOutputBufferWriteString(
-        (*writer).out,
-        name as *const ::core::ffi::c_char,
-    );
+    count = xmlOutputBufferWriteString((*writer).out, name as *const ::core::ffi::c_char);
     if count < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -5003,9 +4784,7 @@ pub unsafe extern "C" fn xmlTextWriterEndDTDEntity(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -5084,8 +4863,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteDTDInternalEntity(
 ) -> ::core::ffi::c_int {
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
-    if name.is_null() || *name as ::core::ffi::c_int == '\0' as i32 || content.is_null()
-    {
+    if name.is_null() || *name as ::core::ffi::c_int == '\0' as i32 || content.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
     sum = 0 as ::core::ffi::c_int;
@@ -5151,9 +4929,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteDTDExternalEntityContents(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() {
         xmlWriterErrMsg(
             writer,
@@ -5228,10 +5004,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteDTDExternalEntityContents(
             return -(1 as ::core::ffi::c_int);
         }
         sum += count;
-        count = xmlOutputBufferWriteString(
-            (*writer).out,
-            pubid as *const ::core::ffi::c_char,
-        );
+        count = xmlOutputBufferWriteString((*writer).out, pubid as *const ::core::ffi::c_char);
         if count < 0 as ::core::ffi::c_int {
             return -(1 as ::core::ffi::c_int);
         }
@@ -5274,10 +5047,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteDTDExternalEntityContents(
             return -(1 as ::core::ffi::c_int);
         }
         sum += count;
-        count = xmlOutputBufferWriteString(
-            (*writer).out,
-            sysid as *const ::core::ffi::c_char,
-        );
+        count = xmlOutputBufferWriteString((*writer).out, sysid as *const ::core::ffi::c_char);
         if count < 0 as ::core::ffi::c_int {
             return -(1 as ::core::ffi::c_int);
         }
@@ -5301,10 +5071,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteDTDExternalEntityContents(
             return -(1 as ::core::ffi::c_int);
         }
         sum += count;
-        count = xmlOutputBufferWriteString(
-            (*writer).out,
-            ndataid as *const ::core::ffi::c_char,
-        );
+        count = xmlOutputBufferWriteString((*writer).out, ndataid as *const ::core::ffi::c_char);
         if count < 0 as ::core::ffi::c_int {
             return -(1 as ::core::ffi::c_int);
         }
@@ -5322,9 +5089,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteDTDNotation(
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if writer.is_null() || name.is_null() || *name as ::core::ffi::c_int == '\0' as i32 {
         return -(1 as ::core::ffi::c_int);
     }
@@ -5376,10 +5141,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteDTDNotation(
         return -(1 as ::core::ffi::c_int);
     }
     sum += count;
-    count = xmlOutputBufferWriteString(
-        (*writer).out,
-        name as *const ::core::ffi::c_char,
-    );
+    count = xmlOutputBufferWriteString((*writer).out, name as *const ::core::ffi::c_char);
     if count < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -5402,10 +5164,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteDTDNotation(
             return -(1 as ::core::ffi::c_int);
         }
         sum += count;
-        count = xmlOutputBufferWriteString(
-            (*writer).out,
-            pubid as *const ::core::ffi::c_char,
-        );
+        count = xmlOutputBufferWriteString((*writer).out, pubid as *const ::core::ffi::c_char);
         if count < 0 as ::core::ffi::c_int {
             return -(1 as ::core::ffi::c_int);
         }
@@ -5448,10 +5207,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteDTDNotation(
             return -(1 as ::core::ffi::c_int);
         }
         sum += count;
-        count = xmlOutputBufferWriteString(
-            (*writer).out,
-            sysid as *const ::core::ffi::c_char,
-        );
+        count = xmlOutputBufferWriteString((*writer).out, sysid as *const ::core::ffi::c_char);
         if count < 0 as ::core::ffi::c_int {
             return -(1 as ::core::ffi::c_int);
         }
@@ -5477,9 +5233,7 @@ pub unsafe extern "C" fn xmlTextWriterWriteDTDNotation(
     return sum;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlTextWriterFlush(
-    mut writer: xmlTextWriterPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlTextWriterFlush(mut writer: xmlTextWriterPtr) -> ::core::ffi::c_int {
     let mut count: ::core::ffi::c_int = 0;
     if writer.is_null() {
         return -(1 as ::core::ffi::c_int);
@@ -5492,16 +5246,13 @@ pub unsafe extern "C" fn xmlTextWriterFlush(
     return count;
 }
 unsafe extern "C" fn xmlFreeTextWriterStackEntry(mut lk: xmlLinkPtr) {
-    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     p = xmlLinkGetData(lk) as *mut xmlTextWriterStackEntry;
     if p.is_null() {
         return;
     }
     if !(*p).name.is_null() {
-        xmlFree
-            .expect("non-null function pointer")((*p).name as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*p).name as *mut ::core::ffi::c_void);
     }
     xmlFree.expect("non-null function pointer")(p as *mut ::core::ffi::c_void);
 }
@@ -5509,12 +5260,8 @@ unsafe extern "C" fn xmlCmpTextWriterStackEntry(
     mut data0: *const ::core::ffi::c_void,
     mut data1: *const ::core::ffi::c_void,
 ) -> ::core::ffi::c_int {
-    let mut p0: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
-    let mut p1: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterStackEntry,
-    >();
+    let mut p0: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
+    let mut p1: *mut xmlTextWriterStackEntry = ::core::ptr::null_mut::<xmlTextWriterStackEntry>();
     if data0 == data1 {
         return 0 as ::core::ffi::c_int;
     }
@@ -5528,13 +5275,10 @@ unsafe extern "C" fn xmlCmpTextWriterStackEntry(
     p1 = data1 as *mut xmlTextWriterStackEntry;
     return xmlStrcmp((*p0).name, (*p1).name);
 }
-unsafe extern "C" fn xmlTextWriterOutputNSDecl(
-    mut writer: xmlTextWriterPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn xmlTextWriterOutputNSDecl(mut writer: xmlTextWriterPtr) -> ::core::ffi::c_int {
     let mut lk: xmlLinkPtr = ::core::ptr::null_mut::<xmlLink>();
-    let mut np: *mut xmlTextWriterNsStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterNsStackEntry,
-    >();
+    let mut np: *mut xmlTextWriterNsStackEntry =
+        ::core::ptr::null_mut::<xmlTextWriterNsStackEntry>();
     let mut count: ::core::ffi::c_int = 0;
     let mut sum: ::core::ffi::c_int = 0;
     sum = 0 as ::core::ffi::c_int;
@@ -5550,12 +5294,8 @@ unsafe extern "C" fn xmlTextWriterOutputNSDecl(
         xmlListPopFront((*writer).nsstack);
         if !np.is_null() {
             count = xmlTextWriterWriteAttribute(writer, prefix, namespaceURI);
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )(namespaceURI as *mut ::core::ffi::c_void);
-            xmlFree
-                .expect("non-null function pointer")(prefix as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(namespaceURI as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(prefix as *mut ::core::ffi::c_void);
             if count < 0 as ::core::ffi::c_int {
                 xmlListDelete((*writer).nsstack);
                 (*writer).nsstack = ::core::ptr::null_mut::<xmlList>();
@@ -5567,22 +5307,17 @@ unsafe extern "C" fn xmlTextWriterOutputNSDecl(
     return sum;
 }
 unsafe extern "C" fn xmlFreeTextWriterNsStackEntry(mut lk: xmlLinkPtr) {
-    let mut p: *mut xmlTextWriterNsStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterNsStackEntry,
-    >();
+    let mut p: *mut xmlTextWriterNsStackEntry =
+        ::core::ptr::null_mut::<xmlTextWriterNsStackEntry>();
     p = xmlLinkGetData(lk) as *mut xmlTextWriterNsStackEntry;
     if p.is_null() {
         return;
     }
     if !(*p).prefix.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*p).prefix as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*p).prefix as *mut ::core::ffi::c_void);
     }
     if !(*p).uri.is_null() {
-        xmlFree
-            .expect("non-null function pointer")((*p).uri as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*p).uri as *mut ::core::ffi::c_void);
     }
     xmlFree.expect("non-null function pointer")(p as *mut ::core::ffi::c_void);
 }
@@ -5590,12 +5325,10 @@ unsafe extern "C" fn xmlCmpTextWriterNsStackEntry(
     mut data0: *const ::core::ffi::c_void,
     mut data1: *const ::core::ffi::c_void,
 ) -> ::core::ffi::c_int {
-    let mut p0: *mut xmlTextWriterNsStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterNsStackEntry,
-    >();
-    let mut p1: *mut xmlTextWriterNsStackEntry = ::core::ptr::null_mut::<
-        xmlTextWriterNsStackEntry,
-    >();
+    let mut p0: *mut xmlTextWriterNsStackEntry =
+        ::core::ptr::null_mut::<xmlTextWriterNsStackEntry>();
+    let mut p1: *mut xmlTextWriterNsStackEntry =
+        ::core::ptr::null_mut::<xmlTextWriterNsStackEntry>();
     let mut rc: ::core::ffi::c_int = 0;
     if data0 == data1 {
         return 0 as ::core::ffi::c_int;
@@ -5657,9 +5390,7 @@ unsafe extern "C" fn xmlTextWriterCloseDocCallback(
     }
     return 0 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn xmlTextWriterStartDocumentCallback(
-    mut ctx: *mut ::core::ffi::c_void,
-) {
+unsafe extern "C" fn xmlTextWriterStartDocumentCallback(mut ctx: *mut ::core::ffi::c_void) {
     let mut ctxt: xmlParserCtxtPtr = ctx as xmlParserCtxtPtr;
     let mut doc: xmlDocPtr = ::core::ptr::null_mut::<xmlDoc>();
     if (*ctxt).html != 0 {
@@ -5671,11 +5402,7 @@ unsafe extern "C" fn xmlTextWriterStartDocumentCallback(
         }
         if (*ctxt).myDoc.is_null() {
             if !(*ctxt).sax.is_null() && (*(*ctxt).sax).error.is_some() {
-                (*(*ctxt).sax)
-                    .error
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                (*(*ctxt).sax).error.expect("non-null function pointer")(
                     (*ctxt).userData,
                     b"SAX.startDocument(): out of memory\n\0" as *const u8
                         as *const ::core::ffi::c_char,
@@ -5703,11 +5430,7 @@ unsafe extern "C" fn xmlTextWriterStartDocumentCallback(
             }
         } else {
             if !(*ctxt).sax.is_null() && (*(*ctxt).sax).error.is_some() {
-                (*(*ctxt).sax)
-                    .error
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                (*(*ctxt).sax).error.expect("non-null function pointer")(
                     (*ctxt).userData,
                     b"SAX.startDocument(): out of memory\n\0" as *const u8
                         as *const ::core::ffi::c_char,
@@ -5719,16 +5442,14 @@ unsafe extern "C" fn xmlTextWriterStartDocumentCallback(
             return;
         }
     }
-    if !(*ctxt).myDoc.is_null() && (*(*ctxt).myDoc).URL.is_null()
-        && !(*ctxt).input.is_null() && !(*(*ctxt).input).filename.is_null()
+    if !(*ctxt).myDoc.is_null()
+        && (*(*ctxt).myDoc).URL.is_null()
+        && !(*ctxt).input.is_null()
+        && !(*(*ctxt).input).filename.is_null()
     {
-        (*(*ctxt).myDoc).URL = xmlCanonicPath(
-            (*(*ctxt).input).filename as *const xmlChar,
-        );
+        (*(*ctxt).myDoc).URL = xmlCanonicPath((*(*ctxt).input).filename as *const xmlChar);
         if (*(*ctxt).myDoc).URL.is_null() {
-            (*(*ctxt).myDoc).URL = xmlStrdup(
-                (*(*ctxt).input).filename as *const xmlChar,
-            );
+            (*(*ctxt).myDoc).URL = xmlStrdup((*(*ctxt).input).filename as *const xmlChar);
         }
     }
 }
@@ -5753,16 +5474,13 @@ pub unsafe extern "C" fn xmlTextWriterSetIndentString(
         return -(1 as ::core::ffi::c_int);
     }
     if !(*writer).ichar.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*writer).ichar as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*writer).ichar as *mut ::core::ffi::c_void);
     }
     (*writer).ichar = xmlStrdup(str);
     if (*writer).ichar.is_null() {
-        return -(1 as ::core::ffi::c_int)
+        return -(1 as ::core::ffi::c_int);
     } else {
-        return 0 as ::core::ffi::c_int
+        return 0 as ::core::ffi::c_int;
     };
 }
 #[no_mangle]
@@ -5779,9 +5497,7 @@ pub unsafe extern "C" fn xmlTextWriterSetQuoteChar(
     (*writer).qchar = quotechar as ::core::ffi::c_char;
     return 0 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn xmlTextWriterWriteIndent(
-    mut writer: xmlTextWriterPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn xmlTextWriterWriteIndent(mut writer: xmlTextWriterPtr) -> ::core::ffi::c_int {
     let mut lksize: ::core::ffi::c_int = 0;
     let mut i: ::core::ffi::c_int = 0;
     let mut ret: ::core::ffi::c_int = 0;
@@ -5828,47 +5544,37 @@ unsafe extern "C" fn xmlTextWriterHandleStateDependencies(
                     return -(1 as ::core::ffi::c_int);
                 }
                 sum += count;
-                extra[0 as ::core::ffi::c_int as usize] = '>' as i32
-                    as ::core::ffi::c_char;
+                extra[0 as ::core::ffi::c_int as usize] = '>' as i32 as ::core::ffi::c_char;
                 (*p).state = XML_TEXTWRITER_TEXT;
             }
             4 => {
-                extra[0 as ::core::ffi::c_int as usize] = ' ' as i32
-                    as ::core::ffi::c_char;
+                extra[0 as ::core::ffi::c_int as usize] = ' ' as i32 as ::core::ffi::c_char;
                 (*p).state = XML_TEXTWRITER_PI_TEXT;
             }
             7 => {
-                extra[0 as ::core::ffi::c_int as usize] = ' ' as i32
-                    as ::core::ffi::c_char;
-                extra[1 as ::core::ffi::c_int as usize] = '[' as i32
-                    as ::core::ffi::c_char;
+                extra[0 as ::core::ffi::c_int as usize] = ' ' as i32 as ::core::ffi::c_char;
+                extra[1 as ::core::ffi::c_int as usize] = '[' as i32 as ::core::ffi::c_char;
                 (*p).state = XML_TEXTWRITER_DTD_TEXT;
             }
             9 => {
-                extra[0 as ::core::ffi::c_int as usize] = ' ' as i32
-                    as ::core::ffi::c_char;
+                extra[0 as ::core::ffi::c_int as usize] = ' ' as i32 as ::core::ffi::c_char;
                 (*p).state = XML_TEXTWRITER_DTD_ELEM_TEXT;
             }
             11 => {
-                extra[0 as ::core::ffi::c_int as usize] = ' ' as i32
-                    as ::core::ffi::c_char;
+                extra[0 as ::core::ffi::c_int as usize] = ' ' as i32 as ::core::ffi::c_char;
                 (*p).state = XML_TEXTWRITER_DTD_ATTL_TEXT;
             }
             13 | 15 => {
-                extra[0 as ::core::ffi::c_int as usize] = ' ' as i32
-                    as ::core::ffi::c_char;
+                extra[0 as ::core::ffi::c_int as usize] = ' ' as i32 as ::core::ffi::c_char;
                 extra[1 as ::core::ffi::c_int as usize] = (*writer).qchar;
                 (*p).state = XML_TEXTWRITER_DTD_ENTY_TEXT;
             }
             _ => {}
         }
     }
-    if *(&raw mut extra as *mut ::core::ffi::c_char) as ::core::ffi::c_int != '\0' as i32
-    {
-        count = xmlOutputBufferWriteString(
-            (*writer).out,
-            &raw mut extra as *mut ::core::ffi::c_char,
-        );
+    if *(&raw mut extra as *mut ::core::ffi::c_char) as ::core::ffi::c_int != '\0' as i32 {
+        count =
+            xmlOutputBufferWriteString((*writer).out, &raw mut extra as *mut ::core::ffi::c_char);
         if count < 0 as ::core::ffi::c_int {
             return -(1 as ::core::ffi::c_int);
         }

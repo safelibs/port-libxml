@@ -124,7 +124,7 @@ provider = "rust"
 [[module]]
 name = "relaxng"
 source = "../original/relaxng.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "SAX"
@@ -139,7 +139,7 @@ provider = "rust"
 [[module]]
 name = "schematron"
 source = "../original/schematron.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "threads"
@@ -204,12 +204,12 @@ provider = "rust"
 [[module]]
 name = "xmlschemas"
 source = "../original/xmlschemas.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xmlschemastypes"
 source = "../original/xmlschemastypes.c"
-provider = "c_fallback"
+provider = "rust"
 
 [[module]]
 name = "xmlstring"

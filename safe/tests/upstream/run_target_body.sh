@@ -95,6 +95,100 @@ compare_commands() {
   compare_commands_in_dirs "$1" "$2" "$cwd" "$3" "$cwd" "$4" "${@:5}"
 }
 
+normalize_schema_stderr() {
+  local source="$1"
+  local target="$2"
+  sed -E \
+    -e 's/^I\/O warning : /warning: /' \
+    -e "s@^[^:]+:[0-9]+: (element [^:]+: )?Schemas (parser|validity) error : @@" \
+    "$source" >"$target"
+}
+
+compare_schema_commands() {
+  local label="$1"
+  local original_bin="$2"
+  local safe_bin="$3"
+  local stdin_path="$4"
+  shift 4
+
+  local cwd tmpdir
+  cwd="$(pwd)"
+  tmpdir="$(mktemp -d "$TMP_ROOT/${label//[^A-Za-z0-9._-]/_}.XXXXXX")"
+
+  capture_command "$ORIGINAL_LIBDIR" "$cwd" "$tmpdir/original.stdout" "$tmpdir/original.stderr" "$tmpdir/original.rc" "$stdin_path" "$original_bin" "$@"
+  capture_command "$STAGE_LIBDIR" "$cwd" "$tmpdir/safe.stdout" "$tmpdir/safe.stderr" "$tmpdir/safe.rc" "$stdin_path" "$safe_bin" "$@"
+
+  if ! cmp -s "$tmpdir/original.rc" "$tmpdir/safe.rc"; then
+    printf 'target body mismatch for %s: exit status differs\n' "$label" >&2
+    printf 'original rc: %s\n' "$(cat "$tmpdir/original.rc")" >&2
+    printf 'safe rc: %s\n' "$(cat "$tmpdir/safe.rc")" >&2
+    exit 1
+  fi
+
+  if ! diff -u "$tmpdir/original.stdout" "$tmpdir/safe.stdout" >/dev/null; then
+    printf 'target body mismatch for %s: stdout differs\n' "$label" >&2
+    diff -u "$tmpdir/original.stdout" "$tmpdir/safe.stdout" || true
+    exit 1
+  fi
+
+  normalize_schema_stderr "$tmpdir/original.stderr" "$tmpdir/original.stderr.norm"
+  normalize_schema_stderr "$tmpdir/safe.stderr" "$tmpdir/safe.stderr.norm"
+  if ! diff -u "$tmpdir/original.stderr.norm" "$tmpdir/safe.stderr.norm" >/dev/null; then
+    printf 'target body mismatch for %s: stderr differs\n' "$label" >&2
+    diff -u "$tmpdir/original.stderr" "$tmpdir/safe.stderr" || true
+    exit 1
+  fi
+
+  rm -rf "$tmpdir"
+}
+
+normalize_relaxng_stderr() {
+  local source="$1"
+  local target="$2"
+  sed -E \
+    -e "s@^[^:]+:[0-9]+: (element [^:]+: )?Relax-NG (parser|validity) error : @@" \
+    -e "s@^Relax-NG (parser|validity) error : @@" \
+    "$source" >"$target"
+}
+
+compare_relaxng_commands() {
+  local label="$1"
+  local original_bin="$2"
+  local safe_bin="$3"
+  local stdin_path="$4"
+  shift 4
+
+  local cwd tmpdir
+  cwd="$(pwd)"
+  tmpdir="$(mktemp -d "$TMP_ROOT/${label//[^A-Za-z0-9._-]/_}.XXXXXX")"
+
+  capture_command "$ORIGINAL_LIBDIR" "$cwd" "$tmpdir/original.stdout" "$tmpdir/original.stderr" "$tmpdir/original.rc" "$stdin_path" "$original_bin" "$@"
+  capture_command "$STAGE_LIBDIR" "$cwd" "$tmpdir/safe.stdout" "$tmpdir/safe.stderr" "$tmpdir/safe.rc" "$stdin_path" "$safe_bin" "$@"
+
+  if ! cmp -s "$tmpdir/original.rc" "$tmpdir/safe.rc"; then
+    printf 'target body mismatch for %s: exit status differs\n' "$label" >&2
+    printf 'original rc: %s\n' "$(cat "$tmpdir/original.rc")" >&2
+    printf 'safe rc: %s\n' "$(cat "$tmpdir/safe.rc")" >&2
+    exit 1
+  fi
+
+  if ! diff -u "$tmpdir/original.stdout" "$tmpdir/safe.stdout" >/dev/null; then
+    printf 'target body mismatch for %s: stdout differs\n' "$label" >&2
+    diff -u "$tmpdir/original.stdout" "$tmpdir/safe.stdout" || true
+    exit 1
+  fi
+
+  normalize_relaxng_stderr "$tmpdir/original.stderr" "$tmpdir/original.stderr.norm"
+  normalize_relaxng_stderr "$tmpdir/safe.stderr" "$tmpdir/safe.stderr.norm"
+  if ! diff -u "$tmpdir/original.stderr.norm" "$tmpdir/safe.stderr.norm" >/dev/null; then
+    printf 'target body mismatch for %s: stderr differs\n' "$label" >&2
+    diff -u "$tmpdir/original.stderr" "$tmpdir/safe.stderr" || true
+    exit 1
+  fi
+
+  rm -rf "$tmpdir"
+}
+
 run_safe_timing_body() {
   local bin="$1"
   local cwd="$2"
@@ -415,6 +509,105 @@ catatests_one() {
   fi
 }
 
+pinned_relax_addressbook() {
+  compare_commands \
+    "PinnedRelaxAddressBook" \
+    "$ROOT/original/.libs/testRelax" \
+    "$UPSTREAM_BIN/testRelax" \
+    "" \
+    --noout \
+    ./test/relaxng/tutorA.rng \
+    ./test/relaxng/addressBook.rng
+}
+
+schemastests_one() {
+  local schema_path="$1"
+  local name sno xml_path xno
+
+  name="$(basename "$schema_path" | sed 's+_.*++')"
+  sno="$(basename "$schema_path" | sed 's+.*_\(.*\)\.xsd+\1+')"
+  for xml_path in ./test/schemas/"$name"_*.xml; do
+    [[ -f "$xml_path" ]] || continue
+    xno="$(basename "$xml_path" | sed 's+.*_\(.*\)\.xml+\1+')"
+    compare_schema_commands \
+      "Schemastests:${name}_${sno}_${xno}" \
+      "$ORIGINAL_XMLLINT" \
+      "$SAFE_XMLLINT" \
+      "" \
+      --noout \
+      --schema "$schema_path" \
+      "$xml_path"
+  done
+}
+
+relaxtests_compile_one() {
+  local schema_path="$1"
+  local name
+
+  name="$(basename "$schema_path" .rng)"
+  compare_relaxng_commands \
+    "Relaxtests-compile:${name}" \
+    "$ORIGINAL_XMLLINT" \
+    "$SAFE_XMLLINT" \
+    "" \
+    --noout \
+    --relaxng ./test/relaxng/tutorA.rng \
+    "$schema_path"
+}
+
+relaxtests_validate_one() {
+  local schema_path="$1"
+  local xml_path="$2"
+  local name xno
+
+  name="$(basename "$schema_path" .rng)"
+  xno="$(basename "$xml_path" | sed 's+.*_\(.*\)\.xml+\1+')"
+  compare_relaxng_commands \
+    "Relaxtests:${name}_${xno}" \
+    "$ORIGINAL_XMLLINT" \
+    "$SAFE_XMLLINT" \
+    "" \
+    --noout \
+    --relaxng "$schema_path" \
+    "$xml_path"
+}
+
+relaxtests_stream_one() {
+  local schema_path="$1"
+  local xml_path="$2"
+  local name xno
+
+  name="$(basename "$schema_path" .rng)"
+  xno="$(basename "$xml_path" | sed 's+.*_\(.*\)\.xml+\1+')"
+  compare_relaxng_commands \
+    "Relaxtests-stream:${name}_${xno}" \
+    "$ORIGINAL_XMLLINT" \
+    "$SAFE_XMLLINT" \
+    "" \
+    --noout \
+    --stream \
+    --relaxng "$schema_path" \
+    "$xml_path"
+}
+
+schematrontests_one() {
+  local schema_path="$1"
+  local name xml_path xno
+
+  name="$(basename "$schema_path" .sct)"
+  for xml_path in ./test/schematron/"$name"_*.xml; do
+    [[ -f "$xml_path" ]] || continue
+    xno="$(basename "$xml_path" | sed 's+.*_\(.*\)\.xml+\1+')"
+    compare_commands \
+      "Schematrontests:${name}_${xno}" \
+      "$ORIGINAL_XMLLINT" \
+      "$SAFE_XMLLINT" \
+      "" \
+      --schematron "$schema_path" \
+      "$xml_path"
+  done
+}
+
 run_fuzz_tests() {
   local fuzz_root
   fuzz_root="$ROOT/safe/target/upstream-fuzz"
@@ -579,6 +772,39 @@ case "$TARGET" in
   Catatests)
     echo "## Catalog regression tests"
     for_each_file "./test/catalogs/*.script" catatests_one
+    ;;
+  PinnedRelaxAddressBook)
+    echo "## Relax-NG pinned helper comparison"
+    pinned_relax_addressbook
+    ;;
+  Schemastests)
+    echo "## XML Schema regression tests"
+    for_each_file "./test/schemas/*_*.xsd" schemastests_one
+    ;;
+  Relaxtests)
+    echo "## Relax-NG regression tests"
+    for path in ./test/relaxng/*.rng; do
+      [[ -d "$path" ]] && continue
+      relaxtests_compile_one "$path"
+      name="$(basename "$path" .rng)"
+      for xml_path in ./test/relaxng/"$name"_*.xml; do
+        [[ -f "$xml_path" ]] || continue
+        relaxtests_validate_one "$path" "$xml_path"
+      done
+    done
+    echo "## Relax-NG streaming regression tests"
+    for path in ./test/relaxng/*.rng; do
+      [[ -d "$path" ]] && continue
+      name="$(basename "$path" .rng)"
+      for xml_path in ./test/relaxng/"$name"_*.xml; do
+        [[ -f "$xml_path" ]] || continue
+        relaxtests_stream_one "$path" "$xml_path"
+      done
+    done
+    ;;
+  Schematrontests)
+    echo "## Schematron regression tests"
+    for_each_file "./test/schematron/*.sct" schematrontests_one
     ;;
   Timingtests)
     echo "## Timing tests to try to detect performance"

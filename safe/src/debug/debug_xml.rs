@@ -3,11 +3,10 @@ use crate::debug::shell::{output_or_stdout, write_file_str, FILE};
 use crate::foundation::dict::{xmlDictLookup, xmlDictOwns};
 use crate::foundation::error::{
     XML_ATTRIBUTE_DECL, XML_ATTRIBUTE_NODE, XML_CDATA_SECTION_NODE, XML_COMMENT_NODE,
-    XML_DOCB_DOCUMENT_NODE, XML_DOCUMENT_FRAG_NODE, XML_DOCUMENT_NODE,
-    XML_DOCUMENT_TYPE_NODE, XML_DTD_NODE, XML_ELEMENT_DECL, XML_ELEMENT_NODE,
-    XML_ENTITY_DECL, XML_ENTITY_NODE, XML_ENTITY_REF_NODE, XML_HTML_DOCUMENT_NODE,
-    XML_NAMESPACE_DECL, XML_NOTATION_NODE, XML_PI_NODE, XML_TEXT_NODE,
-    XML_XINCLUDE_END, XML_XINCLUDE_START,
+    XML_DOCB_DOCUMENT_NODE, XML_DOCUMENT_FRAG_NODE, XML_DOCUMENT_NODE, XML_DOCUMENT_TYPE_NODE,
+    XML_DTD_NODE, XML_ELEMENT_DECL, XML_ELEMENT_NODE, XML_ENTITY_DECL, XML_ENTITY_NODE,
+    XML_ENTITY_REF_NODE, XML_HTML_DOCUMENT_NODE, XML_NAMESPACE_DECL, XML_NOTATION_NODE,
+    XML_PI_NODE, XML_TEXT_NODE, XML_XINCLUDE_END, XML_XINCLUDE_START,
 };
 use crate::foundation::xmlstring::{xmlCheckUTF8, xmlStrEqual};
 use crate::parser::parser::{XML_PARSE_NODICT, XML_PARSE_SAX1};
@@ -154,7 +153,12 @@ unsafe fn check_ns_scope(ctxt: &mut CheckCtxt, node: xmlNodePtr, ns: xmlNsPtr) {
 
 unsafe fn check_string(ctxt: &mut CheckCtxt, string: *const xmlChar) {
     if !string.is_null() && unsafe { xmlCheckUTF8(string) } == 0 {
-        unsafe { check_error(ctxt, format!("String is not UTF-8 {}\n", xml_string(string))) };
+        unsafe {
+            check_error(
+                ctxt,
+                format!("String is not UTF-8 {}\n", xml_string(string)),
+            )
+        };
     }
 }
 
@@ -176,8 +180,9 @@ unsafe fn check_name(ctxt: &mut CheckCtxt, name: *const xmlChar) {
     if !ctxt.dict.is_null()
         && unsafe { xmlDictOwns(ctxt.dict as *mut _, name) } == 0
         && (ctxt.doc.is_null()
-            || unsafe { (*ctxt.doc).parseFlags & (XML_PARSE_SAX1 as c_int | XML_PARSE_NODICT as c_int) }
-                == 0)
+            || unsafe {
+                (*ctxt.doc).parseFlags & (XML_PARSE_SAX1 as c_int | XML_PARSE_NODICT as c_int)
+            } == 0)
     {
         unsafe {
             check_error(
@@ -270,9 +275,15 @@ unsafe fn check_generic_node(ctxt: &mut CheckCtxt, node: xmlNodePtr) {
                     )
                 };
             }
-        } else if unsafe { !(*node).parent.is_null() } && unsafe { (*(*node).parent).children } != node
+        } else if unsafe { !(*node).parent.is_null() }
+            && unsafe { (*(*node).parent).children } != node
         {
-            unsafe { check_error(ctxt, "Node has no prev and not first of parent list\n".to_string()) };
+            unsafe {
+                check_error(
+                    ctxt,
+                    "Node has no prev and not first of parent list\n".to_string(),
+                )
+            };
         }
     } else if unsafe { (*(*node).prev).next } != node {
         unsafe { check_error(ctxt, "Node prev->next : back link wrong\n".to_string()) };
@@ -284,7 +295,12 @@ unsafe fn check_generic_node(ctxt: &mut CheckCtxt, node: xmlNodePtr) {
             && unsafe { (*(*node).parent).last } != node
             && unsafe { (*(*node).parent).type_ } == XML_ELEMENT_NODE
         {
-            unsafe { check_error(ctxt, "Node has no next and not last of parent list\n".to_string()) };
+            unsafe {
+                check_error(
+                    ctxt,
+                    "Node has no next and not last of parent list\n".to_string(),
+                )
+            };
         }
     } else {
         if unsafe { (*(*node).next).prev } != node {
@@ -353,7 +369,10 @@ unsafe fn check_generic_node(ctxt: &mut CheckCtxt, node: xmlNodePtr) {
                 unsafe {
                     check_error(
                         ctxt,
-                        format!("Comment node has wrong name '{}'\n", xml_string((*node).name)),
+                        format!(
+                            "Comment node has wrong name '{}'\n",
+                            xml_string((*node).name)
+                        ),
                     )
                 };
             }
@@ -439,15 +458,25 @@ unsafe fn check_doc_head(ctxt: &mut CheckCtxt, doc: xmlDocPtr) {
     match unsafe { (*doc).type_ } {
         XML_DOCUMENT_NODE | XML_HTML_DOCUMENT_NODE => {}
         XML_ELEMENT_NODE => unsafe { check_error(ctxt, "Misplaced ELEMENT node\n".to_string()) },
-        XML_ATTRIBUTE_NODE => unsafe { check_error(ctxt, "Misplaced ATTRIBUTE node\n".to_string()) },
+        XML_ATTRIBUTE_NODE => unsafe {
+            check_error(ctxt, "Misplaced ATTRIBUTE node\n".to_string())
+        },
         XML_TEXT_NODE => unsafe { check_error(ctxt, "Misplaced TEXT node\n".to_string()) },
-        XML_CDATA_SECTION_NODE => unsafe { check_error(ctxt, "Misplaced CDATA node\n".to_string()) },
-        XML_ENTITY_REF_NODE => unsafe { check_error(ctxt, "Misplaced ENTITYREF node\n".to_string()) },
+        XML_CDATA_SECTION_NODE => unsafe {
+            check_error(ctxt, "Misplaced CDATA node\n".to_string())
+        },
+        XML_ENTITY_REF_NODE => unsafe {
+            check_error(ctxt, "Misplaced ENTITYREF node\n".to_string())
+        },
         XML_ENTITY_NODE => unsafe { check_error(ctxt, "Misplaced ENTITY node\n".to_string()) },
         XML_PI_NODE => unsafe { check_error(ctxt, "Misplaced PI node\n".to_string()) },
         XML_COMMENT_NODE => unsafe { check_error(ctxt, "Misplaced COMMENT node\n".to_string()) },
-        XML_DOCUMENT_TYPE_NODE => unsafe { check_error(ctxt, "Misplaced DOCTYPE node\n".to_string()) },
-        XML_DOCUMENT_FRAG_NODE => unsafe { check_error(ctxt, "Misplaced FRAGMENT node\n".to_string()) },
+        XML_DOCUMENT_TYPE_NODE => unsafe {
+            check_error(ctxt, "Misplaced DOCTYPE node\n".to_string())
+        },
+        XML_DOCUMENT_FRAG_NODE => unsafe {
+            check_error(ctxt, "Misplaced FRAGMENT node\n".to_string())
+        },
         XML_NOTATION_NODE => unsafe { check_error(ctxt, "Misplaced NOTATION node\n".to_string()) },
         other => unsafe { check_error(ctxt, format!("Unknown node type {other}\n")) },
     }
@@ -529,7 +558,12 @@ unsafe fn dump_namespace(ctxt: &DumpCtxt, ns: xmlNsPtr) {
     if unsafe { (*ns).prefix }.is_null() {
         unsafe { write_file_str(ctxt.output, "default namespace href=") };
     } else {
-        unsafe { write_file_str(ctxt.output, &format!("namespace {} href=", xml_string((*ns).prefix))) };
+        unsafe {
+            write_file_str(
+                ctxt.output,
+                &format!("namespace {} href=", xml_string((*ns).prefix)),
+            )
+        };
     }
     unsafe {
         dump_string(ctxt, (*ns).href);
@@ -693,7 +727,10 @@ unsafe fn dump_one_node(ctxt: &mut DumpCtxt, node: xmlNodePtr) {
         },
         XML_ENTITY_REF_NODE => unsafe {
             dump_spaces(ctxt);
-            write_file_str(ctxt.output, &format!("ENTITY_REF({})\n", xml_string((*node).name)));
+            write_file_str(
+                ctxt.output,
+                &format!("ENTITY_REF({})\n", xml_string((*node).name)),
+            );
         },
         XML_ENTITY_NODE => unsafe {
             dump_spaces(ctxt);
@@ -876,7 +913,10 @@ pub unsafe extern "C" fn xmlDebugDumpDTD(output: *mut FILE, dtd: xmlDtdPtr) {
             write_file_str(output, "DTD");
         }
         if !(*dtd).ExternalID.is_null() {
-            write_file_str(output, &format!(", PUBLIC {}", xml_string((*dtd).ExternalID)));
+            write_file_str(
+                output,
+                &format!(", PUBLIC {}", xml_string((*dtd).ExternalID)),
+            );
         }
         if !(*dtd).SystemID.is_null() {
             write_file_str(output, &format!(", SYSTEM {}", xml_string((*dtd).SystemID)));
@@ -890,7 +930,11 @@ pub unsafe extern "C" fn xmlDebugDumpDocument(output: *mut FILE, doc: xmlDocPtr)
     let mut ctxt = DumpCtxt {
         output: unsafe { output_or_stdout(output) },
         depth: 0,
-        dict: if doc.is_null() { null_mut() } else { unsafe { (*doc).dict as *mut c_void } },
+        dict: if doc.is_null() {
+            null_mut()
+        } else {
+            unsafe { (*doc).dict as *mut c_void }
+        },
         options: DUMP_TEXT_TYPE,
     };
     unsafe { dump_document(&mut ctxt, doc) };
@@ -901,7 +945,11 @@ pub unsafe extern "C" fn xmlDebugDumpDocumentHead(output: *mut FILE, doc: xmlDoc
     let ctxt = DumpCtxt {
         output: unsafe { output_or_stdout(output) },
         depth: 0,
-        dict: if doc.is_null() { null_mut() } else { unsafe { (*doc).dict as *mut c_void } },
+        dict: if doc.is_null() {
+            null_mut()
+        } else {
+            unsafe { (*doc).dict as *mut c_void }
+        },
         options: DUMP_TEXT_TYPE,
     };
     unsafe { dump_document_head(&ctxt, doc) };
@@ -913,17 +961,23 @@ pub unsafe extern "C" fn xmlDebugDumpEntities(output: *mut FILE, doc: xmlDocPtr)
     let ctxt = DumpCtxt {
         output,
         depth: 0,
-        dict: if doc.is_null() { null_mut() } else { unsafe { (*doc).dict as *mut c_void } },
+        dict: if doc.is_null() {
+            null_mut()
+        } else {
+            unsafe { (*doc).dict as *mut c_void }
+        },
         options: 0,
     };
     unsafe {
         dump_doc_head(&ctxt, doc);
-        if !doc.is_null() && !(*doc).intSubset.is_null() && !(*(*doc).intSubset).entities.is_null() {
+        if !doc.is_null() && !(*doc).intSubset.is_null() && !(*(*doc).intSubset).entities.is_null()
+        {
             write_file_str(output, "Entities in internal subset\n");
         } else {
             write_file_str(output, "No entities in internal subset\n");
         }
-        if !doc.is_null() && !(*doc).extSubset.is_null() && !(*(*doc).extSubset).entities.is_null() {
+        if !doc.is_null() && !(*doc).extSubset.is_null() && !(*(*doc).extSubset).entities.is_null()
+        {
             write_file_str(output, "Entities in external subset\n");
         } else {
             write_file_str(output, "No entities in external subset\n");
@@ -990,7 +1044,9 @@ pub unsafe extern "C" fn xmlLsCountNode(node: xmlNodePtr) -> c_int {
     let mut list = null_mut();
     match unsafe { (*node).type_ } {
         XML_ELEMENT_NODE => list = unsafe { (*node).children },
-        XML_DOCUMENT_NODE | XML_HTML_DOCUMENT_NODE => list = unsafe { (*(node as xmlDocPtr)).children },
+        XML_DOCUMENT_NODE | XML_HTML_DOCUMENT_NODE => {
+            list = unsafe { (*(node as xmlDocPtr)).children }
+        }
         XML_ATTRIBUTE_NODE => list = unsafe { (*(node as xmlAttrPtr)).children },
         XML_TEXT_NODE | XML_CDATA_SECTION_NODE | XML_PI_NODE | XML_COMMENT_NODE => {
             if unsafe { !(*node).content.is_null() } {
@@ -1047,7 +1103,14 @@ pub unsafe extern "C" fn xmlLsOneNode(output: *mut FILE, node: xmlNodePtr) {
     unsafe { write_file_str(output, lead) };
     if node_type != XML_NAMESPACE_DECL {
         unsafe {
-            write_file_str(output, if (*node).properties.is_null() { "-" } else { "a" });
+            write_file_str(
+                output,
+                if (*node).properties.is_null() {
+                    "-"
+                } else {
+                    "a"
+                },
+            );
             write_file_str(output, if (*node).nsDef.is_null() { "-" } else { "n" });
         }
     }

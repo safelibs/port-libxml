@@ -1,7 +1,6 @@
 use super::budget;
 use crate::abi::opaque::{
-    _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict, _xmlHashTable, _xmlStartTag,
-    _xmlValidState,
+    _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict, _xmlHashTable, _xmlStartTag, _xmlValidState,
 };
 
 extern "C" {
@@ -77,11 +76,7 @@ extern "C" {
     fn xmlNodeIsText(node: *const xmlNode) -> ::core::ffi::c_int;
     fn xmlHashFree(table: xmlHashTablePtr, f: xmlHashDeallocator);
     fn xmlHashDefaultDeallocator(entry: *mut ::core::ffi::c_void, name: *const xmlChar);
-    fn xmlParserValidityError(
-        ctx: *mut ::core::ffi::c_void,
-        msg: *const ::core::ffi::c_char,
-        ...
-    );
+    fn xmlParserValidityError(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
     fn xmlParserValidityWarning(
         ctx: *mut ::core::ffi::c_void,
         msg: *const ::core::ffi::c_char,
@@ -106,9 +101,7 @@ extern "C" {
         msg: *const ::core::ffi::c_char,
         ...
     );
-    fn xmlFindCharEncodingHandler(
-        name: *const ::core::ffi::c_char,
-    ) -> xmlCharEncodingHandlerPtr;
+    fn xmlFindCharEncodingHandler(name: *const ::core::ffi::c_char) -> xmlCharEncodingHandlerPtr;
     fn xmlParseCharEncoding(name: *const ::core::ffi::c_char) -> xmlCharEncoding;
     fn xmlDetectCharEncoding(
         in_0: *const ::core::ffi::c_uchar,
@@ -136,14 +129,9 @@ extern "C" {
         buf: *const ::core::ffi::c_char,
     ) -> ::core::ffi::c_int;
     fn xmlFreeParserInputBuffer(in_0: xmlParserInputBufferPtr);
-    fn xmlParserGetDirectory(
-        filename: *const ::core::ffi::c_char,
-    ) -> *mut ::core::ffi::c_char;
+    fn xmlParserGetDirectory(filename: *const ::core::ffi::c_char) -> *mut ::core::ffi::c_char;
     fn xmlInitParser();
-    fn xmlParserInputGrow(
-        in_0: xmlParserInputPtr,
-        len: ::core::ffi::c_int,
-    ) -> ::core::ffi::c_int;
+    fn xmlParserInputGrow(in_0: xmlParserInputPtr, len: ::core::ffi::c_int) -> ::core::ffi::c_int;
     fn xmlFreeParserCtxt(ctxt: xmlParserCtxtPtr);
     fn xmlNewIOInputStream(
         ctxt: xmlParserCtxtPtr,
@@ -186,18 +174,13 @@ extern "C" {
         buffer: *const ::core::ffi::c_char,
         size: ::core::ffi::c_int,
     ) -> xmlParserCtxtPtr;
-    fn xmlSwitchEncoding(
-        ctxt: xmlParserCtxtPtr,
-        enc: xmlCharEncoding,
-    ) -> ::core::ffi::c_int;
+    fn xmlSwitchEncoding(ctxt: xmlParserCtxtPtr, enc: xmlCharEncoding) -> ::core::ffi::c_int;
     fn xmlSwitchToEncoding(
         ctxt: xmlParserCtxtPtr,
         handler: xmlCharEncodingHandlerPtr,
     ) -> ::core::ffi::c_int;
-    fn xmlNewStringInputStream(
-        ctxt: xmlParserCtxtPtr,
-        buffer: *const xmlChar,
-    ) -> xmlParserInputPtr;
+    fn xmlNewStringInputStream(ctxt: xmlParserCtxtPtr, buffer: *const xmlChar)
+        -> xmlParserInputPtr;
     fn xmlPopInput(ctxt: xmlParserCtxtPtr) -> xmlChar;
     fn xmlFreeInputStream(input: xmlParserInputPtr);
     fn xmlNewInputStream(ctxt: xmlParserCtxtPtr) -> xmlParserInputPtr;
@@ -568,9 +551,8 @@ pub type xmlCharEncodingInputFunc = Option<
         *mut ::core::ffi::c_int,
     ) -> ::core::ffi::c_int,
 >;
-pub type xmlInputCloseCallback = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type xmlInputCloseCallback =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type xmlInputReadCallback = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -625,12 +607,10 @@ pub type xmlAutomata = _xmlAutomata;
 pub type xmlValidState = _xmlValidState;
 pub type xmlDocPtr = *mut xmlDoc;
 pub type xmlDoc = _xmlDoc;
-pub type xmlValidityWarningFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type xmlValidityErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlValidityWarningFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type xmlValidityErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlParserNodeInfoSeq = _xmlParserNodeInfoSeq;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -675,9 +655,8 @@ pub struct _xmlSAXHandler {
     pub endElementNs: endElementNsSAX2Func,
     pub serror: xmlStructuredErrorFunc,
 }
-pub type xmlStructuredErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> (),
->;
+pub type xmlStructuredErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> ()>;
 pub type xmlErrorPtr = *mut xmlError;
 pub type endElementNsSAX2Func = Option<
     unsafe extern "C" fn(
@@ -709,15 +688,10 @@ pub type externalSubsetSAXFunc = Option<
     ) -> (),
 >;
 pub type cdataBlockSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type getParameterEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getParameterEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type xmlEntityPtr = *mut xmlEntity;
 pub type xmlEntity = _xmlEntity;
 #[derive(Copy, Clone)]
@@ -750,74 +724,43 @@ pub const XML_INTERNAL_PARAMETER_ENTITY: xmlEntityType = 4;
 pub const XML_EXTERNAL_GENERAL_UNPARSED_ENTITY: xmlEntityType = 3;
 pub const XML_EXTERNAL_GENERAL_PARSED_ENTITY: xmlEntityType = 2;
 pub const XML_INTERNAL_GENERAL_ENTITY: xmlEntityType = 1;
-pub type fatalErrorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type errorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type warningSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type commentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type processingInstructionSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> (),
->;
+pub type fatalErrorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type errorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type warningSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type commentSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type processingInstructionSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> ()>;
 pub type ignorableWhitespaceSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
 pub type charactersSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type referenceSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type endElementSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
+pub type referenceSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type endElementSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
 pub type startElementSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        *mut *const xmlChar,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *mut *const xmlChar) -> (),
 >;
-pub type endDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type startDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type setDocumentLocatorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
->;
+pub type endDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type startDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type setDocumentLocatorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> ()>;
 pub type xmlSAXLocatorPtr = *mut xmlSAXLocator;
 pub type xmlSAXLocator = _xmlSAXLocator;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _xmlSAXLocator {
-    pub getPublicId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getSystemId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getLineNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
-    pub getColumnNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
+    pub getPublicId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getSystemId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getLineNumber: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
+    pub getColumnNumber:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
 }
 pub type unparsedEntityDeclSAXFunc = Option<
     unsafe extern "C" fn(
@@ -896,9 +839,8 @@ pub type entityDeclSAXFunc = Option<
         *mut xmlChar,
     ) -> (),
 >;
-pub type getEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type resolveEntitySAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -906,15 +848,12 @@ pub type resolveEntitySAXFunc = Option<
         *const xmlChar,
     ) -> xmlParserInputPtr,
 >;
-pub type hasExternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type hasInternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type isStandaloneSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type hasExternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type hasInternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type isStandaloneSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type internalSubsetSAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -926,12 +865,10 @@ pub type internalSubsetSAXFunc = Option<
 pub type xmlFreeFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
 pub const XML_ERR_NO_MEMORY: xmlParserErrors = 2;
 pub const XML_FROM_PARSER: C2RustUnnamed_0 = 1;
-pub type xmlGenericErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type xmlReallocFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t) -> *mut ::core::ffi::c_void,
->;
+pub type xmlGenericErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type xmlReallocFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t) -> *mut ::core::ffi::c_void>;
 pub const HTML_PARSE_NOIMPLIED: C2RustUnnamed_2 = 8192;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -1761,9 +1698,7 @@ pub struct _htmlElemDesc {
 }
 pub type xmlParserNodeInfoPtr = *mut xmlParserNodeInfo;
 pub const HTML_PARSE_IGNORE_ENC: C2RustUnnamed_2 = 2097152;
-pub type xmlMallocFunc = Option<
-    unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void,
->;
+pub type xmlMallocFunc = Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void>;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct elementPriority {
@@ -1782,9 +1717,8 @@ pub const XML_DOC_DTDVALID: C2RustUnnamed = 8;
 pub const XML_DOC_OLD10: C2RustUnnamed = 4;
 pub const XML_DOC_NSVALID: C2RustUnnamed = 2;
 pub const XML_DOC_WELLFORMED: C2RustUnnamed = 1;
-pub type xmlHashDeallocator = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
+pub type xmlHashDeallocator =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
 pub type C2RustUnnamed_0 = ::core::ffi::c_uint;
 pub const XML_FROM_URI: C2RustUnnamed_0 = 30;
 pub const XML_FROM_BUFFER: C2RustUnnamed_0 = 29;
@@ -1896,9 +1830,7 @@ pub const HTML_VALID: htmlStatus = 4;
 pub const HTML_DEPRECATED: htmlStatus = 2;
 pub const HTML_INVALID: htmlStatus = 1;
 pub const HTML_NA: htmlStatus = 0;
-pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const INT_MAX: ::core::ffi::c_int = __INT_MAX__;
 pub const XML_CTXT_FINISH_DTD_0: ::core::ffi::c_uint = 0xabcd1234 as ::core::ffi::c_uint;
 pub const INPUT_CHUNK: ::core::ffi::c_int = 250 as ::core::ffi::c_int;
@@ -1909,7 +1841,8 @@ unsafe extern "C" fn htmlErrMemory(
     mut ctxt: xmlParserCtxtPtr,
     mut extra: *const ::core::ffi::c_char,
 ) {
-    if !ctxt.is_null() && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
+    if !ctxt.is_null()
+        && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
         && (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
     {
         return;
@@ -1936,8 +1869,7 @@ unsafe extern "C" fn htmlErrMemory(
             ::core::ptr::null::<::core::ffi::c_char>(),
             0 as ::core::ffi::c_int,
             0 as ::core::ffi::c_int,
-            b"Memory allocation failed : %s\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"Memory allocation failed : %s\n\0" as *const u8 as *const ::core::ffi::c_char,
             extra,
         );
     } else {
@@ -1968,7 +1900,8 @@ unsafe extern "C" fn htmlParseErr(
     mut str1: *const xmlChar,
     mut str2: *const xmlChar,
 ) {
-    if !ctxt.is_null() && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
+    if !ctxt.is_null()
+        && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
         && (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
     {
         return;
@@ -2006,7 +1939,8 @@ unsafe extern "C" fn htmlParseErrInt(
     mut msg: *const ::core::ffi::c_char,
     mut val: ::core::ffi::c_int,
 ) {
-    if !ctxt.is_null() && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
+    if !ctxt.is_null()
+        && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
         && (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
     {
         return;
@@ -2059,10 +1993,7 @@ unsafe extern "C" fn htmlnamePush(
     }
     if (*ctxt).nameNr >= (*ctxt).nameMax {
         (*ctxt).nameMax *= 2 as ::core::ffi::c_int;
-        (*ctxt).nameTab = xmlRealloc
-            .expect(
-                "non-null function pointer",
-            )(
+        (*ctxt).nameTab = xmlRealloc.expect("non-null function pointer")(
             (*ctxt).nameTab as *mut *mut xmlChar as *mut ::core::ffi::c_void,
             ((*ctxt).nameMax as size_t)
                 .wrapping_mul(::core::mem::size_of::<*const xmlChar>() as size_t),
@@ -2129,10 +2060,7 @@ unsafe extern "C" fn htmlNodeInfoPush(
             (*ctxt).nodeInfoMax = 5 as ::core::ffi::c_int;
         }
         (*ctxt).nodeInfoMax *= 2 as ::core::ffi::c_int;
-        (*ctxt).nodeInfoTab = xmlRealloc
-            .expect(
-                "non-null function pointer",
-            )(
+        (*ctxt).nodeInfoTab = xmlRealloc.expect("non-null function pointer")(
             (*ctxt).nodeInfoTab as *mut htmlParserNodeInfo as *mut ::core::ffi::c_void,
             ((*ctxt).nodeInfoMax as size_t)
                 .wrapping_mul(::core::mem::size_of::<xmlParserNodeInfo>() as size_t),
@@ -2145,17 +2073,14 @@ unsafe extern "C" fn htmlNodeInfoPush(
             return 0 as ::core::ffi::c_int;
         }
     }
-    *(*ctxt).nodeInfoTab.offset((*ctxt).nodeInfoNr as isize) = *value
-        as xmlParserNodeInfo;
-    (*ctxt).nodeInfo = (*ctxt).nodeInfoTab.offset((*ctxt).nodeInfoNr as isize)
-        as *mut xmlParserNodeInfo;
+    *(*ctxt).nodeInfoTab.offset((*ctxt).nodeInfoNr as isize) = *value as xmlParserNodeInfo;
+    (*ctxt).nodeInfo =
+        (*ctxt).nodeInfoTab.offset((*ctxt).nodeInfoNr as isize) as *mut xmlParserNodeInfo;
     let fresh16 = (*ctxt).nodeInfoNr;
     (*ctxt).nodeInfoNr = (*ctxt).nodeInfoNr + 1;
     return fresh16;
 }
-unsafe extern "C" fn htmlNodeInfoPop(
-    mut ctxt: htmlParserCtxtPtr,
-) -> *mut htmlParserNodeInfo {
+unsafe extern "C" fn htmlNodeInfoPop(mut ctxt: htmlParserCtxtPtr) -> *mut htmlParserNodeInfo {
     if (*ctxt).nodeInfoNr <= 0 as ::core::ffi::c_int {
         return ::core::ptr::null_mut::<htmlParserNodeInfo>();
     }
@@ -2171,15 +2096,17 @@ unsafe extern "C" fn htmlNodeInfoPop(
     } else {
         (*ctxt).nodeInfo = ::core::ptr::null_mut::<xmlParserNodeInfo>();
     }
-    return (*ctxt).nodeInfoTab.offset((*ctxt).nodeInfoNr as isize)
-        as *mut htmlParserNodeInfo;
+    return (*ctxt).nodeInfoTab.offset((*ctxt).nodeInfoNr as isize) as *mut htmlParserNodeInfo;
 }
 unsafe extern "C" fn htmlFindEncoding(mut ctxt: xmlParserCtxtPtr) -> *mut xmlChar {
     let mut start: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut cur: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut end: *const xmlChar = ::core::ptr::null::<xmlChar>();
-    if ctxt.is_null() || (*ctxt).input.is_null() || !(*(*ctxt).input).encoding.is_null()
-        || (*(*ctxt).input).buf.is_null() || !(*(*(*ctxt).input).buf).encoder.is_null()
+    if ctxt.is_null()
+        || (*ctxt).input.is_null()
+        || !(*(*ctxt).input).encoding.is_null()
+        || (*(*ctxt).input).buf.is_null()
+        || !(*(*(*ctxt).input).buf).encoder.is_null()
     {
         return ::core::ptr::null_mut::<xmlChar>();
     }
@@ -2214,12 +2141,9 @@ unsafe extern "C" fn htmlFindEncoding(mut ctxt: xmlParserCtxtPtr) -> *mut xmlCha
     }
     cur = cur.offset(8 as ::core::ffi::c_int as isize);
     start = cur;
-    while *cur as ::core::ffi::c_int >= 'A' as i32
-        && *cur as ::core::ffi::c_int <= 'Z' as i32
-        || *cur as ::core::ffi::c_int >= 'a' as i32
-            && *cur as ::core::ffi::c_int <= 'z' as i32
-        || *cur as ::core::ffi::c_int >= '0' as i32
-            && *cur as ::core::ffi::c_int <= '9' as i32
+    while *cur as ::core::ffi::c_int >= 'A' as i32 && *cur as ::core::ffi::c_int <= 'Z' as i32
+        || *cur as ::core::ffi::c_int >= 'a' as i32 && *cur as ::core::ffi::c_int <= 'z' as i32
+        || *cur as ::core::ffi::c_int >= '0' as i32 && *cur as ::core::ffi::c_int <= '9' as i32
         || *cur as ::core::ffi::c_int == '-' as i32
         || *cur as ::core::ffi::c_int == '_' as i32
         || *cur as ::core::ffi::c_int == ':' as i32
@@ -2240,9 +2164,7 @@ unsafe extern "C" fn htmlCurrentChar(
     mut len: *mut ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     let mut current_block: u64;
-    let mut cur: *const ::core::ffi::c_uchar = ::core::ptr::null::<
-        ::core::ffi::c_uchar,
-    >();
+    let mut cur: *const ::core::ffi::c_uchar = ::core::ptr::null::<::core::ffi::c_uchar>();
     let mut c: ::core::ffi::c_uchar = 0;
     let mut val: ::core::ffi::c_uint = 0;
     if (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int {
@@ -2254,9 +2176,8 @@ unsafe extern "C" fn htmlCurrentChar(
     }
     if (*ctxt).charset != XML_CHAR_ENCODING_UTF8 as ::core::ffi::c_int {
         let mut guess: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-        let mut handler: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<
-            xmlCharEncodingHandler,
-        >();
+        let mut handler: xmlCharEncodingHandlerPtr =
+            ::core::ptr::null_mut::<xmlCharEncodingHandler>();
         if (*(*(*ctxt).input).cur as ::core::ffi::c_int) < 0x80 as ::core::ffi::c_int {
             *len = 1 as ::core::ffi::c_int;
             if *(*(*ctxt).input).cur as ::core::ffi::c_int == 0 as ::core::ffi::c_int
@@ -2278,10 +2199,7 @@ unsafe extern "C" fn htmlCurrentChar(
             xmlSwitchEncoding(ctxt, XML_CHAR_ENCODING_8859_1);
         } else {
             if !(*(*ctxt).input).encoding.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                xmlFree.expect("non-null function pointer")(
                     (*(*ctxt).input).encoding as *mut xmlChar as *mut ::core::ffi::c_void,
                 );
             }
@@ -2299,8 +2217,7 @@ unsafe extern "C" fn htmlCurrentChar(
                 htmlParseErr(
                     ctxt,
                     XML_ERR_INVALID_ENCODING,
-                    b"Unsupported encoding %s\0" as *const u8
-                        as *const ::core::ffi::c_char,
+                    b"Unsupported encoding %s\0" as *const u8 as *const ::core::ffi::c_char,
                     guess,
                     ::core::ptr::null::<xmlChar>(),
                 );
@@ -2311,9 +2228,7 @@ unsafe extern "C" fn htmlCurrentChar(
     cur = (*(*ctxt).input).cur as *const ::core::ffi::c_uchar;
     c = *cur;
     if c as ::core::ffi::c_int & 0x80 as ::core::ffi::c_int != 0 {
-        if !(c as ::core::ffi::c_int & 0x40 as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int)
-        {
+        if !(c as ::core::ffi::c_int & 0x40 as ::core::ffi::c_int == 0 as ::core::ffi::c_int) {
             if *cur.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
                 == 0 as ::core::ffi::c_int
             {
@@ -2321,57 +2236,61 @@ unsafe extern "C" fn htmlCurrentChar(
                 cur = (*(*ctxt).input).cur as *const ::core::ffi::c_uchar;
             }
             if !(*cur.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                & 0xc0 as ::core::ffi::c_int != 0x80 as ::core::ffi::c_int)
+                & 0xc0 as ::core::ffi::c_int
+                != 0x80 as ::core::ffi::c_int)
             {
                 if c as ::core::ffi::c_int & 0xe0 as ::core::ffi::c_int
                     == 0xe0 as ::core::ffi::c_int
                 {
-                    if *cur.offset(2 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == 0 as ::core::ffi::c_int
+                    if *cur.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        == 0 as ::core::ffi::c_int
                     {
                         xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
                         cur = (*(*ctxt).input).cur as *const ::core::ffi::c_uchar;
                     }
-                    if *cur.offset(2 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
+                    if *cur.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0xc0 as ::core::ffi::c_int
                         != 0x80 as ::core::ffi::c_int
                     {
                         current_block = 11718607780513628058;
                     } else if c as ::core::ffi::c_int & 0xf0 as ::core::ffi::c_int
                         == 0xf0 as ::core::ffi::c_int
                     {
-                        if *cur.offset(3 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == 0 as ::core::ffi::c_int
+                        if *cur.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                            == 0 as ::core::ffi::c_int
                         {
                             xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
                             cur = (*(*ctxt).input).cur as *const ::core::ffi::c_uchar;
                         }
                         if c as ::core::ffi::c_int & 0xf8 as ::core::ffi::c_int
                             != 0xf0 as ::core::ffi::c_int
-                            || *cur.offset(3 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
+                            || *cur.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                                & 0xc0 as ::core::ffi::c_int
                                 != 0x80 as ::core::ffi::c_int
                         {
                             current_block = 11718607780513628058;
                         } else {
                             *len = 4 as ::core::ffi::c_int;
                             val = ((*cur.offset(0 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int & 0x7 as ::core::ffi::c_int)
-                                << 18 as ::core::ffi::c_int) as ::core::ffi::c_uint;
-                            val
-                                |= ((*cur.offset(1 as ::core::ffi::c_int as isize)
-                                    as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
-                                    << 12 as ::core::ffi::c_int) as ::core::ffi::c_uint;
-                            val
-                                |= ((*cur.offset(2 as ::core::ffi::c_int as isize)
-                                    as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
-                                    << 6 as ::core::ffi::c_int) as ::core::ffi::c_uint;
-                            val
-                                |= (*cur.offset(3 as ::core::ffi::c_int as isize)
-                                    as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
-                                    as ::core::ffi::c_uint;
-                            if val < 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint
-                            {
+                                as ::core::ffi::c_int
+                                & 0x7 as ::core::ffi::c_int)
+                                << 18 as ::core::ffi::c_int)
+                                as ::core::ffi::c_uint;
+                            val |= ((*cur.offset(1 as ::core::ffi::c_int as isize)
+                                as ::core::ffi::c_int
+                                & 0x3f as ::core::ffi::c_int)
+                                << 12 as ::core::ffi::c_int)
+                                as ::core::ffi::c_uint;
+                            val |= ((*cur.offset(2 as ::core::ffi::c_int as isize)
+                                as ::core::ffi::c_int
+                                & 0x3f as ::core::ffi::c_int)
+                                << 6 as ::core::ffi::c_int)
+                                as ::core::ffi::c_uint;
+                            val |= (*cur.offset(3 as ::core::ffi::c_int as isize)
+                                as ::core::ffi::c_int
+                                & 0x3f as ::core::ffi::c_int)
+                                as ::core::ffi::c_uint;
+                            if val < 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint {
                                 current_block = 11718607780513628058;
                             } else {
                                 current_block = 10930818133215224067;
@@ -2380,16 +2299,18 @@ unsafe extern "C" fn htmlCurrentChar(
                     } else {
                         *len = 3 as ::core::ffi::c_int;
                         val = ((*cur.offset(0 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0xf as ::core::ffi::c_int)
-                            << 12 as ::core::ffi::c_int) as ::core::ffi::c_uint;
-                        val
-                            |= ((*cur.offset(1 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
-                                << 6 as ::core::ffi::c_int) as ::core::ffi::c_uint;
-                        val
-                            |= (*cur.offset(2 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
-                                as ::core::ffi::c_uint;
+                            as ::core::ffi::c_int
+                            & 0xf as ::core::ffi::c_int)
+                            << 12 as ::core::ffi::c_int)
+                            as ::core::ffi::c_uint;
+                        val |= ((*cur.offset(1 as ::core::ffi::c_int as isize)
+                            as ::core::ffi::c_int
+                            & 0x3f as ::core::ffi::c_int)
+                            << 6 as ::core::ffi::c_int)
+                            as ::core::ffi::c_uint;
+                        val |= (*cur.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                            & 0x3f as ::core::ffi::c_int)
+                            as ::core::ffi::c_uint;
                         if val < 0x800 as ::core::ffi::c_uint {
                             current_block = 11718607780513628058;
                         } else {
@@ -2398,13 +2319,13 @@ unsafe extern "C" fn htmlCurrentChar(
                     }
                 } else {
                     *len = 2 as ::core::ffi::c_int;
-                    val = ((*cur.offset(0 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int & 0x1f as ::core::ffi::c_int)
-                        << 6 as ::core::ffi::c_int) as ::core::ffi::c_uint;
-                    val
-                        |= (*cur.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
-                            as ::core::ffi::c_uint;
+                    val = ((*cur.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x1f as ::core::ffi::c_int)
+                        << 6 as ::core::ffi::c_int)
+                        as ::core::ffi::c_uint;
+                    val |= (*cur.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int)
+                        as ::core::ffi::c_uint;
                     if val < 0x80 as ::core::ffi::c_uint {
                         current_block = 11718607780513628058;
                     } else {
@@ -2415,19 +2336,17 @@ unsafe extern "C" fn htmlCurrentChar(
                     11718607780513628058 => {}
                     _ => {
                         if if val < 0x100 as ::core::ffi::c_uint {
-                            (0x9 as ::core::ffi::c_uint <= val
-                                && val <= 0xa as ::core::ffi::c_uint
+                            (0x9 as ::core::ffi::c_uint <= val && val <= 0xa as ::core::ffi::c_uint
                                 || val == 0xd as ::core::ffi::c_uint
-                                || 0x20 as ::core::ffi::c_uint <= val) as ::core::ffi::c_int
+                                || 0x20 as ::core::ffi::c_uint <= val)
+                                as ::core::ffi::c_int
                         } else {
                             (0x100 as ::core::ffi::c_uint <= val
                                 && val <= 0xd7ff as ::core::ffi::c_uint
                                 || 0xe000 as ::core::ffi::c_uint <= val
                                     && val <= 0xfffd as ::core::ffi::c_uint
-                                || 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint
-                                    <= val
-                                    && val
-                                        <= 0x10ffff as ::core::ffi::c_int as ::core::ffi::c_uint)
+                                || 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint <= val
+                                    && val <= 0x10ffff as ::core::ffi::c_int as ::core::ffi::c_uint)
                                 as ::core::ffi::c_int
                         } == 0
                         {
@@ -2453,22 +2372,27 @@ unsafe extern "C" fn htmlCurrentChar(
                 149 as size_t,
                 b"Bytes: 0x%02X 0x%02X 0x%02X 0x%02X\n\0" as *const u8
                     as *const ::core::ffi::c_char,
-                *(*(*ctxt).input).cur.offset(0 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int,
-                *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int,
-                *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int,
-                *(*(*ctxt).input).cur.offset(3 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int,
+                *(*(*ctxt).input)
+                    .cur
+                    .offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
+                *(*(*ctxt).input)
+                    .cur
+                    .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
+                *(*(*ctxt).input)
+                    .cur
+                    .offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
+                *(*(*ctxt).input)
+                    .cur
+                    .offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
             );
         } else {
             snprintf(
                 &raw mut buffer as *mut ::core::ffi::c_char,
                 149 as size_t,
                 b"Bytes: 0x%02X\n\0" as *const u8 as *const ::core::ffi::c_char,
-                *(*(*ctxt).input).cur.offset(0 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int,
+                *(*(*ctxt).input)
+                    .cur
+                    .offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
             );
         }
         htmlParseErr(
@@ -2491,8 +2415,7 @@ unsafe extern "C" fn htmlCurrentChar(
             htmlParseErrInt(
                 ctxt,
                 XML_ERR_INVALID_CHAR,
-                b"Char 0x%X out of allowed range\n\0" as *const u8
-                    as *const ::core::ffi::c_char,
+                b"Char 0x%X out of allowed range\n\0" as *const u8 as *const ::core::ffi::c_char,
                 0 as ::core::ffi::c_int,
             );
             *len = 1 as ::core::ffi::c_int;
@@ -2502,9 +2425,7 @@ unsafe extern "C" fn htmlCurrentChar(
         return *(*(*ctxt).input).cur as ::core::ffi::c_int;
     };
 }
-unsafe extern "C" fn htmlSkipBlankChars(
-    mut ctxt: xmlParserCtxtPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn htmlSkipBlankChars(mut ctxt: xmlParserCtxtPtr) -> ::core::ffi::c_int {
     let mut res: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     while *(*(*ctxt).input).cur as ::core::ffi::c_int == 0x20 as ::core::ffi::c_int
         || 0x9 as ::core::ffi::c_int <= *(*(*ctxt).input).cur as ::core::ffi::c_int
@@ -2642,12 +2563,10 @@ static mut html_inline: [*const ::core::ffi::c_char; 40] = [
     b"button\0" as *const u8 as *const ::core::ffi::c_char,
     ::core::ptr::null::<::core::ffi::c_char>(),
 ];
-static mut html_pcdata: [*const ::core::ffi::c_char; 1] = [
-    ::core::ptr::null::<::core::ffi::c_char>(),
-];
-pub const CELLVALIGN: [::core::ffi::c_char; 7] = unsafe {
-    ::core::mem::transmute::<[u8; 7], [::core::ffi::c_char; 7]>(*b"valign\0")
-};
+static mut html_pcdata: [*const ::core::ffi::c_char; 1] =
+    [::core::ptr::null::<::core::ffi::c_char>()];
+pub const CELLVALIGN: [::core::ffi::c_char; 7] =
+    unsafe { ::core::mem::transmute::<[u8; 7], [::core::ffi::c_char; 7]>(*b"valign\0") };
 static mut html_attrs: [*const ::core::ffi::c_char; 16] = [
     b"id\0" as *const u8 as *const ::core::ffi::c_char,
     b"class\0" as *const u8 as *const ::core::ffi::c_char,
@@ -4180,8 +4099,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 0 as ::core::ffi::c_char,
-            desc: b"client-side image map area \0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"client-side image map area \0" as *const u8 as *const ::core::ffi::c_char,
             subelts: ::core::ptr::null::<*const ::core::ffi::c_char>()
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -4401,8 +4319,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 1 as ::core::ffi::c_char,
             dtd: 1 as ::core::ffi::c_char,
             isinline: 0 as ::core::ffi::c_char,
-            desc: b"shorthand for div align=center \0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"shorthand for div align=center \0" as *const u8 as *const ::core::ffi::c_char,
             subelts: &raw const html_flow as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -4502,8 +4419,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 0 as ::core::ffi::c_char,
-            desc: b"definition description \0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"definition description \0" as *const u8 as *const ::core::ffi::c_char,
             subelts: &raw const html_flow as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -4583,8 +4499,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 0 as ::core::ffi::c_char,
-            desc: b"generic language/style container\0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"generic language/style container\0" as *const u8 as *const ::core::ffi::c_char,
             subelts: &raw const html_flow as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -4664,8 +4579,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 1 as ::core::ffi::c_char,
             dtd: 1 as ::core::ffi::c_char,
             isinline: 1 as ::core::ffi::c_char,
-            desc: b"generic embedded object \0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"generic embedded object \0" as *const u8 as *const ::core::ffi::c_char,
             subelts: ::core::ptr::null::<*const ::core::ffi::c_char>()
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -5085,8 +4999,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 1 as ::core::ffi::c_char,
-            desc: b"text to be entered by the user\0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"text to be entered by the user\0" as *const u8 as *const ::core::ffi::c_char,
             subelts: &raw const html_inline as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -5166,8 +5079,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 0 as ::core::ffi::c_char,
-            desc: b"a media-independent link \0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"a media-independent link \0" as *const u8 as *const ::core::ffi::c_char,
             subelts: ::core::ptr::null::<*const ::core::ffi::c_char>()
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -5227,8 +5139,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 0 as ::core::ffi::c_char,
-            desc: b"generic metainformation \0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"generic metainformation \0" as *const u8 as *const ::core::ffi::c_char,
             subelts: ::core::ptr::null::<*const ::core::ffi::c_char>()
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -5248,8 +5159,8 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 2 as ::core::ffi::c_char,
             isinline: 0 as ::core::ffi::c_char,
-            desc: b"alternate content container for non frame-based rendering \0"
-                as *const u8 as *const ::core::ffi::c_char,
+            desc: b"alternate content container for non frame-based rendering \0" as *const u8
+                as *const ::core::ffi::c_char,
             subelts: &raw const noframes_content as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: b"body\0" as *const u8 as *const ::core::ffi::c_char,
@@ -5269,8 +5180,8 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 0 as ::core::ffi::c_char,
-            desc: b"alternate content container for non script-based rendering \0"
-                as *const u8 as *const ::core::ffi::c_char,
+            desc: b"alternate content container for non script-based rendering \0" as *const u8
+                as *const ::core::ffi::c_char,
             subelts: &raw const html_flow as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: b"div\0" as *const u8 as *const ::core::ffi::c_char,
@@ -5290,8 +5201,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 2 as ::core::ffi::c_char,
-            desc: b"generic embedded object \0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"generic embedded object \0" as *const u8 as *const ::core::ffi::c_char,
             subelts: &raw const object_contents as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: b"div\0" as *const u8 as *const ::core::ffi::c_char,
@@ -5431,8 +5341,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 1 as ::core::ffi::c_char,
-            desc: b"short inline quotation \0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"short inline quotation \0" as *const u8 as *const ::core::ffi::c_char,
             subelts: &raw const html_inline as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -5452,8 +5361,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 1 as ::core::ffi::c_char,
             dtd: 1 as ::core::ffi::c_char,
             isinline: 1 as ::core::ffi::c_char,
-            desc: b"strike-through text style\0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"strike-through text style\0" as *const u8 as *const ::core::ffi::c_char,
             subelts: &raw const html_inline as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -5554,8 +5462,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 1 as ::core::ffi::c_char,
-            desc: b"generic language/style container \0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"generic language/style container \0" as *const u8 as *const ::core::ffi::c_char,
             subelts: &raw const html_inline as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -5855,8 +5762,7 @@ static mut html40ElementTable: [htmlElemDesc; 92] = unsafe {
             depr: 0 as ::core::ffi::c_char,
             dtd: 0 as ::core::ffi::c_char,
             isinline: 1 as ::core::ffi::c_char,
-            desc: b"teletype or monospaced text style\0" as *const u8
-                as *const ::core::ffi::c_char,
+            desc: b"teletype or monospaced text style\0" as *const u8 as *const ::core::ffi::c_char,
             subelts: &raw const html_inline as *const *const ::core::ffi::c_char
                 as *mut *const ::core::ffi::c_char,
             defaultsubelt: ::core::ptr::null::<::core::ffi::c_char>(),
@@ -7028,8 +6934,7 @@ pub unsafe extern "C" fn htmlTagLookup(mut tag: *const xmlChar) -> *const htmlEl
     }
     return bsearch(
         tag as *const ::core::ffi::c_void,
-        &raw const html40ElementTable as *const htmlElemDesc
-            as *const ::core::ffi::c_void,
+        &raw const html40ElementTable as *const htmlElemDesc as *const ::core::ffi::c_void,
         (::core::mem::size_of::<[htmlElemDesc; 92]>() as size_t)
             .wrapping_div(::core::mem::size_of::<htmlElemDesc>() as size_t),
         ::core::mem::size_of::<htmlElemDesc>() as size_t,
@@ -7072,15 +6977,12 @@ unsafe extern "C" fn htmlCheckAutoClose(
         oldTag: ::core::ptr::null::<::core::ffi::c_char>(),
         newTag: ::core::ptr::null::<::core::ffi::c_char>(),
     };
-    let mut res: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-        ::core::ffi::c_void,
-    >();
+    let mut res: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
     key.oldTag = oldtag as *const ::core::ffi::c_char;
     key.newTag = newtag as *const ::core::ffi::c_char;
     res = bsearch(
         &raw mut key as *const ::core::ffi::c_void,
-        &raw const htmlStartClose as *const htmlStartCloseEntry
-            as *const ::core::ffi::c_void,
+        &raw const htmlStartClose as *const htmlStartCloseEntry as *const ::core::ffi::c_void,
         (::core::mem::size_of::<[htmlStartCloseEntry; 251]>() as size_t)
             .wrapping_div(::core::mem::size_of::<htmlStartCloseEntry>() as size_t),
         ::core::mem::size_of::<htmlStartCloseEntry>() as size_t,
@@ -7094,10 +6996,7 @@ unsafe extern "C" fn htmlCheckAutoClose(
     );
     return (res != NULL) as ::core::ffi::c_int;
 }
-unsafe extern "C" fn htmlAutoCloseOnClose(
-    mut ctxt: htmlParserCtxtPtr,
-    mut newtag: *const xmlChar,
-) {
+unsafe extern "C" fn htmlAutoCloseOnClose(mut ctxt: htmlParserCtxtPtr, mut newtag: *const xmlChar) {
     let mut info: *const htmlElemDesc = ::core::ptr::null::<htmlElemDesc>();
     let mut i: ::core::ffi::c_int = 0;
     let mut priority: ::core::ffi::c_int = 0;
@@ -7117,9 +7016,7 @@ unsafe extern "C" fn htmlAutoCloseOnClose(
     }
     while xmlStrEqual(newtag, (*ctxt).name) == 0 {
         info = htmlTagLookup((*ctxt).name);
-        if !info.is_null()
-            && (*info).endTag as ::core::ffi::c_int == 3 as ::core::ffi::c_int
-        {
+        if !info.is_null() && (*info).endTag as ::core::ffi::c_int == 3 as ::core::ffi::c_int {
             htmlParseErr(
                 ctxt as xmlParserCtxtPtr,
                 XML_ERR_TAG_NAME_MISMATCH,
@@ -7153,11 +7050,9 @@ unsafe extern "C" fn htmlAutoCloseOnEnd(mut ctxt: htmlParserCtxtPtr) {
         i -= 1;
     }
 }
-unsafe extern "C" fn htmlAutoClose(
-    mut ctxt: htmlParserCtxtPtr,
-    mut newtag: *const xmlChar,
-) {
-    while !newtag.is_null() && !(*ctxt).name.is_null()
+unsafe extern "C" fn htmlAutoClose(mut ctxt: htmlParserCtxtPtr, mut newtag: *const xmlChar) {
+    while !newtag.is_null()
+        && !(*ctxt).name.is_null()
         && htmlCheckAutoClose(newtag, (*ctxt).name) != 0
     {
         if !(*ctxt).sax.is_null() && (*(*ctxt).sax).endElement.is_some() {
@@ -7171,7 +7066,8 @@ unsafe extern "C" fn htmlAutoClose(
         htmlAutoCloseOnEnd(ctxt);
         return;
     }
-    while newtag.is_null() && !(*ctxt).name.is_null()
+    while newtag.is_null()
+        && !(*ctxt).name.is_null()
         && (xmlStrEqual(
             (*ctxt).name,
             b"head\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
@@ -7236,10 +7132,7 @@ pub unsafe extern "C" fn htmlIsAutoClosed(
     }
     return 0 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn htmlCheckImplied(
-    mut ctxt: htmlParserCtxtPtr,
-    mut newtag: *const xmlChar,
-) {
+unsafe extern "C" fn htmlCheckImplied(mut ctxt: htmlParserCtxtPtr, mut newtag: *const xmlChar) {
     let mut i: ::core::ffi::c_int = 0;
     if (*ctxt).options & HTML_PARSE_NOIMPLIED as ::core::ffi::c_int != 0 {
         return;
@@ -7262,9 +7155,7 @@ unsafe extern "C" fn htmlCheckImplied(
         if !(*ctxt).sax.is_null() && (*(*ctxt).sax).startElement.is_some() {
             (*(*ctxt).sax)
                 .startElement
-                .expect(
-                    "non-null function pointer",
-                )(
+                .expect("non-null function pointer")(
                 (*ctxt).userData,
                 b"html\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 ::core::ptr::null_mut::<*const xmlChar>(),
@@ -7318,9 +7209,7 @@ unsafe extern "C" fn htmlCheckImplied(
         if !(*ctxt).sax.is_null() && (*(*ctxt).sax).startElement.is_some() {
             (*(*ctxt).sax)
                 .startElement
-                .expect(
-                    "non-null function pointer",
-                )(
+                .expect("non-null function pointer")(
                 (*ctxt).userData,
                 b"head\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 ::core::ptr::null_mut::<*const xmlChar>(),
@@ -7367,9 +7256,7 @@ unsafe extern "C" fn htmlCheckImplied(
         if !(*ctxt).sax.is_null() && (*(*ctxt).sax).startElement.is_some() {
             (*(*ctxt).sax)
                 .startElement
-                .expect(
-                    "non-null function pointer",
-                )(
+                .expect("non-null function pointer")(
                 (*ctxt).userData,
                 b"body\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 ::core::ptr::null_mut::<*const xmlChar>(),
@@ -7377,9 +7264,7 @@ unsafe extern "C" fn htmlCheckImplied(
         }
     }
 }
-unsafe extern "C" fn htmlCheckParagraph(
-    mut ctxt: htmlParserCtxtPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn htmlCheckParagraph(mut ctxt: htmlParserCtxtPtr) -> ::core::ffi::c_int {
     let mut tag: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut i: ::core::ffi::c_int = 0;
     if ctxt.is_null() {
@@ -7402,9 +7287,7 @@ unsafe extern "C" fn htmlCheckParagraph(
         if !(*ctxt).sax.is_null() && (*(*ctxt).sax).startElement.is_some() {
             (*(*ctxt).sax)
                 .startElement
-                .expect(
-                    "non-null function pointer",
-                )(
+                .expect("non-null function pointer")(
                 (*ctxt).userData,
                 b"p\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 ::core::ptr::null_mut::<*const xmlChar>(),
@@ -7433,9 +7316,7 @@ unsafe extern "C" fn htmlCheckParagraph(
             if !(*ctxt).sax.is_null() && (*(*ctxt).sax).startElement.is_some() {
                 (*(*ctxt).sax)
                     .startElement
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                    .expect("non-null function pointer")(
                     (*ctxt).userData,
                     b"p\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                     ::core::ptr::null_mut::<*const xmlChar>(),
@@ -7448,16 +7329,13 @@ unsafe extern "C" fn htmlCheckParagraph(
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn htmlIsScriptAttribute(
-    mut name: *const xmlChar,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn htmlIsScriptAttribute(mut name: *const xmlChar) -> ::core::ffi::c_int {
     let mut i: ::core::ffi::c_uint = 0;
     if name.is_null() {
         return 0 as ::core::ffi::c_int;
     }
     if *name.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int != 'o' as i32
-        || *name.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            != 'n' as i32
+        || *name.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int != 'n' as i32
     {
         return 0 as ::core::ffi::c_int;
     }
@@ -8965,9 +8843,7 @@ static mut html40EntitiesTable: [htmlEntityDesc; 253] = [
     },
 ];
 #[no_mangle]
-pub unsafe extern "C" fn htmlEntityLookup(
-    mut name: *const xmlChar,
-) -> *const htmlEntityDesc {
+pub unsafe extern "C" fn htmlEntityLookup(mut name: *const xmlChar) -> *const htmlEntityDesc {
     let mut i: ::core::ffi::c_uint = 0;
     i = 0 as ::core::ffi::c_uint;
     while (i as usize)
@@ -8975,8 +8851,8 @@ pub unsafe extern "C" fn htmlEntityLookup(
             .wrapping_div(::core::mem::size_of::<htmlEntityDesc>() as usize)
     {
         if xmlStrEqual(name, html40EntitiesTable[i as usize].name as *mut xmlChar) != 0 {
-            return (&raw const html40EntitiesTable as *const htmlEntityDesc)
-                .offset(i as isize) as *const htmlEntityDesc as htmlEntityDescPtr
+            return (&raw const html40EntitiesTable as *const htmlEntityDesc).offset(i as isize)
+                as *const htmlEntityDesc as htmlEntityDescPtr
                 as *const htmlEntityDesc;
         }
         i = i.wrapping_add(1);
@@ -8997,8 +8873,8 @@ pub unsafe extern "C" fn htmlEntityValueLookup(
             if html40EntitiesTable[i as usize].value > value {
                 break;
             }
-            return (&raw const html40EntitiesTable as *const htmlEntityDesc)
-                .offset(i as isize) as *const htmlEntityDesc as htmlEntityDescPtr
+            return (&raw const html40EntitiesTable as *const htmlEntityDesc).offset(i as isize)
+                as *const htmlEntityDesc as htmlEntityDescPtr
                 as *const htmlEntityDesc;
         } else {
             i = i.wrapping_add(1);
@@ -9014,14 +8890,10 @@ pub unsafe extern "C" fn UTF8ToHtml(
     mut inlen: *mut ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     let mut processed: *const ::core::ffi::c_uchar = in_0;
-    let mut outend: *const ::core::ffi::c_uchar = ::core::ptr::null::<
-        ::core::ffi::c_uchar,
-    >();
+    let mut outend: *const ::core::ffi::c_uchar = ::core::ptr::null::<::core::ffi::c_uchar>();
     let mut outstart: *const ::core::ffi::c_uchar = out;
     let mut instart: *const ::core::ffi::c_uchar = in_0;
-    let mut inend: *const ::core::ffi::c_uchar = ::core::ptr::null::<
-        ::core::ffi::c_uchar,
-    >();
+    let mut inend: *const ::core::ffi::c_uchar = ::core::ptr::null::<::core::ffi::c_uchar>();
     let mut c: ::core::ffi::c_uint = 0;
     let mut d: ::core::ffi::c_uint = 0;
     let mut trailing: ::core::ffi::c_int = 0;
@@ -9043,10 +8915,8 @@ pub unsafe extern "C" fn UTF8ToHtml(
             c = d;
             trailing = 0 as ::core::ffi::c_int;
         } else if d < 0xc0 as ::core::ffi::c_uint {
-            *outlen = out.offset_from(outstart) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
-            *inlen = processed.offset_from(instart) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
+            *outlen = out.offset_from(outstart) as ::core::ffi::c_long as ::core::ffi::c_int;
+            *inlen = processed.offset_from(instart) as ::core::ffi::c_long as ::core::ffi::c_int;
             return -(2 as ::core::ffi::c_int);
         } else if d < 0xe0 as ::core::ffi::c_uint {
             c = d & 0x1f as ::core::ffi::c_uint;
@@ -9058,26 +8928,20 @@ pub unsafe extern "C" fn UTF8ToHtml(
             c = d & 0x7 as ::core::ffi::c_uint;
             trailing = 3 as ::core::ffi::c_int;
         } else {
-            *outlen = out.offset_from(outstart) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
-            *inlen = processed.offset_from(instart) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
+            *outlen = out.offset_from(outstart) as ::core::ffi::c_long as ::core::ffi::c_int;
+            *inlen = processed.offset_from(instart) as ::core::ffi::c_long as ::core::ffi::c_int;
             return -(2 as ::core::ffi::c_int);
         }
-        if (inend.offset_from(in_0) as ::core::ffi::c_long)
-            < trailing as ::core::ffi::c_long
-        {
+        if (inend.offset_from(in_0) as ::core::ffi::c_long) < trailing as ::core::ffi::c_long {
             break;
         }
         while trailing != 0 {
-            if in_0 >= inend
-                || {
-                    let fresh49 = in_0;
-                    in_0 = in_0.offset(1);
-                    d = *fresh49 as ::core::ffi::c_uint;
-                    d & 0xc0 as ::core::ffi::c_uint != 0x80 as ::core::ffi::c_uint
-                }
-            {
+            if in_0 >= inend || {
+                let fresh49 = in_0;
+                in_0 = in_0.offset(1);
+                d = *fresh49 as ::core::ffi::c_uint;
+                d & 0xc0 as ::core::ffi::c_uint != 0x80 as ::core::ffi::c_uint
+            } {
                 break;
             }
             c <<= 6 as ::core::ffi::c_int;
@@ -9085,9 +8949,7 @@ pub unsafe extern "C" fn UTF8ToHtml(
             trailing -= 1;
         }
         if c < 0x80 as ::core::ffi::c_uint {
-            if out.offset(1 as ::core::ffi::c_int as isize)
-                >= outend as *mut ::core::ffi::c_uchar
-            {
+            if out.offset(1 as ::core::ffi::c_int as isize) >= outend as *mut ::core::ffi::c_uchar {
                 break;
             }
             let fresh50 = out;
@@ -9096,9 +8958,7 @@ pub unsafe extern "C" fn UTF8ToHtml(
         } else {
             let mut len: ::core::ffi::c_int = 0;
             let mut ent: *const htmlEntityDesc = ::core::ptr::null::<htmlEntityDesc>();
-            let mut cp: *const ::core::ffi::c_char = ::core::ptr::null::<
-                ::core::ffi::c_char,
-            >();
+            let mut cp: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
             let mut nbuf: [::core::ffi::c_char; 16] = [0; 16];
             ent = htmlEntityValueLookup(c);
             if ent.is_null() {
@@ -9113,7 +8973,9 @@ pub unsafe extern "C" fn UTF8ToHtml(
                 cp = (*ent).name;
             }
             len = strlen(cp) as ::core::ffi::c_int;
-            if out.offset(2 as ::core::ffi::c_int as isize).offset(len as isize)
+            if out
+                .offset(2 as ::core::ffi::c_int as isize)
+                .offset(len as isize)
                 >= outend as *mut ::core::ffi::c_uchar
             {
                 break;
@@ -9146,14 +9008,10 @@ pub unsafe extern "C" fn htmlEncodeEntities(
     mut quoteChar: ::core::ffi::c_int,
 ) -> ::core::ffi::c_int {
     let mut processed: *const ::core::ffi::c_uchar = in_0;
-    let mut outend: *const ::core::ffi::c_uchar = ::core::ptr::null::<
-        ::core::ffi::c_uchar,
-    >();
+    let mut outend: *const ::core::ffi::c_uchar = ::core::ptr::null::<::core::ffi::c_uchar>();
     let mut outstart: *const ::core::ffi::c_uchar = out;
     let mut instart: *const ::core::ffi::c_uchar = in_0;
-    let mut inend: *const ::core::ffi::c_uchar = ::core::ptr::null::<
-        ::core::ffi::c_uchar,
-    >();
+    let mut inend: *const ::core::ffi::c_uchar = ::core::ptr::null::<::core::ffi::c_uchar>();
     let mut c: ::core::ffi::c_uint = 0;
     let mut d: ::core::ffi::c_uint = 0;
     let mut trailing: ::core::ffi::c_int = 0;
@@ -9170,10 +9028,8 @@ pub unsafe extern "C" fn htmlEncodeEntities(
             c = d;
             trailing = 0 as ::core::ffi::c_int;
         } else if d < 0xc0 as ::core::ffi::c_uint {
-            *outlen = out.offset_from(outstart) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
-            *inlen = processed.offset_from(instart) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
+            *outlen = out.offset_from(outstart) as ::core::ffi::c_long as ::core::ffi::c_int;
+            *inlen = processed.offset_from(instart) as ::core::ffi::c_long as ::core::ffi::c_int;
             return -(2 as ::core::ffi::c_int);
         } else if d < 0xe0 as ::core::ffi::c_uint {
             c = d & 0x1f as ::core::ffi::c_uint;
@@ -9185,15 +9041,11 @@ pub unsafe extern "C" fn htmlEncodeEntities(
             c = d & 0x7 as ::core::ffi::c_uint;
             trailing = 3 as ::core::ffi::c_int;
         } else {
-            *outlen = out.offset_from(outstart) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
-            *inlen = processed.offset_from(instart) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
+            *outlen = out.offset_from(outstart) as ::core::ffi::c_long as ::core::ffi::c_int;
+            *inlen = processed.offset_from(instart) as ::core::ffi::c_long as ::core::ffi::c_int;
             return -(2 as ::core::ffi::c_int);
         }
-        if (inend.offset_from(in_0) as ::core::ffi::c_long)
-            < trailing as ::core::ffi::c_long
-        {
+        if (inend.offset_from(in_0) as ::core::ffi::c_long) < trailing as ::core::ffi::c_long {
             break;
         }
         loop {
@@ -9206,16 +9058,16 @@ pub unsafe extern "C" fn htmlEncodeEntities(
             in_0 = in_0.offset(1);
             d = *fresh55 as ::core::ffi::c_uint;
             if d & 0xc0 as ::core::ffi::c_uint != 0x80 as ::core::ffi::c_uint {
-                *outlen = out.offset_from(outstart) as ::core::ffi::c_long
-                    as ::core::ffi::c_int;
-                *inlen = processed.offset_from(instart) as ::core::ffi::c_long
-                    as ::core::ffi::c_int;
+                *outlen = out.offset_from(outstart) as ::core::ffi::c_long as ::core::ffi::c_int;
+                *inlen =
+                    processed.offset_from(instart) as ::core::ffi::c_long as ::core::ffi::c_int;
                 return -(2 as ::core::ffi::c_int);
             }
             c <<= 6 as ::core::ffi::c_int;
             c |= d & 0x3f as ::core::ffi::c_uint;
         }
-        if c < 0x80 as ::core::ffi::c_uint && c != quoteChar as ::core::ffi::c_uint
+        if c < 0x80 as ::core::ffi::c_uint
+            && c != quoteChar as ::core::ffi::c_uint
             && c != '&' as i32 as ::core::ffi::c_uint
             && c != '<' as i32 as ::core::ffi::c_uint
             && c != '>' as i32 as ::core::ffi::c_uint
@@ -9228,9 +9080,7 @@ pub unsafe extern "C" fn htmlEncodeEntities(
             *fresh56 = c as ::core::ffi::c_uchar;
         } else {
             let mut ent: *const htmlEntityDesc = ::core::ptr::null::<htmlEntityDesc>();
-            let mut cp: *const ::core::ffi::c_char = ::core::ptr::null::<
-                ::core::ffi::c_char,
-            >();
+            let mut cp: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
             let mut nbuf: [::core::ffi::c_char; 16] = [0; 16];
             let mut len: ::core::ffi::c_int = 0;
             ent = htmlEntityValueLookup(c);
@@ -9246,7 +9096,9 @@ pub unsafe extern "C" fn htmlEncodeEntities(
                 cp = (*ent).name;
             }
             len = strlen(cp) as ::core::ffi::c_int;
-            if out.offset(2 as ::core::ffi::c_int as isize).offset(len as isize)
+            if out
+                .offset(2 as ::core::ffi::c_int as isize)
+                .offset(len as isize)
                 > outend as *mut ::core::ffi::c_uchar
             {
                 break;
@@ -9270,20 +9122,15 @@ pub unsafe extern "C" fn htmlEncodeEntities(
     *inlen = processed.offset_from(instart) as ::core::ffi::c_long as ::core::ffi::c_int;
     return 0 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn htmlNewInputStream(
-    mut ctxt: htmlParserCtxtPtr,
-) -> htmlParserInputPtr {
+unsafe extern "C" fn htmlNewInputStream(mut ctxt: htmlParserCtxtPtr) -> htmlParserInputPtr {
     let mut input: htmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
-    input = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<htmlParserInput>() as size_t) as xmlParserInputPtr
-        as htmlParserInputPtr;
+    input = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<htmlParserInput>() as size_t
+    ) as xmlParserInputPtr as htmlParserInputPtr;
     if input.is_null() {
         htmlErrMemory(
             ctxt as xmlParserCtxtPtr,
-            b"couldn't allocate a new input stream\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"couldn't allocate a new input stream\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlParserInput>();
     }
@@ -9374,10 +9221,8 @@ unsafe extern "C" fn areBlanks(
     while j < len {
         if !(*str.offset(j as isize) as ::core::ffi::c_int == 0x20 as ::core::ffi::c_int
             || 0x9 as ::core::ffi::c_int <= *str.offset(j as isize) as ::core::ffi::c_int
-                && *str.offset(j as isize) as ::core::ffi::c_int
-                    <= 0xa as ::core::ffi::c_int
-            || *str.offset(j as isize) as ::core::ffi::c_int
-                == 0xd as ::core::ffi::c_int)
+                && *str.offset(j as isize) as ::core::ffi::c_int <= 0xa as ::core::ffi::c_int
+            || *str.offset(j as isize) as ::core::ffi::c_int == 0xd as ::core::ffi::c_int)
         {
             return 0 as ::core::ffi::c_int;
         }
@@ -9409,7 +9254,8 @@ unsafe extern "C" fn areBlanks(
     if xmlStrEqual(
         (*ctxt).name,
         b"body\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-    ) != 0 && !(*ctxt).myDoc.is_null()
+    ) != 0
+        && !(*ctxt).myDoc.is_null()
     {
         dtd = xmlGetIntSubset((*ctxt).myDoc as *const xmlDoc);
         if !dtd.is_null() && !(*dtd).ExternalID.is_null() {
@@ -9420,8 +9266,8 @@ unsafe extern "C" fn areBlanks(
             ) == 0
                 || xmlStrcasecmp(
                     (*dtd).ExternalID,
-                    b"-//W3C//DTD HTML 4//EN\0" as *const u8
-                        as *const ::core::ffi::c_char as *mut xmlChar,
+                    b"-//W3C//DTD HTML 4//EN\0" as *const u8 as *const ::core::ffi::c_char
+                        as *mut xmlChar,
                 ) == 0
             {
                 return 1 as ::core::ffi::c_int;
@@ -9448,9 +9294,7 @@ unsafe extern "C" fn areBlanks(
         i = 0 as ::core::ffi::c_uint;
         while (i as usize)
             < (::core::mem::size_of::<[*const ::core::ffi::c_char; 53]>() as usize)
-                .wrapping_div(
-                    ::core::mem::size_of::<*const ::core::ffi::c_char>() as usize,
-                )
+                .wrapping_div(::core::mem::size_of::<*const ::core::ffi::c_char>() as usize)
         {
             if xmlStrEqual((*ctxt).name, allowPCData[i as usize] as *mut xmlChar) != 0 {
                 return 0 as ::core::ffi::c_int;
@@ -9458,18 +9302,14 @@ unsafe extern "C" fn areBlanks(
             i = i.wrapping_add(1);
         }
     } else if xmlNodeIsText(lastChild as *const xmlNode) != 0 {
-        return 0 as ::core::ffi::c_int
+        return 0 as ::core::ffi::c_int;
     } else {
         i = 0 as ::core::ffi::c_uint;
         while (i as usize)
             < (::core::mem::size_of::<[*const ::core::ffi::c_char; 53]>() as usize)
-                .wrapping_div(
-                    ::core::mem::size_of::<*const ::core::ffi::c_char>() as usize,
-                )
+                .wrapping_div(::core::mem::size_of::<*const ::core::ffi::c_char>() as usize)
         {
-            if xmlStrEqual((*lastChild).name, allowPCData[i as usize] as *mut xmlChar)
-                != 0
-            {
+            if xmlStrEqual((*lastChild).name, allowPCData[i as usize] as *mut xmlChar) != 0 {
                 return 0 as ::core::ffi::c_int;
             }
             i = i.wrapping_add(1);
@@ -9483,14 +9323,12 @@ pub unsafe extern "C" fn htmlNewDocNoDtD(
     mut ExternalID: *const xmlChar,
 ) -> htmlDocPtr {
     let mut cur: xmlDocPtr = ::core::ptr::null_mut::<xmlDoc>();
-    cur = xmlMalloc
-        .expect("non-null function pointer")(::core::mem::size_of::<xmlDoc>() as size_t)
+    cur = xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<xmlDoc>() as size_t)
         as xmlDocPtr;
     if cur.is_null() {
         htmlErrMemory(
             ::core::ptr::null_mut::<xmlParserCtxt>(),
-            b"HTML document creation failed\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"HTML document creation failed\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlDoc>();
     }
@@ -9520,8 +9358,8 @@ pub unsafe extern "C" fn htmlNewDocNoDtD(
             as ::core::ffi::c_uint
             & !((15 as ::core::ffi::c_uint) << 27 as ::core::ffi::c_int))
         as ::core::ffi::c_int;
-    (*cur).properties = XML_DOC_HTML as ::core::ffi::c_int
-        | XML_DOC_USERBUILT as ::core::ffi::c_int;
+    (*cur).properties =
+        XML_DOC_HTML as ::core::ffi::c_int | XML_DOC_USERBUILT as ::core::ffi::c_int;
     if !ExternalID.is_null() || !URI.is_null() {
         xmlCreateIntSubset(
             cur,
@@ -9531,8 +9369,7 @@ pub unsafe extern "C" fn htmlNewDocNoDtD(
         );
     }
     if __xmlRegisterCallbacks != 0 && (*__xmlRegisterNodeDefaultValue()).is_some() {
-        (*__xmlRegisterNodeDefaultValue())
-            .expect("non-null function pointer")(cur as xmlNodePtr);
+        (*__xmlRegisterNodeDefaultValue()).expect("non-null function pointer")(cur as xmlNodePtr);
     }
     return cur as htmlDocPtr;
 }
@@ -9545,8 +9382,8 @@ pub unsafe extern "C" fn htmlNewDoc(
         return htmlNewDocNoDtD(
             b"http://www.w3.org/TR/REC-html40/loose.dtd\0" as *const u8
                 as *const ::core::ffi::c_char as *mut xmlChar,
-            b"-//W3C//DTD HTML 4.0 Transitional//EN\0" as *const u8
-                as *const ::core::ffi::c_char as *mut xmlChar,
+            b"-//W3C//DTD HTML 4.0 Transitional//EN\0" as *const u8 as *const ::core::ffi::c_char
+                as *mut xmlChar,
         );
     }
     return htmlNewDocNoDtD(URI, ExternalID);
@@ -9568,11 +9405,9 @@ unsafe extern "C" fn htmlParseHTMLName(mut ctxt: htmlParserCtxtPtr) -> *const xm
         && (0x41 as ::core::ffi::c_int <= *(*(*ctxt).input).cur as ::core::ffi::c_int
             && *(*(*ctxt).input).cur as ::core::ffi::c_int <= 0x5a as ::core::ffi::c_int
             || 0x61 as ::core::ffi::c_int <= *(*(*ctxt).input).cur as ::core::ffi::c_int
-                && *(*(*ctxt).input).cur as ::core::ffi::c_int
-                    <= 0x7a as ::core::ffi::c_int
+                && *(*(*ctxt).input).cur as ::core::ffi::c_int <= 0x7a as ::core::ffi::c_int
             || 0x30 as ::core::ffi::c_int <= *(*(*ctxt).input).cur as ::core::ffi::c_int
-                && *(*(*ctxt).input).cur as ::core::ffi::c_int
-                    <= 0x39 as ::core::ffi::c_int
+                && *(*(*ctxt).input).cur as ::core::ffi::c_int <= 0x39 as ::core::ffi::c_int
             || *(*(*ctxt).input).cur as ::core::ffi::c_int == ':' as i32
             || *(*(*ctxt).input).cur as ::core::ffi::c_int == '-' as i32
             || *(*(*ctxt).input).cur as ::core::ffi::c_int == '_' as i32
@@ -9591,59 +9426,96 @@ unsafe extern "C" fn htmlParseHTMLName(mut ctxt: htmlParserCtxtPtr) -> *const xm
     }
     return xmlDictLookup((*ctxt).dict, &raw mut loc as *mut xmlChar, i);
 }
-unsafe extern "C" fn htmlParseHTMLName_nonInvasive(
-    mut ctxt: htmlParserCtxtPtr,
-) -> *const xmlChar {
+unsafe extern "C" fn htmlParseHTMLName_nonInvasive(mut ctxt: htmlParserCtxtPtr) -> *const xmlChar {
     let mut i: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     let mut loc: [xmlChar; 100] = [0; 100];
     if !(0x41 as ::core::ffi::c_int
-        <= *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int <= 0x5a as ::core::ffi::c_int
+        <= *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            <= 0x5a as ::core::ffi::c_int
         || 0x61 as ::core::ffi::c_int
-            <= *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int
-            && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int <= 0x7a as ::core::ffi::c_int)
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int != '_' as i32
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int != ':' as i32
+            <= *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            && *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                <= 0x7a as ::core::ffi::c_int)
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            != '_' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            != ':' as i32
     {
         return ::core::ptr::null::<xmlChar>();
     }
     while i < HTML_PARSER_BUFFER_SIZE
         && (0x41 as ::core::ffi::c_int
-            <= *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
+            <= *(*(*ctxt).input)
+                .cur
+                .offset((1 as ::core::ffi::c_int + i) as isize)
                 as ::core::ffi::c_int
-            && *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
-                as ::core::ffi::c_int <= 0x5a as ::core::ffi::c_int
+            && *(*(*ctxt).input)
+                .cur
+                .offset((1 as ::core::ffi::c_int + i) as isize)
+                as ::core::ffi::c_int
+                <= 0x5a as ::core::ffi::c_int
             || 0x61 as ::core::ffi::c_int
-                <= *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
+                <= *(*(*ctxt).input)
+                    .cur
+                    .offset((1 as ::core::ffi::c_int + i) as isize)
                     as ::core::ffi::c_int
-                && *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
-                    as ::core::ffi::c_int <= 0x7a as ::core::ffi::c_int
+                && *(*(*ctxt).input)
+                    .cur
+                    .offset((1 as ::core::ffi::c_int + i) as isize)
+                    as ::core::ffi::c_int
+                    <= 0x7a as ::core::ffi::c_int
             || 0x30 as ::core::ffi::c_int
-                <= *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
+                <= *(*(*ctxt).input)
+                    .cur
+                    .offset((1 as ::core::ffi::c_int + i) as isize)
                     as ::core::ffi::c_int
-                && *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
-                    as ::core::ffi::c_int <= 0x39 as ::core::ffi::c_int
-            || *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
-                as ::core::ffi::c_int == ':' as i32
-            || *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
-                as ::core::ffi::c_int == '-' as i32
-            || *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
-                as ::core::ffi::c_int == '_' as i32)
+                && *(*(*ctxt).input)
+                    .cur
+                    .offset((1 as ::core::ffi::c_int + i) as isize)
+                    as ::core::ffi::c_int
+                    <= 0x39 as ::core::ffi::c_int
+            || *(*(*ctxt).input)
+                .cur
+                .offset((1 as ::core::ffi::c_int + i) as isize)
+                as ::core::ffi::c_int
+                == ':' as i32
+            || *(*(*ctxt).input)
+                .cur
+                .offset((1 as ::core::ffi::c_int + i) as isize)
+                as ::core::ffi::c_int
+                == '-' as i32
+            || *(*(*ctxt).input)
+                .cur
+                .offset((1 as ::core::ffi::c_int + i) as isize)
+                as ::core::ffi::c_int
+                == '_' as i32)
     {
-        if *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
-            as ::core::ffi::c_int >= 'A' as i32
-            && *(*(*ctxt).input).cur.offset((1 as ::core::ffi::c_int + i) as isize)
-                as ::core::ffi::c_int <= 'Z' as i32
+        if *(*(*ctxt).input)
+            .cur
+            .offset((1 as ::core::ffi::c_int + i) as isize) as ::core::ffi::c_int
+            >= 'A' as i32
+            && *(*(*ctxt).input)
+                .cur
+                .offset((1 as ::core::ffi::c_int + i) as isize) as ::core::ffi::c_int
+                <= 'Z' as i32
         {
             loc[i as usize] = (*(*(*ctxt).input)
                 .cur
-                .offset((1 as ::core::ffi::c_int + i) as isize) as ::core::ffi::c_int
+                .offset((1 as ::core::ffi::c_int + i) as isize)
+                as ::core::ffi::c_int
                 + 0x20 as ::core::ffi::c_int) as xmlChar;
         } else {
             loc[i as usize] = *(*(*ctxt).input)
@@ -9659,8 +9531,8 @@ unsafe extern "C" fn htmlParseName(mut ctxt: htmlParserCtxtPtr) -> *const xmlCha
     let mut ret: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut count: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if (*ctxt).progressive == 0 as ::core::ffi::c_int
-        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-            as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+            < INPUT_CHUNK as ::core::ffi::c_long
     {
         xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
     }
@@ -9692,8 +9564,8 @@ unsafe extern "C" fn htmlParseName(mut ctxt: htmlParserCtxtPtr) -> *const xmlCha
         if *in_0 as ::core::ffi::c_int > 0 as ::core::ffi::c_int
             && (*in_0 as ::core::ffi::c_int) < 0x80 as ::core::ffi::c_int
         {
-            count = in_0.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
+            count =
+                in_0.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long as ::core::ffi::c_int;
             ret = xmlDictLookup((*ctxt).dict, (*(*ctxt).input).cur, count);
             (*(*ctxt).input).cur = in_0;
             (*(*ctxt).input).col += count;
@@ -9709,13 +9581,15 @@ unsafe extern "C" fn htmlParseNameComplex(mut ctxt: xmlParserCtxtPtr) -> *const 
     let mut count: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     let mut base: *const xmlChar = (*(*ctxt).input).base;
     if (*ctxt).progressive == 0 as ::core::ffi::c_int
-        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-            as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+            < INPUT_CHUNK as ::core::ffi::c_long
     {
         xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
     }
     c = htmlCurrentChar(ctxt, &raw mut l);
-    if c == ' ' as i32 || c == '>' as i32 || c == '/' as i32
+    if c == ' ' as i32
+        || c == '>' as i32
+        || c == '/' as i32
         || !((if c < 0x100 as ::core::ffi::c_int {
             (0x41 as ::core::ffi::c_int <= c && c <= 0x5a as ::core::ffi::c_int
                 || 0x61 as ::core::ffi::c_int <= c && c <= 0x7a as ::core::ffi::c_int
@@ -9730,13 +9604,17 @@ unsafe extern "C" fn htmlParseNameComplex(mut ctxt: xmlParserCtxtPtr) -> *const 
             } else {
                 (0x4e00 as ::core::ffi::c_int <= c && c <= 0x9fa5 as ::core::ffi::c_int
                     || c == 0x3007 as ::core::ffi::c_int
-                    || 0x3021 as ::core::ffi::c_int <= c
-                        && c <= 0x3029 as ::core::ffi::c_int) as ::core::ffi::c_int
-            }) != 0) && c != '_' as i32 && c != ':' as i32
+                    || 0x3021 as ::core::ffi::c_int <= c && c <= 0x3029 as ::core::ffi::c_int)
+                    as ::core::ffi::c_int
+            }) != 0)
+            && c != '_' as i32
+            && c != ':' as i32
     {
         return ::core::ptr::null::<xmlChar>();
     }
-    while c != ' ' as i32 && c != '>' as i32 && c != '/' as i32
+    while c != ' ' as i32
+        && c != '>' as i32
+        && c != '/' as i32
         && ((if c < 0x100 as ::core::ffi::c_int {
             (0x41 as ::core::ffi::c_int <= c && c <= 0x5a as ::core::ffi::c_int
                 || 0x61 as ::core::ffi::c_int <= c && c <= 0x7a as ::core::ffi::c_int
@@ -9751,15 +9629,18 @@ unsafe extern "C" fn htmlParseNameComplex(mut ctxt: xmlParserCtxtPtr) -> *const 
             } else {
                 (0x4e00 as ::core::ffi::c_int <= c && c <= 0x9fa5 as ::core::ffi::c_int
                     || c == 0x3007 as ::core::ffi::c_int
-                    || 0x3021 as ::core::ffi::c_int <= c
-                        && c <= 0x3029 as ::core::ffi::c_int) as ::core::ffi::c_int
+                    || 0x3021 as ::core::ffi::c_int <= c && c <= 0x3029 as ::core::ffi::c_int)
+                    as ::core::ffi::c_int
             }) != 0
             || (if c < 0x100 as ::core::ffi::c_int {
                 (0x30 as ::core::ffi::c_int <= c && c <= 0x39 as ::core::ffi::c_int)
                     as ::core::ffi::c_int
             } else {
                 xmlCharInRange(c as ::core::ffi::c_uint, &raw const xmlIsDigitGroup)
-            }) != 0 || c == '.' as i32 || c == '-' as i32 || c == '_' as i32
+            }) != 0
+            || c == '.' as i32
+            || c == '-' as i32
+            || c == '_' as i32
             || c == ':' as i32
             || (if c < 0x100 as ::core::ffi::c_int {
                 0 as ::core::ffi::c_int
@@ -9777,8 +9658,8 @@ unsafe extern "C" fn htmlParseNameComplex(mut ctxt: xmlParserCtxtPtr) -> *const 
         if fresh15 > 100 as ::core::ffi::c_int {
             count = 0 as ::core::ffi::c_int;
             if (*ctxt).progressive == 0 as ::core::ffi::c_int
-                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                    as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+                    < INPUT_CHUNK as ::core::ffi::c_long
             {
                 xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
             }
@@ -9803,8 +9684,7 @@ unsafe extern "C" fn htmlParseNameComplex(mut ctxt: xmlParserCtxtPtr) -> *const 
         htmlParseErr(
             ctxt,
             XML_ERR_INTERNAL_ERROR,
-            b"unexpected change of input buffer\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"unexpected change of input buffer\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
@@ -9827,10 +9707,7 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
     let mut cur: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut ent: *const htmlEntityDesc = ::core::ptr::null::<htmlEntityDesc>();
     buffer_size = HTML_PARSER_BUFFER_SIZE;
-    buffer = xmlMallocAtomic
-        .expect(
-            "non-null function pointer",
-        )(
+    buffer = xmlMallocAtomic.expect("non-null function pointer")(
         (buffer_size as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
     ) as *mut xmlChar;
     if buffer.is_null() {
@@ -9851,18 +9728,17 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
         }
         if stop as ::core::ffi::c_int == 0 as ::core::ffi::c_int
             && (*(*(*ctxt).input).cur as ::core::ffi::c_int == 0x20 as ::core::ffi::c_int
-                || 0x9 as ::core::ffi::c_int
-                    <= *(*(*ctxt).input).cur as ::core::ffi::c_int
-                    && *(*(*ctxt).input).cur as ::core::ffi::c_int
-                        <= 0xa as ::core::ffi::c_int
-                || *(*(*ctxt).input).cur as ::core::ffi::c_int
-                    == 0xd as ::core::ffi::c_int)
+                || 0x9 as ::core::ffi::c_int <= *(*(*ctxt).input).cur as ::core::ffi::c_int
+                    && *(*(*ctxt).input).cur as ::core::ffi::c_int <= 0xa as ::core::ffi::c_int
+                || *(*(*ctxt).input).cur as ::core::ffi::c_int == 0xd as ::core::ffi::c_int)
         {
             break;
         }
         if *(*(*ctxt).input).cur as ::core::ffi::c_int == '&' as i32 {
-            if *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == '#' as i32
+            if *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == '#' as i32
             {
                 let mut c: ::core::ffi::c_uint = 0;
                 let mut bits: ::core::ffi::c_int = 0;
@@ -9875,23 +9751,20 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                 } else if c < 0x800 as ::core::ffi::c_uint {
                     let fresh27 = out;
                     out = out.offset(1);
-                    *fresh27 = (c >> 6 as ::core::ffi::c_int
-                        & 0x1f as ::core::ffi::c_uint | 0xc0 as ::core::ffi::c_uint)
-                        as xmlChar;
+                    *fresh27 = (c >> 6 as ::core::ffi::c_int & 0x1f as ::core::ffi::c_uint
+                        | 0xc0 as ::core::ffi::c_uint) as xmlChar;
                     bits = 0 as ::core::ffi::c_int;
                 } else if c < 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint {
                     let fresh28 = out;
                     out = out.offset(1);
-                    *fresh28 = (c >> 12 as ::core::ffi::c_int
-                        & 0xf as ::core::ffi::c_uint | 0xe0 as ::core::ffi::c_uint)
-                        as xmlChar;
+                    *fresh28 = (c >> 12 as ::core::ffi::c_int & 0xf as ::core::ffi::c_uint
+                        | 0xe0 as ::core::ffi::c_uint) as xmlChar;
                     bits = 6 as ::core::ffi::c_int;
                 } else {
                     let fresh29 = out;
                     out = out.offset(1);
-                    *fresh29 = (c >> 18 as ::core::ffi::c_int
-                        & 0x7 as ::core::ffi::c_uint | 0xf0 as ::core::ffi::c_uint)
-                        as xmlChar;
+                    *fresh29 = (c >> 18 as ::core::ffi::c_int & 0x7 as ::core::ffi::c_uint
+                        | 0xf0 as ::core::ffi::c_uint) as xmlChar;
                     bits = 12 as ::core::ffi::c_int;
                 }
                 while bits >= 0 as ::core::ffi::c_int {
@@ -9904,14 +9777,11 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                 if out.offset_from(buffer) as ::core::ffi::c_long
                     > (buffer_size - 100 as ::core::ffi::c_int) as ::core::ffi::c_long
                 {
-                    let mut indx: ::core::ffi::c_int = out.offset_from(buffer)
-                        as ::core::ffi::c_long as ::core::ffi::c_int;
+                    let mut indx: ::core::ffi::c_int =
+                        out.offset_from(buffer) as ::core::ffi::c_long as ::core::ffi::c_int;
                     let mut tmp: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                     buffer_size *= 2 as ::core::ffi::c_int;
-                    tmp = xmlRealloc
-                        .expect(
-                            "non-null function pointer",
-                        )(
+                    tmp = xmlRealloc.expect("non-null function pointer")(
                         buffer as *mut ::core::ffi::c_void,
                         (buffer_size as size_t)
                             .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
@@ -9919,13 +9789,11 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                     if tmp.is_null() {
                         htmlErrMemory(
                             ctxt as xmlParserCtxtPtr,
-                            b"growing buffer\n\0" as *const u8
-                                as *const ::core::ffi::c_char,
+                            b"growing buffer\n\0" as *const u8 as *const ::core::ffi::c_char,
                         );
-                        xmlFree
-                            .expect(
-                                "non-null function pointer",
-                            )(buffer as *mut ::core::ffi::c_void);
+                        xmlFree.expect("non-null function pointer")(
+                            buffer as *mut ::core::ffi::c_void,
+                        );
                         return ::core::ptr::null_mut::<xmlChar>();
                     }
                     buffer = tmp;
@@ -9938,17 +9806,13 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                     out = out.offset(1);
                     *fresh31 = '&' as i32 as xmlChar;
                     if out.offset_from(buffer) as ::core::ffi::c_long
-                        > (buffer_size - 100 as ::core::ffi::c_int)
-                            as ::core::ffi::c_long
+                        > (buffer_size - 100 as ::core::ffi::c_int) as ::core::ffi::c_long
                     {
-                        let mut indx_0: ::core::ffi::c_int = out.offset_from(buffer)
-                            as ::core::ffi::c_long as ::core::ffi::c_int;
+                        let mut indx_0: ::core::ffi::c_int =
+                            out.offset_from(buffer) as ::core::ffi::c_long as ::core::ffi::c_int;
                         let mut tmp_0: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                         buffer_size *= 2 as ::core::ffi::c_int;
-                        tmp_0 = xmlRealloc
-                            .expect(
-                                "non-null function pointer",
-                            )(
+                        tmp_0 = xmlRealloc.expect("non-null function pointer")(
                             buffer as *mut ::core::ffi::c_void,
                             (buffer_size as size_t)
                                 .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
@@ -9956,13 +9820,11 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                         if tmp_0.is_null() {
                             htmlErrMemory(
                                 ctxt as xmlParserCtxtPtr,
-                                b"growing buffer\n\0" as *const u8
-                                    as *const ::core::ffi::c_char,
+                                b"growing buffer\n\0" as *const u8 as *const ::core::ffi::c_char,
                             );
-                            xmlFree
-                                .expect(
-                                    "non-null function pointer",
-                                )(buffer as *mut ::core::ffi::c_void);
+                            xmlFree.expect("non-null function pointer")(
+                                buffer as *mut ::core::ffi::c_void,
+                            );
                             return ::core::ptr::null_mut::<xmlChar>();
                         }
                         buffer = tmp_0;
@@ -9975,19 +9837,14 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                     cur = name;
                     while *cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
                         if out.offset_from(buffer) as ::core::ffi::c_long
-                            > (buffer_size - 100 as ::core::ffi::c_int)
-                                as ::core::ffi::c_long
+                            > (buffer_size - 100 as ::core::ffi::c_int) as ::core::ffi::c_long
                         {
                             let mut indx_1: ::core::ffi::c_int = out.offset_from(buffer)
-                                as ::core::ffi::c_long as ::core::ffi::c_int;
-                            let mut tmp_1: *mut xmlChar = ::core::ptr::null_mut::<
-                                xmlChar,
-                            >();
+                                as ::core::ffi::c_long
+                                as ::core::ffi::c_int;
+                            let mut tmp_1: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                             buffer_size *= 2 as ::core::ffi::c_int;
-                            tmp_1 = xmlRealloc
-                                .expect(
-                                    "non-null function pointer",
-                                )(
+                            tmp_1 = xmlRealloc.expect("non-null function pointer")(
                                 buffer as *mut ::core::ffi::c_void,
                                 (buffer_size as size_t)
                                     .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
@@ -9998,10 +9855,9 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                                     b"growing buffer\n\0" as *const u8
                                         as *const ::core::ffi::c_char,
                                 );
-                                xmlFree
-                                    .expect(
-                                        "non-null function pointer",
-                                    )(buffer as *mut ::core::ffi::c_void);
+                                xmlFree.expect("non-null function pointer")(
+                                    buffer as *mut ::core::ffi::c_void,
+                                );
                                 return ::core::ptr::null_mut::<xmlChar>();
                             }
                             buffer = tmp_1;
@@ -10017,17 +9873,13 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                     let mut c_0: ::core::ffi::c_uint = 0;
                     let mut bits_0: ::core::ffi::c_int = 0;
                     if out.offset_from(buffer) as ::core::ffi::c_long
-                        > (buffer_size - 100 as ::core::ffi::c_int)
-                            as ::core::ffi::c_long
+                        > (buffer_size - 100 as ::core::ffi::c_int) as ::core::ffi::c_long
                     {
-                        let mut indx_2: ::core::ffi::c_int = out.offset_from(buffer)
-                            as ::core::ffi::c_long as ::core::ffi::c_int;
+                        let mut indx_2: ::core::ffi::c_int =
+                            out.offset_from(buffer) as ::core::ffi::c_long as ::core::ffi::c_int;
                         let mut tmp_2: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                         buffer_size *= 2 as ::core::ffi::c_int;
-                        tmp_2 = xmlRealloc
-                            .expect(
-                                "non-null function pointer",
-                            )(
+                        tmp_2 = xmlRealloc.expect("non-null function pointer")(
                             buffer as *mut ::core::ffi::c_void,
                             (buffer_size as size_t)
                                 .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
@@ -10035,13 +9887,11 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                         if tmp_2.is_null() {
                             htmlErrMemory(
                                 ctxt as xmlParserCtxtPtr,
-                                b"growing buffer\n\0" as *const u8
-                                    as *const ::core::ffi::c_char,
+                                b"growing buffer\n\0" as *const u8 as *const ::core::ffi::c_char,
                             );
-                            xmlFree
-                                .expect(
-                                    "non-null function pointer",
-                                )(buffer as *mut ::core::ffi::c_void);
+                            xmlFree.expect("non-null function pointer")(
+                                buffer as *mut ::core::ffi::c_void,
+                            );
                             return ::core::ptr::null_mut::<xmlChar>();
                         }
                         buffer = tmp_2;
@@ -10056,23 +9906,22 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                     } else if c_0 < 0x800 as ::core::ffi::c_uint {
                         let fresh36 = out;
                         out = out.offset(1);
-                        *fresh36 = (c_0 >> 6 as ::core::ffi::c_int
-                            & 0x1f as ::core::ffi::c_uint | 0xc0 as ::core::ffi::c_uint)
+                        *fresh36 = (c_0 >> 6 as ::core::ffi::c_int & 0x1f as ::core::ffi::c_uint
+                            | 0xc0 as ::core::ffi::c_uint)
                             as xmlChar;
                         bits_0 = 0 as ::core::ffi::c_int;
-                    } else if c_0 < 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint
-                    {
+                    } else if c_0 < 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint {
                         let fresh37 = out;
                         out = out.offset(1);
-                        *fresh37 = (c_0 >> 12 as ::core::ffi::c_int
-                            & 0xf as ::core::ffi::c_uint | 0xe0 as ::core::ffi::c_uint)
+                        *fresh37 = (c_0 >> 12 as ::core::ffi::c_int & 0xf as ::core::ffi::c_uint
+                            | 0xe0 as ::core::ffi::c_uint)
                             as xmlChar;
                         bits_0 = 6 as ::core::ffi::c_int;
                     } else {
                         let fresh38 = out;
                         out = out.offset(1);
-                        *fresh38 = (c_0 >> 18 as ::core::ffi::c_int
-                            & 0x7 as ::core::ffi::c_uint | 0xf0 as ::core::ffi::c_uint)
+                        *fresh38 = (c_0 >> 18 as ::core::ffi::c_int & 0x7 as ::core::ffi::c_uint
+                            | 0xf0 as ::core::ffi::c_uint)
                             as xmlChar;
                         bits_0 = 12 as ::core::ffi::c_int;
                     }
@@ -10080,7 +9929,8 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                         let fresh39 = out;
                         out = out.offset(1);
                         *fresh39 = (c_0 >> bits_0 & 0x3f as ::core::ffi::c_uint
-                            | 0x80 as ::core::ffi::c_uint) as xmlChar;
+                            | 0x80 as ::core::ffi::c_uint)
+                            as xmlChar;
                         bits_0 -= 6 as ::core::ffi::c_int;
                     }
                 }
@@ -10092,14 +9942,11 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
             if out.offset_from(buffer) as ::core::ffi::c_long
                 > (buffer_size - 100 as ::core::ffi::c_int) as ::core::ffi::c_long
             {
-                let mut indx_3: ::core::ffi::c_int = out.offset_from(buffer)
-                    as ::core::ffi::c_long as ::core::ffi::c_int;
+                let mut indx_3: ::core::ffi::c_int =
+                    out.offset_from(buffer) as ::core::ffi::c_long as ::core::ffi::c_int;
                 let mut tmp_3: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                 buffer_size *= 2 as ::core::ffi::c_int;
-                tmp_3 = xmlRealloc
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                tmp_3 = xmlRealloc.expect("non-null function pointer")(
                     buffer as *mut ::core::ffi::c_void,
                     (buffer_size as size_t)
                         .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
@@ -10109,17 +9956,13 @@ unsafe extern "C" fn htmlParseHTMLAttribute(
                         ctxt as xmlParserCtxtPtr,
                         b"growing buffer\n\0" as *const u8 as *const ::core::ffi::c_char,
                     );
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(buffer as *mut ::core::ffi::c_void);
+                    xmlFree.expect("non-null function pointer")(buffer as *mut ::core::ffi::c_void);
                     return ::core::ptr::null_mut::<xmlChar>();
                 }
                 buffer = tmp_3;
                 out = buffer.offset(indx_3 as isize) as *mut xmlChar;
             }
-            c_1 = htmlCurrentChar(ctxt as xmlParserCtxtPtr, &raw mut l)
-                as ::core::ffi::c_uint;
+            c_1 = htmlCurrentChar(ctxt as xmlParserCtxtPtr, &raw mut l) as ::core::ffi::c_uint;
             if c_1 < 0x80 as ::core::ffi::c_uint {
                 let fresh40 = out;
                 out = out.offset(1);
@@ -10177,15 +10020,14 @@ pub unsafe extern "C" fn htmlParseEntityRef(
             htmlParseErr(
                 ctxt as xmlParserCtxtPtr,
                 XML_ERR_NAME_REQUIRED,
-                b"htmlParseEntityRef: no name\n\0" as *const u8
-                    as *const ::core::ffi::c_char,
+                b"htmlParseEntityRef: no name\n\0" as *const u8 as *const ::core::ffi::c_char,
                 ::core::ptr::null::<xmlChar>(),
                 ::core::ptr::null::<xmlChar>(),
             );
         } else {
             if (*ctxt).progressive == 0 as ::core::ffi::c_int
-                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                    as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+                    < INPUT_CHUNK as ::core::ffi::c_long
             {
                 xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
             }
@@ -10250,8 +10092,7 @@ unsafe extern "C" fn htmlParseAttValue(mut ctxt: htmlParserCtxtPtr) -> *mut xmlC
             htmlParseErr(
                 ctxt as xmlParserCtxtPtr,
                 XML_ERR_ATTRIBUTE_WITHOUT_VALUE,
-                b"AttValue: no value found\n\0" as *const u8
-                    as *const ::core::ffi::c_char,
+                b"AttValue: no value found\n\0" as *const u8 as *const ::core::ffi::c_char,
                 ::core::ptr::null::<xmlChar>(),
                 ::core::ptr::null::<xmlChar>(),
             );
@@ -10259,9 +10100,7 @@ unsafe extern "C" fn htmlParseAttValue(mut ctxt: htmlParserCtxtPtr) -> *mut xmlC
     }
     return ret;
 }
-unsafe extern "C" fn htmlParseSystemLiteral(
-    mut ctxt: htmlParserCtxtPtr,
-) -> *mut xmlChar {
+unsafe extern "C" fn htmlParseSystemLiteral(mut ctxt: htmlParserCtxtPtr) -> *mut xmlChar {
     let mut len: size_t = 0 as size_t;
     let mut startPosition: size_t = 0 as size_t;
     let mut err: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
@@ -10273,8 +10112,7 @@ unsafe extern "C" fn htmlParseSystemLiteral(
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_LITERAL_NOT_STARTED,
-            b"SystemLiteral \" or ' expected\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"SystemLiteral \" or ' expected\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
@@ -10285,8 +10123,8 @@ unsafe extern "C" fn htmlParseSystemLiteral(
     if (*(*ctxt).input).cur < (*(*ctxt).input).base {
         return ret;
     }
-    startPosition = (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
-        as ::core::ffi::c_long as size_t;
+    startPosition =
+        (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base) as ::core::ffi::c_long as size_t;
     while *(*(*ctxt).input).cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int
         && *(*(*ctxt).input).cur as ::core::ffi::c_int != quote
     {
@@ -10338,8 +10176,7 @@ unsafe extern "C" fn htmlParsePubidLiteral(mut ctxt: htmlParserCtxtPtr) -> *mut 
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_LITERAL_NOT_STARTED,
-            b"PubidLiteral \" or ' expected\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"PubidLiteral \" or ' expected\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
@@ -10350,18 +10187,16 @@ unsafe extern "C" fn htmlParsePubidLiteral(mut ctxt: htmlParserCtxtPtr) -> *mut 
     if (*(*ctxt).input).cur < (*(*ctxt).input).base {
         return ret;
     }
-    startPosition = (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
-        as ::core::ffi::c_long as size_t;
+    startPosition =
+        (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base) as ::core::ffi::c_long as size_t;
     while *(*(*ctxt).input).cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int
         && *(*(*ctxt).input).cur as ::core::ffi::c_int != quote
     {
-        if xmlIsPubidChar_tab[*(*(*ctxt).input).cur as ::core::ffi::c_int as usize] == 0
-        {
+        if xmlIsPubidChar_tab[*(*(*ctxt).input).cur as ::core::ffi::c_int as usize] == 0 {
             htmlParseErrInt(
                 ctxt as xmlParserCtxtPtr,
                 XML_ERR_INVALID_CHAR,
-                b"Invalid char in PubidLiteral 0x%X\n\0" as *const u8
-                    as *const ::core::ffi::c_char,
+                b"Invalid char in PubidLiteral 0x%X\n\0" as *const u8 as *const ::core::ffi::c_char,
                 *(*(*ctxt).input).cur as ::core::ffi::c_int,
             );
             err = 1 as ::core::ffi::c_int;
@@ -10395,8 +10230,7 @@ unsafe extern "C" fn htmlParseScript(mut ctxt: htmlParserCtxtPtr) {
     let mut l: ::core::ffi::c_int = 0;
     if (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base) as ::core::ffi::c_long
         > (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
-        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-            as ::core::ffi::c_long)
+        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
             < (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
     {
         xmlParserInputShrink((*ctxt).input);
@@ -10404,13 +10238,17 @@ unsafe extern "C" fn htmlParseScript(mut ctxt: htmlParserCtxtPtr) {
     cur = htmlCurrentChar(ctxt as xmlParserCtxtPtr, &raw mut l);
     while cur != 0 as ::core::ffi::c_int {
         if cur == '<' as i32
-            && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == '/' as i32
+            && *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == '/' as i32
         {
             if (*ctxt).recovery != 0 {
                 if xmlStrncasecmp(
                     (*ctxt).name,
-                    (*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize),
+                    (*(*ctxt).input)
+                        .cur
+                        .offset(2 as ::core::ffi::c_int as isize),
                     xmlStrlen((*ctxt).name),
                 ) == 0 as ::core::ffi::c_int
                 {
@@ -10419,33 +10257,43 @@ unsafe extern "C" fn htmlParseScript(mut ctxt: htmlParserCtxtPtr) {
                 htmlParseErr(
                     ctxt as xmlParserCtxtPtr,
                     XML_ERR_TAG_NAME_MISMATCH,
-                    b"Element %s embeds close tag\n\0" as *const u8
-                        as *const ::core::ffi::c_char,
+                    b"Element %s embeds close tag\n\0" as *const u8 as *const ::core::ffi::c_char,
                     (*ctxt).name,
                     ::core::ptr::null::<xmlChar>(),
                 );
-            } else if *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int >= 'A' as i32
-                && *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int <= 'Z' as i32
-                || *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int >= 'a' as i32
-                    && *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int <= 'z' as i32
+            } else if *(*(*ctxt).input)
+                .cur
+                .offset(2 as ::core::ffi::c_int as isize)
+                as ::core::ffi::c_int
+                >= 'A' as i32
+                && *(*(*ctxt).input)
+                    .cur
+                    .offset(2 as ::core::ffi::c_int as isize)
+                    as ::core::ffi::c_int
+                    <= 'Z' as i32
+                || *(*(*ctxt).input)
+                    .cur
+                    .offset(2 as ::core::ffi::c_int as isize)
+                    as ::core::ffi::c_int
+                    >= 'a' as i32
+                    && *(*(*ctxt).input)
+                        .cur
+                        .offset(2 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        <= 'z' as i32
             {
                 break;
             }
         }
         if if cur < 0x100 as ::core::ffi::c_int {
             (0x9 as ::core::ffi::c_int <= cur && cur <= 0xa as ::core::ffi::c_int
-                || cur == 0xd as ::core::ffi::c_int || 0x20 as ::core::ffi::c_int <= cur)
-                as ::core::ffi::c_int
+                || cur == 0xd as ::core::ffi::c_int
+                || 0x20 as ::core::ffi::c_int <= cur) as ::core::ffi::c_int
         } else {
             (0x100 as ::core::ffi::c_int <= cur && cur <= 0xd7ff as ::core::ffi::c_int
-                || 0xe000 as ::core::ffi::c_int <= cur
-                    && cur <= 0xfffd as ::core::ffi::c_int
-                || 0x10000 as ::core::ffi::c_int <= cur
-                    && cur <= 0x10ffff as ::core::ffi::c_int) as ::core::ffi::c_int
+                || 0xe000 as ::core::ffi::c_int <= cur && cur <= 0xfffd as ::core::ffi::c_int
+                || 0x10000 as ::core::ffi::c_int <= cur && cur <= 0x10ffff as ::core::ffi::c_int)
+                as ::core::ffi::c_int
         } != 0
         {
             if l == 1 as ::core::ffi::c_int {
@@ -10453,20 +10301,17 @@ unsafe extern "C" fn htmlParseScript(mut ctxt: htmlParserCtxtPtr) {
                 nbchar = nbchar + 1;
                 buf[fresh47 as usize] = cur as xmlChar;
             } else {
-                nbchar
-                    += xmlCopyChar(
-                        l,
-                        (&raw mut buf as *mut xmlChar).offset(nbchar as isize)
-                            as *mut xmlChar,
-                        cur,
-                    );
+                nbchar += xmlCopyChar(
+                    l,
+                    (&raw mut buf as *mut xmlChar).offset(nbchar as isize) as *mut xmlChar,
+                    cur,
+                );
             }
         } else {
             htmlParseErrInt(
                 ctxt as xmlParserCtxtPtr,
                 XML_ERR_INVALID_CHAR,
-                b"Invalid char in CDATA 0x%X\n\0" as *const u8
-                    as *const ::core::ffi::c_char,
+                b"Invalid char in CDATA 0x%X\n\0" as *const u8 as *const ::core::ffi::c_char,
                 cur,
             );
         }
@@ -10475,21 +10320,25 @@ unsafe extern "C" fn htmlParseScript(mut ctxt: htmlParserCtxtPtr) {
             if (*(*ctxt).sax).cdataBlock.is_some() {
                 (*(*ctxt).sax)
                     .cdataBlock
-                    .expect(
-                        "non-null function pointer",
-                    )((*ctxt).userData, &raw mut buf as *mut xmlChar, nbchar);
+                    .expect("non-null function pointer")(
+                    (*ctxt).userData,
+                    &raw mut buf as *mut xmlChar,
+                    nbchar,
+                );
             } else if (*(*ctxt).sax).characters.is_some() {
                 (*(*ctxt).sax)
                     .characters
-                    .expect(
-                        "non-null function pointer",
-                    )((*ctxt).userData, &raw mut buf as *mut xmlChar, nbchar);
+                    .expect("non-null function pointer")(
+                    (*ctxt).userData,
+                    &raw mut buf as *mut xmlChar,
+                    nbchar,
+                );
             }
             nbchar = 0 as ::core::ffi::c_int;
         }
         if (*ctxt).progressive == 0 as ::core::ffi::c_int
-            && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+            && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+                < INPUT_CHUNK as ::core::ffi::c_long
         {
             xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
         }
@@ -10503,22 +10352,24 @@ unsafe extern "C" fn htmlParseScript(mut ctxt: htmlParserCtxtPtr) {
         (*(*ctxt).input).cur = (*(*ctxt).input).cur.offset(l as isize);
         cur = htmlCurrentChar(ctxt as xmlParserCtxtPtr, &raw mut l);
     }
-    if nbchar != 0 as ::core::ffi::c_int && !(*ctxt).sax.is_null()
-        && (*ctxt).disableSAX == 0
-    {
+    if nbchar != 0 as ::core::ffi::c_int && !(*ctxt).sax.is_null() && (*ctxt).disableSAX == 0 {
         buf[nbchar as usize] = 0 as xmlChar;
         if (*(*ctxt).sax).cdataBlock.is_some() {
             (*(*ctxt).sax)
                 .cdataBlock
-                .expect(
-                    "non-null function pointer",
-                )((*ctxt).userData, &raw mut buf as *mut xmlChar, nbchar);
+                .expect("non-null function pointer")(
+                (*ctxt).userData,
+                &raw mut buf as *mut xmlChar,
+                nbchar,
+            );
         } else if (*(*ctxt).sax).characters.is_some() {
             (*(*ctxt).sax)
                 .characters
-                .expect(
-                    "non-null function pointer",
-                )((*ctxt).userData, &raw mut buf as *mut xmlChar, nbchar);
+                .expect("non-null function pointer")(
+                (*ctxt).userData,
+                &raw mut buf as *mut xmlChar,
+                nbchar,
+            );
         }
     }
 }
@@ -10538,8 +10389,7 @@ unsafe extern "C" fn htmlParseCharDataInternal(
     }
     if (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base) as ::core::ffi::c_long
         > (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
-        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-            as ::core::ffi::c_long)
+        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
             < (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
     {
         xmlParserInputShrink((*ctxt).input);
@@ -10551,21 +10401,19 @@ unsafe extern "C" fn htmlParseCharDataInternal(
     {
         if if cur < 0x100 as ::core::ffi::c_int {
             (0x9 as ::core::ffi::c_int <= cur && cur <= 0xa as ::core::ffi::c_int
-                || cur == 0xd as ::core::ffi::c_int || 0x20 as ::core::ffi::c_int <= cur)
-                as ::core::ffi::c_int
+                || cur == 0xd as ::core::ffi::c_int
+                || 0x20 as ::core::ffi::c_int <= cur) as ::core::ffi::c_int
         } else {
             (0x100 as ::core::ffi::c_int <= cur && cur <= 0xd7ff as ::core::ffi::c_int
-                || 0xe000 as ::core::ffi::c_int <= cur
-                    && cur <= 0xfffd as ::core::ffi::c_int
-                || 0x10000 as ::core::ffi::c_int <= cur
-                    && cur <= 0x10ffff as ::core::ffi::c_int) as ::core::ffi::c_int
+                || 0xe000 as ::core::ffi::c_int <= cur && cur <= 0xfffd as ::core::ffi::c_int
+                || 0x10000 as ::core::ffi::c_int <= cur && cur <= 0x10ffff as ::core::ffi::c_int)
+                as ::core::ffi::c_int
         } == 0
         {
             htmlParseErrInt(
                 ctxt as xmlParserCtxtPtr,
                 XML_ERR_INVALID_CHAR,
-                b"Invalid char in CDATA 0x%X\n\0" as *const u8
-                    as *const ::core::ffi::c_char,
+                b"Invalid char in CDATA 0x%X\n\0" as *const u8 as *const ::core::ffi::c_char,
                 cur,
             );
         } else if l == 1 as ::core::ffi::c_int {
@@ -10573,13 +10421,11 @@ unsafe extern "C" fn htmlParseCharDataInternal(
             nbchar = nbchar + 1;
             buf[fresh1 as usize] = cur as xmlChar;
         } else {
-            nbchar
-                += xmlCopyChar(
-                    l,
-                    (&raw mut buf as *mut xmlChar).offset(nbchar as isize)
-                        as *mut xmlChar,
-                    cur,
-                );
+            nbchar += xmlCopyChar(
+                l,
+                (&raw mut buf as *mut xmlChar).offset(nbchar as isize) as *mut xmlChar,
+                cur,
+            );
         }
         if nbchar >= HTML_PARSER_BIG_BUFFER_SIZE {
             buf[nbchar as usize] = 0 as xmlChar;
@@ -10589,25 +10435,31 @@ unsafe extern "C" fn htmlParseCharDataInternal(
                         if (*(*ctxt).sax).characters.is_some() {
                             (*(*ctxt).sax)
                                 .characters
-                                .expect(
-                                    "non-null function pointer",
-                                )((*ctxt).userData, &raw mut buf as *mut xmlChar, nbchar);
+                                .expect("non-null function pointer")(
+                                (*ctxt).userData,
+                                &raw mut buf as *mut xmlChar,
+                                nbchar,
+                            );
                         }
                     } else if (*(*ctxt).sax).ignorableWhitespace.is_some() {
                         (*(*ctxt).sax)
                             .ignorableWhitespace
-                            .expect(
-                                "non-null function pointer",
-                            )((*ctxt).userData, &raw mut buf as *mut xmlChar, nbchar);
+                            .expect("non-null function pointer")(
+                            (*ctxt).userData,
+                            &raw mut buf as *mut xmlChar,
+                            nbchar,
+                        );
                     }
                 } else {
                     htmlCheckParagraph(ctxt);
                     if (*(*ctxt).sax).characters.is_some() {
                         (*(*ctxt).sax)
                             .characters
-                            .expect(
-                                "non-null function pointer",
-                            )((*ctxt).userData, &raw mut buf as *mut xmlChar, nbchar);
+                            .expect("non-null function pointer")(
+                            (*ctxt).userData,
+                            &raw mut buf as *mut xmlChar,
+                            nbchar,
+                        );
                     }
                 }
             }
@@ -10624,36 +10476,32 @@ unsafe extern "C" fn htmlParseCharDataInternal(
         chunk += 1;
         if chunk > HTML_PARSER_BUFFER_SIZE {
             chunk = 0 as ::core::ffi::c_int;
-            if (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
-                as ::core::ffi::c_long
+            if (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base) as ::core::ffi::c_long
                 > (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
-                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                    as ::core::ffi::c_long)
+                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
                     < (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
             {
                 xmlParserInputShrink((*ctxt).input);
             }
             if (*ctxt).progressive == 0 as ::core::ffi::c_int
-                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                    as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+                    < INPUT_CHUNK as ::core::ffi::c_long
             {
                 xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
             }
         }
         cur = htmlCurrentChar(ctxt as xmlParserCtxtPtr, &raw mut l);
         if cur == 0 as ::core::ffi::c_int {
-            if (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
-                as ::core::ffi::c_long
+            if (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base) as ::core::ffi::c_long
                 > (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
-                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                    as ::core::ffi::c_long)
+                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
                     < (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
             {
                 xmlParserInputShrink((*ctxt).input);
             }
             if (*ctxt).progressive == 0 as ::core::ffi::c_int
-                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                    as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+                    < INPUT_CHUNK as ::core::ffi::c_long
             {
                 xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
             }
@@ -10668,25 +10516,31 @@ unsafe extern "C" fn htmlParseCharDataInternal(
                     if (*(*ctxt).sax).characters.is_some() {
                         (*(*ctxt).sax)
                             .characters
-                            .expect(
-                                "non-null function pointer",
-                            )((*ctxt).userData, &raw mut buf as *mut xmlChar, nbchar);
+                            .expect("non-null function pointer")(
+                            (*ctxt).userData,
+                            &raw mut buf as *mut xmlChar,
+                            nbchar,
+                        );
                     }
                 } else if (*(*ctxt).sax).ignorableWhitespace.is_some() {
                     (*(*ctxt).sax)
                         .ignorableWhitespace
-                        .expect(
-                            "non-null function pointer",
-                        )((*ctxt).userData, &raw mut buf as *mut xmlChar, nbchar);
+                        .expect("non-null function pointer")(
+                        (*ctxt).userData,
+                        &raw mut buf as *mut xmlChar,
+                        nbchar,
+                    );
                 }
             } else {
                 htmlCheckParagraph(ctxt);
                 if (*(*ctxt).sax).characters.is_some() {
                     (*(*ctxt).sax)
                         .characters
-                        .expect(
-                            "non-null function pointer",
-                        )((*ctxt).userData, &raw mut buf as *mut xmlChar, nbchar);
+                        .expect("non-null function pointer")(
+                        (*ctxt).userData,
+                        &raw mut buf as *mut xmlChar,
+                        nbchar,
+                    );
                 }
             }
         }
@@ -10704,24 +10558,29 @@ unsafe extern "C" fn htmlParseExternalID(
     let mut URI: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     if toupper(*(*(*ctxt).input).cur as ::core::ffi::c_int) == 'S' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'Y' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'S' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(3 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'T' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(4 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'E' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(5 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(5 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'M' as i32
     {
         (*(*ctxt).input).cur = (*(*ctxt).input)
@@ -10730,15 +10589,13 @@ unsafe extern "C" fn htmlParseExternalID(
         (*(*ctxt).input).col += 6 as ::core::ffi::c_int;
         if !(*(*(*ctxt).input).cur as ::core::ffi::c_int == 0x20 as ::core::ffi::c_int
             || 0x9 as ::core::ffi::c_int <= *(*(*ctxt).input).cur as ::core::ffi::c_int
-                && *(*(*ctxt).input).cur as ::core::ffi::c_int
-                    <= 0xa as ::core::ffi::c_int
+                && *(*(*ctxt).input).cur as ::core::ffi::c_int <= 0xa as ::core::ffi::c_int
             || *(*(*ctxt).input).cur as ::core::ffi::c_int == 0xd as ::core::ffi::c_int)
         {
             htmlParseErr(
                 ctxt as xmlParserCtxtPtr,
                 XML_ERR_SPACE_REQUIRED,
-                b"Space required after 'SYSTEM'\n\0" as *const u8
-                    as *const ::core::ffi::c_char,
+                b"Space required after 'SYSTEM'\n\0" as *const u8 as *const ::core::ffi::c_char,
                 ::core::ptr::null::<xmlChar>(),
                 ::core::ptr::null::<xmlChar>(),
             );
@@ -10757,24 +10614,29 @@ unsafe extern "C" fn htmlParseExternalID(
         }
     } else if toupper(*(*(*ctxt).input).cur as ::core::ffi::c_int) == 'P' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'U' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'B' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(3 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'L' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(4 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'I' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(5 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(5 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'C' as i32
     {
         (*(*ctxt).input).cur = (*(*ctxt).input)
@@ -10783,15 +10645,13 @@ unsafe extern "C" fn htmlParseExternalID(
         (*(*ctxt).input).col += 6 as ::core::ffi::c_int;
         if !(*(*(*ctxt).input).cur as ::core::ffi::c_int == 0x20 as ::core::ffi::c_int
             || 0x9 as ::core::ffi::c_int <= *(*(*ctxt).input).cur as ::core::ffi::c_int
-                && *(*(*ctxt).input).cur as ::core::ffi::c_int
-                    <= 0xa as ::core::ffi::c_int
+                && *(*(*ctxt).input).cur as ::core::ffi::c_int <= 0xa as ::core::ffi::c_int
             || *(*(*ctxt).input).cur as ::core::ffi::c_int == 0xd as ::core::ffi::c_int)
         {
             htmlParseErr(
                 ctxt as xmlParserCtxtPtr,
                 XML_ERR_SPACE_REQUIRED,
-                b"Space required after 'PUBLIC'\n\0" as *const u8
-                    as *const ::core::ffi::c_char,
+                b"Space required after 'PUBLIC'\n\0" as *const u8 as *const ::core::ffi::c_char,
                 ::core::ptr::null::<xmlChar>(),
                 ::core::ptr::null::<xmlChar>(),
             );
@@ -10831,8 +10691,10 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
     } else {
         *(*(*ctxt).input).cur as ::core::ffi::c_int
     }) == '<' as i32
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '?' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '?' as i32
     {
         state = (*ctxt).instate;
         (*ctxt).instate = XML_PARSER_PI;
@@ -10842,8 +10704,7 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
         (*(*ctxt).input).col += 2 as ::core::ffi::c_int;
         if (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base) as ::core::ffi::c_long
             > (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
-            && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                as ::core::ffi::c_long)
+            && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
                 < (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
         {
             xmlParserInputShrink((*ctxt).input);
@@ -10860,24 +10721,23 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
                     .cur
                     .offset(1 as ::core::ffi::c_int as isize);
                 (*(*ctxt).input).col += 1 as ::core::ffi::c_int;
-                if !(*ctxt).sax.is_null() && (*ctxt).disableSAX == 0
+                if !(*ctxt).sax.is_null()
+                    && (*ctxt).disableSAX == 0
                     && (*(*ctxt).sax).processingInstruction.is_some()
                 {
                     (*(*ctxt).sax)
                         .processingInstruction
-                        .expect(
-                            "non-null function pointer",
-                        )((*ctxt).userData, target, ::core::ptr::null::<xmlChar>());
+                        .expect("non-null function pointer")(
+                        (*ctxt).userData,
+                        target,
+                        ::core::ptr::null::<xmlChar>(),
+                    );
                 }
                 (*ctxt).instate = state;
                 return;
             }
-            buf = xmlMallocAtomic
-                .expect(
-                    "non-null function pointer",
-                )(
-                (size as size_t)
-                    .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+            buf = xmlMallocAtomic.expect("non-null function pointer")(
+                (size as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
             ) as *mut xmlChar;
             if buf.is_null() {
                 htmlErrMemory(
@@ -10890,8 +10750,7 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
             cur = *(*(*ctxt).input).cur as ::core::ffi::c_int;
             if if cur < 0x100 as ::core::ffi::c_int {
                 (cur == 0x20 as ::core::ffi::c_int
-                    || 0x9 as ::core::ffi::c_int <= cur
-                        && cur <= 0xa as ::core::ffi::c_int
+                    || 0x9 as ::core::ffi::c_int <= cur && cur <= 0xa as ::core::ffi::c_int
                     || cur == 0xd as ::core::ffi::c_int) as ::core::ffi::c_int
             } else {
                 0 as ::core::ffi::c_int
@@ -10900,8 +10759,7 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
                 htmlParseErr(
                     ctxt as xmlParserCtxtPtr,
                     XML_ERR_SPACE_REQUIRED,
-                    b"ParsePI: PI %s space expected\n\0" as *const u8
-                        as *const ::core::ffi::c_char,
+                    b"ParsePI: PI %s space expected\n\0" as *const u8 as *const ::core::ffi::c_char,
                     target,
                     ::core::ptr::null::<xmlChar>(),
                 );
@@ -10912,23 +10770,18 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
                 if len + 5 as ::core::ffi::c_int >= size {
                     let mut tmp: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                     size *= 2 as ::core::ffi::c_int;
-                    tmp = xmlRealloc
-                        .expect(
-                            "non-null function pointer",
-                        )(
+                    tmp = xmlRealloc.expect("non-null function pointer")(
                         buf as *mut ::core::ffi::c_void,
-                        (size as size_t)
-                            .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+                        (size as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
                     ) as *mut xmlChar;
                     if tmp.is_null() {
                         htmlErrMemory(
                             ctxt as xmlParserCtxtPtr,
                             ::core::ptr::null::<::core::ffi::c_char>(),
                         );
-                        xmlFree
-                            .expect(
-                                "non-null function pointer",
-                            )(buf as *mut ::core::ffi::c_void);
+                        xmlFree.expect("non-null function pointer")(
+                            buf as *mut ::core::ffi::c_void,
+                        );
                         (*ctxt).instate = state;
                         return;
                     }
@@ -10938,7 +10791,8 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
                 if count > 50 as ::core::ffi::c_int {
                     if (*ctxt).progressive == 0 as ::core::ffi::c_int
                         && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                            as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+                            as ::core::ffi::c_long)
+                            < INPUT_CHUNK as ::core::ffi::c_long
                     {
                         xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
                     }
@@ -10947,10 +10801,10 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
                 if if cur < 0x100 as ::core::ffi::c_int {
                     (0x9 as ::core::ffi::c_int <= cur && cur <= 0xa as ::core::ffi::c_int
                         || cur == 0xd as ::core::ffi::c_int
-                        || 0x20 as ::core::ffi::c_int <= cur) as ::core::ffi::c_int
+                        || 0x20 as ::core::ffi::c_int <= cur)
+                        as ::core::ffi::c_int
                 } else {
-                    (0x100 as ::core::ffi::c_int <= cur
-                        && cur <= 0xd7ff as ::core::ffi::c_int
+                    (0x100 as ::core::ffi::c_int <= cur && cur <= 0xd7ff as ::core::ffi::c_int
                         || 0xe000 as ::core::ffi::c_int <= cur
                             && cur <= 0xfffd as ::core::ffi::c_int
                         || 0x10000 as ::core::ffi::c_int <= cur
@@ -10963,12 +10817,7 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
                         len = len + 1;
                         *buf.offset(fresh45 as isize) = cur as xmlChar;
                     } else {
-                        len
-                            += xmlCopyChar(
-                                l,
-                                buf.offset(len as isize) as *mut xmlChar,
-                                cur,
-                            );
+                        len += xmlCopyChar(l, buf.offset(len as isize) as *mut xmlChar, cur);
                     }
                 } else {
                     htmlParseErrInt(
@@ -10994,14 +10843,14 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
                         > (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
                         && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
                             as ::core::ffi::c_long)
-                            < (2 as ::core::ffi::c_int * INPUT_CHUNK)
-                                as ::core::ffi::c_long
+                            < (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
                     {
                         xmlParserInputShrink((*ctxt).input);
                     }
                     if (*ctxt).progressive == 0 as ::core::ffi::c_int
                         && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                            as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+                            as ::core::ffi::c_long)
+                            < INPUT_CHUNK as ::core::ffi::c_long
                     {
                         xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
                     }
@@ -11013,8 +10862,7 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
                 htmlParseErr(
                     ctxt as xmlParserCtxtPtr,
                     XML_ERR_PI_NOT_FINISHED,
-                    b"ParsePI: PI %s never end ...\n\0" as *const u8
-                        as *const ::core::ffi::c_char,
+                    b"ParsePI: PI %s never end ...\n\0" as *const u8 as *const ::core::ffi::c_char,
                     target,
                     ::core::ptr::null::<xmlChar>(),
                 );
@@ -11023,14 +10871,15 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
                     .cur
                     .offset(1 as ::core::ffi::c_int as isize);
                 (*(*ctxt).input).col += 1 as ::core::ffi::c_int;
-                if !(*ctxt).sax.is_null() && (*ctxt).disableSAX == 0
+                if !(*ctxt).sax.is_null()
+                    && (*ctxt).disableSAX == 0
                     && (*(*ctxt).sax).processingInstruction.is_some()
                 {
                     (*(*ctxt).sax)
                         .processingInstruction
-                        .expect(
-                            "non-null function pointer",
-                        )((*ctxt).userData, target, buf);
+                        .expect("non-null function pointer")(
+                        (*ctxt).userData, target, buf
+                    );
                 }
             }
             xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
@@ -11038,8 +10887,7 @@ unsafe extern "C" fn htmlParsePI(mut ctxt: htmlParserCtxtPtr) {
             htmlParseErr(
                 ctxt as xmlParserCtxtPtr,
                 XML_ERR_PI_NOT_STARTED,
-                b"PI is not started correctly\0" as *const u8
-                    as *const ::core::ffi::c_char,
+                b"PI is not started correctly\0" as *const u8 as *const ::core::ffi::c_char,
                 ::core::ptr::null::<xmlChar>(),
                 ::core::ptr::null::<xmlChar>(),
             );
@@ -11065,12 +10913,18 @@ unsafe extern "C" fn htmlParseComment(mut ctxt: htmlParserCtxtPtr) {
     } else {
         *(*(*ctxt).input).cur as ::core::ffi::c_int
     }) != '<' as i32
-        || *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int != '!' as i32
-        || *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int != '-' as i32
-        || *(*(*ctxt).input).cur.offset(3 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int != '-' as i32
+        || *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            != '!' as i32
+        || *(*(*ctxt).input)
+            .cur
+            .offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            != '-' as i32
+        || *(*(*ctxt).input)
+            .cur
+            .offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            != '-' as i32
     {
         return;
     }
@@ -11078,19 +10932,18 @@ unsafe extern "C" fn htmlParseComment(mut ctxt: htmlParserCtxtPtr) {
     (*ctxt).instate = XML_PARSER_COMMENT;
     if (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base) as ::core::ffi::c_long
         > (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
-        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-            as ::core::ffi::c_long)
+        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
             < (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
     {
         xmlParserInputShrink((*ctxt).input);
     }
-    (*(*ctxt).input).cur = (*(*ctxt).input).cur.offset(4 as ::core::ffi::c_int as isize);
+    (*(*ctxt).input).cur = (*(*ctxt).input)
+        .cur
+        .offset(4 as ::core::ffi::c_int as isize);
     (*(*ctxt).input).col += 4 as ::core::ffi::c_int;
-    buf = xmlMallocAtomic
-        .expect(
-            "non-null function pointer",
-        )((size as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t))
-        as *mut xmlChar;
+    buf = xmlMallocAtomic.expect("non-null function pointer")(
+        (size as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+    ) as *mut xmlChar;
     if buf.is_null() {
         htmlErrMemory(
             ctxt as xmlParserCtxtPtr,
@@ -11140,22 +10993,20 @@ unsafe extern "C" fn htmlParseComment(mut ctxt: htmlParserCtxtPtr) {
                         > (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
                         && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
                             as ::core::ffi::c_long)
-                            < (2 as ::core::ffi::c_int * INPUT_CHUNK)
-                                as ::core::ffi::c_long
+                            < (2 as ::core::ffi::c_int * INPUT_CHUNK) as ::core::ffi::c_long
                     {
                         xmlParserInputShrink((*ctxt).input);
                     }
                     if (*ctxt).progressive == 0 as ::core::ffi::c_int
                         && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                            as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+                            as ::core::ffi::c_long)
+                            < INPUT_CHUNK as ::core::ffi::c_long
                     {
                         xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
                     }
                     next = htmlCurrentChar(ctxt as xmlParserCtxtPtr, &raw mut nl);
                 }
-                if q == '-' as i32 && r == '-' as i32 && cur == '!' as i32
-                    && next == '>' as i32
-                {
+                if q == '-' as i32 && r == '-' as i32 && cur == '!' as i32 && next == '>' as i32 {
                     htmlParseErr(
                         ctxt as xmlParserCtxtPtr,
                         XML_ERR_COMMENT_NOT_FINISHED,
@@ -11170,19 +11021,15 @@ unsafe extern "C" fn htmlParseComment(mut ctxt: htmlParserCtxtPtr) {
                     if len + 5 as ::core::ffi::c_int >= size {
                         let mut tmp: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                         size *= 2 as ::core::ffi::c_int;
-                        tmp = xmlRealloc
-                            .expect(
-                                "non-null function pointer",
-                            )(
+                        tmp = xmlRealloc.expect("non-null function pointer")(
                             buf as *mut ::core::ffi::c_void,
                             (size as size_t)
                                 .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
                         ) as *mut xmlChar;
                         if tmp.is_null() {
-                            xmlFree
-                                .expect(
-                                    "non-null function pointer",
-                                )(buf as *mut ::core::ffi::c_void);
+                            xmlFree.expect("non-null function pointer")(
+                                buf as *mut ::core::ffi::c_void,
+                            );
                             htmlErrMemory(
                                 ctxt as xmlParserCtxtPtr,
                                 b"growing buffer failed\n\0" as *const u8
@@ -11196,10 +11043,10 @@ unsafe extern "C" fn htmlParseComment(mut ctxt: htmlParserCtxtPtr) {
                     if if q < 0x100 as ::core::ffi::c_int {
                         (0x9 as ::core::ffi::c_int <= q && q <= 0xa as ::core::ffi::c_int
                             || q == 0xd as ::core::ffi::c_int
-                            || 0x20 as ::core::ffi::c_int <= q) as ::core::ffi::c_int
+                            || 0x20 as ::core::ffi::c_int <= q)
+                            as ::core::ffi::c_int
                     } else {
-                        (0x100 as ::core::ffi::c_int <= q
-                            && q <= 0xd7ff as ::core::ffi::c_int
+                        (0x100 as ::core::ffi::c_int <= q && q <= 0xd7ff as ::core::ffi::c_int
                             || 0xe000 as ::core::ffi::c_int <= q
                                 && q <= 0xfffd as ::core::ffi::c_int
                             || 0x10000 as ::core::ffi::c_int <= q
@@ -11212,12 +11059,7 @@ unsafe extern "C" fn htmlParseComment(mut ctxt: htmlParserCtxtPtr) {
                             len = len + 1;
                             *buf.offset(fresh46 as isize) = q as xmlChar;
                         } else {
-                            len
-                                += xmlCopyChar(
-                                    ql,
-                                    buf.offset(len as isize) as *mut xmlChar,
-                                    q,
-                                );
+                            len += xmlCopyChar(ql, buf.offset(len as isize) as *mut xmlChar, q);
                         }
                     } else {
                         htmlParseErrInt(
@@ -11239,17 +11081,16 @@ unsafe extern "C" fn htmlParseComment(mut ctxt: htmlParserCtxtPtr) {
             *buf.offset(len as isize) = 0 as xmlChar;
             if cur == '>' as i32 {
                 xmlNextChar(ctxt as xmlParserCtxtPtr);
-                if !(*ctxt).sax.is_null() && (*(*ctxt).sax).comment.is_some()
+                if !(*ctxt).sax.is_null()
+                    && (*(*ctxt).sax).comment.is_some()
                     && (*ctxt).disableSAX == 0
                 {
-                    (*(*ctxt).sax)
-                        .comment
-                        .expect("non-null function pointer")((*ctxt).userData, buf);
+                    (*(*ctxt).sax).comment.expect("non-null function pointer")(
+                        (*ctxt).userData,
+                        buf,
+                    );
                 }
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(buf as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
                 (*ctxt).instate = state;
                 return;
             }
@@ -11258,36 +11099,38 @@ unsafe extern "C" fn htmlParseComment(mut ctxt: htmlParserCtxtPtr) {
     htmlParseErr(
         ctxt as xmlParserCtxtPtr,
         XML_ERR_COMMENT_NOT_FINISHED,
-        b"Comment not terminated \n<!--%.50s\n\0" as *const u8
-            as *const ::core::ffi::c_char,
+        b"Comment not terminated \n<!--%.50s\n\0" as *const u8 as *const ::core::ffi::c_char,
         buf,
         ::core::ptr::null::<xmlChar>(),
     );
     xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
 }
 #[no_mangle]
-pub unsafe extern "C" fn htmlParseCharRef(
-    mut ctxt: htmlParserCtxtPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn htmlParseCharRef(mut ctxt: htmlParserCtxtPtr) -> ::core::ffi::c_int {
     let mut val: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if ctxt.is_null() || (*ctxt).input.is_null() {
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_INTERNAL_ERROR,
-            b"htmlParseCharRef: context error\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlParseCharRef: context error\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
         return 0 as ::core::ffi::c_int;
     }
     if *(*(*ctxt).input).cur as ::core::ffi::c_int == '&' as i32
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '#' as i32
-        && (*(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == 'x' as i32
-            || *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == 'X' as i32)
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '#' as i32
+        && (*(*(*ctxt).input)
+            .cur
+            .offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == 'x' as i32
+            || *(*(*ctxt).input)
+                .cur
+                .offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == 'X' as i32)
     {
         (*(*ctxt).input).cur = (*(*ctxt).input)
             .cur
@@ -11334,8 +11177,10 @@ pub unsafe extern "C" fn htmlParseCharRef(
             xmlNextChar(ctxt as xmlParserCtxtPtr);
         }
     } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == '&' as i32
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '#' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '#' as i32
     {
         (*(*ctxt).input).cur = (*(*ctxt).input)
             .cur
@@ -11369,30 +11214,28 @@ pub unsafe extern "C" fn htmlParseCharRef(
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_INVALID_CHARREF,
-            b"htmlParseCharRef: invalid value\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlParseCharRef: invalid value\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
     }
     if if val < 0x100 as ::core::ffi::c_int {
         (0x9 as ::core::ffi::c_int <= val && val <= 0xa as ::core::ffi::c_int
-            || val == 0xd as ::core::ffi::c_int || 0x20 as ::core::ffi::c_int <= val)
-            as ::core::ffi::c_int
+            || val == 0xd as ::core::ffi::c_int
+            || 0x20 as ::core::ffi::c_int <= val) as ::core::ffi::c_int
     } else {
         (0x100 as ::core::ffi::c_int <= val && val <= 0xd7ff as ::core::ffi::c_int
             || 0xe000 as ::core::ffi::c_int <= val && val <= 0xfffd as ::core::ffi::c_int
-            || 0x10000 as ::core::ffi::c_int <= val
-                && val <= 0x10ffff as ::core::ffi::c_int) as ::core::ffi::c_int
+            || 0x10000 as ::core::ffi::c_int <= val && val <= 0x10ffff as ::core::ffi::c_int)
+            as ::core::ffi::c_int
     } != 0
     {
-        return val
+        return val;
     } else if val >= 0x110000 as ::core::ffi::c_int {
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_INVALID_CHAR,
-            b"htmlParseCharRef: value too large\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlParseCharRef: value too large\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
@@ -11411,7 +11254,9 @@ unsafe extern "C" fn htmlParseDocTypeDecl(mut ctxt: htmlParserCtxtPtr) {
     let mut name: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut ExternalID: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
     let mut URI: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    (*(*ctxt).input).cur = (*(*ctxt).input).cur.offset(9 as ::core::ffi::c_int as isize);
+    (*(*ctxt).input).cur = (*(*ctxt).input)
+        .cur
+        .offset(9 as ::core::ffi::c_int as isize);
     (*(*ctxt).input).col += 9 as ::core::ffi::c_int;
     htmlSkipBlankChars(ctxt as xmlParserCtxtPtr);
     name = htmlParseName(ctxt);
@@ -11432,8 +11277,7 @@ unsafe extern "C" fn htmlParseDocTypeDecl(mut ctxt: htmlParserCtxtPtr) {
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_DOCTYPE_NOT_FINISHED,
-            b"DOCTYPE improperly terminated\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"DOCTYPE improperly terminated\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
@@ -11446,21 +11290,17 @@ unsafe extern "C" fn htmlParseDocTypeDecl(mut ctxt: htmlParserCtxtPtr) {
     if *(*(*ctxt).input).cur as ::core::ffi::c_int == '>' as i32 {
         xmlNextChar(ctxt as xmlParserCtxtPtr);
     }
-    if !(*ctxt).sax.is_null() && (*(*ctxt).sax).internalSubset.is_some()
-        && (*ctxt).disableSAX == 0
+    if !(*ctxt).sax.is_null() && (*(*ctxt).sax).internalSubset.is_some() && (*ctxt).disableSAX == 0
     {
         (*(*ctxt).sax)
             .internalSubset
-            .expect(
-                "non-null function pointer",
-            )((*ctxt).userData, name, ExternalID, URI);
+            .expect("non-null function pointer")((*ctxt).userData, name, ExternalID, URI);
     }
     if !URI.is_null() {
         xmlFree.expect("non-null function pointer")(URI as *mut ::core::ffi::c_void);
     }
     if !ExternalID.is_null() {
-        xmlFree
-            .expect("non-null function pointer")(ExternalID as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(ExternalID as *mut ::core::ffi::c_void);
     }
 }
 unsafe extern "C" fn htmlParseAttribute(
@@ -11475,8 +11315,7 @@ unsafe extern "C" fn htmlParseAttribute(
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_NAME_REQUIRED,
-            b"error parsing attribute name\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"error parsing attribute name\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
@@ -11495,7 +11334,8 @@ unsafe extern "C" fn htmlCheckEncodingDirect(
     mut ctxt: htmlParserCtxtPtr,
     mut encoding: *const xmlChar,
 ) {
-    if ctxt.is_null() || encoding.is_null()
+    if ctxt.is_null()
+        || encoding.is_null()
         || (*ctxt).options & HTML_PARSE_IGNORE_ENC as ::core::ffi::c_int != 0
     {
         return;
@@ -11505,31 +11345,25 @@ unsafe extern "C" fn htmlCheckEncodingDirect(
     }
     if !encoding.is_null() {
         let mut enc: xmlCharEncoding = XML_CHAR_ENCODING_NONE;
-        let mut handler: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<
-            xmlCharEncodingHandler,
-        >();
+        let mut handler: xmlCharEncodingHandlerPtr =
+            ::core::ptr::null_mut::<xmlCharEncodingHandler>();
         while *encoding as ::core::ffi::c_int == ' ' as i32
             || *encoding as ::core::ffi::c_int == '\t' as i32
         {
             encoding = encoding.offset(1);
         }
         if !(*(*ctxt).input).encoding.is_null() {
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )((*(*ctxt).input).encoding as *mut xmlChar as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(
+                (*(*ctxt).input).encoding as *mut xmlChar as *mut ::core::ffi::c_void,
+            );
         }
         (*(*ctxt).input).encoding = xmlStrdup(encoding);
         enc = xmlParseCharEncoding(encoding as *const ::core::ffi::c_char);
         if enc as ::core::ffi::c_int != XML_CHAR_ENCODING_ERROR as ::core::ffi::c_int {
-            if (enc as ::core::ffi::c_int
-                == XML_CHAR_ENCODING_UTF16LE as ::core::ffi::c_int
-                || enc as ::core::ffi::c_int
-                    == XML_CHAR_ENCODING_UTF16BE as ::core::ffi::c_int
-                || enc as ::core::ffi::c_int
-                    == XML_CHAR_ENCODING_UCS4LE as ::core::ffi::c_int
-                || enc as ::core::ffi::c_int
-                    == XML_CHAR_ENCODING_UCS4BE as ::core::ffi::c_int)
+            if (enc as ::core::ffi::c_int == XML_CHAR_ENCODING_UTF16LE as ::core::ffi::c_int
+                || enc as ::core::ffi::c_int == XML_CHAR_ENCODING_UTF16BE as ::core::ffi::c_int
+                || enc as ::core::ffi::c_int == XML_CHAR_ENCODING_UCS4LE as ::core::ffi::c_int
+                || enc as ::core::ffi::c_int == XML_CHAR_ENCODING_UCS4BE as ::core::ffi::c_int)
                 && !(*(*ctxt).input).buf.is_null()
                 && (*(*(*ctxt).input).buf).encoder.is_null()
             {
@@ -11561,7 +11395,8 @@ unsafe extern "C" fn htmlCheckEncodingDirect(
                 );
             }
         }
-        if !(*(*ctxt).input).buf.is_null() && !(*(*(*ctxt).input).buf).encoder.is_null()
+        if !(*(*ctxt).input).buf.is_null()
+            && !(*(*(*ctxt).input).buf).encoder.is_null()
             && !(*(*(*ctxt).input).buf).raw.is_null()
             && !(*(*(*ctxt).input).buf).buffer.is_null()
         {
@@ -11585,10 +11420,7 @@ unsafe extern "C" fn htmlCheckEncodingDirect(
         }
     }
 }
-unsafe extern "C" fn htmlCheckEncoding(
-    mut ctxt: htmlParserCtxtPtr,
-    mut attvalue: *const xmlChar,
-) {
+unsafe extern "C" fn htmlCheckEncoding(mut ctxt: htmlParserCtxtPtr, mut attvalue: *const xmlChar) {
     let mut encoding: *const xmlChar = ::core::ptr::null::<xmlChar>();
     if attvalue.is_null() {
         return;
@@ -11616,10 +11448,7 @@ unsafe extern "C" fn htmlCheckEncoding(
         htmlCheckEncodingDirect(ctxt, encoding);
     }
 }
-unsafe extern "C" fn htmlCheckMeta(
-    mut ctxt: htmlParserCtxtPtr,
-    mut atts: *mut *const xmlChar,
-) {
+unsafe extern "C" fn htmlCheckMeta(mut ctxt: htmlParserCtxtPtr, mut atts: *mut *const xmlChar) {
     let mut i: ::core::ffi::c_int = 0;
     let mut att: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut value: *const xmlChar = ::core::ptr::null::<xmlChar>();
@@ -11639,13 +11468,11 @@ unsafe extern "C" fn htmlCheckMeta(
         if !value.is_null()
             && xmlStrcasecmp(
                 att,
-                b"http-equiv\0" as *const u8 as *const ::core::ffi::c_char
-                    as *mut xmlChar,
+                b"http-equiv\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
             ) == 0
             && xmlStrcasecmp(
                 value,
-                b"Content-Type\0" as *const u8 as *const ::core::ffi::c_char
-                    as *mut xmlChar,
+                b"Content-Type\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
             ) == 0
         {
             http = 1 as ::core::ffi::c_int;
@@ -11672,9 +11499,7 @@ unsafe extern "C" fn htmlCheckMeta(
         htmlCheckEncoding(ctxt, content);
     }
 }
-unsafe extern "C" fn htmlParseStartTag(
-    mut ctxt: htmlParserCtxtPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn htmlParseStartTag(mut ctxt: htmlParserCtxtPtr) -> ::core::ffi::c_int {
     let mut current_block: u64;
     let mut name: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut attname: *const xmlChar = ::core::ptr::null::<xmlChar>();
@@ -11689,8 +11514,7 @@ unsafe extern "C" fn htmlParseStartTag(
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_INTERNAL_ERROR,
-            b"htmlParseStartTag: context error\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlParseStartTag: context error\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
@@ -11706,8 +11530,8 @@ unsafe extern "C" fn htmlParseStartTag(
     atts = (*ctxt).atts;
     maxatts = (*ctxt).maxatts;
     if (*ctxt).progressive == 0 as ::core::ffi::c_int
-        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-            as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+            < INPUT_CHUNK as ::core::ffi::c_long
     {
         xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
     }
@@ -11723,8 +11547,7 @@ unsafe extern "C" fn htmlParseStartTag(
         );
         while *(*(*ctxt).input).cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int
             && *(*(*ctxt).input).cur as ::core::ffi::c_int != '>' as i32
-            && (*ctxt).instate as ::core::ffi::c_int
-                != XML_PARSER_EOF as ::core::ffi::c_int
+            && (*ctxt).instate as ::core::ffi::c_int != XML_PARSER_EOF as ::core::ffi::c_int
         {
             xmlNextChar(ctxt as xmlParserCtxtPtr);
         }
@@ -11804,12 +11627,14 @@ unsafe extern "C" fn htmlParseStartTag(
     while *(*(*ctxt).input).cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int
         && *(*(*ctxt).input).cur as ::core::ffi::c_int != '>' as i32
         && (*(*(*ctxt).input).cur as ::core::ffi::c_int != '/' as i32
-            || *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int != '>' as i32)
+            || *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                != '>' as i32)
     {
         if (*ctxt).progressive == 0 as ::core::ffi::c_int
-            && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+            && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+                < INPUT_CHUNK as ::core::ffi::c_long
         {
             xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
         }
@@ -11825,16 +11650,14 @@ unsafe extern "C" fn htmlParseStartTag(
                     htmlParseErr(
                         ctxt as xmlParserCtxtPtr,
                         XML_ERR_ATTRIBUTE_REDEFINED,
-                        b"Attribute %s redefined\n\0" as *const u8
-                            as *const ::core::ffi::c_char,
+                        b"Attribute %s redefined\n\0" as *const u8 as *const ::core::ffi::c_char,
                         attname,
                         ::core::ptr::null::<xmlChar>(),
                     );
                     if !attvalue.is_null() {
-                        xmlFree
-                            .expect(
-                                "non-null function pointer",
-                            )(attvalue as *mut ::core::ffi::c_void);
+                        xmlFree.expect("non-null function pointer")(
+                            attvalue as *mut ::core::ffi::c_void,
+                        );
                     }
                     current_block = 16413667366605331443;
                     break;
@@ -11847,14 +11670,9 @@ unsafe extern "C" fn htmlParseStartTag(
                 _ => {
                     if atts.is_null() {
                         maxatts = 22 as ::core::ffi::c_int;
-                        atts = xmlMalloc
-                            .expect(
-                                "non-null function pointer",
-                            )(
+                        atts = xmlMalloc.expect("non-null function pointer")(
                             (maxatts as size_t)
-                                .wrapping_mul(
-                                    ::core::mem::size_of::<*mut xmlChar>() as size_t,
-                                ),
+                                .wrapping_mul(::core::mem::size_of::<*mut xmlChar>() as size_t),
                         ) as *mut *const xmlChar;
                         if atts.is_null() {
                             htmlErrMemory(
@@ -11862,10 +11680,9 @@ unsafe extern "C" fn htmlParseStartTag(
                                 ::core::ptr::null::<::core::ffi::c_char>(),
                             );
                             if !attvalue.is_null() {
-                                xmlFree
-                                    .expect(
-                                        "non-null function pointer",
-                                    )(attvalue as *mut ::core::ffi::c_void);
+                                xmlFree.expect("non-null function pointer")(
+                                    attvalue as *mut ::core::ffi::c_void,
+                                );
                             }
                             current_block = 16413667366605331443;
                         } else {
@@ -11874,19 +11691,12 @@ unsafe extern "C" fn htmlParseStartTag(
                             current_block = 4888910987971495881;
                         }
                     } else if nbatts + 4 as ::core::ffi::c_int > maxatts {
-                        let mut n: *mut *const xmlChar = ::core::ptr::null_mut::<
-                            *const xmlChar,
-                        >();
+                        let mut n: *mut *const xmlChar = ::core::ptr::null_mut::<*const xmlChar>();
                         maxatts *= 2 as ::core::ffi::c_int;
-                        n = xmlRealloc
-                            .expect(
-                                "non-null function pointer",
-                            )(
+                        n = xmlRealloc.expect("non-null function pointer")(
                             atts as *mut ::core::ffi::c_void,
                             (maxatts as size_t)
-                                .wrapping_mul(
-                                    ::core::mem::size_of::<*const xmlChar>() as size_t,
-                                ),
+                                .wrapping_mul(::core::mem::size_of::<*const xmlChar>() as size_t),
                         ) as *mut *const xmlChar;
                         if n.is_null() {
                             htmlErrMemory(
@@ -11894,10 +11704,9 @@ unsafe extern "C" fn htmlParseStartTag(
                                 ::core::ptr::null::<::core::ffi::c_char>(),
                             );
                             if !attvalue.is_null() {
-                                xmlFree
-                                    .expect(
-                                        "non-null function pointer",
-                                    )(attvalue as *mut ::core::ffi::c_void);
+                                xmlFree.expect("non-null function pointer")(
+                                    attvalue as *mut ::core::ffi::c_void,
+                                );
                             }
                             current_block = 16413667366605331443;
                         } else {
@@ -11922,8 +11731,8 @@ unsafe extern "C" fn htmlParseStartTag(
                             *fresh20 = attvalue;
                             let ref mut fresh21 = *atts.offset(nbatts as isize);
                             *fresh21 = ::core::ptr::null::<xmlChar>();
-                            let ref mut fresh22 = *atts
-                                .offset((nbatts + 1 as ::core::ffi::c_int) as isize);
+                            let ref mut fresh22 =
+                                *atts.offset((nbatts + 1 as ::core::ffi::c_int) as isize);
                             *fresh22 = ::core::ptr::null::<xmlChar>();
                         }
                     }
@@ -11931,24 +11740,20 @@ unsafe extern "C" fn htmlParseStartTag(
             }
         } else {
             if !attvalue.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(attvalue as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(attvalue as *mut ::core::ffi::c_void);
             }
             while *(*(*ctxt).input).cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int
-                && !(*(*(*ctxt).input).cur as ::core::ffi::c_int
-                    == 0x20 as ::core::ffi::c_int
-                    || 0x9 as ::core::ffi::c_int
-                        <= *(*(*ctxt).input).cur as ::core::ffi::c_int
-                        && *(*(*ctxt).input).cur as ::core::ffi::c_int
-                            <= 0xa as ::core::ffi::c_int
-                    || *(*(*ctxt).input).cur as ::core::ffi::c_int
-                        == 0xd as ::core::ffi::c_int)
+                && !(*(*(*ctxt).input).cur as ::core::ffi::c_int == 0x20 as ::core::ffi::c_int
+                    || 0x9 as ::core::ffi::c_int <= *(*(*ctxt).input).cur as ::core::ffi::c_int
+                        && *(*(*ctxt).input).cur as ::core::ffi::c_int <= 0xa as ::core::ffi::c_int
+                    || *(*(*ctxt).input).cur as ::core::ffi::c_int == 0xd as ::core::ffi::c_int)
                 && *(*(*ctxt).input).cur as ::core::ffi::c_int != '>' as i32
                 && (*(*(*ctxt).input).cur as ::core::ffi::c_int != '/' as i32
-                    || *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int != '>' as i32)
+                    || *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        != '>' as i32)
             {
                 xmlNextChar(ctxt as xmlParserCtxtPtr);
             }
@@ -11964,13 +11769,17 @@ unsafe extern "C" fn htmlParseStartTag(
             if nbatts != 0 as ::core::ffi::c_int {
                 (*(*ctxt).sax)
                     .startElement
-                    .expect("non-null function pointer")((*ctxt).userData, name, atts);
+                    .expect("non-null function pointer")(
+                    (*ctxt).userData, name, atts
+                );
             } else {
                 (*(*ctxt).sax)
                     .startElement
-                    .expect(
-                        "non-null function pointer",
-                    )((*ctxt).userData, name, ::core::ptr::null_mut::<*const xmlChar>());
+                    .expect("non-null function pointer")(
+                    (*ctxt).userData,
+                    name,
+                    ::core::ptr::null_mut::<*const xmlChar>(),
+                );
             }
         }
     }
@@ -11978,10 +11787,7 @@ unsafe extern "C" fn htmlParseStartTag(
         i = 1 as ::core::ffi::c_int;
         while i < nbatts {
             if !(*atts.offset(i as isize)).is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                xmlFree.expect("non-null function pointer")(
                     *atts.offset(i as isize) as *mut xmlChar as *mut ::core::ffi::c_void,
                 );
             }
@@ -11996,20 +11802,23 @@ unsafe extern "C" fn htmlParseEndTag(mut ctxt: htmlParserCtxtPtr) -> ::core::ffi
     let mut i: ::core::ffi::c_int = 0;
     let mut ret: ::core::ffi::c_int = 0;
     if *(*(*ctxt).input).cur as ::core::ffi::c_int != '<' as i32
-        || *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int != '/' as i32
+        || *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            != '/' as i32
     {
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_LTSLASH_REQUIRED,
-            b"htmlParseEndTag: '</' not found\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlParseEndTag: '</' not found\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
         return 0 as ::core::ffi::c_int;
     }
-    (*(*ctxt).input).cur = (*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize);
+    (*(*ctxt).input).cur = (*(*ctxt).input)
+        .cur
+        .offset(2 as ::core::ffi::c_int as isize);
     (*(*ctxt).input).col += 2 as ::core::ffi::c_int;
     name = htmlParseHTMLName(ctxt);
     if name.is_null() {
@@ -12100,8 +11909,10 @@ unsafe extern "C" fn htmlParseReference(mut ctxt: htmlParserCtxtPtr) {
     if *(*(*ctxt).input).cur as ::core::ffi::c_int != '&' as i32 {
         return;
     }
-    if *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-        as ::core::ffi::c_int == '#' as i32
+    if *(*(*ctxt).input)
+        .cur
+        .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+        == '#' as i32
     {
         let mut c: ::core::ffi::c_uint = 0;
         let mut bits: ::core::ffi::c_int = 0;
@@ -12118,27 +11929,27 @@ unsafe extern "C" fn htmlParseReference(mut ctxt: htmlParserCtxtPtr) {
         } else if c < 0x800 as ::core::ffi::c_uint {
             let fresh6 = i;
             i = i + 1;
-            out[fresh6 as usize] = (c >> 6 as ::core::ffi::c_int
-                & 0x1f as ::core::ffi::c_uint | 0xc0 as ::core::ffi::c_uint) as xmlChar;
+            out[fresh6 as usize] = (c >> 6 as ::core::ffi::c_int & 0x1f as ::core::ffi::c_uint
+                | 0xc0 as ::core::ffi::c_uint) as xmlChar;
             bits = 0 as ::core::ffi::c_int;
         } else if c < 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint {
             let fresh7 = i;
             i = i + 1;
-            out[fresh7 as usize] = (c >> 12 as ::core::ffi::c_int
-                & 0xf as ::core::ffi::c_uint | 0xe0 as ::core::ffi::c_uint) as xmlChar;
+            out[fresh7 as usize] = (c >> 12 as ::core::ffi::c_int & 0xf as ::core::ffi::c_uint
+                | 0xe0 as ::core::ffi::c_uint) as xmlChar;
             bits = 6 as ::core::ffi::c_int;
         } else {
             let fresh8 = i;
             i = i + 1;
-            out[fresh8 as usize] = (c >> 18 as ::core::ffi::c_int
-                & 0x7 as ::core::ffi::c_uint | 0xf0 as ::core::ffi::c_uint) as xmlChar;
+            out[fresh8 as usize] = (c >> 18 as ::core::ffi::c_int & 0x7 as ::core::ffi::c_uint
+                | 0xf0 as ::core::ffi::c_uint) as xmlChar;
             bits = 12 as ::core::ffi::c_int;
         }
         while bits >= 0 as ::core::ffi::c_int {
             let fresh9 = i;
             i = i + 1;
-            out[fresh9 as usize] = (c >> bits & 0x3f as ::core::ffi::c_uint
-                | 0x80 as ::core::ffi::c_uint) as xmlChar;
+            out[fresh9 as usize] =
+                (c >> bits & 0x3f as ::core::ffi::c_uint | 0x80 as ::core::ffi::c_uint) as xmlChar;
             bits -= 6 as ::core::ffi::c_int;
         }
         out[i as usize] = 0 as xmlChar;
@@ -12146,9 +11957,11 @@ unsafe extern "C" fn htmlParseReference(mut ctxt: htmlParserCtxtPtr) {
         if !(*ctxt).sax.is_null() && (*(*ctxt).sax).characters.is_some() {
             (*(*ctxt).sax)
                 .characters
-                .expect(
-                    "non-null function pointer",
-                )((*ctxt).userData, &raw mut out as *mut xmlChar, i);
+                .expect("non-null function pointer")(
+                (*ctxt).userData,
+                &raw mut out as *mut xmlChar,
+                i,
+            );
         }
     } else {
         ent = htmlParseEntityRef(ctxt, &raw mut name);
@@ -12157,9 +11970,7 @@ unsafe extern "C" fn htmlParseReference(mut ctxt: htmlParserCtxtPtr) {
             if !(*ctxt).sax.is_null() && (*(*ctxt).sax).characters.is_some() {
                 (*(*ctxt).sax)
                     .characters
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                    .expect("non-null function pointer")(
                     (*ctxt).userData,
                     b"&\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                     1 as ::core::ffi::c_int,
@@ -12172,18 +11983,16 @@ unsafe extern "C" fn htmlParseReference(mut ctxt: htmlParserCtxtPtr) {
             if !(*ctxt).sax.is_null() && (*(*ctxt).sax).characters.is_some() {
                 (*(*ctxt).sax)
                     .characters
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                    .expect("non-null function pointer")(
                     (*ctxt).userData,
                     b"&\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                     1 as ::core::ffi::c_int,
                 );
                 (*(*ctxt).sax)
                     .characters
-                    .expect(
-                        "non-null function pointer",
-                    )((*ctxt).userData, name, xmlStrlen(name));
+                    .expect("non-null function pointer")(
+                    (*ctxt).userData, name, xmlStrlen(name)
+                );
             }
         } else {
             let mut c_0: ::core::ffi::c_uint = 0;
@@ -12198,30 +12007,31 @@ unsafe extern "C" fn htmlParseReference(mut ctxt: htmlParserCtxtPtr) {
             } else if c_0 < 0x800 as ::core::ffi::c_uint {
                 let fresh11 = i_0;
                 i_0 = i_0 + 1;
-                out[fresh11 as usize] = (c_0 >> 6 as ::core::ffi::c_int
-                    & 0x1f as ::core::ffi::c_uint | 0xc0 as ::core::ffi::c_uint)
-                    as xmlChar;
+                out[fresh11 as usize] =
+                    (c_0 >> 6 as ::core::ffi::c_int & 0x1f as ::core::ffi::c_uint
+                        | 0xc0 as ::core::ffi::c_uint) as xmlChar;
                 bits_0 = 0 as ::core::ffi::c_int;
             } else if c_0 < 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint {
                 let fresh12 = i_0;
                 i_0 = i_0 + 1;
-                out[fresh12 as usize] = (c_0 >> 12 as ::core::ffi::c_int
-                    & 0xf as ::core::ffi::c_uint | 0xe0 as ::core::ffi::c_uint)
-                    as xmlChar;
+                out[fresh12 as usize] =
+                    (c_0 >> 12 as ::core::ffi::c_int & 0xf as ::core::ffi::c_uint
+                        | 0xe0 as ::core::ffi::c_uint) as xmlChar;
                 bits_0 = 6 as ::core::ffi::c_int;
             } else {
                 let fresh13 = i_0;
                 i_0 = i_0 + 1;
-                out[fresh13 as usize] = (c_0 >> 18 as ::core::ffi::c_int
-                    & 0x7 as ::core::ffi::c_uint | 0xf0 as ::core::ffi::c_uint)
-                    as xmlChar;
+                out[fresh13 as usize] =
+                    (c_0 >> 18 as ::core::ffi::c_int & 0x7 as ::core::ffi::c_uint
+                        | 0xf0 as ::core::ffi::c_uint) as xmlChar;
                 bits_0 = 12 as ::core::ffi::c_int;
             }
             while bits_0 >= 0 as ::core::ffi::c_int {
                 let fresh14 = i_0;
                 i_0 = i_0 + 1;
                 out[fresh14 as usize] = (c_0 >> bits_0 & 0x3f as ::core::ffi::c_uint
-                    | 0x80 as ::core::ffi::c_uint) as xmlChar;
+                    | 0x80 as ::core::ffi::c_uint)
+                    as xmlChar;
                 bits_0 -= 6 as ::core::ffi::c_int;
             }
             out[i_0 as usize] = 0 as xmlChar;
@@ -12229,9 +12039,11 @@ unsafe extern "C" fn htmlParseReference(mut ctxt: htmlParserCtxtPtr) {
             if !(*ctxt).sax.is_null() && (*(*ctxt).sax).characters.is_some() {
                 (*(*ctxt).sax)
                     .characters
-                    .expect(
-                        "non-null function pointer",
-                    )((*ctxt).userData, &raw mut out as *mut xmlChar, i_0);
+                    .expect("non-null function pointer")(
+                    (*ctxt).userData,
+                    &raw mut out as *mut xmlChar,
+                    i_0,
+                );
             }
         }
     };
@@ -12244,46 +12056,62 @@ unsafe extern "C" fn htmlParseContent(mut ctxt: htmlParserCtxtPtr) {
     depth = (*ctxt).nameNr;
     loop {
         if (*ctxt).progressive == 0 as ::core::ffi::c_int
-            && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+            && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+                < INPUT_CHUNK as ::core::ffi::c_long
         {
             xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
         }
-        if (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
-        {
+        if (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int {
             break;
         }
         if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-            && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == '/' as i32
+            && *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == '/' as i32
         {
             if htmlParseEndTag(ctxt) != 0
                 && (!currentNode.is_null() || (*ctxt).nameNr == 0 as ::core::ffi::c_int)
             {
                 if !currentNode.is_null() {
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(currentNode as *mut ::core::ffi::c_void);
+                    xmlFree.expect("non-null function pointer")(
+                        currentNode as *mut ::core::ffi::c_void,
+                    );
                 }
                 return;
             }
         } else {
             if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
                 && (0x41 as ::core::ffi::c_int
-                    <= *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
+                    <= *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
                         as ::core::ffi::c_int
-                    && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int <= 0x5a as ::core::ffi::c_int
+                    && *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        <= 0x5a as ::core::ffi::c_int
                     || 0x61 as ::core::ffi::c_int
-                        <= *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
+                        <= *(*(*ctxt).input)
+                            .cur
+                            .offset(1 as ::core::ffi::c_int as isize)
                             as ::core::ffi::c_int
-                        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int <= 0x7a as ::core::ffi::c_int
-                    || *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == '_' as i32
-                    || *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == ':' as i32)
+                        && *(*(*ctxt).input)
+                            .cur
+                            .offset(1 as ::core::ffi::c_int as isize)
+                            as ::core::ffi::c_int
+                            <= 0x7a as ::core::ffi::c_int
+                    || *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        == '_' as i32
+                    || *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        == ':' as i32)
             {
                 name = htmlParseHTMLName_nonInvasive(ctxt);
                 if name.is_null() {
@@ -12295,82 +12123,94 @@ unsafe extern "C" fn htmlParseContent(mut ctxt: htmlParserCtxtPtr) {
                         ::core::ptr::null::<xmlChar>(),
                         ::core::ptr::null::<xmlChar>(),
                     );
-                    while *(*(*ctxt).input).cur as ::core::ffi::c_int
-                        != 0 as ::core::ffi::c_int
+                    while *(*(*ctxt).input).cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int
                         && *(*(*ctxt).input).cur as ::core::ffi::c_int != '>' as i32
                     {
                         xmlNextChar(ctxt as xmlParserCtxtPtr);
                     }
                     if !currentNode.is_null() {
-                        xmlFree
-                            .expect(
-                                "non-null function pointer",
-                            )(currentNode as *mut ::core::ffi::c_void);
+                        xmlFree.expect("non-null function pointer")(
+                            currentNode as *mut ::core::ffi::c_void,
+                        );
                     }
                     return;
                 }
                 if !(*ctxt).name.is_null() {
-                    if htmlCheckAutoClose(name, (*ctxt).name) == 1 as ::core::ffi::c_int
-                    {
+                    if htmlCheckAutoClose(name, (*ctxt).name) == 1 as ::core::ffi::c_int {
                         htmlAutoClose(ctxt, name);
                         continue;
                     }
                 }
             }
-            if (*ctxt).nameNr > 0 as ::core::ffi::c_int && depth >= (*ctxt).nameNr
+            if (*ctxt).nameNr > 0 as ::core::ffi::c_int
+                && depth >= (*ctxt).nameNr
                 && xmlStrEqual(currentNode, (*ctxt).name) == 0
             {
                 if !currentNode.is_null() {
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(currentNode as *mut ::core::ffi::c_void);
+                    xmlFree.expect("non-null function pointer")(
+                        currentNode as *mut ::core::ffi::c_void,
+                    );
                 }
                 return;
             }
             if *(*(*ctxt).input).cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int
                 && (xmlStrEqual(
                     currentNode,
-                    b"script\0" as *const u8 as *const ::core::ffi::c_char
-                        as *mut xmlChar,
+                    b"script\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 ) != 0
                     || xmlStrEqual(
                         currentNode,
-                        b"style\0" as *const u8 as *const ::core::ffi::c_char
-                            as *mut xmlChar,
+                        b"style\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                     ) != 0)
             {
                 htmlParseScript(ctxt);
             } else {
                 if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-                    && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == '!' as i32
+                    && *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        == '!' as i32
                     && toupper(
-                        *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
+                        *(*(*ctxt).input)
+                            .cur
+                            .offset(2 as ::core::ffi::c_int as isize)
                             as ::core::ffi::c_int,
                     ) == 'D' as i32
                     && toupper(
-                        *(*(*ctxt).input).cur.offset(3 as ::core::ffi::c_int as isize)
+                        *(*(*ctxt).input)
+                            .cur
+                            .offset(3 as ::core::ffi::c_int as isize)
                             as ::core::ffi::c_int,
                     ) == 'O' as i32
                     && toupper(
-                        *(*(*ctxt).input).cur.offset(4 as ::core::ffi::c_int as isize)
+                        *(*(*ctxt).input)
+                            .cur
+                            .offset(4 as ::core::ffi::c_int as isize)
                             as ::core::ffi::c_int,
                     ) == 'C' as i32
                     && toupper(
-                        *(*(*ctxt).input).cur.offset(5 as ::core::ffi::c_int as isize)
+                        *(*(*ctxt).input)
+                            .cur
+                            .offset(5 as ::core::ffi::c_int as isize)
                             as ::core::ffi::c_int,
                     ) == 'T' as i32
                     && toupper(
-                        *(*(*ctxt).input).cur.offset(6 as ::core::ffi::c_int as isize)
+                        *(*(*ctxt).input)
+                            .cur
+                            .offset(6 as ::core::ffi::c_int as isize)
                             as ::core::ffi::c_int,
                     ) == 'Y' as i32
                     && toupper(
-                        *(*(*ctxt).input).cur.offset(7 as ::core::ffi::c_int as isize)
+                        *(*(*ctxt).input)
+                            .cur
+                            .offset(7 as ::core::ffi::c_int as isize)
                             as ::core::ffi::c_int,
                     ) == 'P' as i32
                     && toupper(
-                        *(*(*ctxt).input).cur.offset(8 as ::core::ffi::c_int as isize)
+                        *(*(*ctxt).input)
+                            .cur
+                            .offset(8 as ::core::ffi::c_int as isize)
                             as ::core::ffi::c_int,
                     ) == 'E' as i32
                 {
@@ -12379,32 +12219,48 @@ unsafe extern "C" fn htmlParseContent(mut ctxt: htmlParserCtxtPtr) {
                         XML_HTML_STRUCURE_ERROR,
                         b"Misplaced DOCTYPE declaration\n\0" as *const u8
                             as *const ::core::ffi::c_char,
-                        b"DOCTYPE\0" as *const u8 as *const ::core::ffi::c_char
-                            as *mut xmlChar,
+                        b"DOCTYPE\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                         ::core::ptr::null::<xmlChar>(),
                     );
                     htmlParseDocTypeDecl(ctxt);
                 }
                 if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-                    && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == '!' as i32
-                    && *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == '-' as i32
-                    && *(*(*ctxt).input).cur.offset(3 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == '-' as i32
+                    && *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        == '!' as i32
+                    && *(*(*ctxt).input)
+                        .cur
+                        .offset(2 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        == '-' as i32
+                    && *(*(*ctxt).input)
+                        .cur
+                        .offset(3 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        == '-' as i32
                 {
                     htmlParseComment(ctxt);
                 } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-                    && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == '?' as i32
+                    && *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        == '?' as i32
                 {
                     htmlParsePI(ctxt);
                 } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
                     && (0x41 as ::core::ffi::c_int
-                        <= *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
+                        <= *(*(*ctxt).input)
+                            .cur
+                            .offset(1 as ::core::ffi::c_int as isize)
                             as ::core::ffi::c_int
-                        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int <= 0x5a as ::core::ffi::c_int
+                        && *(*(*ctxt).input)
+                            .cur
+                            .offset(1 as ::core::ffi::c_int as isize)
+                            as ::core::ffi::c_int
+                            <= 0x5a as ::core::ffi::c_int
                         || 0x61 as ::core::ffi::c_int
                             <= *(*(*ctxt).input)
                                 .cur
@@ -12413,30 +12269,27 @@ unsafe extern "C" fn htmlParseContent(mut ctxt: htmlParserCtxtPtr) {
                             && *(*(*ctxt).input)
                                 .cur
                                 .offset(1 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int <= 0x7a as ::core::ffi::c_int)
+                                as ::core::ffi::c_int
+                                <= 0x7a as ::core::ffi::c_int)
                 {
                     htmlParseElement(ctxt);
                 } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32 {
-                    if !(*ctxt).sax.is_null() && (*ctxt).disableSAX == 0
+                    if !(*ctxt).sax.is_null()
+                        && (*ctxt).disableSAX == 0
                         && (*(*ctxt).sax).characters.is_some()
                     {
                         (*(*ctxt).sax)
                             .characters
-                            .expect(
-                                "non-null function pointer",
-                            )(
+                            .expect("non-null function pointer")(
                             (*ctxt).userData,
-                            b"<\0" as *const u8 as *const ::core::ffi::c_char
-                                as *mut xmlChar,
+                            b"<\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                             1 as ::core::ffi::c_int,
                         );
                     }
                     xmlNextChar(ctxt as xmlParserCtxtPtr);
                 } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == '&' as i32 {
                     htmlParseReference(ctxt);
-                } else if *(*(*ctxt).input).cur as ::core::ffi::c_int
-                    == 0 as ::core::ffi::c_int
-                {
+                } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
                     htmlAutoCloseOnEnd(ctxt);
                     break;
                 } else {
@@ -12444,18 +12297,15 @@ unsafe extern "C" fn htmlParseContent(mut ctxt: htmlParserCtxtPtr) {
                 }
             }
             if (*ctxt).progressive == 0 as ::core::ffi::c_int
-                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                    as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+                && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+                    < INPUT_CHUNK as ::core::ffi::c_long
             {
                 xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
             }
         }
     }
     if !currentNode.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )(currentNode as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(currentNode as *mut ::core::ffi::c_void);
     }
 }
 #[no_mangle]
@@ -12477,8 +12327,7 @@ pub unsafe extern "C" fn htmlParseElement(mut ctxt: htmlParserCtxtPtr) {
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_INTERNAL_ERROR,
-            b"htmlParseElement: context error\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlParseElement: context error\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
@@ -12490,10 +12339,8 @@ pub unsafe extern "C" fn htmlParseElement(mut ctxt: htmlParserCtxtPtr) {
     if (*ctxt).record_info != 0 {
         node_info.begin_pos = (*(*ctxt).input)
             .consumed
-            .wrapping_add(
-                (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
-                    as ::core::ffi::c_long as ::core::ffi::c_ulong,
-            );
+            .wrapping_add((*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
+                as ::core::ffi::c_long as ::core::ffi::c_ulong);
         node_info.begin_line = (*(*ctxt).input).line as ::core::ffi::c_ulong;
     }
     failed = htmlParseStartTag(ctxt);
@@ -12515,8 +12362,10 @@ pub unsafe extern "C" fn htmlParseElement(mut ctxt: htmlParserCtxtPtr) {
         );
     }
     if *(*(*ctxt).input).cur as ::core::ffi::c_int == '/' as i32
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '>' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '>' as i32
     {
         (*(*ctxt).input).cur = (*(*ctxt).input)
             .cur
@@ -12536,8 +12385,7 @@ pub unsafe extern "C" fn htmlParseElement(mut ctxt: htmlParserCtxtPtr) {
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_GT_REQUIRED,
-            b"Couldn't find end of Start Tag %s\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"Couldn't find end of Start Tag %s\n\0" as *const u8 as *const ::core::ffi::c_char,
             name,
             ::core::ptr::null::<xmlChar>(),
         );
@@ -12548,10 +12396,8 @@ pub unsafe extern "C" fn htmlParseElement(mut ctxt: htmlParserCtxtPtr) {
         if (*ctxt).record_info != 0 {
             node_info.end_pos = (*(*ctxt).input)
                 .consumed
-                .wrapping_add(
-                    (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
-                        as ::core::ffi::c_long as ::core::ffi::c_ulong,
-                );
+                .wrapping_add((*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
+                    as ::core::ffi::c_long as ::core::ffi::c_ulong);
             node_info.end_line = (*(*ctxt).input).line as ::core::ffi::c_ulong;
             node_info.node = (*ctxt).node as *const _xmlNode;
             xmlParserAddNodeInfo(ctxt as xmlParserCtxtPtr, &raw mut node_info);
@@ -12582,10 +12428,8 @@ pub unsafe extern "C" fn htmlParseElement(mut ctxt: htmlParserCtxtPtr) {
     if !currentNode.is_null() && (*ctxt).record_info != 0 {
         node_info.end_pos = (*(*ctxt).input)
             .consumed
-            .wrapping_add(
-                (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
-                    as ::core::ffi::c_long as ::core::ffi::c_ulong,
-            );
+            .wrapping_add((*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
+                as ::core::ffi::c_long as ::core::ffi::c_ulong);
         node_info.end_line = (*(*ctxt).input).line as ::core::ffi::c_ulong;
         node_info.node = (*ctxt).node as *const _xmlNode;
         xmlParserAddNodeInfo(ctxt as xmlParserCtxtPtr, &raw mut node_info);
@@ -12594,20 +12438,15 @@ pub unsafe extern "C" fn htmlParseElement(mut ctxt: htmlParserCtxtPtr) {
         htmlAutoCloseOnEnd(ctxt);
     }
     if !currentNode.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )(currentNode as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(currentNode as *mut ::core::ffi::c_void);
     }
 }
 unsafe extern "C" fn htmlParserFinishElementParsing(mut ctxt: htmlParserCtxtPtr) {
     if !(*ctxt).node.is_null() && (*ctxt).record_info != 0 {
         (*(*ctxt).nodeInfo).end_pos = (*(*ctxt).input)
             .consumed
-            .wrapping_add(
-                (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
-                    as ::core::ffi::c_long as ::core::ffi::c_ulong,
-            );
+            .wrapping_add((*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
+                as ::core::ffi::c_long as ::core::ffi::c_ulong);
         (*(*ctxt).nodeInfo).end_line = (*(*ctxt).input).line as ::core::ffi::c_ulong;
         (*(*ctxt).nodeInfo).node = (*ctxt).node as *const _xmlNode;
         xmlParserAddNodeInfo(
@@ -12648,10 +12487,8 @@ unsafe extern "C" fn htmlParseElementInternal(mut ctxt: htmlParserCtxtPtr) {
     if (*ctxt).record_info != 0 {
         node_info.begin_pos = (*(*ctxt).input)
             .consumed
-            .wrapping_add(
-                (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
-                    as ::core::ffi::c_long as ::core::ffi::c_ulong,
-            );
+            .wrapping_add((*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
+                as ::core::ffi::c_long as ::core::ffi::c_ulong);
         node_info.begin_line = (*(*ctxt).input).line as ::core::ffi::c_ulong;
     }
     failed = htmlParseStartTag(ctxt);
@@ -12673,8 +12510,10 @@ unsafe extern "C" fn htmlParseElementInternal(mut ctxt: htmlParserCtxtPtr) {
         );
     }
     if *(*(*ctxt).input).cur as ::core::ffi::c_int == '/' as i32
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '>' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '>' as i32
     {
         (*(*ctxt).input).cur = (*(*ctxt).input)
             .cur
@@ -12694,8 +12533,7 @@ unsafe extern "C" fn htmlParseElementInternal(mut ctxt: htmlParserCtxtPtr) {
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_GT_REQUIRED,
-            b"Couldn't find end of Start Tag %s\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"Couldn't find end of Start Tag %s\n\0" as *const u8 as *const ::core::ffi::c_char,
             name,
             ::core::ptr::null::<xmlChar>(),
         );
@@ -12730,27 +12568,27 @@ unsafe extern "C" fn htmlParseContentInternal(mut ctxt: htmlParserCtxtPtr) {
     depth = (*ctxt).nameNr;
     loop {
         if (*ctxt).progressive == 0 as ::core::ffi::c_int
-            && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+            && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+                < INPUT_CHUNK as ::core::ffi::c_long
         {
             xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
         }
-        if (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
-        {
+        if (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int {
             break;
         }
         if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-            && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == '/' as i32
+            && *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == '/' as i32
         {
             if htmlParseEndTag(ctxt) != 0
                 && (!currentNode.is_null() || (*ctxt).nameNr == 0 as ::core::ffi::c_int)
             {
                 if !currentNode.is_null() {
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(currentNode as *mut ::core::ffi::c_void);
+                    xmlFree.expect("non-null function pointer")(
+                        currentNode as *mut ::core::ffi::c_void,
+                    );
                 }
                 currentNode = xmlStrdup((*ctxt).name);
                 depth = (*ctxt).nameNr;
@@ -12758,19 +12596,35 @@ unsafe extern "C" fn htmlParseContentInternal(mut ctxt: htmlParserCtxtPtr) {
         } else {
             if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
                 && (0x41 as ::core::ffi::c_int
-                    <= *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
+                    <= *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
                         as ::core::ffi::c_int
-                    && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int <= 0x5a as ::core::ffi::c_int
+                    && *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        <= 0x5a as ::core::ffi::c_int
                     || 0x61 as ::core::ffi::c_int
-                        <= *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
+                        <= *(*(*ctxt).input)
+                            .cur
+                            .offset(1 as ::core::ffi::c_int as isize)
                             as ::core::ffi::c_int
-                        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int <= 0x7a as ::core::ffi::c_int
-                    || *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == '_' as i32
-                    || *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == ':' as i32)
+                        && *(*(*ctxt).input)
+                            .cur
+                            .offset(1 as ::core::ffi::c_int as isize)
+                            as ::core::ffi::c_int
+                            <= 0x7a as ::core::ffi::c_int
+                    || *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        == '_' as i32
+                    || *(*(*ctxt).input)
+                        .cur
+                        .offset(1 as ::core::ffi::c_int as isize)
+                        as ::core::ffi::c_int
+                        == ':' as i32)
             {
                 name = htmlParseHTMLName_nonInvasive(ctxt);
                 if name.is_null() {
@@ -12782,39 +12636,36 @@ unsafe extern "C" fn htmlParseContentInternal(mut ctxt: htmlParserCtxtPtr) {
                         ::core::ptr::null::<xmlChar>(),
                         ::core::ptr::null::<xmlChar>(),
                     );
-                    while *(*(*ctxt).input).cur as ::core::ffi::c_int
-                        == 0 as ::core::ffi::c_int
+                    while *(*(*ctxt).input).cur as ::core::ffi::c_int == 0 as ::core::ffi::c_int
                         && *(*(*ctxt).input).cur as ::core::ffi::c_int != '>' as i32
                     {
                         xmlNextChar(ctxt as xmlParserCtxtPtr);
                     }
                     htmlParserFinishElementParsing(ctxt);
                     if !currentNode.is_null() {
-                        xmlFree
-                            .expect(
-                                "non-null function pointer",
-                            )(currentNode as *mut ::core::ffi::c_void);
+                        xmlFree.expect("non-null function pointer")(
+                            currentNode as *mut ::core::ffi::c_void,
+                        );
                     }
                     currentNode = xmlStrdup((*ctxt).name);
                     depth = (*ctxt).nameNr;
                     continue;
                 } else if !(*ctxt).name.is_null() {
-                    if htmlCheckAutoClose(name, (*ctxt).name) == 1 as ::core::ffi::c_int
-                    {
+                    if htmlCheckAutoClose(name, (*ctxt).name) == 1 as ::core::ffi::c_int {
                         htmlAutoClose(ctxt, name);
                         continue;
                     }
                 }
             }
-            if (*ctxt).nameNr > 0 as ::core::ffi::c_int && depth >= (*ctxt).nameNr
+            if (*ctxt).nameNr > 0 as ::core::ffi::c_int
+                && depth >= (*ctxt).nameNr
                 && xmlStrEqual(currentNode, (*ctxt).name) == 0
             {
                 htmlParserFinishElementParsing(ctxt);
                 if !currentNode.is_null() {
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(currentNode as *mut ::core::ffi::c_void);
+                    xmlFree.expect("non-null function pointer")(
+                        currentNode as *mut ::core::ffi::c_void,
+                    );
                 }
                 currentNode = xmlStrdup((*ctxt).name);
                 depth = (*ctxt).nameNr;
@@ -12822,20 +12673,21 @@ unsafe extern "C" fn htmlParseContentInternal(mut ctxt: htmlParserCtxtPtr) {
                 if *(*(*ctxt).input).cur as ::core::ffi::c_int != 0 as ::core::ffi::c_int
                     && (xmlStrEqual(
                         currentNode,
-                        b"script\0" as *const u8 as *const ::core::ffi::c_char
-                            as *mut xmlChar,
+                        b"script\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                     ) != 0
                         || xmlStrEqual(
                             currentNode,
-                            b"style\0" as *const u8 as *const ::core::ffi::c_char
-                                as *mut xmlChar,
+                            b"style\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                         ) != 0)
                 {
                     htmlParseScript(ctxt);
                 } else {
                     if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-                        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '!' as i32
+                        && *(*(*ctxt).input)
+                            .cur
+                            .offset(1 as ::core::ffi::c_int as isize)
+                            as ::core::ffi::c_int
+                            == '!' as i32
                         && toupper(
                             *(*(*ctxt).input)
                                 .cur
@@ -12884,24 +12736,35 @@ unsafe extern "C" fn htmlParseContentInternal(mut ctxt: htmlParserCtxtPtr) {
                             XML_HTML_STRUCURE_ERROR,
                             b"Misplaced DOCTYPE declaration\n\0" as *const u8
                                 as *const ::core::ffi::c_char,
-                            b"DOCTYPE\0" as *const u8 as *const ::core::ffi::c_char
-                                as *mut xmlChar,
+                            b"DOCTYPE\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                             ::core::ptr::null::<xmlChar>(),
                         );
                         htmlParseDocTypeDecl(ctxt);
                     }
                     if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-                        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '!' as i32
-                        && *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '-' as i32
-                        && *(*(*ctxt).input).cur.offset(3 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '-' as i32
+                        && *(*(*ctxt).input)
+                            .cur
+                            .offset(1 as ::core::ffi::c_int as isize)
+                            as ::core::ffi::c_int
+                            == '!' as i32
+                        && *(*(*ctxt).input)
+                            .cur
+                            .offset(2 as ::core::ffi::c_int as isize)
+                            as ::core::ffi::c_int
+                            == '-' as i32
+                        && *(*(*ctxt).input)
+                            .cur
+                            .offset(3 as ::core::ffi::c_int as isize)
+                            as ::core::ffi::c_int
+                            == '-' as i32
                     {
                         htmlParseComment(ctxt);
                     } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-                        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '?' as i32
+                        && *(*(*ctxt).input)
+                            .cur
+                            .offset(1 as ::core::ffi::c_int as isize)
+                            as ::core::ffi::c_int
+                            == '?' as i32
                     {
                         htmlParsePI(ctxt);
                     } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
@@ -12913,7 +12776,8 @@ unsafe extern "C" fn htmlParseContentInternal(mut ctxt: htmlParserCtxtPtr) {
                             && *(*(*ctxt).input)
                                 .cur
                                 .offset(1 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int <= 0x5a as ::core::ffi::c_int
+                                as ::core::ffi::c_int
+                                <= 0x5a as ::core::ffi::c_int
                             || 0x61 as ::core::ffi::c_int
                                 <= *(*(*ctxt).input)
                                     .cur
@@ -12922,37 +12786,34 @@ unsafe extern "C" fn htmlParseContentInternal(mut ctxt: htmlParserCtxtPtr) {
                                 && *(*(*ctxt).input)
                                     .cur
                                     .offset(1 as ::core::ffi::c_int as isize)
-                                    as ::core::ffi::c_int <= 0x7a as ::core::ffi::c_int)
+                                    as ::core::ffi::c_int
+                                    <= 0x7a as ::core::ffi::c_int)
                     {
                         htmlParseElementInternal(ctxt);
                         if !currentNode.is_null() {
-                            xmlFree
-                                .expect(
-                                    "non-null function pointer",
-                                )(currentNode as *mut ::core::ffi::c_void);
+                            xmlFree.expect("non-null function pointer")(
+                                currentNode as *mut ::core::ffi::c_void,
+                            );
                         }
                         currentNode = xmlStrdup((*ctxt).name);
                         depth = (*ctxt).nameNr;
                     } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32 {
-                        if !(*ctxt).sax.is_null() && (*ctxt).disableSAX == 0
+                        if !(*ctxt).sax.is_null()
+                            && (*ctxt).disableSAX == 0
                             && (*(*ctxt).sax).characters.is_some()
                         {
                             (*(*ctxt).sax)
                                 .characters
-                                .expect(
-                                    "non-null function pointer",
-                                )(
+                                .expect("non-null function pointer")(
                                 (*ctxt).userData,
-                                b"<\0" as *const u8 as *const ::core::ffi::c_char
-                                    as *mut xmlChar,
+                                b"<\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                                 1 as ::core::ffi::c_int,
                             );
                         }
                         xmlNextChar(ctxt as xmlParserCtxtPtr);
                     } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == '&' as i32 {
                         htmlParseReference(ctxt);
-                    } else if *(*(*ctxt).input).cur as ::core::ffi::c_int
-                        == 0 as ::core::ffi::c_int
+                    } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == 0 as ::core::ffi::c_int
                     {
                         htmlAutoCloseOnEnd(ctxt);
                         break;
@@ -12962,7 +12823,8 @@ unsafe extern "C" fn htmlParseContentInternal(mut ctxt: htmlParserCtxtPtr) {
                 }
                 if (*ctxt).progressive == 0 as ::core::ffi::c_int
                     && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-                        as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+                        as ::core::ffi::c_long)
+                        < INPUT_CHUNK as ::core::ffi::c_long
                 {
                     xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
                 }
@@ -12970,10 +12832,7 @@ unsafe extern "C" fn htmlParseContentInternal(mut ctxt: htmlParserCtxtPtr) {
         }
     }
     if !currentNode.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )(currentNode as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(currentNode as *mut ::core::ffi::c_void);
     }
 }
 #[no_mangle]
@@ -12983,9 +12842,7 @@ pub unsafe extern "C" fn __htmlParseContent(mut ctxt: *mut ::core::ffi::c_void) 
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn htmlParseDocument(
-    mut ctxt: htmlParserCtxtPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn htmlParseDocument(mut ctxt: htmlParserCtxtPtr) -> ::core::ffi::c_int {
     let mut start: [xmlChar; 4] = [0; 4];
     let mut enc: xmlCharEncoding = XML_CHAR_ENCODING_NONE;
     let mut dtd: xmlDtdPtr = ::core::ptr::null_mut::<xmlDtd>();
@@ -12995,8 +12852,7 @@ pub unsafe extern "C" fn htmlParseDocument(
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_INTERNAL_ERROR,
-            b"htmlParseDocument: context error\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlParseDocument: context error\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
@@ -13006,17 +12862,15 @@ pub unsafe extern "C" fn htmlParseDocument(
     (*ctxt).html = 1 as ::core::ffi::c_int;
     (*ctxt).linenumbers = 1 as ::core::ffi::c_int;
     if (*ctxt).progressive == 0 as ::core::ffi::c_int
-        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur)
-            as ::core::ffi::c_long) < INPUT_CHUNK as ::core::ffi::c_long
+        && ((*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long)
+            < INPUT_CHUNK as ::core::ffi::c_long
     {
         xmlParserInputGrow((*ctxt).input, INPUT_CHUNK);
     }
     if !(*ctxt).sax.is_null() && (*(*ctxt).sax).setDocumentLocator.is_some() {
         (*(*ctxt).sax)
             .setDocumentLocator
-            .expect(
-                "non-null function pointer",
-            )((*ctxt).userData, __xmlDefaultSAXLocator());
+            .expect("non-null function pointer")((*ctxt).userData, __xmlDefaultSAXLocator());
     }
     if (*ctxt).encoding.is_null()
         && (*(*ctxt).input).end.offset_from((*(*ctxt).input).cur) as ::core::ffi::c_long
@@ -13055,73 +12909,96 @@ pub unsafe extern "C" fn htmlParseDocument(
             ::core::ptr::null::<xmlChar>(),
         );
     }
-    if !(*ctxt).sax.is_null() && (*(*ctxt).sax).startDocument.is_some()
-        && (*ctxt).disableSAX == 0
-    {
+    if !(*ctxt).sax.is_null() && (*(*ctxt).sax).startDocument.is_some() && (*ctxt).disableSAX == 0 {
         (*(*ctxt).sax)
             .startDocument
             .expect("non-null function pointer")((*ctxt).userData);
     }
     while *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '!' as i32
-        && *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '-' as i32
-        && *(*(*ctxt).input).cur.offset(3 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '-' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '!' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '-' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '-' as i32
         || *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-            && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == '?' as i32
+            && *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == '?' as i32
     {
         htmlParseComment(ctxt);
         htmlParsePI(ctxt);
         htmlSkipBlankChars(ctxt as xmlParserCtxtPtr);
     }
     if *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '!' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '!' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'D' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(3 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'O' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(4 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'C' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(5 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(5 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'T' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(6 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(6 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'Y' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(7 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(7 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'P' as i32
         && toupper(
-            *(*(*ctxt).input).cur.offset(8 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int,
+            *(*(*ctxt).input)
+                .cur
+                .offset(8 as ::core::ffi::c_int as isize) as ::core::ffi::c_int,
         ) == 'E' as i32
     {
         htmlParseDocTypeDecl(ctxt);
     }
     htmlSkipBlankChars(ctxt as xmlParserCtxtPtr);
     while *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-        && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '!' as i32
-        && *(*(*ctxt).input).cur.offset(2 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '-' as i32
-        && *(*(*ctxt).input).cur.offset(3 as ::core::ffi::c_int as isize)
-            as ::core::ffi::c_int == '-' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '!' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '-' as i32
+        && *(*(*ctxt).input)
+            .cur
+            .offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+            == '-' as i32
         || *(*(*ctxt).input).cur as ::core::ffi::c_int == '<' as i32
-            && *(*(*ctxt).input).cur.offset(1 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int == '?' as i32
+            && *(*(*ctxt).input)
+                .cur
+                .offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                == '?' as i32
     {
         htmlParseComment(ctxt);
         htmlParsePI(ctxt);
@@ -13132,10 +13009,11 @@ pub unsafe extern "C" fn htmlParseDocument(
         htmlAutoCloseOnEnd(ctxt);
     }
     if !(*ctxt).sax.is_null() && (*(*ctxt).sax).endDocument.is_some() {
-        (*(*ctxt).sax).endDocument.expect("non-null function pointer")((*ctxt).userData);
+        (*(*ctxt).sax)
+            .endDocument
+            .expect("non-null function pointer")((*ctxt).userData);
     }
-    if (*ctxt).options & HTML_PARSE_NODEFDTD as ::core::ffi::c_int == 0
-        && !(*ctxt).myDoc.is_null()
+    if (*ctxt).options & HTML_PARSE_NODEFDTD as ::core::ffi::c_int == 0 && !(*ctxt).myDoc.is_null()
     {
         dtd = xmlGetIntSubset((*ctxt).myDoc as *const xmlDoc);
         if dtd.is_null() {
@@ -13154,9 +13032,7 @@ pub unsafe extern "C" fn htmlParseDocument(
     }
     return 0 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn htmlInitParserCtxt(
-    mut ctxt: htmlParserCtxtPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn htmlInitParserCtxt(mut ctxt: htmlParserCtxtPtr) -> ::core::ffi::c_int {
     let mut sax: *mut htmlSAXHandler = ::core::ptr::null_mut::<htmlSAXHandler>();
     if ctxt.is_null() {
         return -(1 as ::core::ffi::c_int);
@@ -13170,20 +13046,17 @@ unsafe extern "C" fn htmlInitParserCtxt(
     if (*ctxt).dict.is_null() {
         htmlErrMemory(
             ::core::ptr::null_mut::<xmlParserCtxt>(),
-            b"htmlInitParserCtxt: out of memory\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlInitParserCtxt: out of memory\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return -(1 as ::core::ffi::c_int);
     }
-    sax = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<htmlSAXHandler>() as size_t) as *mut htmlSAXHandler;
+    sax = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<htmlSAXHandler>() as size_t
+    ) as *mut htmlSAXHandler;
     if sax.is_null() {
         htmlErrMemory(
             ::core::ptr::null_mut::<xmlParserCtxt>(),
-            b"htmlInitParserCtxt: out of memory\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlInitParserCtxt: out of memory\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return -(1 as ::core::ffi::c_int);
     } else {
@@ -13193,18 +13066,13 @@ unsafe extern "C" fn htmlInitParserCtxt(
             ::core::mem::size_of::<htmlSAXHandler>() as size_t,
         );
     }
-    (*ctxt).inputTab = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(
-        (5 as size_t)
-            .wrapping_mul(::core::mem::size_of::<htmlParserInputPtr>() as size_t),
+    (*ctxt).inputTab = xmlMalloc.expect("non-null function pointer")(
+        (5 as size_t).wrapping_mul(::core::mem::size_of::<htmlParserInputPtr>() as size_t),
     ) as *mut htmlParserInputPtr as *mut xmlParserInputPtr;
     if (*ctxt).inputTab.is_null() {
         htmlErrMemory(
             ::core::ptr::null_mut::<xmlParserCtxt>(),
-            b"htmlInitParserCtxt: out of memory\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlInitParserCtxt: out of memory\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         (*ctxt).inputNr = 0 as ::core::ffi::c_int;
         (*ctxt).inputMax = 0 as ::core::ffi::c_int;
@@ -13218,16 +13086,13 @@ unsafe extern "C" fn htmlInitParserCtxt(
     (*ctxt).encoding = ::core::ptr::null::<xmlChar>();
     (*ctxt).standalone = -(1 as ::core::ffi::c_int);
     (*ctxt).instate = XML_PARSER_START;
-    (*ctxt).nodeTab = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )((10 as size_t).wrapping_mul(::core::mem::size_of::<htmlNodePtr>() as size_t))
-        as *mut htmlNodePtr as *mut xmlNodePtr;
+    (*ctxt).nodeTab = xmlMalloc.expect("non-null function pointer")(
+        (10 as size_t).wrapping_mul(::core::mem::size_of::<htmlNodePtr>() as size_t),
+    ) as *mut htmlNodePtr as *mut xmlNodePtr;
     if (*ctxt).nodeTab.is_null() {
         htmlErrMemory(
             ::core::ptr::null_mut::<xmlParserCtxt>(),
-            b"htmlInitParserCtxt: out of memory\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlInitParserCtxt: out of memory\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         (*ctxt).nodeNr = 0 as ::core::ffi::c_int;
         (*ctxt).nodeMax = 0 as ::core::ffi::c_int;
@@ -13240,16 +13105,13 @@ unsafe extern "C" fn htmlInitParserCtxt(
     (*ctxt).nodeNr = 0 as ::core::ffi::c_int;
     (*ctxt).nodeMax = 10 as ::core::ffi::c_int;
     (*ctxt).node = ::core::ptr::null_mut::<xmlNode>();
-    (*ctxt).nameTab = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )((10 as size_t).wrapping_mul(::core::mem::size_of::<*mut xmlChar>() as size_t))
-        as *mut *const xmlChar;
+    (*ctxt).nameTab = xmlMalloc.expect("non-null function pointer")(
+        (10 as size_t).wrapping_mul(::core::mem::size_of::<*mut xmlChar>() as size_t),
+    ) as *mut *const xmlChar;
     if (*ctxt).nameTab.is_null() {
         htmlErrMemory(
             ::core::ptr::null_mut::<xmlParserCtxt>(),
-            b"htmlInitParserCtxt: out of memory\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlInitParserCtxt: out of memory\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         (*ctxt).nameNr = 0 as ::core::ffi::c_int;
         (*ctxt).nameMax = 0 as ::core::ffi::c_int;
@@ -13269,8 +13131,7 @@ unsafe extern "C" fn htmlInitParserCtxt(
     (*ctxt).nodeInfoNr = 0 as ::core::ffi::c_int;
     (*ctxt).nodeInfoMax = 0 as ::core::ffi::c_int;
     if sax.is_null() {
-        (*ctxt).sax = __htmlDefaultSAXHandler() as xmlSAXHandlerPtr
-            as *mut _xmlSAXHandler;
+        (*ctxt).sax = __htmlDefaultSAXHandler() as xmlSAXHandlerPtr as *mut _xmlSAXHandler;
     } else {
         (*ctxt).sax = sax as *mut _xmlSAXHandler;
         memcpy(
@@ -13319,15 +13180,13 @@ pub unsafe extern "C" fn htmlFreeParserCtxt(mut ctxt: htmlParserCtxtPtr) {
 #[no_mangle]
 pub unsafe extern "C" fn htmlNewParserCtxt() -> htmlParserCtxtPtr {
     let mut ctxt: xmlParserCtxtPtr = ::core::ptr::null_mut::<xmlParserCtxt>();
-    ctxt = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlParserCtxt>() as size_t) as xmlParserCtxtPtr;
+    ctxt = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlParserCtxt>() as size_t
+    ) as xmlParserCtxtPtr;
     if ctxt.is_null() {
         htmlErrMemory(
             ::core::ptr::null_mut::<xmlParserCtxt>(),
-            b"NewParserCtxt: out of memory\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"NewParserCtxt: out of memory\n\0" as *const u8 as *const ::core::ffi::c_char,
         );
         return ::core::ptr::null_mut::<xmlParserCtxt>();
     }
@@ -13349,9 +13208,7 @@ pub unsafe extern "C" fn htmlCreateMemoryParserCtxt(
 ) -> htmlParserCtxtPtr {
     let mut ctxt: xmlParserCtxtPtr = ::core::ptr::null_mut::<xmlParserCtxt>();
     let mut input: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
-    let mut buf: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut buf: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     if buffer.is_null() {
         return ::core::ptr::null_mut::<xmlParserCtxt>();
     }
@@ -13394,14 +13251,12 @@ unsafe extern "C" fn htmlCreateDocParserCtxt(
     }
     if !encoding.is_null() {
         let mut enc: xmlCharEncoding = XML_CHAR_ENCODING_NONE;
-        let mut handler: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<
-            xmlCharEncodingHandler,
-        >();
+        let mut handler: xmlCharEncodingHandlerPtr =
+            ::core::ptr::null_mut::<xmlCharEncodingHandler>();
         if !(*(*ctxt).input).encoding.is_null() {
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )((*(*ctxt).input).encoding as *mut xmlChar as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(
+                (*(*ctxt).input).encoding as *mut xmlChar as *mut ::core::ffi::c_void,
+            );
         }
         (*(*ctxt).input).encoding = xmlStrdup(encoding as *const xmlChar);
         enc = xmlParseCharEncoding(encoding);
@@ -13411,8 +13266,7 @@ unsafe extern "C" fn htmlCreateDocParserCtxt(
                 htmlParseErr(
                     ctxt as xmlParserCtxtPtr,
                     XML_ERR_UNSUPPORTED_ENCODING,
-                    b"Unsupported encoding %s\n\0" as *const u8
-                        as *const ::core::ffi::c_char,
+                    b"Unsupported encoding %s\n\0" as *const u8 as *const ::core::ffi::c_char,
                     encoding as *const xmlChar,
                     ::core::ptr::null::<xmlChar>(),
                 );
@@ -13425,8 +13279,7 @@ unsafe extern "C" fn htmlCreateDocParserCtxt(
                 htmlParseErr(
                     ctxt as xmlParserCtxtPtr,
                     XML_ERR_UNSUPPORTED_ENCODING,
-                    b"Unsupported encoding %s\n\0" as *const u8
-                        as *const ::core::ffi::c_char,
+                    b"Unsupported encoding %s\n\0" as *const u8 as *const ::core::ffi::c_char,
                     encoding as *const xmlChar,
                     ::core::ptr::null::<xmlChar>(),
                 );
@@ -13452,8 +13305,7 @@ unsafe extern "C" fn htmlParseLookupSequence(
     if in_0.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    base = (*in_0).cur.offset_from((*in_0).base) as ::core::ffi::c_long
-        as ::core::ffi::c_int;
+    base = (*in_0).cur.offset_from((*in_0).base) as ::core::ffi::c_long as ::core::ffi::c_int;
     if base < 0 as ::core::ffi::c_int {
         return -(1 as ::core::ffi::c_int);
     }
@@ -13507,14 +13359,14 @@ unsafe extern "C" fn htmlParseLookupSequence(
         }
         match current_block_25 {
             3437258052017859086 => {
-                if *buf.offset(base as isize) as ::core::ffi::c_int
-                    == first as ::core::ffi::c_int
-                {
+                if *buf.offset(base as isize) as ::core::ffi::c_int == first as ::core::ffi::c_int {
                     if third as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
                         if *buf.offset((base + 1 as ::core::ffi::c_int) as isize)
-                            as ::core::ffi::c_int != next as ::core::ffi::c_int
+                            as ::core::ffi::c_int
+                            != next as ::core::ffi::c_int
                             || *buf.offset((base + 2 as ::core::ffi::c_int) as isize)
-                                as ::core::ffi::c_int != third as ::core::ffi::c_int
+                                as ::core::ffi::c_int
+                                != third as ::core::ffi::c_int
                         {
                             current_block_25 = 5689001924483802034;
                         } else {
@@ -13522,7 +13374,8 @@ unsafe extern "C" fn htmlParseLookupSequence(
                         }
                     } else if next as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
                         if *buf.offset((base + 1 as ::core::ffi::c_int) as isize)
-                            as ::core::ffi::c_int != next as ::core::ffi::c_int
+                            as ::core::ffi::c_int
+                            != next as ::core::ffi::c_int
                         {
                             current_block_25 = 5689001924483802034;
                         } else {
@@ -13536,8 +13389,8 @@ unsafe extern "C" fn htmlParseLookupSequence(
                         _ => {
                             (*ctxt).checkIndex = 0 as ::core::ffi::c_long;
                             return (base as ::core::ffi::c_long
-                                - (*in_0).cur.offset_from((*in_0).base)
-                                    as ::core::ffi::c_long) as ::core::ffi::c_int;
+                                - (*in_0).cur.offset_from((*in_0).base) as ::core::ffi::c_long)
+                                as ::core::ffi::c_int;
                         }
                     }
                 }
@@ -13554,13 +13407,10 @@ unsafe extern "C" fn htmlParseLookupSequence(
     }
     return -(1 as ::core::ffi::c_int);
 }
-unsafe extern "C" fn htmlParseLookupCommentEnd(
-    mut ctxt: htmlParserCtxtPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn htmlParseLookupCommentEnd(mut ctxt: htmlParserCtxtPtr) -> ::core::ffi::c_int {
     let mut mark: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
-    let mut cur: ::core::ffi::c_int = (*(*ctxt).input)
-        .cur
-        .offset_from((*(*ctxt).input).base) as ::core::ffi::c_long as ::core::ffi::c_int;
+    let mut cur: ::core::ffi::c_int = (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
+        as ::core::ffi::c_long as ::core::ffi::c_int;
     while mark >= 0 as ::core::ffi::c_int {
         mark = htmlParseLookupSequence(
             ctxt,
@@ -13570,19 +13420,25 @@ unsafe extern "C" fn htmlParseLookupCommentEnd(
             0 as ::core::ffi::c_int,
         );
         if mark < 0 as ::core::ffi::c_int
-            || *(*(*ctxt).input).cur.offset((mark + 2 as ::core::ffi::c_int) as isize)
-                as ::core::ffi::c_int == '>' as i32
-            || *(*(*ctxt).input).cur.offset((mark + 2 as ::core::ffi::c_int) as isize)
-                as ::core::ffi::c_int == '!' as i32
+            || *(*(*ctxt).input)
+                .cur
+                .offset((mark + 2 as ::core::ffi::c_int) as isize)
+                as ::core::ffi::c_int
+                == '>' as i32
+            || *(*(*ctxt).input)
+                .cur
+                .offset((mark + 2 as ::core::ffi::c_int) as isize)
+                as ::core::ffi::c_int
+                == '!' as i32
                 && *(*(*ctxt).input)
                     .cur
                     .offset((mark + 3 as ::core::ffi::c_int) as isize)
-                    as ::core::ffi::c_int == '>' as i32
+                    as ::core::ffi::c_int
+                    == '>' as i32
         {
             return mark;
         }
-        (*ctxt).checkIndex = (cur + mark + 1 as ::core::ffi::c_int)
-            as ::core::ffi::c_long;
+        (*ctxt).checkIndex = (cur + mark + 1 as ::core::ffi::c_int) as ::core::ffi::c_long;
     }
     return mark;
 }
@@ -13618,8 +13474,7 @@ unsafe extern "C" fn htmlParseTryOrFinish(
         if avail == 0 as ptrdiff_t && terminate != 0 {
             htmlAutoCloseOnEnd(ctxt);
             if (*ctxt).nameNr == 0 as ::core::ffi::c_int
-                && (*ctxt).instate as ::core::ffi::c_int
-                    != XML_PARSER_EOF as ::core::ffi::c_int
+                && (*ctxt).instate as ::core::ffi::c_int != XML_PARSER_EOF as ::core::ffi::c_int
             {
                 (*ctxt).instate = XML_PARSER_EOF;
                 if !(*ctxt).sax.is_null() && (*(*ctxt).sax).endDocument.is_some() {
@@ -13653,28 +13508,30 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                         htmlSkipBlankChars(ctxt as xmlParserCtxtPtr);
                         if (*in_0).buf.is_null() {
                             avail = ((*in_0).length as ::core::ffi::c_long
-                                - (*in_0).cur.offset_from((*in_0).base)
-                                    as ::core::ffi::c_long) as ptrdiff_t;
+                                - (*in_0).cur.offset_from((*in_0).base) as ::core::ffi::c_long)
+                                as ptrdiff_t;
                         } else {
                             avail = xmlBufUse((*(*in_0).buf).buffer) as ptrdiff_t
                                 - (*in_0).cur.offset_from((*in_0).base) as ptrdiff_t;
                         }
                     }
-                    if !(*ctxt).sax.is_null()
-                        && (*(*ctxt).sax).setDocumentLocator.is_some()
-                    {
+                    if !(*ctxt).sax.is_null() && (*(*ctxt).sax).setDocumentLocator.is_some() {
                         (*(*ctxt).sax)
                             .setDocumentLocator
-                            .expect(
-                                "non-null function pointer",
-                            )((*ctxt).userData, __xmlDefaultSAXLocator());
+                            .expect("non-null function pointer")(
+                            (*ctxt).userData,
+                            __xmlDefaultSAXLocator(),
+                        );
                     }
-                    if !(*ctxt).sax.is_null() && (*(*ctxt).sax).startDocument.is_some()
+                    if !(*ctxt).sax.is_null()
+                        && (*(*ctxt).sax).startDocument.is_some()
                         && (*ctxt).disableSAX == 0
                     {
                         (*(*ctxt).sax)
                             .startDocument
-                            .expect("non-null function pointer")((*ctxt).userData);
+                            .expect("non-null function pointer")(
+                            (*ctxt).userData
+                        );
                     }
                     cur = *(*in_0).cur.offset(0 as ::core::ffi::c_int as isize);
                     next = *(*in_0).cur.offset(1 as ::core::ffi::c_int as isize);
@@ -13744,8 +13601,8 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                     htmlSkipBlankChars(ctxt as xmlParserCtxtPtr);
                     if (*in_0).buf.is_null() {
                         avail = ((*in_0).length as ::core::ffi::c_long
-                            - (*in_0).cur.offset_from((*in_0).base)
-                                as ::core::ffi::c_long) as ptrdiff_t;
+                            - (*in_0).cur.offset_from((*in_0).base) as ::core::ffi::c_long)
+                            as ptrdiff_t;
                     } else {
                         avail = xmlBufUse((*(*in_0).buf).buffer) as ptrdiff_t
                             - (*in_0).cur.offset_from((*in_0).base) as ptrdiff_t;
@@ -13765,9 +13622,11 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                     if cur as ::core::ffi::c_int == '<' as i32
                         && next as ::core::ffi::c_int == '!' as i32
                         && *(*in_0).cur.offset(2 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '-' as i32
+                            as ::core::ffi::c_int
+                            == '-' as i32
                         && *(*in_0).cur.offset(3 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '-' as i32
+                            as ::core::ffi::c_int
+                            == '-' as i32
                     {
                         if terminate == 0
                             && htmlParseLookupCommentEnd(ctxt) < 0 as ::core::ffi::c_int
@@ -13864,8 +13723,8 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                     htmlSkipBlankChars(ctxt as xmlParserCtxtPtr);
                     if (*in_0).buf.is_null() {
                         avail = ((*in_0).length as ::core::ffi::c_long
-                            - (*in_0).cur.offset_from((*in_0).base)
-                                as ::core::ffi::c_long) as ptrdiff_t;
+                            - (*in_0).cur.offset_from((*in_0).base) as ::core::ffi::c_long)
+                            as ptrdiff_t;
                     } else {
                         avail = xmlBufUse((*(*in_0).buf).buffer) as ptrdiff_t
                             - (*in_0).cur.offset_from((*in_0).base) as ptrdiff_t;
@@ -13878,9 +13737,11 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                     if cur as ::core::ffi::c_int == '<' as i32
                         && next as ::core::ffi::c_int == '!' as i32
                         && *(*in_0).cur.offset(2 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '-' as i32
+                            as ::core::ffi::c_int
+                            == '-' as i32
                         && *(*in_0).cur.offset(3 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '-' as i32
+                            as ::core::ffi::c_int
+                            == '-' as i32
                     {
                         if terminate == 0
                             && htmlParseLookupCommentEnd(ctxt) < 0 as ::core::ffi::c_int
@@ -13918,8 +13779,8 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                 14 => {
                     if (*in_0).buf.is_null() {
                         avail = ((*in_0).length as ::core::ffi::c_long
-                            - (*in_0).cur.offset_from((*in_0).base)
-                                as ::core::ffi::c_long) as ptrdiff_t;
+                            - (*in_0).cur.offset_from((*in_0).base) as ::core::ffi::c_long)
+                            as ptrdiff_t;
                     } else {
                         avail = xmlBufUse((*(*in_0).buf).buffer) as ptrdiff_t
                             - (*in_0).cur.offset_from((*in_0).base) as ptrdiff_t;
@@ -13943,9 +13804,11 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                         if cur as ::core::ffi::c_int == '<' as i32
                             && next as ::core::ffi::c_int == '!' as i32
                             && *(*in_0).cur.offset(2 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int == '-' as i32
+                                as ::core::ffi::c_int
+                                == '-' as i32
                             && *(*in_0).cur.offset(3 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int == '-' as i32
+                                as ::core::ffi::c_int
+                                == '-' as i32
                         {
                             if terminate == 0
                                 && htmlParseLookupCommentEnd(ctxt) < 0 as ::core::ffi::c_int
@@ -13980,12 +13843,12 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                             (*ctxt).errNo = XML_ERR_DOCUMENT_END as ::core::ffi::c_int;
                             (*ctxt).wellFormed = 0 as ::core::ffi::c_int;
                             (*ctxt).instate = XML_PARSER_EOF;
-                            if !(*ctxt).sax.is_null()
-                                && (*(*ctxt).sax).endDocument.is_some()
-                            {
+                            if !(*ctxt).sax.is_null() && (*(*ctxt).sax).endDocument.is_some() {
                                 (*(*ctxt).sax)
                                     .endDocument
-                                    .expect("non-null function pointer")((*ctxt).userData);
+                                    .expect("non-null function pointer")(
+                                    (*ctxt).userData
+                                );
                             }
                             break;
                         }
@@ -13994,9 +13857,7 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                 6 => {
                     let mut name: *const xmlChar = ::core::ptr::null::<xmlChar>();
                     let mut failed: ::core::ffi::c_int = 0;
-                    let mut info: *const htmlElemDesc = ::core::ptr::null::<
-                        htmlElemDesc,
-                    >();
+                    let mut info: *const htmlElemDesc = ::core::ptr::null::<htmlElemDesc>();
                     if avail < 1 as ptrdiff_t {
                         break;
                     }
@@ -14027,20 +13888,17 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                             break;
                         }
                         if (*ctxt).record_info != 0 {
-                            node_info.begin_pos = (*(*ctxt).input)
-                                .consumed
-                                .wrapping_add(
-                                    (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
-                                        as ::core::ffi::c_long as ::core::ffi::c_ulong,
-                                );
-                            node_info.begin_line = (*(*ctxt).input).line
-                                as ::core::ffi::c_ulong;
+                            node_info.begin_pos = (*(*ctxt).input).consumed.wrapping_add(
+                                (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
+                                    as ::core::ffi::c_long
+                                    as ::core::ffi::c_ulong,
+                            );
+                            node_info.begin_line = (*(*ctxt).input).line as ::core::ffi::c_ulong;
                         }
                         failed = htmlParseStartTag(ctxt);
                         name = (*ctxt).name;
                         if failed == -(1 as ::core::ffi::c_int) || name.is_null() {
-                            if *(*(*ctxt).input).cur as ::core::ffi::c_int == '>' as i32
-                            {
+                            if *(*(*ctxt).input).cur as ::core::ffi::c_int == '>' as i32 {
                                 xmlNextChar(ctxt as xmlParserCtxtPtr);
                             }
                         } else {
@@ -14059,38 +13917,34 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                                 && *(*(*ctxt).input)
                                     .cur
                                     .offset(1 as ::core::ffi::c_int as isize)
-                                    as ::core::ffi::c_int == '>' as i32
+                                    as ::core::ffi::c_int
+                                    == '>' as i32
                             {
                                 (*(*ctxt).input).cur = (*(*ctxt).input)
                                     .cur
                                     .offset(2 as ::core::ffi::c_int as isize);
                                 (*(*ctxt).input).col += 2 as ::core::ffi::c_int;
-                                if !(*ctxt).sax.is_null()
-                                    && (*(*ctxt).sax).endElement.is_some()
-                                {
+                                if !(*ctxt).sax.is_null() && (*(*ctxt).sax).endElement.is_some() {
                                     (*(*ctxt).sax)
                                         .endElement
-                                        .expect(
-                                            "non-null function pointer",
-                                        )((*ctxt).userData, name);
+                                        .expect("non-null function pointer")(
+                                        (*ctxt).userData,
+                                        name,
+                                    );
                                 }
                                 htmlnamePop(ctxt);
                                 (*ctxt).instate = XML_PARSER_CONTENT;
-                            } else if *(*(*ctxt).input).cur as ::core::ffi::c_int
-                                == '>' as i32
-                            {
+                            } else if *(*(*ctxt).input).cur as ::core::ffi::c_int == '>' as i32 {
                                 xmlNextChar(ctxt as xmlParserCtxtPtr);
-                                if !info.is_null()
-                                    && (*info).empty as ::core::ffi::c_int != 0
-                                {
-                                    if !(*ctxt).sax.is_null()
-                                        && (*(*ctxt).sax).endElement.is_some()
+                                if !info.is_null() && (*info).empty as ::core::ffi::c_int != 0 {
+                                    if !(*ctxt).sax.is_null() && (*(*ctxt).sax).endElement.is_some()
                                     {
                                         (*(*ctxt).sax)
                                             .endElement
-                                            .expect(
-                                                "non-null function pointer",
-                                            )((*ctxt).userData, name);
+                                            .expect("non-null function pointer")(
+                                            (*ctxt).userData,
+                                            name,
+                                        );
                                     }
                                     htmlnamePop(ctxt);
                                 }
@@ -14127,13 +13981,10 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                     if (*ctxt).token != 0 as ::core::ffi::c_int {
                         chr[0 as ::core::ffi::c_int as usize] = (*ctxt).token as xmlChar;
                         htmlCheckParagraph(ctxt);
-                        if !(*ctxt).sax.is_null() && (*(*ctxt).sax).characters.is_some()
-                        {
+                        if !(*ctxt).sax.is_null() && (*(*ctxt).sax).characters.is_some() {
                             (*(*ctxt).sax)
                                 .characters
-                                .expect(
-                                    "non-null function pointer",
-                                )(
+                                .expect("non-null function pointer")(
                                 (*ctxt).userData,
                                 &raw mut chr as *mut xmlChar,
                                 1 as ::core::ffi::c_int,
@@ -14158,9 +14009,7 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                                         if (*(*ctxt).sax).characters.is_some() {
                                             (*(*ctxt).sax)
                                                 .characters
-                                                .expect(
-                                                    "non-null function pointer",
-                                                )(
+                                                .expect("non-null function pointer")(
                                                 (*ctxt).userData,
                                                 &raw mut chr as *mut xmlChar,
                                                 1 as ::core::ffi::c_int,
@@ -14169,9 +14018,7 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                                     } else if (*(*ctxt).sax).ignorableWhitespace.is_some() {
                                         (*(*ctxt).sax)
                                             .ignorableWhitespace
-                                            .expect(
-                                                "non-null function pointer",
-                                            )(
+                                            .expect("non-null function pointer")(
                                             (*ctxt).userData,
                                             &raw mut chr as *mut xmlChar,
                                             1 as ::core::ffi::c_int,
@@ -14182,9 +14029,7 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                                     if (*(*ctxt).sax).characters.is_some() {
                                         (*(*ctxt).sax)
                                             .characters
-                                            .expect(
-                                                "non-null function pointer",
-                                            )(
+                                            .expect("non-null function pointer")(
                                             (*ctxt).userData,
                                             &raw mut chr as *mut xmlChar,
                                             1 as ::core::ffi::c_int,
@@ -14205,13 +14050,11 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                     next = *(*in_0).cur.offset(1 as ::core::ffi::c_int as isize);
                     if xmlStrEqual(
                         (*ctxt).name,
-                        b"script\0" as *const u8 as *const ::core::ffi::c_char
-                            as *mut xmlChar,
+                        b"script\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                     ) != 0
                         || xmlStrEqual(
                             (*ctxt).name,
-                            b"style\0" as *const u8 as *const ::core::ffi::c_char
-                                as *mut xmlChar,
+                            b"style\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                         ) != 0
                     {
                         if terminate == 0 {
@@ -14227,9 +14070,7 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                             if idx < 0 as ::core::ffi::c_int {
                                 break;
                             }
-                            val = *(*in_0)
-                                .cur
-                                .offset((idx + 2 as ::core::ffi::c_int) as isize);
+                            val = *(*in_0).cur.offset((idx + 2 as ::core::ffi::c_int) as isize);
                             if val as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
                                 break;
                             }
@@ -14303,17 +14144,18 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                             XML_HTML_STRUCURE_ERROR,
                             b"Misplaced DOCTYPE declaration\n\0" as *const u8
                                 as *const ::core::ffi::c_char,
-                            b"DOCTYPE\0" as *const u8 as *const ::core::ffi::c_char
-                                as *mut xmlChar,
+                            b"DOCTYPE\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                             ::core::ptr::null::<xmlChar>(),
                         );
                         htmlParseDocTypeDecl(ctxt);
                     } else if cur as ::core::ffi::c_int == '<' as i32
                         && next as ::core::ffi::c_int == '!' as i32
                         && *(*in_0).cur.offset(2 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '-' as i32
+                            as ::core::ffi::c_int
+                            == '-' as i32
                         && *(*in_0).cur.offset(3 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int == '-' as i32
+                            as ::core::ffi::c_int
+                            == '-' as i32
                     {
                         if terminate == 0
                             && htmlParseLookupCommentEnd(ctxt) < 0 as ::core::ffi::c_int
@@ -14364,14 +14206,13 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                             (*ctxt).instate = XML_PARSER_START_TAG;
                             (*ctxt).checkIndex = 0 as ::core::ffi::c_long;
                         } else if cur as ::core::ffi::c_int == '<' as i32 {
-                            if !(*ctxt).sax.is_null() && (*ctxt).disableSAX == 0
+                            if !(*ctxt).sax.is_null()
+                                && (*ctxt).disableSAX == 0
                                 && (*(*ctxt).sax).characters.is_some()
                             {
                                 (*(*ctxt).sax)
                                     .characters
-                                    .expect(
-                                        "non-null function pointer",
-                                    )(
+                                    .expect("non-null function pointer")(
                                     (*ctxt).userData,
                                     b"<\0" as *const u8 as *const ::core::ffi::c_char
                                         as *mut xmlChar,
@@ -14518,8 +14359,8 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                     htmlParseErr(
                         ctxt as xmlParserCtxtPtr,
                         XML_ERR_INTERNAL_ERROR,
-                        b"HPP: internal error, state == XML_PARSER_SYSTEM_LITERAL\n\0"
-                            as *const u8 as *const ::core::ffi::c_char,
+                        b"HPP: internal error, state == XML_PARSER_SYSTEM_LITERAL\n\0" as *const u8
+                            as *const ::core::ffi::c_char,
                         ::core::ptr::null::<xmlChar>(),
                         ::core::ptr::null::<xmlChar>(),
                     );
@@ -14530,8 +14371,8 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                     htmlParseErr(
                         ctxt as xmlParserCtxtPtr,
                         XML_ERR_INTERNAL_ERROR,
-                        b"HPP: internal error, state == XML_PARSER_IGNORE\n\0"
-                            as *const u8 as *const ::core::ffi::c_char,
+                        b"HPP: internal error, state == XML_PARSER_IGNORE\n\0" as *const u8
+                            as *const ::core::ffi::c_char,
                         ::core::ptr::null::<xmlChar>(),
                         ::core::ptr::null::<xmlChar>(),
                     );
@@ -14542,8 +14383,8 @@ unsafe extern "C" fn htmlParseTryOrFinish(
                     htmlParseErr(
                         ctxt as xmlParserCtxtPtr,
                         XML_ERR_INTERNAL_ERROR,
-                        b"HPP: internal error, state == XML_PARSER_LITERAL\n\0"
-                            as *const u8 as *const ::core::ffi::c_char,
+                        b"HPP: internal error, state == XML_PARSER_LITERAL\n\0" as *const u8
+                            as *const ::core::ffi::c_char,
                         ::core::ptr::null::<xmlChar>(),
                         ::core::ptr::null::<xmlChar>(),
                     );
@@ -14557,8 +14398,7 @@ unsafe extern "C" fn htmlParseTryOrFinish(
     if avail == 0 as ptrdiff_t && terminate != 0 {
         htmlAutoCloseOnEnd(ctxt);
         if (*ctxt).nameNr == 0 as ::core::ffi::c_int
-            && (*ctxt).instate as ::core::ffi::c_int
-                != XML_PARSER_EOF as ::core::ffi::c_int
+            && (*ctxt).instate as ::core::ffi::c_int != XML_PARSER_EOF as ::core::ffi::c_int
         {
             (*ctxt).instate = XML_PARSER_EOF;
             if !(*ctxt).sax.is_null() && (*(*ctxt).sax).endDocument.is_some() {
@@ -14571,10 +14411,8 @@ unsafe extern "C" fn htmlParseTryOrFinish(
     if (*ctxt).options & HTML_PARSE_NODEFDTD as ::core::ffi::c_int == 0
         && !(*ctxt).myDoc.is_null()
         && (terminate != 0
-            || (*ctxt).instate as ::core::ffi::c_int
-                == XML_PARSER_EOF as ::core::ffi::c_int
-            || (*ctxt).instate as ::core::ffi::c_int
-                == XML_PARSER_EPILOG as ::core::ffi::c_int)
+            || (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
+            || (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EPILOG as ::core::ffi::c_int)
     {
         let mut dtd: xmlDtdPtr = ::core::ptr::null_mut::<xmlDtd>();
         dtd = xmlGetIntSubset((*ctxt).myDoc as *const xmlDoc);
@@ -14602,8 +14440,7 @@ pub unsafe extern "C" fn htmlParseChunk(
         htmlParseErr(
             ctxt as xmlParserCtxtPtr,
             XML_ERR_INTERNAL_ERROR,
-            b"htmlParseChunk: context error\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"htmlParseChunk: context error\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<xmlChar>(),
             ::core::ptr::null::<xmlChar>(),
         );
@@ -14619,14 +14456,13 @@ pub unsafe extern "C" fn htmlParseChunk(
     if budget_depth > 0 {
         budget::note_recursion_depth(ctxt, budget_depth as u32);
     }
-    if size > 0 as ::core::ffi::c_int && !chunk.is_null() && !(*ctxt).input.is_null()
+    if size > 0 as ::core::ffi::c_int
+        && !chunk.is_null()
+        && !(*ctxt).input.is_null()
         && !(*(*ctxt).input).buf.is_null()
         && (*ctxt).instate as ::core::ffi::c_int != XML_PARSER_EOF as ::core::ffi::c_int
     {
-        let mut base: size_t = xmlBufGetInputBase(
-            (*(*(*ctxt).input).buf).buffer,
-            (*ctxt).input,
-        );
+        let mut base: size_t = xmlBufGetInputBase((*(*(*ctxt).input).buf).buffer, (*ctxt).input);
         let mut cur: size_t = (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
             as ::core::ffi::c_long as size_t;
         let mut res: ::core::ffi::c_int = 0;
@@ -14637,22 +14473,14 @@ pub unsafe extern "C" fn htmlParseChunk(
             (*ctxt).disableSAX = 1 as ::core::ffi::c_int;
             return XML_PARSER_EOF as ::core::ffi::c_int;
         }
-    } else if (*ctxt).instate as ::core::ffi::c_int
-        != XML_PARSER_EOF as ::core::ffi::c_int
-    {
+    } else if (*ctxt).instate as ::core::ffi::c_int != XML_PARSER_EOF as ::core::ffi::c_int {
         if !(*ctxt).input.is_null() && !(*(*ctxt).input).buf.is_null() {
             let mut in_0: xmlParserInputBufferPtr = (*(*ctxt).input).buf;
-            if !(*in_0).encoder.is_null() && !(*in_0).buffer.is_null()
-                && !(*in_0).raw.is_null()
-            {
+            if !(*in_0).encoder.is_null() && !(*in_0).buffer.is_null() && !(*in_0).raw.is_null() {
                 let mut nbchars: ::core::ffi::c_int = 0;
-                let mut base_0: size_t = xmlBufGetInputBase(
-                    (*in_0).buffer,
-                    (*ctxt).input,
-                );
-                let mut current: size_t = (*(*ctxt).input)
-                    .cur
-                    .offset_from((*(*ctxt).input).base) as ::core::ffi::c_long as size_t;
+                let mut base_0: size_t = xmlBufGetInputBase((*in_0).buffer, (*ctxt).input);
+                let mut current: size_t = (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
+                    as ::core::ffi::c_long as size_t;
                 nbchars = xmlCharEncInput(in_0, terminate);
                 xmlBufSetInputBaseCur((*in_0).buffer, (*ctxt).input, base_0, current);
                 if nbchars < 0 as ::core::ffi::c_int {
@@ -14671,16 +14499,13 @@ pub unsafe extern "C" fn htmlParseChunk(
     htmlParseTryOrFinish(ctxt, terminate);
     if terminate != 0 {
         if (*ctxt).instate as ::core::ffi::c_int != XML_PARSER_EOF as ::core::ffi::c_int
-            && (*ctxt).instate as ::core::ffi::c_int
-                != XML_PARSER_EPILOG as ::core::ffi::c_int
-            && (*ctxt).instate as ::core::ffi::c_int
-                != XML_PARSER_MISC as ::core::ffi::c_int
+            && (*ctxt).instate as ::core::ffi::c_int != XML_PARSER_EPILOG as ::core::ffi::c_int
+            && (*ctxt).instate as ::core::ffi::c_int != XML_PARSER_MISC as ::core::ffi::c_int
         {
             (*ctxt).errNo = XML_ERR_DOCUMENT_END as ::core::ffi::c_int;
             (*ctxt).wellFormed = 0 as ::core::ffi::c_int;
         }
-        if (*ctxt).instate as ::core::ffi::c_int != XML_PARSER_EOF as ::core::ffi::c_int
-        {
+        if (*ctxt).instate as ::core::ffi::c_int != XML_PARSER_EOF as ::core::ffi::c_int {
             if !(*ctxt).sax.is_null() && (*(*ctxt).sax).endDocument.is_some() {
                 (*(*ctxt).sax)
                     .endDocument
@@ -14702,9 +14527,7 @@ pub unsafe extern "C" fn htmlCreatePushParserCtxt(
 ) -> htmlParserCtxtPtr {
     let mut ctxt: htmlParserCtxtPtr = ::core::ptr::null_mut::<xmlParserCtxt>();
     let mut inputStream: htmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
-    let mut buf: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut buf: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     xmlInitParser();
     buf = xmlAllocParserInputBuffer(enc);
     if buf.is_null() {
@@ -14722,20 +14545,14 @@ pub unsafe extern "C" fn htmlCreatePushParserCtxt(
     }
     if !sax.is_null() {
         if (*ctxt).sax != __htmlDefaultSAXHandler() as xmlSAXHandlerPtr {
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )((*ctxt).sax as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")((*ctxt).sax as *mut ::core::ffi::c_void);
         }
-        (*ctxt).sax = xmlMalloc
-            .expect(
-                "non-null function pointer",
-            )(::core::mem::size_of::<htmlSAXHandler>() as size_t) as htmlSAXHandlerPtr
-            as *mut _xmlSAXHandler;
+        (*ctxt).sax = xmlMalloc.expect("non-null function pointer")(::core::mem::size_of::<
+            htmlSAXHandler,
+        >() as size_t) as htmlSAXHandlerPtr as *mut _xmlSAXHandler;
         if (*ctxt).sax.is_null() {
             xmlFree.expect("non-null function pointer")(buf as *mut ::core::ffi::c_void);
-            xmlFree
-                .expect("non-null function pointer")(ctxt as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(ctxt as *mut ::core::ffi::c_void);
             return ::core::ptr::null_mut::<xmlParserCtxt>();
         }
         memcpy(
@@ -14761,19 +14578,18 @@ pub unsafe extern "C" fn htmlCreatePushParserCtxt(
     if filename.is_null() {
         (*inputStream).filename = ::core::ptr::null::<::core::ffi::c_char>();
     } else {
-        (*inputStream).filename = xmlCanonicPath(filename as *const xmlChar)
-            as *mut ::core::ffi::c_char;
+        (*inputStream).filename =
+            xmlCanonicPath(filename as *const xmlChar) as *mut ::core::ffi::c_char;
     }
     (*inputStream).buf = buf;
     xmlBufResetInput((*buf).buffer, inputStream as xmlParserInputPtr);
     inputPush(ctxt as xmlParserCtxtPtr, inputStream as xmlParserInputPtr);
-    if size > 0 as ::core::ffi::c_int && !chunk.is_null() && !(*ctxt).input.is_null()
+    if size > 0 as ::core::ffi::c_int
+        && !chunk.is_null()
+        && !(*ctxt).input.is_null()
         && !(*(*ctxt).input).buf.is_null()
     {
-        let mut base: size_t = xmlBufGetInputBase(
-            (*(*(*ctxt).input).buf).buffer,
-            (*ctxt).input,
-        );
+        let mut base: size_t = xmlBufGetInputBase((*(*(*ctxt).input).buf).buffer, (*ctxt).input);
         let mut cur: size_t = (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
             as ::core::ffi::c_long as size_t;
         xmlParserInputBufferPush((*(*ctxt).input).buf, size, chunk);
@@ -14801,10 +14617,7 @@ pub unsafe extern "C" fn htmlSAXParseDoc(
     }
     if !sax.is_null() {
         if !(*ctxt).sax.is_null() {
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )((*ctxt).sax as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")((*ctxt).sax as *mut ::core::ffi::c_void);
         }
         (*ctxt).sax = sax as *mut _xmlSAXHandler;
         (*ctxt).userData = userData;
@@ -14837,12 +14650,11 @@ pub unsafe extern "C" fn htmlCreateFileParserCtxt(
 ) -> htmlParserCtxtPtr {
     let mut ctxt: htmlParserCtxtPtr = ::core::ptr::null_mut::<xmlParserCtxt>();
     let mut inputStream: htmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
-    let mut canonicFilename: *mut ::core::ffi::c_char = ::core::ptr::null_mut::<
-        ::core::ffi::c_char,
-    >();
+    let mut canonicFilename: *mut ::core::ffi::c_char =
+        ::core::ptr::null_mut::<::core::ffi::c_char>();
     let mut content: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    let mut content_line: *mut xmlChar = b"charset=\0" as *const u8
-        as *const ::core::ffi::c_char as *mut xmlChar;
+    let mut content_line: *mut xmlChar =
+        b"charset=\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar;
     if filename.is_null() {
         return ::core::ptr::null_mut::<xmlParserCtxt>();
     }
@@ -14850,15 +14662,15 @@ pub unsafe extern "C" fn htmlCreateFileParserCtxt(
     if ctxt.is_null() {
         return ::core::ptr::null_mut::<xmlParserCtxt>();
     }
-    canonicFilename = xmlCanonicPath(filename as *const xmlChar)
-        as *mut ::core::ffi::c_char;
+    canonicFilename = xmlCanonicPath(filename as *const xmlChar) as *mut ::core::ffi::c_char;
     if canonicFilename.is_null() {
         if (*__xmlDefaultSAXHandler()).error.is_some() {
             (*__xmlDefaultSAXHandler())
                 .error
-                .expect(
-                    "non-null function pointer",
-                )(NULL, b"out of memory\n\0" as *const u8 as *const ::core::ffi::c_char);
+                .expect("non-null function pointer")(
+                NULL,
+                b"out of memory\n\0" as *const u8 as *const ::core::ffi::c_char,
+            );
         }
         xmlFreeParserCtxt(ctxt as xmlParserCtxtPtr);
         return ::core::ptr::null_mut::<xmlParserCtxt>();
@@ -14868,10 +14680,7 @@ pub unsafe extern "C" fn htmlCreateFileParserCtxt(
         ::core::ptr::null::<::core::ffi::c_char>(),
         ctxt as xmlParserCtxtPtr,
     ) as htmlParserInputPtr;
-    xmlFree
-        .expect(
-            "non-null function pointer",
-        )(canonicFilename as *mut ::core::ffi::c_void);
+    xmlFree.expect("non-null function pointer")(canonicFilename as *mut ::core::ffi::c_void);
     if inputStream.is_null() {
         xmlFreeParserCtxt(ctxt as xmlParserCtxtPtr);
         return ::core::ptr::null_mut::<xmlParserCtxt>();
@@ -14880,10 +14689,7 @@ pub unsafe extern "C" fn htmlCreateFileParserCtxt(
     if !encoding.is_null() {
         let mut l: size_t = strlen(encoding);
         if l < 1000 as size_t {
-            content = xmlMallocAtomic
-                .expect(
-                    "non-null function pointer",
-                )(
+            content = xmlMallocAtomic.expect("non-null function pointer")(
                 (xmlStrlen(content_line) as size_t)
                     .wrapping_add(l)
                     .wrapping_add(1 as size_t),
@@ -14898,10 +14704,7 @@ pub unsafe extern "C" fn htmlCreateFileParserCtxt(
                     encoding as *mut ::core::ffi::c_char,
                 );
                 htmlCheckEncoding(ctxt, content);
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(content as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(content as *mut ::core::ffi::c_void);
             }
         }
     }
@@ -14949,9 +14752,7 @@ pub unsafe extern "C" fn htmlParseFile(
     );
 }
 #[no_mangle]
-pub unsafe extern "C" fn htmlHandleOmittedElem(
-    mut val: ::core::ffi::c_int,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn htmlHandleOmittedElem(mut val: ::core::ffi::c_int) -> ::core::ffi::c_int {
     let mut old: ::core::ffi::c_int = htmlOmittedDefaultValue;
     htmlOmittedDefaultValue = val;
     return old;
@@ -14961,9 +14762,8 @@ pub unsafe extern "C" fn htmlElementAllowedHere(
     mut parent: *const htmlElemDesc,
     mut elt: *const xmlChar,
 ) -> ::core::ffi::c_int {
-    let mut p: *mut *const ::core::ffi::c_char = ::core::ptr::null_mut::<
-        *const ::core::ffi::c_char,
-    >();
+    let mut p: *mut *const ::core::ffi::c_char =
+        ::core::ptr::null_mut::<*const ::core::ffi::c_char>();
     if elt.is_null() || parent.is_null() || (*parent).subelts.is_null() {
         return 0 as ::core::ffi::c_int;
     }
@@ -14999,9 +14799,8 @@ pub unsafe extern "C" fn htmlAttrAllowed(
     mut attr: *const xmlChar,
     mut legacy: ::core::ffi::c_int,
 ) -> htmlStatus {
-    let mut p: *mut *const ::core::ffi::c_char = ::core::ptr::null_mut::<
-        *const ::core::ffi::c_char,
-    >();
+    let mut p: *mut *const ::core::ffi::c_char =
+        ::core::ptr::null_mut::<*const ::core::ffi::c_char>();
     if elt.is_null() || attr.is_null() {
         return HTML_INVALID;
     }
@@ -15045,10 +14844,7 @@ pub unsafe extern "C" fn htmlNodeStatus(
     match (*node).type_0 as ::core::ffi::c_uint {
         1 => {
             return (if legacy != 0 {
-                (if htmlElementAllowedHere(
-                    htmlTagLookup((*(*node).parent).name),
-                    (*node).name,
-                ) != 0
+                (if htmlElementAllowedHere(htmlTagLookup((*(*node).parent).name), (*node).name) != 0
                 {
                     HTML_VALID as ::core::ffi::c_int
                 } else {
@@ -15062,11 +14858,7 @@ pub unsafe extern "C" fn htmlNodeStatus(
             }) as htmlStatus;
         }
         2 => {
-            return htmlAttrAllowed(
-                htmlTagLookup((*(*node).parent).name),
-                (*node).name,
-                legacy,
-            );
+            return htmlAttrAllowed(htmlTagLookup((*(*node).parent).name), (*node).name, legacy);
         }
         _ => return HTML_NA,
     };
@@ -15091,10 +14883,9 @@ pub unsafe extern "C" fn htmlCtxtReset(mut ctxt: htmlParserCtxtPtr) {
     (*ctxt).input = ::core::ptr::null_mut::<xmlParserInput>();
     (*ctxt).spaceNr = 0 as ::core::ffi::c_int;
     if !(*ctxt).spaceTab.is_null() {
-        *(*ctxt).spaceTab.offset(0 as ::core::ffi::c_int as isize) = -(1
-            as ::core::ffi::c_int);
-        (*ctxt).space = (*ctxt).spaceTab.offset(0 as ::core::ffi::c_int as isize)
-            as *mut ::core::ffi::c_int;
+        *(*ctxt).spaceTab.offset(0 as ::core::ffi::c_int as isize) = -(1 as ::core::ffi::c_int);
+        (*ctxt).space =
+            (*ctxt).spaceTab.offset(0 as ::core::ffi::c_int as isize) as *mut ::core::ffi::c_int;
     } else {
         (*ctxt).space = ::core::ptr::null_mut::<::core::ffi::c_int>();
     }
@@ -15104,56 +14895,42 @@ pub unsafe extern "C" fn htmlCtxtReset(mut ctxt: htmlParserCtxtPtr) {
     (*ctxt).name = ::core::ptr::null::<xmlChar>();
     (*ctxt).nsNr = 0 as ::core::ffi::c_int;
     if !(*ctxt).version.is_null()
-        && (dict.is_null()
-            || xmlDictOwns(dict, (*ctxt).version) == 0 as ::core::ffi::c_int)
+        && (dict.is_null() || xmlDictOwns(dict, (*ctxt).version) == 0 as ::core::ffi::c_int)
     {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*ctxt).version as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(
+            (*ctxt).version as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+        );
     }
     (*ctxt).version = ::core::ptr::null::<xmlChar>();
     if !(*ctxt).encoding.is_null()
-        && (dict.is_null()
-            || xmlDictOwns(dict, (*ctxt).encoding) == 0 as ::core::ffi::c_int)
+        && (dict.is_null() || xmlDictOwns(dict, (*ctxt).encoding) == 0 as ::core::ffi::c_int)
     {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*ctxt).encoding as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(
+            (*ctxt).encoding as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+        );
     }
     (*ctxt).encoding = ::core::ptr::null::<xmlChar>();
     if !(*ctxt).directory.is_null()
         && (dict.is_null()
-            || xmlDictOwns(dict, (*ctxt).directory as *const xmlChar)
-                == 0 as ::core::ffi::c_int)
+            || xmlDictOwns(dict, (*ctxt).directory as *const xmlChar) == 0 as ::core::ffi::c_int)
     {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*ctxt).directory as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*ctxt).directory as *mut ::core::ffi::c_void);
     }
     (*ctxt).directory = ::core::ptr::null_mut::<::core::ffi::c_char>();
     if !(*ctxt).extSubURI.is_null()
         && (dict.is_null()
-            || xmlDictOwns(dict, (*ctxt).extSubURI as *const xmlChar)
-                == 0 as ::core::ffi::c_int)
+            || xmlDictOwns(dict, (*ctxt).extSubURI as *const xmlChar) == 0 as ::core::ffi::c_int)
     {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*ctxt).extSubURI as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(
+            (*ctxt).extSubURI as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+        );
     }
     (*ctxt).extSubURI = ::core::ptr::null_mut::<xmlChar>();
     if !(*ctxt).extSubSystem.is_null()
         && (dict.is_null()
-            || xmlDictOwns(dict, (*ctxt).extSubSystem as *const xmlChar)
-                == 0 as ::core::ffi::c_int)
+            || xmlDictOwns(dict, (*ctxt).extSubSystem as *const xmlChar) == 0 as ::core::ffi::c_int)
     {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )(
+        xmlFree.expect("non-null function pointer")(
             (*ctxt).extSubSystem as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
         );
     }
@@ -15203,10 +14980,7 @@ pub unsafe extern "C" fn htmlCtxtReset(mut ctxt: htmlParserCtxtPtr) {
             (*ctxt).attsDefault,
             Some(
                 xmlHashDefaultDeallocator
-                    as unsafe extern "C" fn(
-                        *mut ::core::ffi::c_void,
-                        *const xmlChar,
-                    ) -> (),
+                    as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
             ),
         );
         (*ctxt).attsDefault = ::core::ptr::null_mut::<xmlHashTable>();
@@ -15299,27 +15073,20 @@ unsafe extern "C" fn htmlDoRead(
     htmlCtxtUseOptions(ctxt, options);
     (*ctxt).html = 1 as ::core::ffi::c_int;
     if !encoding.is_null() {
-        let mut hdlr: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<
-            xmlCharEncodingHandler,
-        >();
+        let mut hdlr: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<xmlCharEncodingHandler>();
         hdlr = xmlFindCharEncodingHandler(encoding);
         if !hdlr.is_null() {
             xmlSwitchToEncoding(ctxt as xmlParserCtxtPtr, hdlr);
             if !(*(*ctxt).input).encoding.is_null() {
-                xmlFree
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                xmlFree.expect("non-null function pointer")(
                     (*(*ctxt).input).encoding as *mut xmlChar as *mut ::core::ffi::c_void,
                 );
             }
             (*(*ctxt).input).encoding = xmlStrdup(encoding as *mut xmlChar);
         }
     }
-    if !URL.is_null() && !(*ctxt).input.is_null() && (*(*ctxt).input).filename.is_null()
-    {
-        (*(*ctxt).input).filename = xmlStrdup(URL as *const xmlChar)
-            as *mut ::core::ffi::c_char;
+    if !URL.is_null() && !(*ctxt).input.is_null() && (*(*ctxt).input).filename.is_null() {
+        (*(*ctxt).input).filename = xmlStrdup(URL as *const xmlChar) as *mut ::core::ffi::c_char;
     }
     htmlParseDocument(ctxt);
     ret = (*ctxt).myDoc as htmlDocPtr;
@@ -15402,9 +15169,7 @@ pub unsafe extern "C" fn htmlReadFd(
     mut options: ::core::ffi::c_int,
 ) -> htmlDocPtr {
     let mut ctxt: htmlParserCtxtPtr = ::core::ptr::null_mut::<xmlParserCtxt>();
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     let mut stream: htmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
     if fd < 0 as ::core::ffi::c_int {
         return ::core::ptr::null_mut::<xmlDoc>();
@@ -15440,9 +15205,7 @@ pub unsafe extern "C" fn htmlReadIO(
     mut options: ::core::ffi::c_int,
 ) -> htmlDocPtr {
     let mut ctxt: htmlParserCtxtPtr = ::core::ptr::null_mut::<xmlParserCtxt>();
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     let mut stream: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
     if ioread.is_none() {
         return ::core::ptr::null_mut::<xmlDoc>();
@@ -15460,11 +15223,7 @@ pub unsafe extern "C" fn htmlReadIO(
         xmlFreeParserInputBuffer(input);
         return ::core::ptr::null_mut::<xmlDoc>();
     }
-    stream = xmlNewIOInputStream(
-        ctxt as xmlParserCtxtPtr,
-        input,
-        XML_CHAR_ENCODING_NONE,
-    );
+    stream = xmlNewIOInputStream(ctxt as xmlParserCtxtPtr, input, XML_CHAR_ENCODING_NONE);
     if stream.is_null() {
         xmlFreeParserInputBuffer(input);
         xmlFreeParserCtxt(ctxt as xmlParserCtxtPtr);
@@ -15539,9 +15298,7 @@ pub unsafe extern "C" fn htmlCtxtReadMemory(
     mut encoding: *const ::core::ffi::c_char,
     mut options: ::core::ffi::c_int,
 ) -> htmlDocPtr {
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     let mut stream: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
     if ctxt.is_null() {
         return ::core::ptr::null_mut::<xmlDoc>();
@@ -15555,11 +15312,7 @@ pub unsafe extern "C" fn htmlCtxtReadMemory(
     if input.is_null() {
         return ::core::ptr::null_mut::<xmlDoc>();
     }
-    stream = xmlNewIOInputStream(
-        ctxt as xmlParserCtxtPtr,
-        input,
-        XML_CHAR_ENCODING_NONE,
-    );
+    stream = xmlNewIOInputStream(ctxt as xmlParserCtxtPtr, input, XML_CHAR_ENCODING_NONE);
     if stream.is_null() {
         xmlFreeParserInputBuffer(input);
         return ::core::ptr::null_mut::<xmlDoc>();
@@ -15575,9 +15328,7 @@ pub unsafe extern "C" fn htmlCtxtReadFd(
     mut encoding: *const ::core::ffi::c_char,
     mut options: ::core::ffi::c_int,
 ) -> htmlDocPtr {
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     let mut stream: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
     if fd < 0 as ::core::ffi::c_int {
         return ::core::ptr::null_mut::<xmlDoc>();
@@ -15591,11 +15342,7 @@ pub unsafe extern "C" fn htmlCtxtReadFd(
     if input.is_null() {
         return ::core::ptr::null_mut::<xmlDoc>();
     }
-    stream = xmlNewIOInputStream(
-        ctxt as xmlParserCtxtPtr,
-        input,
-        XML_CHAR_ENCODING_NONE,
-    );
+    stream = xmlNewIOInputStream(ctxt as xmlParserCtxtPtr, input, XML_CHAR_ENCODING_NONE);
     if stream.is_null() {
         xmlFreeParserInputBuffer(input);
         return ::core::ptr::null_mut::<xmlDoc>();
@@ -15613,9 +15360,7 @@ pub unsafe extern "C" fn htmlCtxtReadIO(
     mut encoding: *const ::core::ffi::c_char,
     mut options: ::core::ffi::c_int,
 ) -> htmlDocPtr {
-    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<
-        xmlParserInputBuffer,
-    >();
+    let mut input: xmlParserInputBufferPtr = ::core::ptr::null_mut::<xmlParserInputBuffer>();
     let mut stream: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
     if ioread.is_none() {
         return ::core::ptr::null_mut::<xmlDoc>();
@@ -15632,11 +15377,7 @@ pub unsafe extern "C" fn htmlCtxtReadIO(
         }
         return ::core::ptr::null_mut::<xmlDoc>();
     }
-    stream = xmlNewIOInputStream(
-        ctxt as xmlParserCtxtPtr,
-        input,
-        XML_CHAR_ENCODING_NONE,
-    );
+    stream = xmlNewIOInputStream(ctxt as xmlParserCtxtPtr, input, XML_CHAR_ENCODING_NONE);
     if stream.is_null() {
         xmlFreeParserInputBuffer(input);
         return ::core::ptr::null_mut::<xmlDoc>();

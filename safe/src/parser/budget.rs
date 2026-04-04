@@ -139,7 +139,9 @@ pub(crate) fn dtd_depth_limit_exceeded<T>(
     allow_huge: bool,
 ) -> bool {
     let snapshot = snapshot_for(ctxt);
-    let observed = current_depth.max(snapshot.dtd_depth).max(snapshot.entity_depth);
+    let observed = current_depth
+        .max(snapshot.dtd_depth)
+        .max(snapshot.entity_depth);
     observed > hard_limit || (!allow_huge && observed > soft_limit)
 }
 
@@ -155,7 +157,9 @@ pub(crate) fn entity_limit_exceeded<T>(
         return false;
     }
     let snapshot = snapshot_for(ctxt);
-    let observed_depth = current_depth.max(snapshot.entity_depth).max(snapshot.dtd_depth);
+    let observed_depth = current_depth
+        .max(snapshot.entity_depth)
+        .max(snapshot.dtd_depth);
     if observed_depth > XML_SHARED_ABSOLUTE_DEPTH {
         return true;
     }

@@ -1,6 +1,5 @@
 use crate::abi::opaque::{
-    _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict, _xmlHashTable, _xmlStartTag,
-    _xmlValidState,
+    _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict, _xmlHashTable, _xmlStartTag, _xmlValidState,
 };
 
 extern "C" {
@@ -83,9 +82,8 @@ pub type xmlCharEncodingInputFunc = Option<
         *mut ::core::ffi::c_int,
     ) -> ::core::ffi::c_int,
 >;
-pub type xmlInputCloseCallback = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type xmlInputCloseCallback =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type xmlInputReadCallback = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -435,12 +433,10 @@ pub type xmlAutomata = _xmlAutomata;
 pub type xmlValidState = _xmlValidState;
 pub type xmlDocPtr = *mut xmlDoc;
 pub type xmlDoc = _xmlDoc;
-pub type xmlValidityWarningFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type xmlValidityErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlValidityWarningFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type xmlValidityErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlParserNodeInfoSeq = _xmlParserNodeInfoSeq;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -485,9 +481,8 @@ pub struct _xmlSAXHandler {
     pub endElementNs: endElementNsSAX2Func,
     pub serror: xmlStructuredErrorFunc,
 }
-pub type xmlStructuredErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> (),
->;
+pub type xmlStructuredErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> ()>;
 pub type xmlErrorPtr = *mut xmlError;
 pub type endElementNsSAX2Func = Option<
     unsafe extern "C" fn(
@@ -519,15 +514,10 @@ pub type externalSubsetSAXFunc = Option<
     ) -> (),
 >;
 pub type cdataBlockSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type getParameterEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getParameterEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type xmlEntityPtr = *mut xmlEntity;
 pub type xmlEntity = _xmlEntity;
 #[derive(Copy, Clone)]
@@ -560,74 +550,43 @@ pub const XML_INTERNAL_PARAMETER_ENTITY: xmlEntityType = 4;
 pub const XML_EXTERNAL_GENERAL_UNPARSED_ENTITY: xmlEntityType = 3;
 pub const XML_EXTERNAL_GENERAL_PARSED_ENTITY: xmlEntityType = 2;
 pub const XML_INTERNAL_GENERAL_ENTITY: xmlEntityType = 1;
-pub type fatalErrorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type errorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type warningSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type commentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type processingInstructionSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> (),
->;
+pub type fatalErrorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type errorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type warningSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type commentSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type processingInstructionSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> ()>;
 pub type ignorableWhitespaceSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
 pub type charactersSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type referenceSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type endElementSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
+pub type referenceSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type endElementSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
 pub type startElementSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        *mut *const xmlChar,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *mut *const xmlChar) -> (),
 >;
-pub type endDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type startDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type setDocumentLocatorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
->;
+pub type endDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type startDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type setDocumentLocatorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> ()>;
 pub type xmlSAXLocatorPtr = *mut xmlSAXLocator;
 pub type xmlSAXLocator = _xmlSAXLocator;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _xmlSAXLocator {
-    pub getPublicId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getSystemId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getLineNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
-    pub getColumnNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
+    pub getPublicId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getSystemId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getLineNumber: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
+    pub getColumnNumber:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
 }
 pub type unparsedEntityDeclSAXFunc = Option<
     unsafe extern "C" fn(
@@ -706,9 +665,8 @@ pub type entityDeclSAXFunc = Option<
         *mut xmlChar,
     ) -> (),
 >;
-pub type getEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type resolveEntitySAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -716,15 +674,12 @@ pub type resolveEntitySAXFunc = Option<
         *const xmlChar,
     ) -> xmlParserInputPtr,
 >;
-pub type hasExternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type hasInternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type isStandaloneSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type hasExternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type hasInternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type isStandaloneSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type internalSubsetSAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -737,9 +692,8 @@ pub type xmlParserCtxt = _xmlParserCtxt;
 pub type xmlParserCtxtPtr = *mut xmlParserCtxt;
 pub type xmlSAXHandler = _xmlSAXHandler;
 pub type xmlSAXHandlerPtr = *mut xmlSAXHandler;
-pub type xmlGenericErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlGenericErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlCharEncoding = ::core::ffi::c_int;
 pub const XML_CHAR_ENCODING_ASCII: xmlCharEncoding = 22;
 pub const XML_CHAR_ENCODING_EUC_JP: xmlCharEncoding = 21;
@@ -777,10 +731,7 @@ pub unsafe extern "C" fn docbEncodeEntities(
 ) -> ::core::ffi::c_int {
     static mut deprecated: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if deprecated == 0 {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
             b"docbEncodeEntities() deprecated function reached\n\0" as *const u8
                 as *const ::core::ffi::c_char,
@@ -789,15 +740,10 @@ pub unsafe extern "C" fn docbEncodeEntities(
     }
     return -(1 as ::core::ffi::c_int);
 }
-pub unsafe extern "C" fn docbParseDocument(
-    mut ctxt: docbParserCtxtPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn docbParseDocument(mut ctxt: docbParserCtxtPtr) -> ::core::ffi::c_int {
     static mut deprecated: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if deprecated == 0 {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
             b"docbParseDocument() deprecated function reached\n\0" as *const u8
                 as *const ::core::ffi::c_char,
@@ -809,10 +755,7 @@ pub unsafe extern "C" fn docbParseDocument(
 pub unsafe extern "C" fn docbFreeParserCtxt(mut ctxt: docbParserCtxtPtr) {
     static mut deprecated: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if deprecated == 0 {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
             b"docbFreeParserCtxt() deprecated function reached\n\0" as *const u8
                 as *const ::core::ffi::c_char,
@@ -829,10 +772,7 @@ pub unsafe extern "C" fn docbParseChunk(
 ) -> ::core::ffi::c_int {
     static mut deprecated: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if deprecated == 0 {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
             b"docbParseChunk() deprecated function reached\n\0" as *const u8
                 as *const ::core::ffi::c_char,
@@ -851,23 +791,15 @@ pub unsafe extern "C" fn docbCreatePushParserCtxt(
 ) -> docbParserCtxtPtr {
     static mut deprecated: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if deprecated == 0 {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
             b"docbParseChunk() deprecated function reached\n\0" as *const u8
                 as *const ::core::ffi::c_char,
         );
         deprecated = 1 as ::core::ffi::c_int;
     }
-    return xmlCreatePushParserCtxt(
-        sax as xmlSAXHandlerPtr,
-        user_data,
-        chunk,
-        size,
-        filename,
-    ) as docbParserCtxtPtr;
+    return xmlCreatePushParserCtxt(sax as xmlSAXHandlerPtr, user_data, chunk, size, filename)
+        as docbParserCtxtPtr;
 }
 pub unsafe extern "C" fn docbSAXParseDoc(
     mut cur: *mut xmlChar,
@@ -877,10 +809,7 @@ pub unsafe extern "C" fn docbSAXParseDoc(
 ) -> docbDocPtr {
     static mut deprecated: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if deprecated == 0 {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
             b"docbParseChunk() deprecated function reached\n\0" as *const u8
                 as *const ::core::ffi::c_char,
@@ -901,10 +830,7 @@ pub unsafe extern "C" fn docbParseDoc(
 ) -> docbDocPtr {
     static mut deprecated: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if deprecated == 0 {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
             b"docbParseChunk() deprecated function reached\n\0" as *const u8
                 as *const ::core::ffi::c_char,
@@ -919,10 +845,7 @@ pub unsafe extern "C" fn docbCreateFileParserCtxt(
 ) -> docbParserCtxtPtr {
     static mut deprecated: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if deprecated == 0 {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
             b"docbCreateFileParserCtxt() deprecated function reached\n\0" as *const u8
                 as *const ::core::ffi::c_char,
@@ -939,10 +862,7 @@ pub unsafe extern "C" fn docbSAXParseFile(
 ) -> docbDocPtr {
     static mut deprecated: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if deprecated == 0 {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
             b"docbSAXParseFile() deprecated function reached\n\0" as *const u8
                 as *const ::core::ffi::c_char,
@@ -962,10 +882,7 @@ pub unsafe extern "C" fn docbParseFile(
 ) -> docbDocPtr {
     static mut deprecated: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     if deprecated == 0 {
-        (*__xmlGenericError())
-            .expect(
-                "non-null function pointer",
-            )(
+        (*__xmlGenericError()).expect("non-null function pointer")(
             *__xmlGenericErrorContext(),
             b"docbParseFile() deprecated function reached\n\0" as *const u8
                 as *const ::core::ffi::c_char,

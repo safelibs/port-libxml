@@ -37,9 +37,7 @@ extern "C" {
     fn xmlDumpElementDecl(buf: xmlBufferPtr, elem: xmlElementPtr);
     fn xmlDumpAttributeDecl(buf: xmlBufferPtr, attr: xmlAttributePtr);
     fn xmlDumpEntityDecl(buf: xmlBufferPtr, ent: xmlEntityPtr);
-    fn xmlFindCharEncodingHandler(
-        name: *const ::core::ffi::c_char,
-    ) -> xmlCharEncodingHandlerPtr;
+    fn xmlFindCharEncodingHandler(name: *const ::core::ffi::c_char) -> xmlCharEncodingHandlerPtr;
     fn xmlParseCharEncoding(name: *const ::core::ffi::c_char) -> xmlCharEncoding;
     fn xmlCharEncCloseFunc(handler: *mut xmlCharEncodingHandler) -> ::core::ffi::c_int;
     fn xmlAllocOutputBuffer(encoder: xmlCharEncodingHandlerPtr) -> xmlOutputBufferPtr;
@@ -93,10 +91,7 @@ extern "C" {
     static xmlStringText: [xmlChar; 0];
     static xmlStringTextNoenc: [xmlChar; 0];
     fn htmlGetMetaEncoding(doc: htmlDocPtr) -> *const xmlChar;
-    fn htmlSetMetaEncoding(
-        doc: htmlDocPtr,
-        encoding: *const xmlChar,
-    ) -> ::core::ffi::c_int;
+    fn htmlSetMetaEncoding(doc: htmlDocPtr, encoding: *const xmlChar) -> ::core::ffi::c_int;
     fn htmlNodeDumpFormatOutput(
         buf: xmlOutputBufferPtr,
         doc: xmlDocPtr,
@@ -129,17 +124,12 @@ extern "C" {
         str: *const xmlChar,
         len: ::core::ffi::c_int,
     ) -> ::core::ffi::c_int;
-    fn xmlBufWriteQuotedString(
-        buf: xmlBufPtr,
-        string: *const xmlChar,
-    ) -> ::core::ffi::c_int;
+    fn xmlBufWriteQuotedString(buf: xmlBufPtr, string: *const xmlChar) -> ::core::ffi::c_int;
     fn xmlBufFromBuffer(buffer: xmlBufferPtr) -> xmlBufPtr;
     fn xmlBufBackToBuffer(buf: xmlBufPtr) -> xmlBufferPtr;
     fn xmlBufMergeBuffer(buf: xmlBufPtr, buffer: xmlBufferPtr) -> ::core::ffi::c_int;
-    fn xmlCharEncOutput(
-        output: xmlOutputBufferPtr,
-        init: ::core::ffi::c_int,
-    ) -> ::core::ffi::c_int;
+    fn xmlCharEncOutput(output: xmlOutputBufferPtr, init: ::core::ffi::c_int)
+        -> ::core::ffi::c_int;
 }
 pub type xmlChar = ::core::ffi::c_uchar;
 pub type size_t = usize;
@@ -181,9 +171,7 @@ pub struct _IO_FILE {
 pub type _IO_lock_t = ();
 pub type FILE = _IO_FILE;
 pub type xmlFreeFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
-pub type xmlMallocFunc = Option<
-    unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void,
->;
+pub type xmlMallocFunc = Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void>;
 pub type xmlBufPtr = *mut xmlBuf;
 pub type xmlBuf = _xmlBuf;
 pub type xmlCharEncodingHandlerPtr = *mut xmlCharEncodingHandler;
@@ -226,9 +214,8 @@ pub struct _xmlOutputBuffer {
     pub written: ::core::ffi::c_int,
     pub error: ::core::ffi::c_int,
 }
-pub type xmlOutputCloseCallback = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type xmlOutputCloseCallback =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type xmlOutputWriteCallback = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -545,9 +532,8 @@ pub type xmlNotationTable = _xmlHashTable;
 pub const XML_SAVE_NO_XHTML: C2RustUnnamed_1 = 8;
 pub const XML_SAVE_XHTML: C2RustUnnamed_1 = 16;
 pub const XML_SAVE_NO_DECL: C2RustUnnamed_1 = 2;
-pub type xmlGenericErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlGenericErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub const XML_CHAR_ENCODING_ASCII: xmlCharEncoding = 22;
 pub type xmlCharEncoding = ::core::ffi::c_int;
 pub const XML_CHAR_ENCODING_EUC_JP: xmlCharEncoding = 21;
@@ -1341,9 +1327,7 @@ pub const XML_ERR_OK: C2RustUnnamed_0 = 0;
 pub type C2RustUnnamed_1 = ::core::ffi::c_uint;
 pub const XML_SAVE_WSNONSIG: C2RustUnnamed_1 = 128;
 pub const INT_MAX: ::core::ffi::c_int = __INT_MAX__;
-pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const MAX_INDENT: ::core::ffi::c_int = 60 as ::core::ffi::c_int;
 #[no_mangle]
 pub unsafe extern "C" fn xmlIsXHTML(
@@ -1356,24 +1340,24 @@ pub unsafe extern "C" fn xmlIsXHTML(
     if !publicID.is_null() {
         if xmlStrEqual(
             publicID,
-            b"-//W3C//DTD XHTML 1.0 Strict//EN\0" as *const u8
-                as *const ::core::ffi::c_char as *mut xmlChar,
+            b"-//W3C//DTD XHTML 1.0 Strict//EN\0" as *const u8 as *const ::core::ffi::c_char
+                as *mut xmlChar,
         ) != 0
         {
             return 1 as ::core::ffi::c_int;
         }
         if xmlStrEqual(
             publicID,
-            b"-//W3C//DTD XHTML 1.0 Frameset//EN\0" as *const u8
-                as *const ::core::ffi::c_char as *mut xmlChar,
+            b"-//W3C//DTD XHTML 1.0 Frameset//EN\0" as *const u8 as *const ::core::ffi::c_char
+                as *mut xmlChar,
         ) != 0
         {
             return 1 as ::core::ffi::c_int;
         }
         if xmlStrEqual(
             publicID,
-            b"-//W3C//DTD XHTML 1.0 Transitional//EN\0" as *const u8
-                as *const ::core::ffi::c_char as *mut xmlChar,
+            b"-//W3C//DTD XHTML 1.0 Transitional//EN\0" as *const u8 as *const ::core::ffi::c_char
+                as *mut xmlChar,
         ) != 0
         {
             return 1 as ::core::ffi::c_int;
@@ -1424,34 +1408,34 @@ unsafe extern "C" fn xmlSaveErr(
     let mut msg: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     match code {
         1400 => {
-            msg = b"string is not in UTF-8\n\0" as *const u8
-                as *const ::core::ffi::c_char;
+            msg = b"string is not in UTF-8\n\0" as *const u8 as *const ::core::ffi::c_char;
         }
         1401 => {
-            msg = b"invalid character value\n\0" as *const u8
-                as *const ::core::ffi::c_char;
+            msg = b"invalid character value\n\0" as *const u8 as *const ::core::ffi::c_char;
         }
         1403 => {
             msg = b"unknown encoding %s\n\0" as *const u8 as *const ::core::ffi::c_char;
         }
         1402 => {
-            msg = b"document has no DOCTYPE\n\0" as *const u8
-                as *const ::core::ffi::c_char;
+            msg = b"document has no DOCTYPE\n\0" as *const u8 as *const ::core::ffi::c_char;
         }
         _ => {
-            msg = b"unexpected error number\n\0" as *const u8
-                as *const ::core::ffi::c_char;
+            msg = b"unexpected error number\n\0" as *const u8 as *const ::core::ffi::c_char;
         }
     }
-    __xmlSimpleError(XML_FROM_OUTPUT as ::core::ffi::c_int, code, node, msg, extra);
+    __xmlSimpleError(
+        XML_FROM_OUTPUT as ::core::ffi::c_int,
+        code,
+        node,
+        msg,
+        extra,
+    );
 }
 unsafe extern "C" fn xmlSerializeHexCharRef(
     mut out: *mut ::core::ffi::c_uchar,
     mut val: ::core::ffi::c_int,
 ) -> *mut ::core::ffi::c_uchar {
-    let mut ptr: *mut ::core::ffi::c_uchar = ::core::ptr::null_mut::<
-        ::core::ffi::c_uchar,
-    >();
+    let mut ptr: *mut ::core::ffi::c_uchar = ::core::ptr::null_mut::<::core::ffi::c_uchar>();
     let fresh0 = out;
     out = out.offset(1);
     *fresh0 = '&' as i32 as ::core::ffi::c_uchar;
@@ -1581,9 +1565,7 @@ unsafe extern "C" fn xmlEscapeEntities(
     let mut outstart: *mut ::core::ffi::c_uchar = out;
     let mut base: *const ::core::ffi::c_uchar = in_0 as *const ::core::ffi::c_uchar;
     let mut outend: *mut ::core::ffi::c_uchar = out.offset(*outlen as isize);
-    let mut inend: *const ::core::ffi::c_uchar = ::core::ptr::null::<
-        ::core::ffi::c_uchar,
-    >();
+    let mut inend: *const ::core::ffi::c_uchar = ::core::ptr::null::<::core::ffi::c_uchar>();
     let mut val: ::core::ffi::c_int = 0;
     inend = in_0.offset(*inlen as isize) as *const ::core::ffi::c_uchar;
     loop {
@@ -1592,9 +1574,7 @@ unsafe extern "C" fn xmlEscapeEntities(
             break;
         }
         if *in_0 as ::core::ffi::c_int == '<' as i32 {
-            if (outend.offset_from(out) as ::core::ffi::c_long)
-                < 4 as ::core::ffi::c_long
-            {
+            if (outend.offset_from(out) as ::core::ffi::c_long) < 4 as ::core::ffi::c_long {
                 current_block = 2520131295878969859;
                 break;
             }
@@ -1612,9 +1592,7 @@ unsafe extern "C" fn xmlEscapeEntities(
             *fresh24 = ';' as i32 as ::core::ffi::c_uchar;
             in_0 = in_0.offset(1);
         } else if *in_0 as ::core::ffi::c_int == '>' as i32 {
-            if (outend.offset_from(out) as ::core::ffi::c_long)
-                < 4 as ::core::ffi::c_long
-            {
+            if (outend.offset_from(out) as ::core::ffi::c_long) < 4 as ::core::ffi::c_long {
                 current_block = 2520131295878969859;
                 break;
             }
@@ -1632,9 +1610,7 @@ unsafe extern "C" fn xmlEscapeEntities(
             *fresh28 = ';' as i32 as ::core::ffi::c_uchar;
             in_0 = in_0.offset(1);
         } else if *in_0 as ::core::ffi::c_int == '&' as i32 {
-            if (outend.offset_from(out) as ::core::ffi::c_long)
-                < 5 as ::core::ffi::c_long
-            {
+            if (outend.offset_from(out) as ::core::ffi::c_long) < 5 as ::core::ffi::c_long {
                 current_block = 2520131295878969859;
                 break;
             }
@@ -1665,9 +1641,7 @@ unsafe extern "C" fn xmlEscapeEntities(
             out = out.offset(1);
             *fresh35 = *fresh34 as ::core::ffi::c_uchar;
         } else if *in_0 as ::core::ffi::c_int >= 0x80 as ::core::ffi::c_int {
-            if (outend.offset_from(out) as ::core::ffi::c_long)
-                < 11 as ::core::ffi::c_long
-            {
+            if (outend.offset_from(out) as ::core::ffi::c_long) < 11 as ::core::ffi::c_long {
                 current_block = 2520131295878969859;
                 break;
             }
@@ -1682,58 +1656,46 @@ unsafe extern "C" fn xmlEscapeEntities(
                 break;
             } else {
                 if (*in_0 as ::core::ffi::c_int) < 0xe0 as ::core::ffi::c_int {
-                    if (inend.offset_from(in_0) as ::core::ffi::c_long)
-                        < 2 as ::core::ffi::c_long
-                    {
+                    if (inend.offset_from(in_0) as ::core::ffi::c_long) < 2 as ::core::ffi::c_long {
                         current_block = 2520131295878969859;
                         break;
                     }
-                    val = *in_0.offset(0 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int & 0x1f as ::core::ffi::c_int;
+                    val = *in_0.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x1f as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *in_0.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *in_0.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     in_0 = in_0.offset(2 as ::core::ffi::c_int as isize);
                 } else if (*in_0 as ::core::ffi::c_int) < 0xf0 as ::core::ffi::c_int {
-                    if (inend.offset_from(in_0) as ::core::ffi::c_long)
-                        < 3 as ::core::ffi::c_long
-                    {
+                    if (inend.offset_from(in_0) as ::core::ffi::c_long) < 3 as ::core::ffi::c_long {
                         current_block = 2520131295878969859;
                         break;
                     }
-                    val = *in_0.offset(0 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int & 0xf as ::core::ffi::c_int;
+                    val = *in_0.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0xf as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *in_0.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *in_0.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *in_0.offset(2 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *in_0.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     in_0 = in_0.offset(3 as ::core::ffi::c_int as isize);
                 } else if (*in_0 as ::core::ffi::c_int) < 0xf8 as ::core::ffi::c_int {
-                    if (inend.offset_from(in_0) as ::core::ffi::c_long)
-                        < 4 as ::core::ffi::c_long
-                    {
+                    if (inend.offset_from(in_0) as ::core::ffi::c_long) < 4 as ::core::ffi::c_long {
                         current_block = 2520131295878969859;
                         break;
                     }
-                    val = *in_0.offset(0 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int & 0x7 as ::core::ffi::c_int;
+                    val = *in_0.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x7 as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *in_0.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *in_0.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *in_0.offset(2 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *in_0.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *in_0.offset(3 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *in_0.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     in_0 = in_0.offset(4 as ::core::ffi::c_int as isize);
                 } else {
                     xmlSaveErr(
@@ -1748,10 +1710,10 @@ unsafe extern "C" fn xmlEscapeEntities(
                 if if val < 0x100 as ::core::ffi::c_int {
                     (0x9 as ::core::ffi::c_int <= val && val <= 0xa as ::core::ffi::c_int
                         || val == 0xd as ::core::ffi::c_int
-                        || 0x20 as ::core::ffi::c_int <= val) as ::core::ffi::c_int
+                        || 0x20 as ::core::ffi::c_int <= val)
+                        as ::core::ffi::c_int
                 } else {
-                    (0x100 as ::core::ffi::c_int <= val
-                        && val <= 0xd7ff as ::core::ffi::c_int
+                    (0x100 as ::core::ffi::c_int <= val && val <= 0xd7ff as ::core::ffi::c_int
                         || 0xe000 as ::core::ffi::c_int <= val
                             && val <= 0xfffd as ::core::ffi::c_int
                         || 0x10000 as ::core::ffi::c_int <= val
@@ -1776,9 +1738,7 @@ unsafe extern "C" fn xmlEscapeEntities(
             || *in_0 as ::core::ffi::c_int == 0xd as ::core::ffi::c_int
             || 0x20 as ::core::ffi::c_int <= *in_0 as ::core::ffi::c_int
         {
-            if (outend.offset_from(out) as ::core::ffi::c_long)
-                < 6 as ::core::ffi::c_long
-            {
+            if (outend.offset_from(out) as ::core::ffi::c_long) < 6 as ::core::ffi::c_long {
                 current_block = 2520131295878969859;
                 break;
             }
@@ -1786,10 +1746,7 @@ unsafe extern "C" fn xmlEscapeEntities(
             in_0 = in_0.offset(1);
             out = xmlSerializeHexCharRef(out, *fresh36 as ::core::ffi::c_int);
         } else {
-            (*__xmlGenericError())
-                .expect(
-                    "non-null function pointer",
-                )(
+            (*__xmlGenericError()).expect("non-null function pointer")(
                 *__xmlGenericErrorContext(),
                 b"xmlEscapeEntities : char out of range\n\0" as *const u8
                     as *const ::core::ffi::c_char,
@@ -1801,14 +1758,12 @@ unsafe extern "C" fn xmlEscapeEntities(
     }
     match current_block {
         12785598087081333342 => {
-            *outlen = out.offset_from(outstart) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
+            *outlen = out.offset_from(outstart) as ::core::ffi::c_long as ::core::ffi::c_int;
             *inlen = in_0.offset_from(base) as ::core::ffi::c_long as ::core::ffi::c_int;
             return -(1 as ::core::ffi::c_int);
         }
         _ => {
-            *outlen = out.offset_from(outstart) as ::core::ffi::c_long
-                as ::core::ffi::c_int;
+            *outlen = out.offset_from(outstart) as ::core::ffi::c_long as ::core::ffi::c_int;
             *inlen = in_0.offset_from(base) as ::core::ffi::c_long as ::core::ffi::c_int;
             return 0 as ::core::ffi::c_int;
         }
@@ -1854,8 +1809,8 @@ unsafe extern "C" fn xmlSaveCtxtInit(mut ctxt: xmlSaveCtxtPtr) {
             );
             i += 1;
         }
-        (*ctxt).indent[((*ctxt).indent_nr * (*ctxt).indent_size) as usize] = 0
-            as ::core::ffi::c_char;
+        (*ctxt).indent[((*ctxt).indent_nr * (*ctxt).indent_size) as usize] =
+            0 as ::core::ffi::c_char;
     }
     if *__xmlSaveNoEmptyTags() != 0 {
         (*ctxt).options |= XML_SAVE_NO_EMPTY as ::core::ffi::c_int;
@@ -1866,10 +1821,9 @@ unsafe extern "C" fn xmlFreeSaveCtxt(mut ctxt: xmlSaveCtxtPtr) {
         return;
     }
     if !(*ctxt).encoding.is_null() {
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*ctxt).encoding as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")(
+            (*ctxt).encoding as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
+        );
     }
     if !(*ctxt).buf.is_null() {
         xmlOutputBufferClose((*ctxt).buf);
@@ -1881,14 +1835,11 @@ unsafe extern "C" fn xmlNewSaveCtxt(
     mut options: ::core::ffi::c_int,
 ) -> xmlSaveCtxtPtr {
     let mut ret: xmlSaveCtxtPtr = ::core::ptr::null_mut::<xmlSaveCtxt>();
-    ret = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlSaveCtxt>() as size_t) as xmlSaveCtxtPtr;
+    ret = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlSaveCtxt>() as size_t
+    ) as xmlSaveCtxtPtr;
     if ret.is_null() {
-        xmlSaveErrMemory(
-            b"creating saving context\0" as *const u8 as *const ::core::ffi::c_char,
-        );
+        xmlSaveErrMemory(b"creating saving context\0" as *const u8 as *const ::core::ffi::c_char);
         return ::core::ptr::null_mut::<xmlSaveCtxt>();
     }
     memset(
@@ -1924,10 +1875,7 @@ unsafe extern "C" fn xmlNewSaveCtxt(
     }
     return ret;
 }
-unsafe extern "C" fn xmlAttrSerializeContent(
-    mut buf: xmlOutputBufferPtr,
-    mut attr: xmlAttrPtr,
-) {
+unsafe extern "C" fn xmlAttrSerializeContent(mut buf: xmlOutputBufferPtr, mut attr: xmlAttrPtr) {
     let mut children: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     children = (*attr).children as xmlNodePtr;
     while !children.is_null() {
@@ -1972,10 +1920,7 @@ pub unsafe extern "C" fn xmlBufDumpNotationTable(
     xmlBufMergeBuffer(buf, buffer);
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufDumpElementDecl(
-    mut buf: xmlBufPtr,
-    mut elem: xmlElementPtr,
-) {
+pub unsafe extern "C" fn xmlBufDumpElementDecl(mut buf: xmlBufPtr, mut elem: xmlElementPtr) {
     let mut buffer: xmlBufferPtr = ::core::ptr::null_mut::<xmlBuffer>();
     buffer = xmlBufferCreate();
     if buffer.is_null() {
@@ -1985,10 +1930,7 @@ pub unsafe extern "C" fn xmlBufDumpElementDecl(
     xmlBufMergeBuffer(buf, buffer);
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufDumpAttributeDecl(
-    mut buf: xmlBufPtr,
-    mut attr: xmlAttributePtr,
-) {
+pub unsafe extern "C" fn xmlBufDumpAttributeDecl(mut buf: xmlBufPtr, mut attr: xmlAttributePtr) {
     let mut buffer: xmlBufferPtr = ::core::ptr::null_mut::<xmlBuffer>();
     buffer = xmlBufferCreate();
     if buffer.is_null() {
@@ -1998,10 +1940,7 @@ pub unsafe extern "C" fn xmlBufDumpAttributeDecl(
     xmlBufMergeBuffer(buf, buffer);
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlBufDumpEntityDecl(
-    mut buf: xmlBufPtr,
-    mut ent: xmlEntityPtr,
-) {
+pub unsafe extern "C" fn xmlBufDumpEntityDecl(mut buf: xmlBufPtr, mut ent: xmlEntityPtr) {
     let mut buffer: xmlBufferPtr = ::core::ptr::null_mut::<xmlBuffer>();
     buffer = xmlBufferCreate();
     if buffer.is_null() {
@@ -2037,9 +1976,7 @@ unsafe extern "C" fn xmlSaveSwitchEncoding(
     }
     return 0 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn xmlSaveClearEncoding(
-    mut ctxt: xmlSaveCtxtPtr,
-) -> ::core::ffi::c_int {
+unsafe extern "C" fn xmlSaveClearEncoding(mut ctxt: xmlSaveCtxtPtr) -> ::core::ffi::c_int {
     let mut buf: xmlOutputBufferPtr = (*ctxt).buf;
     xmlOutputBufferFlush(buf);
     xmlCharEncCloseFunc((*buf).encoder as *mut xmlCharEncodingHandler);
@@ -2129,20 +2066,14 @@ unsafe extern "C" fn xmlNsDumpOutput(
 unsafe extern "C" fn xmlNsDumpOutputCtxt(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlNsPtr) {
     xmlNsDumpOutput((*ctxt).buf, cur, ctxt);
 }
-unsafe extern "C" fn xmlNsListDumpOutputCtxt(
-    mut ctxt: xmlSaveCtxtPtr,
-    mut cur: xmlNsPtr,
-) {
+unsafe extern "C" fn xmlNsListDumpOutputCtxt(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlNsPtr) {
     while !cur.is_null() {
         xmlNsDumpOutput((*ctxt).buf, cur, ctxt);
         cur = (*cur).next as xmlNsPtr;
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlNsListDumpOutput(
-    mut buf: xmlOutputBufferPtr,
-    mut cur: xmlNsPtr,
-) {
+pub unsafe extern "C" fn xmlNsListDumpOutput(mut buf: xmlOutputBufferPtr, mut cur: xmlNsPtr) {
     while !cur.is_null() {
         xmlNsDumpOutput(buf, cur, ::core::ptr::null_mut::<xmlSaveCtxt>());
         cur = (*cur).next as xmlNsPtr;
@@ -2187,8 +2118,10 @@ unsafe extern "C" fn xmlDtdDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut dtd: xmlDtdP
         );
         xmlBufWriteQuotedString((*buf).buffer, (*dtd).SystemID);
     }
-    if (*dtd).entities.is_null() && (*dtd).elements.is_null()
-        && (*dtd).attributes.is_null() && (*dtd).notations.is_null()
+    if (*dtd).entities.is_null()
+        && (*dtd).elements.is_null()
+        && (*dtd).attributes.is_null()
+        && (*dtd).notations.is_null()
         && (*dtd).pentities.is_null()
     {
         xmlOutputBufferWrite(
@@ -2203,9 +2136,7 @@ unsafe extern "C" fn xmlDtdDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut dtd: xmlDtdP
         3 as ::core::ffi::c_int,
         b" [\n\0" as *const u8 as *const ::core::ffi::c_char,
     );
-    if !(*dtd).notations.is_null()
-        && ((*dtd).doc.is_null() || (*(*dtd).doc).intSubset == dtd)
-    {
+    if !(*dtd).notations.is_null() && ((*dtd).doc.is_null() || (*(*dtd).doc).intSubset == dtd) {
         xmlBufDumpNotationTable((*buf).buffer, (*dtd).notations as xmlNotationTablePtr);
     }
     format = (*ctxt).format;
@@ -2244,10 +2175,7 @@ unsafe extern "C" fn xmlAttrDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlAtt
         );
     }
     if !(*cur).ns.is_null() && !(*(*cur).ns).prefix.is_null() {
-        xmlOutputBufferWriteString(
-            buf,
-            (*(*cur).ns).prefix as *const ::core::ffi::c_char,
-        );
+        xmlOutputBufferWriteString(buf, (*(*cur).ns).prefix as *const ::core::ffi::c_char);
         xmlOutputBufferWrite(
             buf,
             1 as ::core::ffi::c_int,
@@ -2296,7 +2224,9 @@ unsafe extern "C" fn htmlNodeDumpOutputInternal(
     if encoding.is_null() {
         encoding = b"HTML\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar;
     }
-    if !encoding.is_null() && oldctxtenc.is_null() && (*buf).encoder.is_null()
+    if !encoding.is_null()
+        && oldctxtenc.is_null()
+        && (*buf).encoder.is_null()
         && (*buf).conv.is_null()
     {
         if xmlSaveSwitchEncoding(ctxt, encoding as *const ::core::ffi::c_char)
@@ -2332,10 +2262,7 @@ unsafe extern "C" fn htmlNodeDumpOutputInternal(
     }
     return 0 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn xmlNodeDumpOutputInternal(
-    mut ctxt: xmlSaveCtxtPtr,
-    mut cur: xmlNodePtr,
-) {
+unsafe extern "C" fn xmlNodeDumpOutputInternal(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlNodePtr) {
     let mut format: ::core::ffi::c_int = (*ctxt).format;
     let mut tmp: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
     let mut root: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
@@ -2376,7 +2303,8 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                 xmlBufDumpEntityDecl((*buf).buffer, cur as xmlEntityPtr);
             }
             1 => {
-                if cur != root && (*ctxt).format == 1 as ::core::ffi::c_int
+                if cur != root
+                    && (*ctxt).format == 1 as ::core::ffi::c_int
                     && *__xmlIndentTreeOutput() != 0
                 {
                     xmlOutputBufferWrite(
@@ -2409,10 +2337,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                             b":\0" as *const u8 as *const ::core::ffi::c_char,
                         );
                     }
-                    xmlOutputBufferWriteString(
-                        buf,
-                        (*cur).name as *const ::core::ffi::c_char,
-                    );
+                    xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                     if !(*cur).nsDef.is_null() {
                         xmlNsListDumpOutputCtxt(ctxt, (*cur).nsDef as xmlNsPtr);
                     }
@@ -2471,8 +2396,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                             tmp = (*cur).children as xmlNodePtr;
                             while !tmp.is_null() {
                                 if (*tmp).type_0 as ::core::ffi::c_uint
-                                    == XML_TEXT_NODE as ::core::ffi::c_int
-                                        as ::core::ffi::c_uint
+                                    == XML_TEXT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                                     || (*tmp).type_0 as ::core::ffi::c_uint
                                         == XML_CDATA_SECTION_NODE as ::core::ffi::c_int
                                             as ::core::ffi::c_uint
@@ -2525,7 +2449,8 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                 }
             }
             7 => {
-                if cur != root && (*ctxt).format == 1 as ::core::ffi::c_int
+                if cur != root
+                    && (*ctxt).format == 1 as ::core::ffi::c_int
                     && *__xmlIndentTreeOutput() != 0
                 {
                     xmlOutputBufferWrite(
@@ -2545,10 +2470,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                         2 as ::core::ffi::c_int,
                         b"<?\0" as *const u8 as *const ::core::ffi::c_char,
                     );
-                    xmlOutputBufferWriteString(
-                        buf,
-                        (*cur).name as *const ::core::ffi::c_char,
-                    );
+                    xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                     if !(*cur).content.is_null() {
                         if (*ctxt).format == 2 as ::core::ffi::c_int {
                             xmlOutputBufferWriteWSNonSig(ctxt, 0 as ::core::ffi::c_int);
@@ -2575,10 +2497,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                         2 as ::core::ffi::c_int,
                         b"<?\0" as *const u8 as *const ::core::ffi::c_char,
                     );
-                    xmlOutputBufferWriteString(
-                        buf,
-                        (*cur).name as *const ::core::ffi::c_char,
-                    );
+                    xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                     if (*ctxt).format == 2 as ::core::ffi::c_int {
                         xmlOutputBufferWriteWSNonSig(ctxt, 0 as ::core::ffi::c_int);
                     }
@@ -2590,7 +2509,8 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                 }
             }
             8 => {
-                if cur != root && (*ctxt).format == 1 as ::core::ffi::c_int
+                if cur != root
+                    && (*ctxt).format == 1 as ::core::ffi::c_int
                     && *__xmlIndentTreeOutput() != 0
                 {
                     xmlOutputBufferWrite(
@@ -2610,10 +2530,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                         4 as ::core::ffi::c_int,
                         b"<!--\0" as *const u8 as *const ::core::ffi::c_char,
                     );
-                    xmlOutputBufferWriteString(
-                        buf,
-                        (*cur).content as *const ::core::ffi::c_char,
-                    );
+                    xmlOutputBufferWriteString(buf, (*cur).content as *const ::core::ffi::c_char);
                     xmlOutputBufferWrite(
                         buf,
                         3 as ::core::ffi::c_int,
@@ -2627,10 +2544,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                     1 as ::core::ffi::c_int,
                     b"&\0" as *const u8 as *const ::core::ffi::c_char,
                 );
-                xmlOutputBufferWriteString(
-                    buf,
-                    (*cur).name as *const ::core::ffi::c_char,
-                );
+                xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                 xmlOutputBufferWrite(
                     buf,
                     1 as ::core::ffi::c_int,
@@ -2638,8 +2552,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                 );
             }
             4 => {
-                if (*cur).content.is_null()
-                    || *(*cur).content as ::core::ffi::c_int == '\0' as i32
+                if (*cur).content.is_null() || *(*cur).content as ::core::ffi::c_int == '\0' as i32
                 {
                     xmlOutputBufferWrite(
                         buf,
@@ -2651,10 +2564,10 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                     start = end;
                     while *end as ::core::ffi::c_int != '\0' as i32 {
                         if *end as ::core::ffi::c_int == ']' as i32
-                            && *end.offset(1 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int == ']' as i32
-                            && *end.offset(2 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int == '>' as i32
+                            && *end.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                                == ']' as i32
+                            && *end.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                                == '>' as i32
                         {
                             end = end.offset(2 as ::core::ffi::c_int as isize);
                             xmlOutputBufferWrite(
@@ -2664,8 +2577,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                             );
                             xmlOutputBufferWrite(
                                 buf,
-                                end.offset_from(start) as ::core::ffi::c_long
-                                    as ::core::ffi::c_int,
+                                end.offset_from(start) as ::core::ffi::c_long as ::core::ffi::c_int,
                                 start as *const ::core::ffi::c_char,
                             );
                             xmlOutputBufferWrite(
@@ -2683,10 +2595,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                             9 as ::core::ffi::c_int,
                             b"<![CDATA[\0" as *const u8 as *const ::core::ffi::c_char,
                         );
-                        xmlOutputBufferWriteString(
-                            buf,
-                            start as *const ::core::ffi::c_char,
-                        );
+                        xmlOutputBufferWriteString(buf, start as *const ::core::ffi::c_char);
                         xmlOutputBufferWrite(
                             buf,
                             3 as ::core::ffi::c_int,
@@ -2731,9 +2640,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                     if (*ctxt).level > 0 as ::core::ffi::c_int {
                         (*ctxt).level -= 1;
                     }
-                    if *__xmlIndentTreeOutput() != 0
-                        && (*ctxt).format == 1 as ::core::ffi::c_int
-                    {
+                    if *__xmlIndentTreeOutput() != 0 && (*ctxt).format == 1 as ::core::ffi::c_int {
                         xmlOutputBufferWrite(
                             buf,
                             (*ctxt).indent_size
@@ -2761,10 +2668,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                             b":\0" as *const u8 as *const ::core::ffi::c_char,
                         );
                     }
-                    xmlOutputBufferWriteString(
-                        buf,
-                        (*cur).name as *const ::core::ffi::c_char,
-                    );
+                    xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                     if (*ctxt).format == 2 as ::core::ffi::c_int {
                         xmlOutputBufferWriteWSNonSig(ctxt, 0 as ::core::ffi::c_int);
                     }
@@ -2780,7 +2684,7 @@ unsafe extern "C" fn xmlNodeDumpOutputInternal(
                 }
             }
         }
-    };
+    }
 }
 unsafe extern "C" fn xmlDocContentDumpOutput(
     mut ctxt: xmlSaveCtxtPtr,
@@ -2811,10 +2715,8 @@ unsafe extern "C" fn xmlDocContentDumpOutput(
     }
     if (*cur).type_0 as ::core::ffi::c_uint
         == XML_HTML_DOCUMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
-        && (*ctxt).options & XML_SAVE_AS_XML as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int
-        && (*ctxt).options & XML_SAVE_XHTML as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int
+        && (*ctxt).options & XML_SAVE_AS_XML as ::core::ffi::c_int == 0 as ::core::ffi::c_int
+        && (*ctxt).options & XML_SAVE_XHTML as ::core::ffi::c_int == 0 as ::core::ffi::c_int
         || (*ctxt).options & XML_SAVE_AS_HTML as ::core::ffi::c_int != 0
     {
         if !encoding.is_null() {
@@ -2824,10 +2726,11 @@ unsafe extern "C" fn xmlDocContentDumpOutput(
             encoding = htmlGetMetaEncoding(cur as htmlDocPtr);
         }
         if encoding.is_null() {
-            encoding = b"HTML\0" as *const u8 as *const ::core::ffi::c_char
-                as *mut xmlChar;
+            encoding = b"HTML\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar;
         }
-        if !encoding.is_null() && oldctxtenc.is_null() && (*buf).encoder.is_null()
+        if !encoding.is_null()
+            && oldctxtenc.is_null()
+            && (*buf).encoder.is_null()
             && (*buf).conv.is_null()
         {
             if xmlSaveSwitchEncoding(ctxt, encoding as *const ::core::ffi::c_char)
@@ -2862,16 +2765,15 @@ unsafe extern "C" fn xmlDocContentDumpOutput(
         || (*ctxt).options & XML_SAVE_XHTML as ::core::ffi::c_int != 0
     {
         enc = xmlParseCharEncoding(encoding as *const ::core::ffi::c_char);
-        if !encoding.is_null() && oldctxtenc.is_null() && (*buf).encoder.is_null()
+        if !encoding.is_null()
+            && oldctxtenc.is_null()
+            && (*buf).encoder.is_null()
             && (*buf).conv.is_null()
-            && (*ctxt).options & XML_SAVE_NO_DECL as ::core::ffi::c_int
-                == 0 as ::core::ffi::c_int
+            && (*ctxt).options & XML_SAVE_NO_DECL as ::core::ffi::c_int == 0 as ::core::ffi::c_int
         {
             if enc as ::core::ffi::c_int != XML_CHAR_ENCODING_UTF8 as ::core::ffi::c_int
-                && enc as ::core::ffi::c_int
-                    != XML_CHAR_ENCODING_NONE as ::core::ffi::c_int
-                && enc as ::core::ffi::c_int
-                    != XML_CHAR_ENCODING_ASCII as ::core::ffi::c_int
+                && enc as ::core::ffi::c_int != XML_CHAR_ENCODING_NONE as ::core::ffi::c_int
+                && enc as ::core::ffi::c_int != XML_CHAR_ENCODING_ASCII as ::core::ffi::c_int
             {
                 if xmlSaveSwitchEncoding(ctxt, encoding as *const ::core::ffi::c_char)
                     < 0 as ::core::ffi::c_int
@@ -2908,9 +2810,7 @@ unsafe extern "C" fn xmlDocContentDumpOutput(
                 (*ctxt).escapeAttr = None;
             }
         }
-        if (*ctxt).options & XML_SAVE_NO_DECL as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int
-        {
+        if (*ctxt).options & XML_SAVE_NO_DECL as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
             xmlOutputBufferWrite(
                 buf,
                 14 as ::core::ffi::c_int,
@@ -2938,16 +2838,14 @@ unsafe extern "C" fn xmlDocContentDumpOutput(
                     xmlOutputBufferWrite(
                         buf,
                         16 as ::core::ffi::c_int,
-                        b" standalone=\"no\"\0" as *const u8
-                            as *const ::core::ffi::c_char,
+                        b" standalone=\"no\"\0" as *const u8 as *const ::core::ffi::c_char,
                     );
                 }
                 1 => {
                     xmlOutputBufferWrite(
                         buf,
                         17 as ::core::ffi::c_int,
-                        b" standalone=\"yes\"\0" as *const u8
-                            as *const ::core::ffi::c_char,
+                        b" standalone=\"yes\"\0" as *const u8 as *const ::core::ffi::c_char,
                     );
                 }
                 _ => {}
@@ -2961,9 +2859,7 @@ unsafe extern "C" fn xmlDocContentDumpOutput(
         if (*ctxt).options & XML_SAVE_XHTML as ::core::ffi::c_int != 0 {
             is_xhtml = 1 as ::core::ffi::c_int;
         }
-        if (*ctxt).options & XML_SAVE_NO_XHTML as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int
-        {
+        if (*ctxt).options & XML_SAVE_NO_XHTML as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
             dtd = xmlGetIntSubset(cur as *const xmlDoc);
             if !dtd.is_null() {
                 is_xhtml = xmlIsXHTML((*dtd).SystemID, (*dtd).ExternalID);
@@ -3148,10 +3044,7 @@ unsafe extern "C" fn xhtmlIsEmpty(mut node: xmlNodePtr) -> ::core::ffi::c_int {
     }
     return 0 as ::core::ffi::c_int;
 }
-unsafe extern "C" fn xhtmlAttrListDumpOutput(
-    mut ctxt: xmlSaveCtxtPtr,
-    mut cur: xmlAttrPtr,
-) {
+unsafe extern "C" fn xhtmlAttrListDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlAttrPtr) {
     let mut xml_lang: xmlAttrPtr = ::core::ptr::null_mut::<xmlAttr>();
     let mut lang: xmlAttrPtr = ::core::ptr::null_mut::<xmlAttr>();
     let mut name: xmlAttrPtr = ::core::ptr::null_mut::<xmlAttr>();
@@ -3197,9 +3090,13 @@ unsafe extern "C" fn xhtmlAttrListDumpOutput(
         {
             xml_lang = cur;
         } else if (*cur).ns.is_null()
-            && ((*cur).children.is_null() || (*(*cur).children).content.is_null()
-                || *(*(*cur).children).content.offset(0 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int == 0 as ::core::ffi::c_int)
+            && ((*cur).children.is_null()
+                || (*(*cur).children).content.is_null()
+                || *(*(*cur).children)
+                    .content
+                    .offset(0 as ::core::ffi::c_int as isize)
+                    as ::core::ffi::c_int
+                    == 0 as ::core::ffi::c_int)
             && htmlIsBooleanAttr((*cur).name) != 0
         {
             if !(*cur).children.is_null() {
@@ -3214,7 +3111,8 @@ unsafe extern "C" fn xhtmlAttrListDumpOutput(
         cur = (*cur).next as xmlAttrPtr;
     }
     if !name.is_null() && id.is_null() {
-        if !parent.is_null() && !(*parent).name.is_null()
+        if !parent.is_null()
+            && !(*parent).name.is_null()
             && (xmlStrEqual(
                 (*parent).name,
                 b"a\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
@@ -3237,8 +3135,7 @@ unsafe extern "C" fn xhtmlAttrListDumpOutput(
                 ) != 0
                 || xmlStrEqual(
                     (*parent).name,
-                    b"applet\0" as *const u8 as *const ::core::ffi::c_char
-                        as *mut xmlChar,
+                    b"applet\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 ) != 0
                 || xmlStrEqual(
                     (*parent).name,
@@ -3250,8 +3147,7 @@ unsafe extern "C" fn xhtmlAttrListDumpOutput(
                 ) != 0
                 || xmlStrEqual(
                     (*parent).name,
-                    b"iframe\0" as *const u8 as *const ::core::ffi::c_char
-                        as *mut xmlChar,
+                    b"iframe\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 ) != 0)
         {
             xmlOutputBufferWrite(
@@ -3334,7 +3230,8 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
             }
             1 => {
                 addmeta = 0 as ::core::ffi::c_int;
-                if cur != root && (*ctxt).format == 1 as ::core::ffi::c_int
+                if cur != root
+                    && (*ctxt).format == 1 as ::core::ffi::c_int
                     && *__xmlIndentTreeOutput() != 0
                 {
                     xmlOutputBufferWrite(
@@ -3364,17 +3261,16 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                         b":\0" as *const u8 as *const ::core::ffi::c_char,
                     );
                 }
-                xmlOutputBufferWriteString(
-                    buf,
-                    (*cur).name as *const ::core::ffi::c_char,
-                );
+                xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                 if !(*cur).nsDef.is_null() {
                     xmlNsListDumpOutputCtxt(ctxt, (*cur).nsDef as xmlNsPtr);
                 }
                 if xmlStrEqual(
                     (*cur).name,
                     b"html\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-                ) != 0 && (*cur).ns.is_null() && (*cur).nsDef.is_null()
+                ) != 0
+                    && (*cur).ns.is_null()
+                    && (*cur).nsDef.is_null()
                 {
                     xmlOutputBufferWriteString(
                         buf,
@@ -3389,26 +3285,21 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                     && (*(*cur).parent).parent == (*cur).doc as xmlNodePtr
                     && xmlStrEqual(
                         (*cur).name,
-                        b"head\0" as *const u8 as *const ::core::ffi::c_char
-                            as *mut xmlChar,
+                        b"head\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                     ) != 0
                     && xmlStrEqual(
                         (*(*cur).parent).name,
-                        b"html\0" as *const u8 as *const ::core::ffi::c_char
-                            as *mut xmlChar,
+                        b"html\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                     ) != 0
                 {
                     tmp = (*cur).children as xmlNodePtr;
                     while !tmp.is_null() {
                         if xmlStrEqual(
                             (*tmp).name,
-                            b"meta\0" as *const u8 as *const ::core::ffi::c_char
-                                as *mut xmlChar,
+                            b"meta\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                         ) != 0
                         {
-                            let mut httpequiv: *mut xmlChar = ::core::ptr::null_mut::<
-                                xmlChar,
-                            >();
+                            let mut httpequiv: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                             httpequiv = xmlGetProp(
                                 tmp as *const xmlNode,
                                 b"http-equiv\0" as *const u8 as *const ::core::ffi::c_char
@@ -3421,16 +3312,14 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                                         as *mut xmlChar,
                                 ) == 0 as ::core::ffi::c_int
                                 {
-                                    xmlFree
-                                        .expect(
-                                            "non-null function pointer",
-                                        )(httpequiv as *mut ::core::ffi::c_void);
+                                    xmlFree.expect("non-null function pointer")(
+                                        httpequiv as *mut ::core::ffi::c_void,
+                                    );
                                     break;
                                 } else {
-                                    xmlFree
-                                        .expect(
-                                            "non-null function pointer",
-                                        )(httpequiv as *mut ::core::ffi::c_void);
+                                    xmlFree.expect("non-null function pointer")(
+                                        httpequiv as *mut ::core::ffi::c_void,
+                                    );
                                 }
                             }
                         }
@@ -3481,7 +3370,8 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                             xmlOutputBufferWriteString(
                                 buf,
                                 b"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=\0"
-                                    as *const u8 as *const ::core::ffi::c_char,
+                                    as *const u8
+                                    as *const ::core::ffi::c_char,
                             );
                             if !(*ctxt).encoding.is_null() {
                                 xmlOutputBufferWriteString(
@@ -3530,10 +3420,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                                 b":\0" as *const u8 as *const ::core::ffi::c_char,
                             );
                         }
-                        xmlOutputBufferWriteString(
-                            buf,
-                            (*cur).name as *const ::core::ffi::c_char,
-                        );
+                        xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                         xmlOutputBufferWrite(
                             buf,
                             1 as ::core::ffi::c_int,
@@ -3571,7 +3458,8 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                         xmlOutputBufferWriteString(
                             buf,
                             b"<meta http-equiv=\"Content-Type\" content=\"text/html; charset=\0"
-                                as *const u8 as *const ::core::ffi::c_char,
+                                as *const u8
+                                as *const ::core::ffi::c_char,
                         );
                         if !(*ctxt).encoding.is_null() {
                             xmlOutputBufferWriteString(
@@ -3595,8 +3483,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                         tmp = (*cur).children as xmlNodePtr;
                         while !tmp.is_null() {
                             if (*tmp).type_0 as ::core::ffi::c_uint
-                                == XML_TEXT_NODE as ::core::ffi::c_int
-                                    as ::core::ffi::c_uint
+                                == XML_TEXT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                                 || (*tmp).type_0 as ::core::ffi::c_uint
                                     == XML_ENTITY_REF_NODE as ::core::ffi::c_int
                                         as ::core::ffi::c_uint
@@ -3644,10 +3531,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                         2 as ::core::ffi::c_int,
                         b"<?\0" as *const u8 as *const ::core::ffi::c_char,
                     );
-                    xmlOutputBufferWriteString(
-                        buf,
-                        (*cur).name as *const ::core::ffi::c_char,
-                    );
+                    xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                     if !(*cur).content.is_null() {
                         xmlOutputBufferWrite(
                             buf,
@@ -3670,10 +3554,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                         2 as ::core::ffi::c_int,
                         b"<?\0" as *const u8 as *const ::core::ffi::c_char,
                     );
-                    xmlOutputBufferWriteString(
-                        buf,
-                        (*cur).name as *const ::core::ffi::c_char,
-                    );
+                    xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                     xmlOutputBufferWrite(
                         buf,
                         2 as ::core::ffi::c_int,
@@ -3688,10 +3569,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                         4 as ::core::ffi::c_int,
                         b"<!--\0" as *const u8 as *const ::core::ffi::c_char,
                     );
-                    xmlOutputBufferWriteString(
-                        buf,
-                        (*cur).content as *const ::core::ffi::c_char,
-                    );
+                    xmlOutputBufferWriteString(buf, (*cur).content as *const ::core::ffi::c_char);
                     xmlOutputBufferWrite(
                         buf,
                         3 as ::core::ffi::c_int,
@@ -3705,10 +3583,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                     1 as ::core::ffi::c_int,
                     b"&\0" as *const u8 as *const ::core::ffi::c_char,
                 );
-                xmlOutputBufferWriteString(
-                    buf,
-                    (*cur).name as *const ::core::ffi::c_char,
-                );
+                xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                 xmlOutputBufferWrite(
                     buf,
                     1 as ::core::ffi::c_int,
@@ -3716,8 +3591,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                 );
             }
             4 => {
-                if (*cur).content.is_null()
-                    || *(*cur).content as ::core::ffi::c_int == '\0' as i32
+                if (*cur).content.is_null() || *(*cur).content as ::core::ffi::c_int == '\0' as i32
                 {
                     xmlOutputBufferWrite(
                         buf,
@@ -3729,10 +3603,10 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                     start = end;
                     while *end as ::core::ffi::c_int != '\0' as i32 {
                         if *end as ::core::ffi::c_int == ']' as i32
-                            && *end.offset(1 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int == ']' as i32
-                            && *end.offset(2 as ::core::ffi::c_int as isize)
-                                as ::core::ffi::c_int == '>' as i32
+                            && *end.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                                == ']' as i32
+                            && *end.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                                == '>' as i32
                         {
                             end = end.offset(2 as ::core::ffi::c_int as isize);
                             xmlOutputBufferWrite(
@@ -3742,8 +3616,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                             );
                             xmlOutputBufferWrite(
                                 buf,
-                                end.offset_from(start) as ::core::ffi::c_long
-                                    as ::core::ffi::c_int,
+                                end.offset_from(start) as ::core::ffi::c_long as ::core::ffi::c_int,
                                 start as *const ::core::ffi::c_char,
                             );
                             xmlOutputBufferWrite(
@@ -3761,10 +3634,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                             9 as ::core::ffi::c_int,
                             b"<![CDATA[\0" as *const u8 as *const ::core::ffi::c_char,
                         );
-                        xmlOutputBufferWriteString(
-                            buf,
-                            start as *const ::core::ffi::c_char,
-                        );
+                        xmlOutputBufferWriteString(buf, start as *const ::core::ffi::c_char);
                         xmlOutputBufferWrite(
                             buf,
                             3 as ::core::ffi::c_int,
@@ -3803,9 +3673,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                     if (*ctxt).level > 0 as ::core::ffi::c_int {
                         (*ctxt).level -= 1;
                     }
-                    if *__xmlIndentTreeOutput() != 0
-                        && (*ctxt).format == 1 as ::core::ffi::c_int
-                    {
+                    if *__xmlIndentTreeOutput() != 0 && (*ctxt).format == 1 as ::core::ffi::c_int {
                         xmlOutputBufferWrite(
                             buf,
                             (*ctxt).indent_size
@@ -3833,10 +3701,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                             b":\0" as *const u8 as *const ::core::ffi::c_char,
                         );
                     }
-                    xmlOutputBufferWriteString(
-                        buf,
-                        (*cur).name as *const ::core::ffi::c_char,
-                    );
+                    xmlOutputBufferWriteString(buf, (*cur).name as *const ::core::ffi::c_char);
                     xmlOutputBufferWrite(
                         buf,
                         1 as ::core::ffi::c_int,
@@ -3849,7 +3714,7 @@ unsafe extern "C" fn xhtmlNodeDumpOutput(mut ctxt: xmlSaveCtxtPtr, mut cur: xmlN
                 }
             }
         }
-    };
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlSaveToFd(
@@ -3962,8 +3827,7 @@ pub unsafe extern "C" fn xmlSaveTree(
         && !(*cur).doc.is_null()
         && (*(*cur).doc).type_0 as ::core::ffi::c_uint
             == XML_HTML_DOCUMENT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
-        && (*ctxt).options & XML_SAVE_AS_XML as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int
+        && (*ctxt).options & XML_SAVE_AS_XML as ::core::ffi::c_int == 0 as ::core::ffi::c_int
         || (*ctxt).options & XML_SAVE_AS_HTML as ::core::ffi::c_int != 0
     {
         htmlNodeDumpOutputInternal(ctxt, cur);
@@ -4168,59 +4032,52 @@ pub unsafe extern "C" fn xmlBufAttrSerializeTxtContent(
                 base = cur;
             } else {
                 if (*cur as ::core::ffi::c_int) < 0xe0 as ::core::ffi::c_int {
-                    val = *cur.offset(0 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int & 0x1f as ::core::ffi::c_int;
+                    val = *cur.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x1f as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *cur.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *cur.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     l = 2 as ::core::ffi::c_int;
                 } else if (*cur as ::core::ffi::c_int) < 0xf0 as ::core::ffi::c_int
-                    && *cur.offset(2 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int != 0 as ::core::ffi::c_int
+                    && *cur.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        != 0 as ::core::ffi::c_int
                 {
-                    val = *cur.offset(0 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int & 0xf as ::core::ffi::c_int;
+                    val = *cur.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0xf as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *cur.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *cur.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *cur.offset(2 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *cur.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     l = 3 as ::core::ffi::c_int;
                 } else if (*cur as ::core::ffi::c_int) < 0xf8 as ::core::ffi::c_int
-                    && *cur.offset(2 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int != 0 as ::core::ffi::c_int
-                    && *cur.offset(3 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int != 0 as ::core::ffi::c_int
+                    && *cur.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        != 0 as ::core::ffi::c_int
+                    && *cur.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        != 0 as ::core::ffi::c_int
                 {
-                    val = *cur.offset(0 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int & 0x7 as ::core::ffi::c_int;
+                    val = *cur.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x7 as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *cur.offset(1 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *cur.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *cur.offset(2 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *cur.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     val <<= 6 as ::core::ffi::c_int;
-                    val
-                        |= *cur.offset(3 as ::core::ffi::c_int as isize)
-                            as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int;
+                    val |= *cur.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        & 0x3f as ::core::ffi::c_int;
                     l = 4 as ::core::ffi::c_int;
                 }
                 if l == 1 as ::core::ffi::c_int
                     || (if val < 0x100 as ::core::ffi::c_int {
-                        (0x9 as ::core::ffi::c_int <= val
-                            && val <= 0xa as ::core::ffi::c_int
+                        (0x9 as ::core::ffi::c_int <= val && val <= 0xa as ::core::ffi::c_int
                             || val == 0xd as ::core::ffi::c_int
-                            || 0x20 as ::core::ffi::c_int <= val) as ::core::ffi::c_int
+                            || 0x20 as ::core::ffi::c_int <= val)
+                            as ::core::ffi::c_int
                     } else {
-                        (0x100 as ::core::ffi::c_int <= val
-                            && val <= 0xd7ff as ::core::ffi::c_int
+                        (0x100 as ::core::ffi::c_int <= val && val <= 0xd7ff as ::core::ffi::c_int
                             || 0xe000 as ::core::ffi::c_int <= val
                                 && val <= 0xfffd as ::core::ffi::c_int
                             || 0x10000 as ::core::ffi::c_int <= val
@@ -4245,10 +4102,7 @@ pub unsafe extern "C" fn xmlBufAttrSerializeTxtContent(
                     cur = cur.offset(1);
                     base = cur;
                 } else {
-                    xmlSerializeHexCharRef(
-                        &raw mut tmp as *mut ::core::ffi::c_uchar,
-                        val,
-                    );
+                    xmlSerializeHexCharRef(&raw mut tmp as *mut ::core::ffi::c_uchar, val);
                     xmlBufAdd(
                         buf,
                         &raw mut tmp as *mut ::core::ffi::c_uchar as *mut xmlChar,
@@ -4331,14 +4185,11 @@ pub unsafe extern "C" fn xmlBufNodeDump(
     if buf.is_null() {
         return -(1 as ::core::ffi::c_int) as size_t;
     }
-    outbuf = xmlMalloc
-        .expect(
-            "non-null function pointer",
-        )(::core::mem::size_of::<xmlOutputBuffer>() as size_t) as xmlOutputBufferPtr;
+    outbuf = xmlMalloc.expect("non-null function pointer")(
+        ::core::mem::size_of::<xmlOutputBuffer>() as size_t,
+    ) as xmlOutputBufferPtr;
     if outbuf.is_null() {
-        xmlSaveErrMemory(
-            b"creating buffer\0" as *const u8 as *const ::core::ffi::c_char,
-        );
+        xmlSaveErrMemory(b"creating buffer\0" as *const u8 as *const ::core::ffi::c_char);
         return -(1 as ::core::ffi::c_int) as size_t;
     }
     memset(
@@ -4369,20 +4220,13 @@ pub unsafe extern "C" fn xmlBufNodeDump(
     return ret as size_t;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlElemDump(
-    mut f: *mut FILE,
-    mut doc: xmlDocPtr,
-    mut cur: xmlNodePtr,
-) {
+pub unsafe extern "C" fn xmlElemDump(mut f: *mut FILE, mut doc: xmlDocPtr, mut cur: xmlNodePtr) {
     let mut outbuf: xmlOutputBufferPtr = ::core::ptr::null_mut::<xmlOutputBuffer>();
     xmlInitParser();
     if cur.is_null() {
         return;
     }
-    outbuf = xmlOutputBufferCreateFile(
-        f,
-        ::core::ptr::null_mut::<xmlCharEncodingHandler>(),
-    );
+    outbuf = xmlOutputBufferCreateFile(f, ::core::ptr::null_mut::<xmlCharEncodingHandler>());
     if outbuf.is_null() {
         return;
     }
@@ -4493,9 +4337,8 @@ pub unsafe extern "C" fn xmlDocDumpFormatMemoryEnc(
     };
     let mut dummy: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
     let mut out_buff: xmlOutputBufferPtr = ::core::ptr::null_mut::<xmlOutputBuffer>();
-    let mut conv_hdlr: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<
-        xmlCharEncodingHandler,
-    >();
+    let mut conv_hdlr: xmlCharEncodingHandlerPtr =
+        ::core::ptr::null_mut::<xmlCharEncodingHandler>();
     if doc_txt_len.is_null() {
         doc_txt_len = &raw mut dummy;
     }
@@ -4524,9 +4367,7 @@ pub unsafe extern "C" fn xmlDocDumpFormatMemoryEnc(
     }
     out_buff = xmlAllocOutputBuffer(conv_hdlr);
     if out_buff.is_null() {
-        xmlSaveErrMemory(
-            b"creating buffer\0" as *const u8 as *const ::core::ffi::c_char,
-        );
+        xmlSaveErrMemory(b"creating buffer\0" as *const u8 as *const ::core::ffi::c_char);
         return;
     }
     memset(
@@ -4562,9 +4403,7 @@ pub unsafe extern "C" fn xmlDocDumpFormatMemoryEnc(
     xmlOutputBufferClose(out_buff);
     if (*doc_txt_ptr).is_null() && *doc_txt_len > 0 as ::core::ffi::c_int {
         *doc_txt_len = 0 as ::core::ffi::c_int;
-        xmlSaveErrMemory(
-            b"creating output\0" as *const u8 as *const ::core::ffi::c_char,
-        );
+        xmlSaveErrMemory(b"creating output\0" as *const u8 as *const ::core::ffi::c_char);
     }
 }
 #[no_mangle]
@@ -4635,12 +4474,8 @@ pub unsafe extern "C" fn xmlDocFormatDump(
         escapeAttr: None,
     };
     let mut buf: xmlOutputBufferPtr = ::core::ptr::null_mut::<xmlOutputBuffer>();
-    let mut encoding: *const ::core::ffi::c_char = ::core::ptr::null::<
-        ::core::ffi::c_char,
-    >();
-    let mut handler: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<
-        xmlCharEncodingHandler,
-    >();
+    let mut encoding: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
+    let mut handler: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<xmlCharEncodingHandler>();
     let mut ret: ::core::ffi::c_int = 0;
     if cur.is_null() {
         return -(1 as ::core::ffi::c_int);
@@ -4649,10 +4484,7 @@ pub unsafe extern "C" fn xmlDocFormatDump(
     if !encoding.is_null() {
         handler = xmlFindCharEncodingHandler(encoding);
         if handler.is_null() {
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )(
+            xmlFree.expect("non-null function pointer")(
                 (*cur).encoding as *mut ::core::ffi::c_char as *mut ::core::ffi::c_void,
             );
             (*cur).encoding = ::core::ptr::null::<xmlChar>();
@@ -4683,10 +4515,7 @@ pub unsafe extern "C" fn xmlDocFormatDump(
     return ret;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlDocDump(
-    mut f: *mut FILE,
-    mut cur: xmlDocPtr,
-) -> ::core::ffi::c_int {
+pub unsafe extern "C" fn xmlDocDump(mut f: *mut FILE, mut cur: xmlDocPtr) -> ::core::ffi::c_int {
     return xmlDocFormatDump(f, cur, 0 as ::core::ffi::c_int);
 }
 #[no_mangle]
@@ -4816,9 +4645,7 @@ pub unsafe extern "C" fn xmlSaveFormatFileEnc(
         escapeAttr: None,
     };
     let mut buf: xmlOutputBufferPtr = ::core::ptr::null_mut::<xmlOutputBuffer>();
-    let mut handler: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<
-        xmlCharEncodingHandler,
-    >();
+    let mut handler: xmlCharEncodingHandlerPtr = ::core::ptr::null_mut::<xmlCharEncodingHandler>();
     let mut ret: ::core::ffi::c_int = 0;
     if cur.is_null() {
         return -(1 as ::core::ffi::c_int);

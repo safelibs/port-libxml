@@ -31,14 +31,40 @@ from pathlib import Path
 root = Path(sys.argv[1])
 subset = sys.argv[2]
 manifest = tomllib.loads((root / "safe/tests/upstream/manifest.toml").read_text())
-if subset not in manifest["ordered_subsets"]:
+ordered_subsets = manifest["ordered_subsets"]
+if subset == "all":
+    selected_subsets = manifest["all"]
+elif subset in ordered_subsets:
+    selected_subsets = [subset]
+else:
     raise SystemExit(f"unknown subset {subset!r}")
 
-entries = [entry for entry in manifest["entry"] if subset in entry["subsets"]]
+entries = [entry for entry in manifest["entry"] if set(entry["subsets"]) & set(selected_subsets)]
+
+
+def parse_python_tests(makefile_path: Path) -> list[str]:
+    tests: list[str] = []
+    in_block = False
+    for raw_line in makefile_path.read_text().splitlines():
+        line = raw_line.strip()
+        if line.startswith("PYTESTS="):
+            in_block = True
+            line = line.split("=", 1)[1]
+        elif in_block and line.startswith("XMLS="):
+            break
+        elif not in_block:
+            continue
+        for token in line.replace("\\", " ").split():
+            if token.endswith(".py"):
+                tests.append(token)
+    return tests
+
+
 for entry in entries:
     env = os.environ.copy()
     env.update(entry.get("env", {}))
     cwd = root / entry["cwd"]
+    cwd.mkdir(parents=True, exist_ok=True)
     runner = entry["runner"]
     if runner == "helper_binary":
         command = [str(root / "safe/target/upstream-bin" / entry["binary"]), *entry.get("argv", [])]
@@ -48,6 +74,16 @@ for entry in entries:
         command = [str(root / "safe/tests/upstream/run_makefile_tests.sh")]
     elif runner == "doc_examples":
         command = [str(root / "safe/tests/upstream/run_doc_examples.sh")]
+    elif runner == "python_tests":
+        print("## running Python regression tests", flush=True)
+        tests = parse_python_tests(root / "original/python/tests/Makefile.am")
+        for test in tests:
+            subprocess.run([sys.executable, str(root / "original/python/tests" / test)], cwd=cwd, env=env, check=True)
+        continue
+    elif runner == "python_script":
+        command = [sys.executable, str(root / entry["script"]), *entry.get("argv", [])]
+    elif runner == "shell_script":
+        command = [str(root / entry["script"]), *entry.get("argv", [])]
     else:
         raise SystemExit(f"unknown runner {runner!r} for entry {entry['name']!r}")
 

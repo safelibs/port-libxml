@@ -32,10 +32,7 @@ extern "C" {
         name: *const xmlChar,
     ) -> *const xmlChar;
     fn xmlDictOwns(dict: xmlDictPtr, str: *const xmlChar) -> ::core::ffi::c_int;
-    fn xmlValidateNCName(
-        value: *const xmlChar,
-        space: ::core::ffi::c_int,
-    ) -> ::core::ffi::c_int;
+    fn xmlValidateNCName(value: *const xmlChar, space: ::core::ffi::c_int) -> ::core::ffi::c_int;
     fn xmlBuildQName(
         ncname: *const xmlChar,
         prefix: *const xmlChar,
@@ -56,11 +53,7 @@ extern "C" {
     ) -> xmlDtdPtr;
     fn xmlGetIntSubset(doc: *const xmlDoc) -> xmlDtdPtr;
     fn xmlFreeDtd(cur: xmlDtdPtr);
-    fn xmlNewNs(
-        node: xmlNodePtr,
-        href: *const xmlChar,
-        prefix: *const xmlChar,
-    ) -> xmlNsPtr;
+    fn xmlNewNs(node: xmlNodePtr, href: *const xmlChar, prefix: *const xmlChar) -> xmlNsPtr;
     fn xmlNewDoc(version: *const xmlChar) -> xmlDocPtr;
     fn xmlNewNsProp(
         node: xmlNodePtr,
@@ -87,11 +80,7 @@ extern "C" {
         content: *const xmlChar,
     ) -> xmlNodePtr;
     fn xmlNewDocText(doc: *const xmlDoc, content: *const xmlChar) -> xmlNodePtr;
-    fn xmlNewDocPI(
-        doc: xmlDocPtr,
-        name: *const xmlChar,
-        content: *const xmlChar,
-    ) -> xmlNodePtr;
+    fn xmlNewDocPI(doc: xmlDocPtr, name: *const xmlChar, content: *const xmlChar) -> xmlNodePtr;
     fn xmlNewDocComment(doc: xmlDocPtr, content: *const xmlChar) -> xmlNodePtr;
     fn xmlNewCDataBlock(
         doc: xmlDocPtr,
@@ -109,11 +98,7 @@ extern "C" {
         len: ::core::ffi::c_int,
     ) -> ::core::ffi::c_int;
     fn xmlFreeNode(cur: xmlNodePtr);
-    fn xmlSearchNs(
-        doc: xmlDocPtr,
-        node: xmlNodePtr,
-        nameSpace: *const xmlChar,
-    ) -> xmlNsPtr;
+    fn xmlSearchNs(doc: xmlDocPtr, node: xmlNodePtr, nameSpace: *const xmlChar) -> xmlNsPtr;
     fn xmlSetNs(node: xmlNodePtr, ns: xmlNsPtr);
     fn xmlStringGetNodeList(doc: *const xmlDoc, value: *const xmlChar) -> xmlNodePtr;
     fn xmlStringLenGetNodeList(
@@ -121,16 +106,8 @@ extern "C" {
         value: *const xmlChar,
         len: ::core::ffi::c_int,
     ) -> xmlNodePtr;
-    fn xmlParserError(
-        ctx: *mut ::core::ffi::c_void,
-        msg: *const ::core::ffi::c_char,
-        ...
-    );
-    fn xmlParserWarning(
-        ctx: *mut ::core::ffi::c_void,
-        msg: *const ::core::ffi::c_char,
-        ...
-    );
+    fn xmlParserError(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
+    fn xmlParserWarning(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
     fn __xmlRaiseError(
         schannel: xmlStructuredErrorFunc,
         channel: xmlGenericErrorFunc,
@@ -189,11 +166,7 @@ extern "C" {
         value: *const xmlChar,
         attr: xmlAttrPtr,
     ) -> xmlRefPtr;
-    fn xmlIsRef(
-        doc: xmlDocPtr,
-        elem: xmlNodePtr,
-        attr: xmlAttrPtr,
-    ) -> ::core::ffi::c_int;
+    fn xmlIsRef(doc: xmlDocPtr, elem: xmlNodePtr, attr: xmlAttrPtr) -> ::core::ffi::c_int;
     fn xmlValidateRoot(ctxt: xmlValidCtxtPtr, doc: xmlDocPtr) -> ::core::ffi::c_int;
     fn xmlValidateElementDecl(
         ctxt: xmlValidCtxtPtr,
@@ -244,10 +217,7 @@ extern "C" {
         ns: xmlNsPtr,
         value: *const xmlChar,
     ) -> ::core::ffi::c_int;
-    fn xmlValidateDocumentFinal(
-        ctxt: xmlValidCtxtPtr,
-        doc: xmlDocPtr,
-    ) -> ::core::ffi::c_int;
+    fn xmlValidateDocumentFinal(ctxt: xmlValidCtxtPtr, doc: xmlDocPtr) -> ::core::ffi::c_int;
     fn xmlGetDtdQAttrDesc(
         dtd: xmlDtdPtr,
         elem: *const xmlChar,
@@ -296,14 +266,8 @@ extern "C" {
     fn __xmlDefaultSAXHandler() -> *mut xmlSAXHandlerV1;
     fn __xmlRegisterNodeDefaultValue() -> *mut xmlRegisterNodeFunc;
     static xmlStringText: [xmlChar; 0];
-    fn xmlSwitchEncoding(
-        ctxt: xmlParserCtxtPtr,
-        enc: xmlCharEncoding,
-    ) -> ::core::ffi::c_int;
-    fn xmlPushInput(
-        ctxt: xmlParserCtxtPtr,
-        input: xmlParserInputPtr,
-    ) -> ::core::ffi::c_int;
+    fn xmlSwitchEncoding(ctxt: xmlParserCtxtPtr, enc: xmlCharEncoding) -> ::core::ffi::c_int;
+    fn xmlPushInput(ctxt: xmlParserCtxtPtr, input: xmlParserInputPtr) -> ::core::ffi::c_int;
     fn xmlPopInput(ctxt: xmlParserCtxtPtr) -> xmlChar;
     fn xmlFreeInputStream(input: xmlParserInputPtr);
     fn xmlSplitQName(
@@ -348,12 +312,9 @@ pub type xmlChar = ::core::ffi::c_uchar;
 pub type size_t = usize;
 pub type ptrdiff_t = isize;
 pub type xmlFreeFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
-pub type xmlMallocFunc = Option<
-    unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void,
->;
-pub type xmlReallocFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t) -> *mut ::core::ffi::c_void,
->;
+pub type xmlMallocFunc = Option<unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void>;
+pub type xmlReallocFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t) -> *mut ::core::ffi::c_void>;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _xmlParserInputBuffer {
@@ -397,9 +358,8 @@ pub type xmlCharEncodingInputFunc = Option<
         *mut ::core::ffi::c_int,
     ) -> ::core::ffi::c_int,
 >;
-pub type xmlInputCloseCallback = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type xmlInputCloseCallback =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type xmlInputReadCallback = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -749,12 +709,10 @@ pub type xmlAutomata = _xmlAutomata;
 pub type xmlValidState = _xmlValidState;
 pub type xmlDocPtr = *mut xmlDoc;
 pub type xmlDoc = _xmlDoc;
-pub type xmlValidityWarningFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type xmlValidityErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlValidityWarningFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type xmlValidityErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlParserNodeInfoSeq = _xmlParserNodeInfoSeq;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -799,9 +757,8 @@ pub struct _xmlSAXHandler {
     pub endElementNs: endElementNsSAX2Func,
     pub serror: xmlStructuredErrorFunc,
 }
-pub type xmlStructuredErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> (),
->;
+pub type xmlStructuredErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlErrorPtr) -> ()>;
 pub type xmlErrorPtr = *mut xmlError;
 pub type endElementNsSAX2Func = Option<
     unsafe extern "C" fn(
@@ -833,15 +790,10 @@ pub type externalSubsetSAXFunc = Option<
     ) -> (),
 >;
 pub type cdataBlockSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type getParameterEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getParameterEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type xmlEntityPtr = *mut xmlEntity;
 pub type xmlEntity = _xmlEntity;
 #[derive(Copy, Clone)]
@@ -874,74 +826,43 @@ pub const XML_INTERNAL_PARAMETER_ENTITY: xmlEntityType = 4;
 pub const XML_EXTERNAL_GENERAL_UNPARSED_ENTITY: xmlEntityType = 3;
 pub const XML_EXTERNAL_GENERAL_PARSED_ENTITY: xmlEntityType = 2;
 pub const XML_INTERNAL_GENERAL_ENTITY: xmlEntityType = 1;
-pub type fatalErrorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type errorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type warningSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type commentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type processingInstructionSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> (),
->;
+pub type fatalErrorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type errorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type warningSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type commentSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type processingInstructionSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> ()>;
 pub type ignorableWhitespaceSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
 pub type charactersSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type referenceSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type endElementSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
+pub type referenceSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type endElementSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
 pub type startElementSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        *mut *const xmlChar,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *mut *const xmlChar) -> (),
 >;
-pub type endDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type startDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type setDocumentLocatorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
->;
+pub type endDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type startDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type setDocumentLocatorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> ()>;
 pub type xmlSAXLocatorPtr = *mut xmlSAXLocator;
 pub type xmlSAXLocator = _xmlSAXLocator;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _xmlSAXLocator {
-    pub getPublicId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getSystemId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getLineNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
-    pub getColumnNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
+    pub getPublicId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getSystemId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getLineNumber: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
+    pub getColumnNumber:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
 }
 pub type unparsedEntityDeclSAXFunc = Option<
     unsafe extern "C" fn(
@@ -1020,9 +941,8 @@ pub type entityDeclSAXFunc = Option<
         *mut xmlChar,
     ) -> (),
 >;
-pub type getEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type resolveEntitySAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -1030,15 +950,12 @@ pub type resolveEntitySAXFunc = Option<
         *const xmlChar,
     ) -> xmlParserInputPtr,
 >;
-pub type hasExternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type hasInternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type isStandaloneSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type hasExternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type hasInternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type isStandaloneSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type internalSubsetSAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -1917,9 +1834,8 @@ pub const XML_ERR_DOCUMENT_START: xmlParserErrors = 3;
 pub const XML_ERR_NO_MEMORY: xmlParserErrors = 2;
 pub const XML_ERR_INTERNAL_ERROR: xmlParserErrors = 1;
 pub const XML_ERR_OK: xmlParserErrors = 0;
-pub type xmlGenericErrorFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
+pub type xmlGenericErrorFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
 pub type xmlValidCtxtPtr = *mut xmlValidCtxt;
 pub type xmlParserNodeInfoPtr = *mut xmlParserNodeInfo;
 #[derive(Copy, Clone)]
@@ -2023,11 +1939,9 @@ pub struct _xmlURI {
     pub query_raw: *mut ::core::ffi::c_char,
 }
 pub type xmlRegisterNodeFunc = Option<unsafe extern "C" fn(xmlNodePtr) -> ()>;
-pub const USHRT_MAX: ::core::ffi::c_int = __SHRT_MAX__ * 2 as ::core::ffi::c_int
-    + 1 as ::core::ffi::c_int;
-pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const USHRT_MAX: ::core::ffi::c_int =
+    __SHRT_MAX__ * 2 as ::core::ffi::c_int + 1 as ::core::ffi::c_int;
+pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const XML_CTXT_FINISH_DTD_0: ::core::ffi::c_uint = 0xabcd1234 as ::core::ffi::c_uint;
 pub const XML_CTXT_FINISH_DTD_1: ::core::ffi::c_uint = 0xabcd1235 as ::core::ffi::c_uint;
 pub const XML_COMPLETE_ATTRS: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
@@ -2041,8 +1955,8 @@ unsafe extern "C" fn xmlSAX2ErrMemory(
     mut msg: *const ::core::ffi::c_char,
 ) {
     let mut schannel: xmlStructuredErrorFunc = None;
-    let mut str1: *const ::core::ffi::c_char = b"out of memory\n\0" as *const u8
-        as *const ::core::ffi::c_char;
+    let mut str1: *const ::core::ffi::c_char =
+        b"out of memory\n\0" as *const u8 as *const ::core::ffi::c_char;
     if !ctxt.is_null() {
         (*ctxt).errNo = XML_ERR_NO_MEMORY as ::core::ffi::c_int;
         if !(*ctxt).sax.is_null() && (*(*ctxt).sax).initialized == XML_SAX2_MAGIC {
@@ -2102,7 +2016,8 @@ unsafe extern "C" fn xmlErrValid(
     mut str2: *const ::core::ffi::c_char,
 ) {
     let mut schannel: xmlStructuredErrorFunc = None;
-    if !ctxt.is_null() && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
+    if !ctxt.is_null()
+        && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
         && (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
     {
         return;
@@ -2163,7 +2078,8 @@ unsafe extern "C" fn xmlFatalErrMsg(
     mut str1: *const xmlChar,
     mut str2: *const xmlChar,
 ) {
-    if !ctxt.is_null() && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
+    if !ctxt.is_null()
+        && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
         && (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
     {
         return;
@@ -2205,7 +2121,8 @@ unsafe extern "C" fn xmlWarnMsg(
     mut msg: *const ::core::ffi::c_char,
     mut str1: *const xmlChar,
 ) {
-    if !ctxt.is_null() && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
+    if !ctxt.is_null()
+        && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
         && (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
     {
         return;
@@ -2240,7 +2157,8 @@ unsafe extern "C" fn xmlNsErrMsg(
     mut str1: *const xmlChar,
     mut str2: *const xmlChar,
 ) {
-    if !ctxt.is_null() && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
+    if !ctxt.is_null()
+        && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
         && (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
     {
         return;
@@ -2276,7 +2194,8 @@ unsafe extern "C" fn xmlNsWarnMsg(
     mut str1: *const xmlChar,
     mut str2: *const xmlChar,
 ) {
-    if !ctxt.is_null() && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
+    if !ctxt.is_null()
+        && (*ctxt).disableSAX != 0 as ::core::ffi::c_int
         && (*ctxt).instate as ::core::ffi::c_int == XML_PARSER_EOF as ::core::ffi::c_int
     {
         return;
@@ -2306,15 +2225,11 @@ unsafe extern "C" fn xmlNsWarnMsg(
     );
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlSAX2GetPublicId(
-    mut ctx: *mut ::core::ffi::c_void,
-) -> *const xmlChar {
+pub unsafe extern "C" fn xmlSAX2GetPublicId(mut ctx: *mut ::core::ffi::c_void) -> *const xmlChar {
     return ::core::ptr::null::<xmlChar>();
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlSAX2GetSystemId(
-    mut ctx: *mut ::core::ffi::c_void,
-) -> *const xmlChar {
+pub unsafe extern "C" fn xmlSAX2GetSystemId(mut ctx: *mut ::core::ffi::c_void) -> *const xmlChar {
     let mut ctxt: xmlParserCtxtPtr = ctx as xmlParserCtxtPtr;
     if ctx.is_null() || (*ctxt).input.is_null() {
         return ::core::ptr::null::<xmlChar>();
@@ -2349,8 +2264,7 @@ pub unsafe extern "C" fn xmlSAX2IsStandalone(
     if ctx.is_null() || (*ctxt).myDoc.is_null() {
         return 0 as ::core::ffi::c_int;
     }
-    return ((*(*ctxt).myDoc).standalone == 1 as ::core::ffi::c_int)
-        as ::core::ffi::c_int;
+    return ((*(*ctxt).myDoc).standalone == 1 as ::core::ffi::c_int) as ::core::ffi::c_int;
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlSAX2HasInternalSubset(
@@ -2396,12 +2310,8 @@ pub unsafe extern "C" fn xmlSAX2InternalSubset(
         xmlFreeDtd(dtd);
         (*(*ctxt).myDoc).intSubset = ::core::ptr::null_mut::<_xmlDtd>();
     }
-    (*(*ctxt).myDoc).intSubset = xmlCreateIntSubset(
-        (*ctxt).myDoc,
-        name,
-        ExternalID,
-        SystemID,
-    ) as *mut _xmlDtd;
+    (*(*ctxt).myDoc).intSubset =
+        xmlCreateIntSubset((*ctxt).myDoc, name, ExternalID, SystemID) as *mut _xmlDtd;
     if (*(*ctxt).myDoc).intSubset.is_null() {
         xmlSAX2ErrMemory(
             ctxt,
@@ -2427,9 +2337,7 @@ pub unsafe extern "C" fn xmlSAX2ExternalSubset(
         let mut oldinput: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
         let mut oldinputNr: ::core::ffi::c_int = 0;
         let mut oldinputMax: ::core::ffi::c_int = 0;
-        let mut oldinputTab: *mut xmlParserInputPtr = ::core::ptr::null_mut::<
-            xmlParserInputPtr,
-        >();
+        let mut oldinputTab: *mut xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInputPtr>();
         let mut input: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
         let mut enc: xmlCharEncoding = XML_CHAR_ENCODING_NONE;
         let mut oldcharset: ::core::ffi::c_int = 0;
@@ -2437,9 +2345,9 @@ pub unsafe extern "C" fn xmlSAX2ExternalSubset(
         if !(*ctxt).sax.is_null() && (*(*ctxt).sax).resolveEntity.is_some() {
             input = (*(*ctxt).sax)
                 .resolveEntity
-                .expect(
-                    "non-null function pointer",
-                )((*ctxt).userData, ExternalID, SystemID);
+                .expect("non-null function pointer")(
+                (*ctxt).userData, ExternalID, SystemID
+            );
         }
         if input.is_null() {
             return;
@@ -2452,12 +2360,8 @@ pub unsafe extern "C" fn xmlSAX2ExternalSubset(
         oldcharset = (*ctxt).charset;
         oldencoding = (*ctxt).encoding;
         (*ctxt).encoding = ::core::ptr::null::<xmlChar>();
-        (*ctxt).inputTab = xmlMalloc
-            .expect(
-                "non-null function pointer",
-            )(
-            (5 as size_t)
-                .wrapping_mul(::core::mem::size_of::<xmlParserInputPtr>() as size_t),
+        (*ctxt).inputTab = xmlMalloc.expect("non-null function pointer")(
+            (5 as size_t).wrapping_mul(::core::mem::size_of::<xmlParserInputPtr>() as size_t),
         ) as *mut xmlParserInputPtr;
         if (*ctxt).inputTab.is_null() {
             xmlSAX2ErrMemory(
@@ -2496,23 +2400,18 @@ pub unsafe extern "C" fn xmlSAX2ExternalSubset(
             xmlPopInput(ctxt);
         }
         xmlFreeInputStream((*ctxt).input);
-        xmlFree
-            .expect(
-                "non-null function pointer",
-            )((*ctxt).inputTab as *mut ::core::ffi::c_void);
+        xmlFree.expect("non-null function pointer")((*ctxt).inputTab as *mut ::core::ffi::c_void);
         (*ctxt).input = oldinput;
         (*ctxt).inputNr = oldinputNr;
         (*ctxt).inputMax = oldinputMax;
         (*ctxt).inputTab = oldinputTab;
         (*ctxt).charset = oldcharset;
         if !(*ctxt).encoding.is_null()
-            && ((*ctxt).dict.is_null()
-                || xmlDictOwns((*ctxt).dict, (*ctxt).encoding) == 0)
+            && ((*ctxt).dict.is_null() || xmlDictOwns((*ctxt).dict, (*ctxt).encoding) == 0)
         {
-            xmlFree
-                .expect(
-                    "non-null function pointer",
-                )((*ctxt).encoding as *mut xmlChar as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(
+                (*ctxt).encoding as *mut xmlChar as *mut ::core::ffi::c_void,
+            );
         }
         (*ctxt).encoding = oldencoding;
     }
@@ -2526,9 +2425,7 @@ pub unsafe extern "C" fn xmlSAX2ResolveEntity(
     let mut ctxt: xmlParserCtxtPtr = ctx as xmlParserCtxtPtr;
     let mut ret: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
     let mut URI: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-    let mut base: *const ::core::ffi::c_char = ::core::ptr::null::<
-        ::core::ffi::c_char,
-    >();
+    let mut base: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     if ctx.is_null() {
         return ::core::ptr::null_mut::<xmlParserInput>();
     }
@@ -2565,8 +2462,7 @@ pub unsafe extern "C" fn xmlSAX2GetEntity(
             return ret;
         }
     }
-    if !(*ctxt).myDoc.is_null() && (*(*ctxt).myDoc).standalone == 1 as ::core::ffi::c_int
-    {
+    if !(*ctxt).myDoc.is_null() && (*(*ctxt).myDoc).standalone == 1 as ::core::ffi::c_int {
         if (*ctxt).inSubset == 2 as ::core::ffi::c_int {
             (*(*ctxt).myDoc).standalone = 0 as ::core::ffi::c_int;
             ret = xmlGetDocEntity((*ctxt).myDoc as *const xmlDoc, name);
@@ -2634,9 +2530,7 @@ pub unsafe extern "C" fn xmlSAX2EntityDecl(
         }
         if !ent.is_null() && (*ent).URI.is_null() && !systemId.is_null() {
             let mut URI: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-            let mut base: *const ::core::ffi::c_char = ::core::ptr::null::<
-                ::core::ffi::c_char,
-            >();
+            let mut base: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
             if !(*ctxt).input.is_null() {
                 base = (*(*ctxt).input).filename;
             }
@@ -2648,14 +2542,12 @@ pub unsafe extern "C" fn xmlSAX2EntityDecl(
         }
     } else if (*ctxt).inSubset == 2 as ::core::ffi::c_int {
         ent = xmlAddDtdEntity((*ctxt).myDoc, name, type_0, publicId, systemId, content);
-        if ent.is_null() && (*ctxt).pedantic != 0 && !(*ctxt).sax.is_null()
+        if ent.is_null()
+            && (*ctxt).pedantic != 0
+            && !(*ctxt).sax.is_null()
             && (*(*ctxt).sax).warning.is_some()
         {
-            (*(*ctxt).sax)
-                .warning
-                .expect(
-                    "non-null function pointer",
-                )(
+            (*(*ctxt).sax).warning.expect("non-null function pointer")(
                 (*ctxt).userData,
                 b"Entity(%s) already defined in the external subset\n\0" as *const u8
                     as *const ::core::ffi::c_char,
@@ -2664,9 +2556,7 @@ pub unsafe extern "C" fn xmlSAX2EntityDecl(
         }
         if !ent.is_null() && (*ent).URI.is_null() && !systemId.is_null() {
             let mut URI_0: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-            let mut base_0: *const ::core::ffi::c_char = ::core::ptr::null::<
-                ::core::ffi::c_char,
-            >();
+            let mut base_0: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
             if !(*ctxt).input.is_null() {
                 base_0 = (*(*ctxt).input).filename;
             }
@@ -2707,14 +2597,14 @@ pub unsafe extern "C" fn xmlSAX2AttributeDecl(
     if xmlStrEqual(
         fullname,
         b"xml:id\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-    ) != 0 && type_0 != XML_ATTRIBUTE_ID as ::core::ffi::c_int
+    ) != 0
+        && type_0 != XML_ATTRIBUTE_ID as ::core::ffi::c_int
     {
         let mut tmp: ::core::ffi::c_int = (*ctxt).valid;
         xmlErrValid(
             ctxt,
             XML_DTD_XMLID_TYPE,
-            b"xml:id : attribute type should be ID\n\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"xml:id : attribute type should be ID\n\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<::core::ffi::c_char>(),
             ::core::ptr::null::<::core::ffi::c_char>(),
         );
@@ -2762,11 +2652,12 @@ pub unsafe extern "C" fn xmlSAX2AttributeDecl(
     if (*ctxt).vctxt.valid == 0 as ::core::ffi::c_int {
         (*ctxt).valid = 0 as ::core::ffi::c_int;
     }
-    if !attr.is_null() && (*ctxt).validate != 0 && (*ctxt).wellFormed != 0
+    if !attr.is_null()
+        && (*ctxt).validate != 0
+        && (*ctxt).wellFormed != 0
         && !(*(*ctxt).myDoc).intSubset.is_null()
     {
-        (*ctxt).valid
-            &= xmlValidateAttributeDecl(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, attr);
+        (*ctxt).valid &= xmlValidateAttributeDecl(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, attr);
     }
     if !prefix.is_null() {
         xmlFree.expect("non-null function pointer")(prefix as *mut ::core::ffi::c_void);
@@ -2817,11 +2708,12 @@ pub unsafe extern "C" fn xmlSAX2ElementDecl(
     if elem.is_null() {
         (*ctxt).valid = 0 as ::core::ffi::c_int;
     }
-    if (*ctxt).validate != 0 && (*ctxt).wellFormed != 0 && !(*ctxt).myDoc.is_null()
+    if (*ctxt).validate != 0
+        && (*ctxt).wellFormed != 0
+        && !(*ctxt).myDoc.is_null()
         && !(*(*ctxt).myDoc).intSubset.is_null()
     {
-        (*ctxt).valid
-            &= xmlValidateElementDecl(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, elem);
+        (*ctxt).valid &= xmlValidateElementDecl(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, elem);
     }
 }
 #[no_mangle]
@@ -2840,8 +2732,8 @@ pub unsafe extern "C" fn xmlSAX2NotationDecl(
         xmlFatalErrMsg(
             ctxt,
             XML_ERR_NOTATION_PROCESSING,
-            b"SAX.xmlSAX2NotationDecl(%s) externalID or PublicID missing\n\0"
-                as *const u8 as *const ::core::ffi::c_char,
+            b"SAX.xmlSAX2NotationDecl(%s) externalID or PublicID missing\n\0" as *const u8
+                as *const ::core::ffi::c_char,
             name,
             ::core::ptr::null::<xmlChar>(),
         );
@@ -2876,11 +2768,8 @@ pub unsafe extern "C" fn xmlSAX2NotationDecl(
     if nota.is_null() {
         (*ctxt).valid = 0 as ::core::ffi::c_int;
     }
-    if (*ctxt).validate != 0 && (*ctxt).wellFormed != 0
-        && !(*(*ctxt).myDoc).intSubset.is_null()
-    {
-        (*ctxt).valid
-            &= xmlValidateNotationDecl(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, nota);
+    if (*ctxt).validate != 0 && (*ctxt).wellFormed != 0 && !(*(*ctxt).myDoc).intSubset.is_null() {
+        (*ctxt).valid &= xmlValidateNotationDecl(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, nota);
     }
 }
 #[no_mangle]
@@ -2905,14 +2794,12 @@ pub unsafe extern "C" fn xmlSAX2UnparsedEntityDecl(
             systemId,
             notationName,
         );
-        if ent.is_null() && (*ctxt).pedantic != 0 && !(*ctxt).sax.is_null()
+        if ent.is_null()
+            && (*ctxt).pedantic != 0
+            && !(*ctxt).sax.is_null()
             && (*(*ctxt).sax).warning.is_some()
         {
-            (*(*ctxt).sax)
-                .warning
-                .expect(
-                    "non-null function pointer",
-                )(
+            (*(*ctxt).sax).warning.expect("non-null function pointer")(
                 (*ctxt).userData,
                 b"Entity(%s) already defined in the internal subset\n\0" as *const u8
                     as *const ::core::ffi::c_char,
@@ -2921,9 +2808,7 @@ pub unsafe extern "C" fn xmlSAX2UnparsedEntityDecl(
         }
         if !ent.is_null() && (*ent).URI.is_null() && !systemId.is_null() {
             let mut URI: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-            let mut base: *const ::core::ffi::c_char = ::core::ptr::null::<
-                ::core::ffi::c_char,
-            >();
+            let mut base: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
             if !(*ctxt).input.is_null() {
                 base = (*(*ctxt).input).filename;
             }
@@ -2942,14 +2827,12 @@ pub unsafe extern "C" fn xmlSAX2UnparsedEntityDecl(
             systemId,
             notationName,
         );
-        if ent.is_null() && (*ctxt).pedantic != 0 && !(*ctxt).sax.is_null()
+        if ent.is_null()
+            && (*ctxt).pedantic != 0
+            && !(*ctxt).sax.is_null()
             && (*(*ctxt).sax).warning.is_some()
         {
-            (*(*ctxt).sax)
-                .warning
-                .expect(
-                    "non-null function pointer",
-                )(
+            (*(*ctxt).sax).warning.expect("non-null function pointer")(
                 (*ctxt).userData,
                 b"Entity(%s) already defined in the external subset\n\0" as *const u8
                     as *const ::core::ffi::c_char,
@@ -2958,9 +2841,7 @@ pub unsafe extern "C" fn xmlSAX2UnparsedEntityDecl(
         }
         if !ent.is_null() && (*ent).URI.is_null() && !systemId.is_null() {
             let mut URI_0: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
-            let mut base_0: *const ::core::ffi::c_char = ::core::ptr::null::<
-                ::core::ffi::c_char,
-            >();
+            let mut base_0: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
             if !(*ctxt).input.is_null() {
                 base_0 = (*(*ctxt).input).filename;
             }
@@ -2974,8 +2855,8 @@ pub unsafe extern "C" fn xmlSAX2UnparsedEntityDecl(
         xmlFatalErrMsg(
             ctxt,
             XML_ERR_INTERNAL_ERROR,
-            b"SAX.xmlSAX2UnparsedEntityDecl(%s) called while not in subset\n\0"
-                as *const u8 as *const ::core::ffi::c_char,
+            b"SAX.xmlSAX2UnparsedEntityDecl(%s) called while not in subset\n\0" as *const u8
+                as *const ::core::ffi::c_char,
             name,
             ::core::ptr::null::<xmlChar>(),
         );
@@ -2985,7 +2866,8 @@ pub unsafe extern "C" fn xmlSAX2UnparsedEntityDecl(
 pub unsafe extern "C" fn xmlSAX2SetDocumentLocator(
     mut ctx: *mut ::core::ffi::c_void,
     mut loc: xmlSAXLocatorPtr,
-) {}
+) {
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlSAX2StartDocument(mut ctx: *mut ::core::ffi::c_void) {
     let mut ctxt: xmlParserCtxtPtr = ctx as xmlParserCtxtPtr;
@@ -3043,8 +2925,10 @@ pub unsafe extern "C" fn xmlSAX2StartDocument(mut ctx: *mut ::core::ffi::c_void)
             xmlDictReference((*doc).dict as xmlDictPtr);
         }
     }
-    if !(*ctxt).myDoc.is_null() && (*(*ctxt).myDoc).URL.is_null()
-        && !(*ctxt).input.is_null() && !(*(*ctxt).input).filename.is_null()
+    if !(*ctxt).myDoc.is_null()
+        && (*(*ctxt).myDoc).URL.is_null()
+        && !(*ctxt).input.is_null()
+        && !(*(*ctxt).input).filename.is_null()
     {
         (*(*ctxt).myDoc).URL = xmlPathToURI((*(*ctxt).input).filename as *const xmlChar);
         if (*(*ctxt).myDoc).URL.is_null() {
@@ -3061,26 +2945,31 @@ pub unsafe extern "C" fn xmlSAX2EndDocument(mut ctx: *mut ::core::ffi::c_void) {
     if ctx.is_null() {
         return;
     }
-    if (*ctxt).validate != 0 && (*ctxt).wellFormed != 0 && !(*ctxt).myDoc.is_null()
+    if (*ctxt).validate != 0
+        && (*ctxt).wellFormed != 0
+        && !(*ctxt).myDoc.is_null()
         && !(*(*ctxt).myDoc).intSubset.is_null()
     {
         (*ctxt).valid &= xmlValidateDocumentFinal(&raw mut (*ctxt).vctxt, (*ctxt).myDoc);
     }
-    if !(*ctxt).encoding.is_null() && !(*ctxt).myDoc.is_null()
+    if !(*ctxt).encoding.is_null()
+        && !(*ctxt).myDoc.is_null()
         && (*(*ctxt).myDoc).encoding.is_null()
     {
         (*(*ctxt).myDoc).encoding = (*ctxt).encoding;
         (*ctxt).encoding = ::core::ptr::null::<xmlChar>();
     }
-    if !(*ctxt).inputTab.is_null() && (*ctxt).inputNr > 0 as ::core::ffi::c_int
+    if !(*ctxt).inputTab.is_null()
+        && (*ctxt).inputNr > 0 as ::core::ffi::c_int
         && !(*(*ctxt).inputTab.offset(0 as ::core::ffi::c_int as isize)).is_null()
         && !(**(*ctxt).inputTab.offset(0 as ::core::ffi::c_int as isize))
             .encoding
-            .is_null() && !(*ctxt).myDoc.is_null() && (*(*ctxt).myDoc).encoding.is_null()
+            .is_null()
+        && !(*ctxt).myDoc.is_null()
+        && (*(*ctxt).myDoc).encoding.is_null()
     {
-        (*(*ctxt).myDoc).encoding = xmlStrdup(
-            (**(*ctxt).inputTab.offset(0 as ::core::ffi::c_int as isize)).encoding,
-        );
+        (*(*ctxt).myDoc).encoding =
+            xmlStrdup((**(*ctxt).inputTab.offset(0 as ::core::ffi::c_int as isize)).encoding);
     }
     if (*ctxt).charset != XML_CHAR_ENCODING_NONE as ::core::ffi::c_int
         && !(*ctxt).myDoc.is_null()
@@ -3136,12 +3025,10 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
                 );
             }
             if !ns.is_null() {
-                xmlFree
-                    .expect("non-null function pointer")(ns as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(ns as *mut ::core::ffi::c_void);
             }
             ns = ::core::ptr::null_mut::<xmlChar>();
-            xmlFree
-                .expect("non-null function pointer")(name as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(name as *mut ::core::ffi::c_void);
             name = xmlStrdup(fullname);
         }
     }
@@ -3174,17 +3061,13 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
             value = nval;
         }
     }
-    if (*ctxt).html == 0 && ns.is_null()
-        && *name.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            == 'x' as i32
-        && *name.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            == 'm' as i32
-        && *name.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            == 'l' as i32
-        && *name.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            == 'n' as i32
-        && *name.offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            == 's' as i32
+    if (*ctxt).html == 0
+        && ns.is_null()
+        && *name.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 'x' as i32
+        && *name.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 'm' as i32
+        && *name.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 'l' as i32
+        && *name.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 'n' as i32
+        && *name.offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 's' as i32
         && *name.offset(5 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
             == 0 as ::core::ffi::c_int
     {
@@ -3207,16 +3090,10 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
                     b"xmlSAX2StartElement\0" as *const u8 as *const ::core::ffi::c_char,
                 );
                 if !name.is_null() {
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(name as *mut ::core::ffi::c_void);
+                    xmlFree.expect("non-null function pointer")(name as *mut ::core::ffi::c_void);
                 }
                 if !nval.is_null() {
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(nval as *mut ::core::ffi::c_void);
+                    xmlFree.expect("non-null function pointer")(nval as *mut ::core::ffi::c_void);
                 }
                 return;
             }
@@ -3230,25 +3107,16 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
             uri = xmlParseURI(val as *const ::core::ffi::c_char);
             if uri.is_null() {
                 if !(*ctxt).sax.is_null() && (*(*ctxt).sax).warning.is_some() {
-                    (*(*ctxt).sax)
-                        .warning
-                        .expect(
-                            "non-null function pointer",
-                        )(
+                    (*(*ctxt).sax).warning.expect("non-null function pointer")(
                         (*ctxt).userData,
-                        b"xmlns: %s not a valid URI\n\0" as *const u8
-                            as *const ::core::ffi::c_char,
+                        b"xmlns: %s not a valid URI\n\0" as *const u8 as *const ::core::ffi::c_char,
                         val,
                     );
                 }
             } else {
                 if (*uri).scheme.is_null() {
                     if !(*ctxt).sax.is_null() && (*(*ctxt).sax).warning.is_some() {
-                        (*(*ctxt).sax)
-                            .warning
-                            .expect(
-                                "non-null function pointer",
-                            )(
+                        (*(*ctxt).sax).warning.expect("non-null function pointer")(
                             (*ctxt).userData,
                             b"xmlns: URI %s is not absolute\n\0" as *const u8
                                 as *const ::core::ffi::c_char,
@@ -3260,43 +3128,39 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
             }
         }
         nsret = xmlNewNs((*ctxt).node, val, ::core::ptr::null::<xmlChar>());
-        if !nsret.is_null() && (*ctxt).validate != 0 && (*ctxt).wellFormed != 0
-            && !(*ctxt).myDoc.is_null() && !(*(*ctxt).myDoc).intSubset.is_null()
+        if !nsret.is_null()
+            && (*ctxt).validate != 0
+            && (*ctxt).wellFormed != 0
+            && !(*ctxt).myDoc.is_null()
+            && !(*(*ctxt).myDoc).intSubset.is_null()
         {
-            (*ctxt).valid
-                &= xmlValidateOneNamespace(
-                    &raw mut (*ctxt).vctxt,
-                    (*ctxt).myDoc,
-                    (*ctxt).node,
-                    prefix,
-                    nsret,
-                    val,
-                );
+            (*ctxt).valid &= xmlValidateOneNamespace(
+                &raw mut (*ctxt).vctxt,
+                (*ctxt).myDoc,
+                (*ctxt).node,
+                prefix,
+                nsret,
+                val,
+            );
         }
         if !name.is_null() {
-            xmlFree
-                .expect("non-null function pointer")(name as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(name as *mut ::core::ffi::c_void);
         }
         if !nval.is_null() {
-            xmlFree
-                .expect("non-null function pointer")(nval as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(nval as *mut ::core::ffi::c_void);
         }
         if val != value as *mut xmlChar {
             xmlFree.expect("non-null function pointer")(val as *mut ::core::ffi::c_void);
         }
         return;
     }
-    if (*ctxt).html == 0 && !ns.is_null()
-        && *ns.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            == 'x' as i32
-        && *ns.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            == 'm' as i32
-        && *ns.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            == 'l' as i32
-        && *ns.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            == 'n' as i32
-        && *ns.offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-            == 's' as i32
+    if (*ctxt).html == 0
+        && !ns.is_null()
+        && *ns.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 'x' as i32
+        && *ns.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 'm' as i32
+        && *ns.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 'l' as i32
+        && *ns.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 'n' as i32
+        && *ns.offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 's' as i32
         && *ns.offset(5 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
             == 0 as ::core::ffi::c_int
     {
@@ -3318,19 +3182,12 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
                     ctxt,
                     b"xmlSAX2StartElement\0" as *const u8 as *const ::core::ffi::c_char,
                 );
-                xmlFree
-                    .expect("non-null function pointer")(ns as *mut ::core::ffi::c_void);
+                xmlFree.expect("non-null function pointer")(ns as *mut ::core::ffi::c_void);
                 if !name.is_null() {
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(name as *mut ::core::ffi::c_void);
+                    xmlFree.expect("non-null function pointer")(name as *mut ::core::ffi::c_void);
                 }
                 if !nval.is_null() {
-                    xmlFree
-                        .expect(
-                            "non-null function pointer",
-                        )(nval as *mut ::core::ffi::c_void);
+                    xmlFree.expect("non-null function pointer")(nval as *mut ::core::ffi::c_void);
                 }
                 return;
             }
@@ -3359,8 +3216,7 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
                 xmlNsWarnMsg(
                     ctxt,
                     XML_WAR_NS_URI,
-                    b"xmlns:%s: %s not a valid URI\n\0" as *const u8
-                        as *const ::core::ffi::c_char,
+                    b"xmlns:%s: %s not a valid URI\n\0" as *const u8 as *const ::core::ffi::c_char,
                     name,
                     value,
                 );
@@ -3380,30 +3236,29 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
         }
         nsret_0 = xmlNewNs((*ctxt).node, val_0, name);
         xmlFree.expect("non-null function pointer")(ns as *mut ::core::ffi::c_void);
-        if !nsret_0.is_null() && (*ctxt).validate != 0 && (*ctxt).wellFormed != 0
-            && !(*ctxt).myDoc.is_null() && !(*(*ctxt).myDoc).intSubset.is_null()
+        if !nsret_0.is_null()
+            && (*ctxt).validate != 0
+            && (*ctxt).wellFormed != 0
+            && !(*ctxt).myDoc.is_null()
+            && !(*(*ctxt).myDoc).intSubset.is_null()
         {
-            (*ctxt).valid
-                &= xmlValidateOneNamespace(
-                    &raw mut (*ctxt).vctxt,
-                    (*ctxt).myDoc,
-                    (*ctxt).node,
-                    prefix,
-                    nsret_0,
-                    value,
-                );
+            (*ctxt).valid &= xmlValidateOneNamespace(
+                &raw mut (*ctxt).vctxt,
+                (*ctxt).myDoc,
+                (*ctxt).node,
+                prefix,
+                nsret_0,
+                value,
+            );
         }
         if !name.is_null() {
-            xmlFree
-                .expect("non-null function pointer")(name as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(name as *mut ::core::ffi::c_void);
         }
         if !nval.is_null() {
-            xmlFree
-                .expect("non-null function pointer")(nval as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(nval as *mut ::core::ffi::c_void);
         }
         if val_0 != value as *mut xmlChar {
-            xmlFree
-                .expect("non-null function pointer")(val_0 as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(val_0 as *mut ::core::ffi::c_void);
         }
         return;
     }
@@ -3445,10 +3300,9 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
                             (*ctxt).disableSAX = 1 as ::core::ffi::c_int;
                         }
                         if !name.is_null() {
-                            xmlFree
-                                .expect(
-                                    "non-null function pointer",
-                                )(name as *mut ::core::ffi::c_void);
+                            xmlFree.expect("non-null function pointer")(
+                                name as *mut ::core::ffi::c_void,
+                            );
                         }
                         current_block = 6276573696622693854;
                         break;
@@ -3470,14 +3324,10 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
                 ::core::ptr::null::<xmlChar>(),
             );
             if !ret.is_null() {
-                if (*ctxt).replaceEntities == 0 as ::core::ffi::c_int
-                    && (*ctxt).html == 0
-                {
+                if (*ctxt).replaceEntities == 0 as ::core::ffi::c_int && (*ctxt).html == 0 {
                     let mut tmp: xmlNodePtr = ::core::ptr::null_mut::<xmlNode>();
-                    (*ret).children = xmlStringGetNodeList(
-                        (*ctxt).myDoc as *const xmlDoc,
-                        value,
-                    ) as *mut _xmlNode;
+                    (*ret).children = xmlStringGetNodeList((*ctxt).myDoc as *const xmlDoc, value)
+                        as *mut _xmlNode;
                     tmp = (*ret).children as xmlNodePtr;
                     while !tmp.is_null() {
                         (*tmp).parent = ret as xmlNodePtr as *mut _xmlNode;
@@ -3487,18 +3337,19 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
                         tmp = (*tmp).next as xmlNodePtr;
                     }
                 } else if !value.is_null() {
-                    (*ret).children = xmlNewDocText(
-                        (*ctxt).myDoc as *const xmlDoc,
-                        value,
-                    ) as *mut _xmlNode;
+                    (*ret).children =
+                        xmlNewDocText((*ctxt).myDoc as *const xmlDoc, value) as *mut _xmlNode;
                     (*ret).last = (*ret).children;
                     if !(*ret).children.is_null() {
                         (*(*ret).children).parent = ret as xmlNodePtr as *mut _xmlNode;
                     }
                 }
             }
-            if (*ctxt).html == 0 && (*ctxt).validate != 0 && (*ctxt).wellFormed != 0
-                && !(*ctxt).myDoc.is_null() && !(*(*ctxt).myDoc).intSubset.is_null()
+            if (*ctxt).html == 0
+                && (*ctxt).validate != 0
+                && (*ctxt).wellFormed != 0
+                && !(*ctxt).myDoc.is_null()
+                && !(*(*ctxt).myDoc).intSubset.is_null()
             {
                 if (*ctxt).replaceEntities == 0 {
                     let mut val_1: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
@@ -3513,18 +3364,15 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
                     );
                     (*ctxt).depth -= 1;
                     if val_1.is_null() {
-                        (*ctxt).valid
-                            &= xmlValidateOneAttribute(
-                                &raw mut (*ctxt).vctxt,
-                                (*ctxt).myDoc,
-                                (*ctxt).node,
-                                ret,
-                                value,
-                            );
+                        (*ctxt).valid &= xmlValidateOneAttribute(
+                            &raw mut (*ctxt).vctxt,
+                            (*ctxt).myDoc,
+                            (*ctxt).node,
+                            ret,
+                            value,
+                        );
                     } else {
-                        let mut nvalnorm: *mut xmlChar = ::core::ptr::null_mut::<
-                            xmlChar,
-                        >();
+                        let mut nvalnorm: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                         nvalnorm = xmlValidNormalizeAttributeValue(
                             (*ctxt).myDoc,
                             (*ctxt).node,
@@ -3532,34 +3380,30 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
                             val_1,
                         );
                         if !nvalnorm.is_null() {
-                            xmlFree
-                                .expect(
-                                    "non-null function pointer",
-                                )(val_1 as *mut ::core::ffi::c_void);
+                            xmlFree.expect("non-null function pointer")(
+                                val_1 as *mut ::core::ffi::c_void,
+                            );
                             val_1 = nvalnorm;
                         }
-                        (*ctxt).valid
-                            &= xmlValidateOneAttribute(
-                                &raw mut (*ctxt).vctxt,
-                                (*ctxt).myDoc,
-                                (*ctxt).node,
-                                ret,
-                                val_1,
-                            );
-                        xmlFree
-                            .expect(
-                                "non-null function pointer",
-                            )(val_1 as *mut ::core::ffi::c_void);
-                    }
-                } else {
-                    (*ctxt).valid
-                        &= xmlValidateOneAttribute(
+                        (*ctxt).valid &= xmlValidateOneAttribute(
                             &raw mut (*ctxt).vctxt,
                             (*ctxt).myDoc,
                             (*ctxt).node,
                             ret,
-                            value,
+                            val_1,
                         );
+                        xmlFree.expect("non-null function pointer")(
+                            val_1 as *mut ::core::ffi::c_void,
+                        );
+                    }
+                } else {
+                    (*ctxt).valid &= xmlValidateOneAttribute(
+                        &raw mut (*ctxt).vctxt,
+                        (*ctxt).myDoc,
+                        (*ctxt).node,
+                        ret,
+                        value,
+                    );
                 }
             } else if (*ctxt).loadsubset & XML_SKIP_IDS == 0 as ::core::ffi::c_int
                 && ((*ctxt).replaceEntities == 0 as ::core::ffi::c_int
@@ -3569,18 +3413,16 @@ unsafe extern "C" fn xmlSAX2AttributeInternal(
             {
                 if xmlStrEqual(
                     fullname,
-                    b"xml:id\0" as *const u8 as *const ::core::ffi::c_char
-                        as *mut xmlChar,
+                    b"xml:id\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                 ) != 0
                 {
-                    if xmlValidateNCName(value, 1 as ::core::ffi::c_int)
-                        != 0 as ::core::ffi::c_int
+                    if xmlValidateNCName(value, 1 as ::core::ffi::c_int) != 0 as ::core::ffi::c_int
                     {
                         xmlErrValid(
                             ctxt,
                             XML_DTD_XMLID_VALUE,
-                            b"xml:id : attribute value %s is not an NCName\n\0"
-                                as *const u8 as *const ::core::ffi::c_char,
+                            b"xml:id : attribute value %s is not an NCName\n\0" as *const u8
+                                as *const ::core::ffi::c_char,
                             value as *const ::core::ffi::c_char,
                             ::core::ptr::null::<::core::ffi::c_char>(),
                         );
@@ -3612,23 +3454,16 @@ unsafe extern "C" fn xmlCheckDefaultedAttributes(
     let mut att: *const xmlChar = ::core::ptr::null::<xmlChar>();
     let mut internal: ::core::ffi::c_int = 1 as ::core::ffi::c_int;
     let mut i: ::core::ffi::c_int = 0;
-    elemDecl = xmlGetDtdQElementDesc(
-        (*(*ctxt).myDoc).intSubset as xmlDtdPtr,
-        name,
-        prefix,
-    );
+    elemDecl = xmlGetDtdQElementDesc((*(*ctxt).myDoc).intSubset as xmlDtdPtr, name, prefix);
     if elemDecl.is_null() {
-        elemDecl = xmlGetDtdQElementDesc(
-            (*(*ctxt).myDoc).extSubset as xmlDtdPtr,
-            name,
-            prefix,
-        );
+        elemDecl = xmlGetDtdQElementDesc((*(*ctxt).myDoc).extSubset as xmlDtdPtr, name, prefix);
         internal = 0 as ::core::ffi::c_int;
     }
     while !elemDecl.is_null() {
         let mut attr: xmlAttributePtr = (*elemDecl).attributes;
         if (*(*ctxt).myDoc).standalone == 1 as ::core::ffi::c_int
-            && !(*(*ctxt).myDoc).extSubset.is_null() && (*ctxt).validate != 0
+            && !(*(*ctxt).myDoc).extSubset.is_null()
+            && (*ctxt).validate != 0
         {
             while !attr.is_null() {
                 if !(*attr).defaultValue.is_null()
@@ -3639,20 +3474,19 @@ unsafe extern "C" fn xmlCheckDefaultedAttributes(
                         (*attr).prefix,
                     ) == attr
                     && xmlGetDtdQAttrDesc(
-                            (*(*ctxt).myDoc).intSubset as xmlDtdPtr,
-                            (*attr).elem,
-                            (*attr).name,
-                            (*attr).prefix,
-                        )
-                        .is_null()
+                        (*(*ctxt).myDoc).intSubset as xmlDtdPtr,
+                        (*attr).elem,
+                        (*attr).name,
+                        (*attr).prefix,
+                    )
+                    .is_null()
                 {
                     let mut fulln: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                     if !(*attr).prefix.is_null() {
                         fulln = xmlStrdup((*attr).prefix);
                         fulln = xmlStrcat(
                             fulln,
-                            b":\0" as *const u8 as *const ::core::ffi::c_char
-                                as *mut xmlChar,
+                            b":\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                         );
                         fulln = xmlStrcat(fulln, (*attr).name);
                     } else {
@@ -3661,8 +3495,7 @@ unsafe extern "C" fn xmlCheckDefaultedAttributes(
                     if fulln.is_null() {
                         xmlSAX2ErrMemory(
                             ctxt,
-                            b"xmlSAX2StartElement\0" as *const u8
-                                as *const ::core::ffi::c_char,
+                            b"xmlSAX2StartElement\0" as *const u8 as *const ::core::ffi::c_char,
                         );
                         break;
                     } else {
@@ -3683,15 +3516,15 @@ unsafe extern "C" fn xmlCheckDefaultedAttributes(
                                 ctxt,
                                 XML_DTD_STANDALONE_DEFAULTED,
                                 b"standalone: attribute %s on %s defaulted from external subset\n\0"
-                                    as *const u8 as *const ::core::ffi::c_char,
+                                    as *const u8
+                                    as *const ::core::ffi::c_char,
                                 fulln as *const ::core::ffi::c_char,
                                 (*attr).elem as *const ::core::ffi::c_char,
                             );
                         }
-                        xmlFree
-                            .expect(
-                                "non-null function pointer",
-                            )(fulln as *mut ::core::ffi::c_void);
+                        xmlFree.expect("non-null function pointer")(
+                            fulln as *mut ::core::ffi::c_void,
+                        );
                     }
                 }
                 attr = (*attr).nexth as xmlAttributePtr;
@@ -3703,19 +3536,16 @@ unsafe extern "C" fn xmlCheckDefaultedAttributes(
                 if !(*attr).prefix.is_null()
                     && xmlStrEqual(
                         (*attr).prefix,
-                        b"xmlns\0" as *const u8 as *const ::core::ffi::c_char
-                            as *mut xmlChar,
+                        b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
                     ) != 0
                     || (*attr).prefix.is_null()
                         && xmlStrEqual(
                             (*attr).name,
-                            b"xmlns\0" as *const u8 as *const ::core::ffi::c_char
-                                as *mut xmlChar,
-                        ) != 0 || (*ctxt).loadsubset & XML_COMPLETE_ATTRS != 0
+                            b"xmlns\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
+                        ) != 0
+                    || (*ctxt).loadsubset & XML_COMPLETE_ATTRS != 0
                 {
-                    let mut tst: xmlAttributePtr = ::core::ptr::null_mut::<
-                        xmlAttribute,
-                    >();
+                    let mut tst: xmlAttributePtr = ::core::ptr::null_mut::<xmlAttribute>();
                     tst = xmlGetDtdQAttrDesc(
                         (*(*ctxt).myDoc).intSubset as xmlDtdPtr,
                         (*attr).elem,
@@ -3724,9 +3554,7 @@ unsafe extern "C" fn xmlCheckDefaultedAttributes(
                     );
                     if tst == attr || tst.is_null() {
                         let mut fn_0: [xmlChar; 50] = [0; 50];
-                        let mut fulln_0: *mut xmlChar = ::core::ptr::null_mut::<
-                            xmlChar,
-                        >();
+                        let mut fulln_0: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
                         fulln_0 = xmlBuildQName(
                             (*attr).name,
                             (*attr).prefix,
@@ -3736,8 +3564,7 @@ unsafe extern "C" fn xmlCheckDefaultedAttributes(
                         if fulln_0.is_null() {
                             xmlSAX2ErrMemory(
                                 ctxt,
-                                b"xmlSAX2StartElement\0" as *const u8
-                                    as *const ::core::ffi::c_char,
+                                b"xmlSAX2StartElement\0" as *const u8 as *const ::core::ffi::c_char,
                             );
                             return;
                         }
@@ -3764,10 +3591,9 @@ unsafe extern "C" fn xmlCheckDefaultedAttributes(
                         if fulln_0 != &raw mut fn_0 as *mut xmlChar
                             && fulln_0 != (*attr).name as *mut xmlChar
                         {
-                            xmlFree
-                                .expect(
-                                    "non-null function pointer",
-                                )(fulln_0 as *mut ::core::ffi::c_void);
+                            xmlFree.expect("non-null function pointer")(
+                                fulln_0 as *mut ::core::ffi::c_void,
+                            );
                         }
                     }
                 }
@@ -3777,11 +3603,7 @@ unsafe extern "C" fn xmlCheckDefaultedAttributes(
         if !(internal == 1 as ::core::ffi::c_int) {
             break;
         }
-        elemDecl = xmlGetDtdQElementDesc(
-            (*(*ctxt).myDoc).extSubset as xmlDtdPtr,
-            name,
-            prefix,
-        );
+        elemDecl = xmlGetDtdQElementDesc((*(*ctxt).myDoc).extSubset as xmlDtdPtr, name, prefix);
         internal = 0 as ::core::ffi::c_int;
     }
 }
@@ -3804,7 +3626,8 @@ pub unsafe extern "C" fn xmlSAX2StartElement(
         return;
     }
     parent = (*ctxt).node;
-    if (*ctxt).validate != 0 && (*(*ctxt).myDoc).extSubset.is_null()
+    if (*ctxt).validate != 0
+        && (*(*ctxt).myDoc).extSubset.is_null()
         && ((*(*ctxt).myDoc).intSubset.is_null()
             || (*(*(*ctxt).myDoc).intSubset).notations.is_null()
                 && (*(*(*ctxt).myDoc).intSubset).elements.is_null()
@@ -3814,8 +3637,7 @@ pub unsafe extern "C" fn xmlSAX2StartElement(
         xmlErrValid(
             ctxt,
             XML_ERR_NO_DTD,
-            b"Validation failed: no DTD found !\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"Validation failed: no DTD found !\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<::core::ffi::c_char>(),
             ::core::ptr::null::<::core::ffi::c_char>(),
         );
@@ -3830,8 +3652,7 @@ pub unsafe extern "C" fn xmlSAX2StartElement(
     );
     if ret.is_null() {
         if !prefix.is_null() {
-            xmlFree
-                .expect("non-null function pointer")(prefix as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(prefix as *mut ::core::ffi::c_void);
         }
         xmlSAX2ErrMemory(
             ctxt,
@@ -3858,8 +3679,7 @@ pub unsafe extern "C" fn xmlSAX2StartElement(
         xmlUnlinkNode(ret);
         xmlFreeNode(ret);
         if !prefix.is_null() {
-            xmlFree
-                .expect("non-null function pointer")(prefix as *mut ::core::ffi::c_void);
+            xmlFree.expect("non-null function pointer")(prefix as *mut ::core::ffi::c_void);
         }
         return;
     }
@@ -3873,8 +3693,7 @@ pub unsafe extern "C" fn xmlSAX2StartElement(
         }
     }
     if (*ctxt).html == 0 {
-        if !(*(*ctxt).myDoc).intSubset.is_null() || !(*(*ctxt).myDoc).extSubset.is_null()
-        {
+        if !(*(*ctxt).myDoc).intSubset.is_null() || !(*(*ctxt).myDoc).extSubset.is_null() {
             xmlCheckDefaultedAttributes(ctxt, name, prefix, atts);
         }
         if !atts.is_null() {
@@ -3886,23 +3705,17 @@ pub unsafe extern "C" fn xmlSAX2StartElement(
             i = i + 1;
             value = *atts.offset(fresh1 as isize);
             while !att.is_null() && !value.is_null() {
-                if *att.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                    == 'x' as i32
-                    && *att.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == 'm' as i32
-                    && *att.offset(2 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == 'l' as i32
-                    && *att.offset(3 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == 'n' as i32
-                    && *att.offset(4 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == 's' as i32
+                if *att.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == 'x' as i32
+                    && *att.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        == 'm' as i32
+                    && *att.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        == 'l' as i32
+                    && *att.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        == 'n' as i32
+                    && *att.offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        == 's' as i32
                 {
-                    xmlSAX2AttributeInternal(
-                        ctxt as *mut ::core::ffi::c_void,
-                        att,
-                        value,
-                        prefix,
-                    );
+                    xmlSAX2AttributeInternal(ctxt as *mut ::core::ffi::c_void, att, value, prefix);
                 }
                 let fresh2 = i;
                 i = i + 1;
@@ -3927,9 +3740,10 @@ pub unsafe extern "C" fn xmlSAX2StartElement(
                 ::core::ptr::null::<xmlChar>(),
             );
         }
-        if !ns.is_null() && !(*ns).href.is_null()
-            && (*(*ns).href.offset(0 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int != 0 as ::core::ffi::c_int
+        if !ns.is_null()
+            && !(*ns).href.is_null()
+            && (*(*ns).href.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                != 0 as ::core::ffi::c_int
                 || !(*ns).prefix.is_null())
         {
             xmlSetNs(ret, ns);
@@ -3960,16 +3774,15 @@ pub unsafe extern "C" fn xmlSAX2StartElement(
             }
         } else {
             while !att.is_null() && !value.is_null() {
-                if *att.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                    != 'x' as i32
-                    || *att.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int != 'm' as i32
-                    || *att.offset(2 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int != 'l' as i32
-                    || *att.offset(3 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int != 'n' as i32
-                    || *att.offset(4 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int != 's' as i32
+                if *att.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int != 'x' as i32
+                    || *att.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        != 'm' as i32
+                    || *att.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        != 'l' as i32
+                    || *att.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        != 'n' as i32
+                    || *att.offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        != 's' as i32
                 {
                     xmlSAX2AttributeInternal(
                         ctxt as *mut ::core::ffi::c_void,
@@ -4015,20 +3828,19 @@ pub unsafe extern "C" fn xmlSAX2EndElement(
     }
     cur = (*ctxt).node;
     if !cur.is_null() && (*ctxt).record_info != 0 {
-        (*(*ctxt).nodeInfo).end_pos = (*(*ctxt).input)
-            .cur
-            .offset_from((*(*ctxt).input).base) as ::core::ffi::c_long
-            as ::core::ffi::c_ulong;
+        (*(*ctxt).nodeInfo).end_pos = (*(*ctxt).input).cur.offset_from((*(*ctxt).input).base)
+            as ::core::ffi::c_long as ::core::ffi::c_ulong;
         (*(*ctxt).nodeInfo).end_line = (*(*ctxt).input).line as ::core::ffi::c_ulong;
         (*(*ctxt).nodeInfo).node = cur as *const _xmlNode;
         xmlParserAddNodeInfo(ctxt, (*ctxt).nodeInfo as xmlParserNodeInfoPtr);
     }
     (*ctxt).nodemem = -(1 as ::core::ffi::c_int);
-    if (*ctxt).validate != 0 && (*ctxt).wellFormed != 0 && !(*ctxt).myDoc.is_null()
+    if (*ctxt).validate != 0
+        && (*ctxt).wellFormed != 0
+        && !(*ctxt).myDoc.is_null()
         && !(*(*ctxt).myDoc).intSubset.is_null()
     {
-        (*ctxt).valid
-            &= xmlValidateOneElement(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, cur);
+        (*ctxt).valid &= xmlValidateOneElement(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, cur);
     }
     nodePop(ctxt);
 }
@@ -4045,10 +3857,9 @@ unsafe extern "C" fn xmlSAX2TextNode(
         (*ctxt).freeElems = (*ret).next as xmlNodePtr;
         (*ctxt).freeElemsNr -= 1;
     } else {
-        ret = xmlMalloc
-            .expect(
-                "non-null function pointer",
-            )(::core::mem::size_of::<xmlNode>() as size_t) as xmlNodePtr;
+        ret = xmlMalloc.expect("non-null function pointer")(
+            ::core::mem::size_of::<xmlNode>() as size_t
+        ) as xmlNodePtr;
     }
     if ret.is_null() {
         xmlErrMemory(
@@ -4065,10 +3876,8 @@ unsafe extern "C" fn xmlSAX2TextNode(
     if (*ctxt).dictNames != 0 {
         let mut cur: xmlChar = *str.offset(len as isize);
         if len
-            < (2 as usize)
-                .wrapping_mul(
-                    ::core::mem::size_of::<*mut ::core::ffi::c_void>() as usize,
-                ) as ::core::ffi::c_int
+            < (2 as usize).wrapping_mul(::core::mem::size_of::<*mut ::core::ffi::c_void>() as usize)
+                as ::core::ffi::c_int
             && (*ctxt).options & XML_PARSE_COMPACT as ::core::ffi::c_int != 0
         {
             let mut tmp: *mut xmlChar = &raw mut (*ret).properties as *mut xmlChar;
@@ -4083,17 +3892,18 @@ unsafe extern "C" fn xmlSAX2TextNode(
             && (cur as ::core::ffi::c_int == '"' as i32
                 || cur as ::core::ffi::c_int == '\'' as i32
                 || cur as ::core::ffi::c_int == '<' as i32
-                    && *str.offset((len + 1 as ::core::ffi::c_int) as isize)
-                        as ::core::ffi::c_int != '!' as i32)
+                    && *str.offset((len + 1 as ::core::ffi::c_int) as isize) as ::core::ffi::c_int
+                        != '!' as i32)
         {
             intern = xmlDictLookup((*ctxt).dict, str, len);
         } else if (*str as ::core::ffi::c_int == 0x20 as ::core::ffi::c_int
             || 0x9 as ::core::ffi::c_int <= *str as ::core::ffi::c_int
                 && *str as ::core::ffi::c_int <= 0xa as ::core::ffi::c_int
             || *str as ::core::ffi::c_int == 0xd as ::core::ffi::c_int)
-            && len < 60 as ::core::ffi::c_int && cur as ::core::ffi::c_int == '<' as i32
-            && *str.offset((len + 1 as ::core::ffi::c_int) as isize)
-                as ::core::ffi::c_int != '!' as i32
+            && len < 60 as ::core::ffi::c_int
+            && cur as ::core::ffi::c_int == '<' as i32
+            && *str.offset((len + 1 as ::core::ffi::c_int) as isize) as ::core::ffi::c_int
+                != '!' as i32
         {
             let mut i: ::core::ffi::c_int = 0;
             i = 1 as ::core::ffi::c_int;
@@ -4102,14 +3912,11 @@ unsafe extern "C" fn xmlSAX2TextNode(
                     current_block = 4808432441040389987;
                     break;
                 }
-                if !(*str.offset(i as isize) as ::core::ffi::c_int
-                    == 0x20 as ::core::ffi::c_int
-                    || 0x9 as ::core::ffi::c_int
-                        <= *str.offset(i as isize) as ::core::ffi::c_int
+                if !(*str.offset(i as isize) as ::core::ffi::c_int == 0x20 as ::core::ffi::c_int
+                    || 0x9 as ::core::ffi::c_int <= *str.offset(i as isize) as ::core::ffi::c_int
                         && *str.offset(i as isize) as ::core::ffi::c_int
                             <= 0xa as ::core::ffi::c_int
-                    || *str.offset(i as isize) as ::core::ffi::c_int
-                        == 0xd as ::core::ffi::c_int)
+                    || *str.offset(i as isize) as ::core::ffi::c_int == 0xd as ::core::ffi::c_int)
                 {
                     current_block = 5329006281916597611;
                     break;
@@ -4146,8 +3953,7 @@ unsafe extern "C" fn xmlSAX2TextNode(
             } else {
                 (*ret).line = USHRT_MAX as ::core::ffi::c_ushort;
                 if (*ctxt).options & XML_PARSE_BIG_LINES as ::core::ffi::c_int != 0 {
-                    (*ret).psvi = (*(*ctxt).input).line as ptrdiff_t
-                        as *mut ::core::ffi::c_void;
+                    (*ret).psvi = (*(*ctxt).input).line as ptrdiff_t as *mut ::core::ffi::c_void;
                 }
             }
         }
@@ -4238,8 +4044,9 @@ unsafe extern "C" fn xmlSAX2AttributeNs(
             (*ret).prev = prev as *mut _xmlAttr;
         }
         if __xmlRegisterCallbacks != 0 && (*__xmlRegisterNodeDefaultValue()).is_some() {
-            (*__xmlRegisterNodeDefaultValue())
-                .expect("non-null function pointer")(ret as xmlNodePtr);
+            (*__xmlRegisterNodeDefaultValue()).expect("non-null function pointer")(
+                ret as xmlNodePtr,
+            );
         }
     } else {
         if (*ctxt).dictNames != 0 {
@@ -4309,35 +4116,35 @@ unsafe extern "C" fn xmlSAX2AttributeNs(
             (*tmp_0).parent = ret as xmlNodePtr as *mut _xmlNode;
         }
     }
-    if (*ctxt).html == 0 && (*ctxt).validate != 0 && (*ctxt).wellFormed != 0
-        && !(*ctxt).myDoc.is_null() && !(*(*ctxt).myDoc).intSubset.is_null()
+    if (*ctxt).html == 0
+        && (*ctxt).validate != 0
+        && (*ctxt).wellFormed != 0
+        && !(*ctxt).myDoc.is_null()
+        && !(*(*ctxt).myDoc).intSubset.is_null()
     {
         if (*ctxt).replaceEntities == 0 {
             dup = xmlSAX2DecodeAttrEntities(ctxt, value, valueend);
             if dup.is_null() {
                 if *valueend as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
-                    (*ctxt).valid
-                        &= xmlValidateOneAttribute(
-                            &raw mut (*ctxt).vctxt,
-                            (*ctxt).myDoc,
-                            (*ctxt).node,
-                            ret,
-                            value,
-                        );
+                    (*ctxt).valid &= xmlValidateOneAttribute(
+                        &raw mut (*ctxt).vctxt,
+                        (*ctxt).myDoc,
+                        (*ctxt).node,
+                        ret,
+                        value,
+                    );
                 } else {
                     dup = xmlStrndup(
                         value,
-                        valueend.offset_from(value) as ::core::ffi::c_long
-                            as ::core::ffi::c_int,
+                        valueend.offset_from(value) as ::core::ffi::c_long as ::core::ffi::c_int,
                     );
-                    (*ctxt).valid
-                        &= xmlValidateOneAttribute(
-                            &raw mut (*ctxt).vctxt,
-                            (*ctxt).myDoc,
-                            (*ctxt).node,
-                            ret,
-                            dup,
-                        );
+                    (*ctxt).valid &= xmlValidateOneAttribute(
+                        &raw mut (*ctxt).vctxt,
+                        (*ctxt).myDoc,
+                        (*ctxt).node,
+                        ret,
+                        dup,
+                    );
                 }
             } else {
                 if !(*ctxt).attsSpecial.is_null() {
@@ -4365,42 +4172,38 @@ unsafe extern "C" fn xmlSAX2AttributeNs(
                         if fullname != &raw mut fn_0 as *mut xmlChar
                             && fullname != localname as *mut xmlChar
                         {
-                            xmlFree
-                                .expect(
-                                    "non-null function pointer",
-                                )(fullname as *mut ::core::ffi::c_void);
+                            xmlFree.expect("non-null function pointer")(
+                                fullname as *mut ::core::ffi::c_void,
+                            );
                         }
                         if !nvalnorm.is_null() {
-                            xmlFree
-                                .expect(
-                                    "non-null function pointer",
-                                )(dup as *mut ::core::ffi::c_void);
+                            xmlFree.expect("non-null function pointer")(
+                                dup as *mut ::core::ffi::c_void,
+                            );
                             dup = nvalnorm;
                         }
                     }
                 }
-                (*ctxt).valid
-                    &= xmlValidateOneAttribute(
-                        &raw mut (*ctxt).vctxt,
-                        (*ctxt).myDoc,
-                        (*ctxt).node,
-                        ret,
-                        dup,
-                    );
-            }
-        } else {
-            dup = xmlStrndup(
-                value,
-                valueend.offset_from(value) as ::core::ffi::c_long as ::core::ffi::c_int,
-            );
-            (*ctxt).valid
-                &= xmlValidateOneAttribute(
+                (*ctxt).valid &= xmlValidateOneAttribute(
                     &raw mut (*ctxt).vctxt,
                     (*ctxt).myDoc,
                     (*ctxt).node,
                     ret,
                     dup,
                 );
+            }
+        } else {
+            dup = xmlStrndup(
+                value,
+                valueend.offset_from(value) as ::core::ffi::c_long as ::core::ffi::c_int,
+            );
+            (*ctxt).valid &= xmlValidateOneAttribute(
+                &raw mut (*ctxt).vctxt,
+                (*ctxt).myDoc,
+                (*ctxt).node,
+                ret,
+                dup,
+            );
         }
     } else if (*ctxt).loadsubset & XML_SKIP_IDS == 0 as ::core::ffi::c_int
         && ((*ctxt).replaceEntities == 0 as ::core::ffi::c_int
@@ -4419,12 +4222,10 @@ unsafe extern "C" fn xmlSAX2AttributeNs(
             if dup.is_null() {
                 dup = xmlStrndup(
                     value,
-                    valueend.offset_from(value) as ::core::ffi::c_long
-                        as ::core::ffi::c_int,
+                    valueend.offset_from(value) as ::core::ffi::c_long as ::core::ffi::c_int,
                 );
             }
-            if xmlValidateNCName(dup, 1 as ::core::ffi::c_int) != 0 as ::core::ffi::c_int
-            {
+            if xmlValidateNCName(dup, 1 as ::core::ffi::c_int) != 0 as ::core::ffi::c_int {
                 xmlErrValid(
                     ctxt,
                     XML_DTD_XMLID_VALUE,
@@ -4439,8 +4240,7 @@ unsafe extern "C" fn xmlSAX2AttributeNs(
             if dup.is_null() {
                 dup = xmlStrndup(
                     value,
-                    valueend.offset_from(value) as ::core::ffi::c_long
-                        as ::core::ffi::c_int,
+                    valueend.offset_from(value) as ::core::ffi::c_long as ::core::ffi::c_int,
                 );
             }
             xmlAddID(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, dup, ret);
@@ -4448,8 +4248,7 @@ unsafe extern "C" fn xmlSAX2AttributeNs(
             if dup.is_null() {
                 dup = xmlStrndup(
                     value,
-                    valueend.offset_from(value) as ::core::ffi::c_long
-                        as ::core::ffi::c_int,
+                    valueend.offset_from(value) as ::core::ffi::c_long as ::core::ffi::c_int,
                 );
             }
             xmlAddRef(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, dup, ret);
@@ -4485,7 +4284,8 @@ pub unsafe extern "C" fn xmlSAX2StartElementNs(
         return;
     }
     parent = (*ctxt).node;
-    if (*ctxt).validate != 0 && (*(*ctxt).myDoc).extSubset.is_null()
+    if (*ctxt).validate != 0
+        && (*(*ctxt).myDoc).extSubset.is_null()
         && ((*(*ctxt).myDoc).intSubset.is_null()
             || (*(*(*ctxt).myDoc).intSubset).notations.is_null()
                 && (*(*(*ctxt).myDoc).intSubset).elements.is_null()
@@ -4495,8 +4295,7 @@ pub unsafe extern "C" fn xmlSAX2StartElementNs(
         xmlErrValid(
             ctxt,
             XML_DTD_NO_DTD,
-            b"Validation failed: no DTD found !\0" as *const u8
-                as *const ::core::ffi::c_char,
+            b"Validation failed: no DTD found !\0" as *const u8 as *const ::core::ffi::c_char,
             ::core::ptr::null::<::core::ffi::c_char>(),
             ::core::ptr::null::<::core::ffi::c_char>(),
         );
@@ -4612,18 +4411,20 @@ pub unsafe extern "C" fn xmlSAX2StartElementNs(
             if !URI.is_null() && prefix == pref {
                 (*ret).ns = ns as *mut xmlNs;
             }
-            if (*ctxt).html == 0 && (*ctxt).validate != 0 && (*ctxt).wellFormed != 0
-                && !(*ctxt).myDoc.is_null() && !(*(*ctxt).myDoc).intSubset.is_null()
+            if (*ctxt).html == 0
+                && (*ctxt).validate != 0
+                && (*ctxt).wellFormed != 0
+                && !(*ctxt).myDoc.is_null()
+                && !(*(*ctxt).myDoc).intSubset.is_null()
             {
-                (*ctxt).valid
-                    &= xmlValidateOneNamespace(
-                        &raw mut (*ctxt).vctxt,
-                        (*ctxt).myDoc,
-                        ret,
-                        prefix,
-                        ns,
-                        uri,
-                    );
+                (*ctxt).valid &= xmlValidateOneNamespace(
+                    &raw mut (*ctxt).vctxt,
+                    (*ctxt).myDoc,
+                    ret,
+                    prefix,
+                    ns,
+                    uri,
+                );
             }
         }
         j += 1;
@@ -4730,10 +4531,9 @@ pub unsafe extern "C" fn xmlSAX2StartElementNs(
                             *attributes.offset((j + 3 as ::core::ffi::c_int) as isize),
                             *attributes.offset((j + 4 as ::core::ffi::c_int) as isize),
                         );
-                        xmlFree
-                            .expect(
-                                "non-null function pointer",
-                            )(lname as *mut ::core::ffi::c_void);
+                        xmlFree.expect("non-null function pointer")(
+                            lname as *mut ::core::ffi::c_void,
+                        );
                         current_block_110 = 9199578309995299736;
                     } else {
                         current_block_110 = 9500030526577190060;
@@ -4799,11 +4599,12 @@ pub unsafe extern "C" fn xmlSAX2EndElementNs(
         xmlParserAddNodeInfo(ctxt, &raw mut node_info);
     }
     (*ctxt).nodemem = -(1 as ::core::ffi::c_int);
-    if (*ctxt).validate != 0 && (*ctxt).wellFormed != 0 && !(*ctxt).myDoc.is_null()
+    if (*ctxt).validate != 0
+        && (*ctxt).wellFormed != 0
+        && !(*ctxt).myDoc.is_null()
         && !(*(*ctxt).myDoc).intSubset.is_null()
     {
-        (*ctxt).valid
-            &= xmlValidateOneElement(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, cur);
+        (*ctxt).valid &= xmlValidateOneElement(&raw mut (*ctxt).vctxt, (*ctxt).myDoc, cur);
     }
     nodePop(ctxt);
 }
@@ -4817,8 +4618,7 @@ pub unsafe extern "C" fn xmlSAX2Reference(
     if ctx.is_null() {
         return;
     }
-    if *name.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == '#' as i32
-    {
+    if *name.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == '#' as i32 {
         ret = xmlNewCharRef((*ctxt).myDoc, name);
     } else {
         ret = xmlNewReference((*ctxt).myDoc as *const xmlDoc, name);
@@ -4865,8 +4665,7 @@ unsafe extern "C" fn xmlSAX2Text(
         }
     } else {
         let mut coalesceText: ::core::ffi::c_int = (!lastChild.is_null()
-            && (*lastChild).type_0 as ::core::ffi::c_uint
-                == type_0 as ::core::ffi::c_uint
+            && (*lastChild).type_0 as ::core::ffi::c_uint == type_0 as ::core::ffi::c_uint
             && (type_0 as ::core::ffi::c_uint
                 != XML_TEXT_NODE as ::core::ffi::c_int as ::core::ffi::c_uint
                 || (*lastChild).name == &raw const xmlStringText as *const xmlChar))
@@ -4890,8 +4689,7 @@ unsafe extern "C" fn xmlSAX2Text(
             }
             if ((*ctxt).nodelen as size_t).wrapping_add(len as size_t)
                 > XML_MAX_TEXT_LENGTH as size_t
-                && (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int
-                    == 0 as ::core::ffi::c_int
+                && (*ctxt).options & XML_PARSE_HUGE as ::core::ffi::c_int == 0 as ::core::ffi::c_int
             {
                 xmlSAX2ErrMemory(
                     ctxt,
@@ -4916,11 +4714,10 @@ unsafe extern "C" fn xmlSAX2Text(
                 let mut size: size_t = 0;
                 size = ((*ctxt).nodemem + len) as size_t;
                 size = size.wrapping_mul(2 as size_t);
-                newbuf = xmlRealloc
-                    .expect(
-                        "non-null function pointer",
-                    )((*lastChild).content as *mut ::core::ffi::c_void, size)
-                    as *mut xmlChar;
+                newbuf = xmlRealloc.expect("non-null function pointer")(
+                    (*lastChild).content as *mut ::core::ffi::c_void,
+                    size,
+                ) as *mut xmlChar;
                 if newbuf.is_null() {
                     xmlSAX2ErrMemory(
                         ctxt,
@@ -4981,7 +4778,8 @@ pub unsafe extern "C" fn xmlSAX2IgnorableWhitespace(
     mut ctx: *mut ::core::ffi::c_void,
     mut ch: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) {}
+) {
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlSAX2ProcessingInstruction(
     mut ctx: *mut ::core::ffi::c_void,
@@ -5142,7 +4940,7 @@ pub unsafe extern "C" fn xmlSAXVersion(
         ) as endElementSAXFunc;
         (*hdlr).initialized = 1 as ::core::ffi::c_uint;
     } else {
-        return -(1 as ::core::ffi::c_int)
+        return -(1 as ::core::ffi::c_int);
     }
     (*hdlr).internalSubset = Some(
         xmlSAX2InternalSubset
@@ -5163,8 +4961,7 @@ pub unsafe extern "C" fn xmlSAXVersion(
             ) -> (),
     ) as externalSubsetSAXFunc;
     (*hdlr).isStandalone = Some(
-        xmlSAX2IsStandalone
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
+        xmlSAX2IsStandalone as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
     ) as isStandaloneSAXFunc;
     (*hdlr).hasInternalSubset = Some(
         xmlSAX2HasInternalSubset
@@ -5184,17 +4981,11 @@ pub unsafe extern "C" fn xmlSAXVersion(
     ) as resolveEntitySAXFunc;
     (*hdlr).getEntity = Some(
         xmlSAX2GetEntity
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-            ) -> xmlEntityPtr,
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
     ) as getEntitySAXFunc;
     (*hdlr).getParameterEntity = Some(
         xmlSAX2GetParameterEntity
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-            ) -> xmlEntityPtr,
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
     ) as getParameterEntitySAXFunc;
     (*hdlr).entityDecl = Some(
         xmlSAX2EntityDecl
@@ -5251,15 +5042,14 @@ pub unsafe extern "C" fn xmlSAXVersion(
         xmlSAX2SetDocumentLocator
             as unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
     ) as setDocumentLocatorSAXFunc;
-    (*hdlr).startDocument = Some(
-        xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as startDocumentSAXFunc;
-    (*hdlr).endDocument = Some(
-        xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as endDocumentSAXFunc;
+    (*hdlr).startDocument =
+        Some(xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as startDocumentSAXFunc;
+    (*hdlr).endDocument =
+        Some(xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as endDocumentSAXFunc;
     (*hdlr).reference = Some(
-        xmlSAX2Reference
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2Reference as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as referenceSAXFunc;
     (*hdlr).characters = Some(
         xmlSAX2Characters
@@ -5287,15 +5077,10 @@ pub unsafe extern "C" fn xmlSAXVersion(
     ) as ignorableWhitespaceSAXFunc;
     (*hdlr).processingInstruction = Some(
         xmlSAX2ProcessingInstruction
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-                *const xmlChar,
-            ) -> (),
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> (),
     ) as processingInstructionSAXFunc;
     (*hdlr).comment = Some(
-        xmlSAX2Comment
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2Comment as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as commentSAXFunc;
     (*hdlr).warning = Some(
         xmlParserWarning
@@ -5373,10 +5158,7 @@ pub unsafe extern "C" fn xmlSAX2InitHtmlDefaultSAXHandler(mut hdlr: *mut xmlSAXH
     (*hdlr).resolveEntity = None;
     (*hdlr).getEntity = Some(
         xmlSAX2GetEntity
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-            ) -> xmlEntityPtr,
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
     ) as getEntitySAXFunc;
     (*hdlr).getParameterEntity = None;
     (*hdlr).entityDecl = None;
@@ -5388,12 +5170,12 @@ pub unsafe extern "C" fn xmlSAX2InitHtmlDefaultSAXHandler(mut hdlr: *mut xmlSAXH
         xmlSAX2SetDocumentLocator
             as unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
     ) as setDocumentLocatorSAXFunc;
-    (*hdlr).startDocument = Some(
-        xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as startDocumentSAXFunc;
-    (*hdlr).endDocument = Some(
-        xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as endDocumentSAXFunc;
+    (*hdlr).startDocument =
+        Some(xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as startDocumentSAXFunc;
+    (*hdlr).endDocument =
+        Some(xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as endDocumentSAXFunc;
     (*hdlr).startElement = Some(
         xmlSAX2StartElement
             as unsafe extern "C" fn(
@@ -5403,8 +5185,7 @@ pub unsafe extern "C" fn xmlSAX2InitHtmlDefaultSAXHandler(mut hdlr: *mut xmlSAXH
             ) -> (),
     ) as startElementSAXFunc;
     (*hdlr).endElement = Some(
-        xmlSAX2EndElement
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2EndElement as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as endElementSAXFunc;
     (*hdlr).reference = None;
     (*hdlr).characters = Some(
@@ -5433,15 +5214,10 @@ pub unsafe extern "C" fn xmlSAX2InitHtmlDefaultSAXHandler(mut hdlr: *mut xmlSAXH
     ) as ignorableWhitespaceSAXFunc;
     (*hdlr).processingInstruction = Some(
         xmlSAX2ProcessingInstruction
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-                *const xmlChar,
-            ) -> (),
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> (),
     ) as processingInstructionSAXFunc;
     (*hdlr).comment = Some(
-        xmlSAX2Comment
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2Comment as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as commentSAXFunc;
     (*hdlr).warning = Some(
         xmlParserWarning
@@ -5489,8 +5265,7 @@ pub unsafe extern "C" fn xmlSAX2InitDocbDefaultSAXHandler(mut hdlr: *mut xmlSAXH
     ) as internalSubsetSAXFunc;
     (*hdlr).externalSubset = None;
     (*hdlr).isStandalone = Some(
-        xmlSAX2IsStandalone
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
+        xmlSAX2IsStandalone as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
     ) as isStandaloneSAXFunc;
     (*hdlr).hasInternalSubset = Some(
         xmlSAX2HasInternalSubset
@@ -5510,10 +5285,7 @@ pub unsafe extern "C" fn xmlSAX2InitDocbDefaultSAXHandler(mut hdlr: *mut xmlSAXH
     ) as resolveEntitySAXFunc;
     (*hdlr).getEntity = Some(
         xmlSAX2GetEntity
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-            ) -> xmlEntityPtr,
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
     ) as getEntitySAXFunc;
     (*hdlr).getParameterEntity = None;
     (*hdlr).entityDecl = Some(
@@ -5535,12 +5307,12 @@ pub unsafe extern "C" fn xmlSAX2InitDocbDefaultSAXHandler(mut hdlr: *mut xmlSAXH
         xmlSAX2SetDocumentLocator
             as unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
     ) as setDocumentLocatorSAXFunc;
-    (*hdlr).startDocument = Some(
-        xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as startDocumentSAXFunc;
-    (*hdlr).endDocument = Some(
-        xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as endDocumentSAXFunc;
+    (*hdlr).startDocument =
+        Some(xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as startDocumentSAXFunc;
+    (*hdlr).endDocument =
+        Some(xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as endDocumentSAXFunc;
     (*hdlr).startElement = Some(
         xmlSAX2StartElement
             as unsafe extern "C" fn(
@@ -5550,12 +5322,10 @@ pub unsafe extern "C" fn xmlSAX2InitDocbDefaultSAXHandler(mut hdlr: *mut xmlSAXH
             ) -> (),
     ) as startElementSAXFunc;
     (*hdlr).endElement = Some(
-        xmlSAX2EndElement
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2EndElement as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as endElementSAXFunc;
     (*hdlr).reference = Some(
-        xmlSAX2Reference
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2Reference as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as referenceSAXFunc;
     (*hdlr).characters = Some(
         xmlSAX2Characters
@@ -5576,8 +5346,7 @@ pub unsafe extern "C" fn xmlSAX2InitDocbDefaultSAXHandler(mut hdlr: *mut xmlSAXH
     ) as ignorableWhitespaceSAXFunc;
     (*hdlr).processingInstruction = None;
     (*hdlr).comment = Some(
-        xmlSAX2Comment
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2Comment as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as commentSAXFunc;
     (*hdlr).warning = Some(
         xmlParserWarning

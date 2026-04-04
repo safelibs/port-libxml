@@ -3,6 +3,9 @@ set -euo pipefail
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 STAGE="${1:-$ROOT/safe/target/stage}"
+if [[ "$STAGE" != /* ]]; then
+  STAGE="$ROOT/$STAGE"
+fi
 ARTIFACTS_ENV="$ROOT/safe/target/build-artifacts.env"
 RELEASE_BINDIR="$ROOT/safe/target/release"
 
@@ -34,9 +37,10 @@ INCLUDEDIR="$STAGE/usr/include/libxml2/libxml"
 PKGDIR="$LIBDIR/pkgconfig"
 ACLOCALDIR="$STAGE/usr/share/aclocal"
 MANDIR="$STAGE/usr/share/man/man1"
+PYTHONDIR="$STAGE/usr/lib/python3/dist-packages"
 
 rm -rf "$STAGE"
-mkdir -p "$LIBDIR" "$BINDIR" "$INCLUDEDIR" "$PKGDIR" "$ACLOCALDIR" "$MANDIR"
+mkdir -p "$LIBDIR" "$BINDIR" "$INCLUDEDIR" "$PKGDIR" "$ACLOCALDIR" "$MANDIR" "$PYTHONDIR"
 
 cp "$LIBXML2_NATIVE_STATIC" "$LIBDIR/libxml2.a"
 cc -shared \
@@ -50,6 +54,7 @@ cc -shared \
   -lz -llzma -lm -ldl -lpthread
 ln -s "libxml2.so.$LIBXML2_VERSION" "$LIBDIR/libxml2.so.2"
 ln -s "libxml2.so.2" "$LIBDIR/libxml2.so"
+cp "$ROOT/original/.libs/libxml2.so.2.9.14" "$LIBDIR/libxml2-original.so.2.9.14"
 
 cp -a "$ROOT/safe/include/libxml/." "$INCLUDEDIR/"
 cp "$ROOT/safe/share/aclocal/libxml2.m4" "$ACLOCALDIR/libxml2.m4"
@@ -164,3 +169,9 @@ install -m 0755 "$RELEASE_BINDIR/xmllint" "$BINDIR/xmllint"
 install -m 0755 "$RELEASE_BINDIR/xmlcatalog" "$BINDIR/xmlcatalog"
 install -m 0644 "$ROOT/original/doc/xmllint.1" "$MANDIR/xmllint.1"
 install -m 0644 "$ROOT/original/doc/xmlcatalog.1" "$MANDIR/xmlcatalog.1"
+
+make -C "$ROOT/safe/python" \
+  STAGE="$STAGE" \
+  TRIPLET="$TRIPLET" \
+  PYTHON=python3 \
+  install

@@ -1,7 +1,7 @@
 use crate::cli::{collect_args, cstring_from_os};
 use crate::debug::shell::{
-    c_readline_with_prompt, fclose_file, fopen_write, free_c_ptr, output_or_stdout,
-    stdout_handle, write_file_str, FILE,
+    c_readline_with_prompt, fclose_file, fopen_write, free_c_ptr, output_or_stdout, stdout_handle,
+    write_file_str, FILE,
 };
 use crate::foundation::globals::xmlFree;
 use core::ffi::{c_char, c_int, c_void};
@@ -67,7 +67,9 @@ unsafe fn c_string_lossy(ptr: *const c_char) -> String {
     if ptr.is_null() {
         String::new()
     } else {
-        unsafe { CStr::from_ptr(ptr) }.to_string_lossy().into_owned()
+        unsafe { CStr::from_ptr(ptr) }
+            .to_string_lossy()
+            .into_owned()
     }
 }
 
@@ -255,10 +257,16 @@ unsafe fn run_shell(cfg: &mut Config) {
             "resolve" => {
                 if argv.len() != 2 {
                     unsafe { write_file_str(output, "resolve requires 2 arguments\n") };
-                } else if let (Ok(pub_id), Ok(sys_id)) =
-                    (CString::new(argv[0].as_str()), CString::new(argv[1].as_str()))
-                {
-                    let ans = unsafe { xmlCatalogResolve(pub_id.as_ptr() as *const u8, sys_id.as_ptr() as *const u8) };
+                } else if let (Ok(pub_id), Ok(sys_id)) = (
+                    CString::new(argv[0].as_str()),
+                    CString::new(argv[1].as_str()),
+                ) {
+                    let ans = unsafe {
+                        xmlCatalogResolve(
+                            pub_id.as_ptr() as *const u8,
+                            sys_id.as_ptr() as *const u8,
+                        )
+                    };
                     unsafe {
                         print_catalog_answer(ans, "Resolver failed to find an answer\n", output);
                     }
@@ -330,9 +338,18 @@ unsafe fn run_shell(cfg: &mut Config) {
                     write_file_str(output, &format!("Unrecognized command {}\n", command));
                 }
                 write_file_str(output, "Commands available:\n");
-                write_file_str(output, "\tpublic PublicID: make a PUBLIC identifier lookup\n");
-                write_file_str(output, "\tsystem SystemID: make a SYSTEM identifier lookup\n");
-                write_file_str(output, "\tresolve PublicID SystemID: do a full resolver lookup\n");
+                write_file_str(
+                    output,
+                    "\tpublic PublicID: make a PUBLIC identifier lookup\n",
+                );
+                write_file_str(
+                    output,
+                    "\tsystem SystemID: make a SYSTEM identifier lookup\n",
+                );
+                write_file_str(
+                    output,
+                    "\tresolve PublicID SystemID: do a full resolver lookup\n",
+                );
                 write_file_str(output, "\tadd 'type' 'orig' 'replace' : add an entry\n");
                 write_file_str(output, "\tdel 'values' : remove values\n");
                 write_file_str(output, "\tdump: print the current catalog state\n");
@@ -419,7 +436,11 @@ pub fn main() -> i32 {
                 let ret = unsafe { xmlLoadCatalog(catalog_path.as_ptr()) };
                 if ret < 0 && cfg.create {
                     unsafe {
-                        let _ = xmlCatalogAdd(b"catalog\0".as_ptr(), catalog_path.as_ptr() as *const u8, null());
+                        let _ = xmlCatalogAdd(
+                            b"catalog\0".as_ptr(),
+                            catalog_path.as_ptr() as *const u8,
+                            null(),
+                        );
                     }
                 }
                 filename = Some(arg);
@@ -468,11 +489,19 @@ pub fn main() -> i32 {
                     if catal.is_null() {
                         catal = unsafe { xmlNewCatalog(1) };
                     }
-                    unsafe { xmlACatalogAdd(catal, b"CATALOG\0".as_ptr(), entry.as_ptr() as *const u8, null()) };
+                    unsafe {
+                        xmlACatalogAdd(
+                            catal,
+                            b"CATALOG\0".as_ptr(),
+                            entry.as_ptr() as *const u8,
+                            null(),
+                        )
+                    };
 
                     let mut super_catalog = null_mut();
                     if !cfg.no_super_update {
-                        let default = CString::new(XML_SGML_DEFAULT_CATALOG).expect("static string");
+                        let default =
+                            CString::new(XML_SGML_DEFAULT_CATALOG).expect("static string");
                         super_catalog = unsafe { xmlLoadSGMLSuperCatalog(default.as_ptr()) };
                         if super_catalog.is_null() {
                             super_catalog = unsafe { xmlNewCatalog(1) };
@@ -486,11 +515,21 @@ pub fn main() -> i32 {
                             );
                         }
                         unsafe {
-                            save_sgml_catalog(super_catalog, default.as_c_str(), cfg.noout, &mut exit_value);
+                            save_sgml_catalog(
+                                super_catalog,
+                                default.as_c_str(),
+                                cfg.noout,
+                                &mut exit_value,
+                            );
                         }
                     }
                     unsafe {
-                        save_sgml_catalog(catal, catalog_file.as_c_str(), cfg.noout, &mut exit_value);
+                        save_sgml_catalog(
+                            catal,
+                            catalog_file.as_c_str(),
+                            cfg.noout,
+                            &mut exit_value,
+                        );
                     }
                     i += 3;
                 }
@@ -509,12 +548,22 @@ pub fn main() -> i32 {
                         Err(code) => return code,
                     };
                     let catal = unsafe { xmlLoadSGMLSuperCatalog(catalog_file.as_ptr()) };
-                    if catal.is_null() || unsafe { xmlACatalogRemove(catal, value.as_ptr() as *const u8) } < 0 {
-                        eprintln!("Failed to remove entry from {}", catalog_file.to_string_lossy());
+                    if catal.is_null()
+                        || unsafe { xmlACatalogRemove(catal, value.as_ptr() as *const u8) } < 0
+                    {
+                        eprintln!(
+                            "Failed to remove entry from {}",
+                            catalog_file.to_string_lossy()
+                        );
                         exit_value = 1;
                     } else {
                         unsafe {
-                            save_sgml_catalog(catal, catalog_file.as_c_str(), cfg.noout, &mut exit_value);
+                            save_sgml_catalog(
+                                catal,
+                                catalog_file.as_c_str(),
+                                cfg.noout,
+                                &mut exit_value,
+                            );
                         }
                     }
                     i += 3;
@@ -575,13 +624,21 @@ pub fn main() -> i32 {
 
         if !cfg.sgml && (cfg.add || cfg.del || cfg.create || cfg.convert) {
             unsafe {
-                save_xml_catalog(filename.as_deref().unwrap_or_default(), cfg.noout, &mut exit_value);
+                save_xml_catalog(
+                    filename.as_deref().unwrap_or_default(),
+                    cfg.noout,
+                    &mut exit_value,
+                );
             }
         }
     } else if cfg.shell {
         unsafe { run_shell(&mut cfg) };
     } else {
-        let start = if filename.is_some() { first_entity } else { first_non_option };
+        let start = if filename.is_some() {
+            first_entity
+        } else {
+            first_non_option
+        };
         for arg in args.iter().skip(start) {
             let entity = match cstring_from_os(arg.as_os_str()) {
                 Ok(entity) => entity,

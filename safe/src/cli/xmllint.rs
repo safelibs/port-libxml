@@ -1,3 +1,7 @@
+use crate::abi::opaque::{
+    _xmlRelaxNG, _xmlRelaxNGParserCtxt, _xmlRelaxNGValidCtxt, _xmlSchema, _xmlSchemaParserCtxt,
+    _xmlSchemaValidCtxt, _xmlSchematron, _xmlSchematronParserCtxt, _xmlSchematronValidCtxt,
+};
 use crate::abi::types::xmlDoc;
 use crate::cli::{collect_args, cstring_from_os};
 use crate::debug::debug_xml::xmlDebugDumpDocument;
@@ -12,7 +16,7 @@ use crate::parser::parser::{
     XML_PARSE_XINCLUDE,
 };
 use crate::parser::xmlreader::XML_PARSER_VALIDATE;
-use core::ffi::{c_char, c_int};
+use core::ffi::{c_char, c_int, c_void};
 use std::ffi::{CStr, CString, OsStr};
 use std::fs::File;
 use std::os::fd::IntoRawFd;
@@ -24,9 +28,24 @@ const XMLLINT_ERR_UNCLASS: i32 = 1;
 const XMLLINT_ERR_DTD: i32 = 2;
 const XMLLINT_ERR_VALID: i32 = 3;
 const XMLLINT_ERR_RDFILE: i32 = 4;
+const XMLLINT_ERR_SCHEMACOMP: i32 = 5;
 const XMLLINT_ERR_OUT: i32 = 6;
+const XML_SCHEMATRON_OUT_QUIET: c_int = 1;
+const XML_SCHEMATRON_OUT_TEXT: c_int = 1 << 1;
+const XML_SCHEMATRON_OUT_XML: c_int = 1 << 2;
+
+type xmlGenericErrorFunc = Option<unsafe extern "C" fn(*mut c_void, *const c_char, ...)>;
 
 type xmlDocPtr = *mut xmlDoc;
+type xmlRelaxNGPtr = *mut _xmlRelaxNG;
+type xmlRelaxNGParserCtxtPtr = *mut _xmlRelaxNGParserCtxt;
+type xmlRelaxNGValidCtxtPtr = *mut _xmlRelaxNGValidCtxt;
+type xmlSchemaPtr = *mut _xmlSchema;
+type xmlSchemaParserCtxtPtr = *mut _xmlSchemaParserCtxt;
+type xmlSchemaValidCtxtPtr = *mut _xmlSchemaValidCtxt;
+type xmlSchematronPtr = *mut _xmlSchematron;
+type xmlSchematronParserCtxtPtr = *mut _xmlSchematronParserCtxt;
+type xmlSchematronValidCtxtPtr = *mut _xmlSchematronValidCtxt;
 
 #[repr(C)]
 struct xmlTextReader {
@@ -46,10 +65,13 @@ struct xmlParserInput {
 type xmlTextReaderPtr = *mut xmlTextReader;
 type xmlSaveCtxtPtr = *mut xmlSaveCtxt;
 type xmlParserInputPtr = *mut xmlParserInput;
-type xmlExternalEntityLoader =
-    Option<unsafe extern "C" fn(*const c_char, *const c_char, *mut xmlParserCtxt) -> xmlParserInputPtr>;
+type xmlExternalEntityLoader = Option<
+    unsafe extern "C" fn(*const c_char, *const c_char, *mut xmlParserCtxt) -> xmlParserInputPtr,
+>;
 
 unsafe extern "C" {
+    static mut xmlGenericError: xmlGenericErrorFunc;
+
     fn xmlNewParserCtxt() -> *mut xmlParserCtxt;
     fn xmlFreeParserCtxt(ctxt: *mut xmlParserCtxt);
     fn xmlCtxtReadFile(
@@ -79,8 +101,11 @@ unsafe extern "C" {
     ) -> xmlParserInputPtr;
 
     fn xmlSaveToFd(fd: c_int, encoding: *const c_char, options: c_int) -> xmlSaveCtxtPtr;
-    fn xmlSaveToFilename(filename: *const c_char, encoding: *const c_char, options: c_int)
-        -> xmlSaveCtxtPtr;
+    fn xmlSaveToFilename(
+        filename: *const c_char,
+        encoding: *const c_char,
+        options: c_int,
+    ) -> xmlSaveCtxtPtr;
     fn xmlSaveDoc(ctxt: xmlSaveCtxtPtr, doc: xmlDocPtr) -> i64;
     fn xmlSaveClose(ctxt: xmlSaveCtxtPtr) -> c_int;
 
@@ -108,8 +133,47 @@ unsafe extern "C" {
     fn xmlTextReaderHasValue(reader: xmlTextReaderPtr) -> c_int;
     fn xmlTextReaderSetParserProp(reader: xmlTextReaderPtr, prop: c_int, value: c_int) -> c_int;
     fn xmlTextReaderIsValid(reader: xmlTextReaderPtr) -> c_int;
+    fn xmlTextReaderRelaxNGValidate(reader: xmlTextReaderPtr, rng: *const c_char) -> c_int;
+    fn xmlTextReaderSchemaValidate(reader: xmlTextReaderPtr, xsd: *const c_char) -> c_int;
 
     fn xmlXIncludeProcessFlags(doc: xmlDocPtr, flags: c_int) -> c_int;
+    fn xmlRelaxNGNewParserCtxt(url: *const c_char) -> xmlRelaxNGParserCtxtPtr;
+    fn xmlRelaxNGFreeParserCtxt(ctxt: xmlRelaxNGParserCtxtPtr);
+    fn xmlRelaxNGParse(ctxt: xmlRelaxNGParserCtxtPtr) -> xmlRelaxNGPtr;
+    fn xmlRelaxNGFree(schema: xmlRelaxNGPtr);
+    fn xmlRelaxNGNewValidCtxt(schema: xmlRelaxNGPtr) -> xmlRelaxNGValidCtxtPtr;
+    fn xmlRelaxNGFreeValidCtxt(ctxt: xmlRelaxNGValidCtxtPtr);
+    fn xmlRelaxNGValidateDoc(ctxt: xmlRelaxNGValidCtxtPtr, doc: xmlDocPtr) -> c_int;
+    fn xmlRelaxNGSetValidErrors(
+        ctxt: xmlRelaxNGValidCtxtPtr,
+        err: xmlGenericErrorFunc,
+        warn: xmlGenericErrorFunc,
+        ctx: *mut c_void,
+    );
+    fn xmlSchemaNewParserCtxt(url: *const c_char) -> xmlSchemaParserCtxtPtr;
+    fn xmlSchemaFreeParserCtxt(ctxt: xmlSchemaParserCtxtPtr);
+    fn xmlSchemaParse(ctxt: xmlSchemaParserCtxtPtr) -> xmlSchemaPtr;
+    fn xmlSchemaFree(schema: xmlSchemaPtr);
+    fn xmlSchemaNewValidCtxt(schema: xmlSchemaPtr) -> xmlSchemaValidCtxtPtr;
+    fn xmlSchemaFreeValidCtxt(ctxt: xmlSchemaValidCtxtPtr);
+    fn xmlSchemaValidateDoc(ctxt: xmlSchemaValidCtxtPtr, doc: xmlDocPtr) -> c_int;
+    fn xmlSchemaValidateSetFilename(vctxt: xmlSchemaValidCtxtPtr, filename: *const c_char);
+    fn xmlSchemaSetValidErrors(
+        ctxt: xmlSchemaValidCtxtPtr,
+        err: xmlGenericErrorFunc,
+        warn: xmlGenericErrorFunc,
+        ctx: *mut c_void,
+    );
+    fn xmlSchematronNewParserCtxt(url: *const c_char) -> xmlSchematronParserCtxtPtr;
+    fn xmlSchematronFreeParserCtxt(ctxt: xmlSchematronParserCtxtPtr);
+    fn xmlSchematronParse(ctxt: xmlSchematronParserCtxtPtr) -> xmlSchematronPtr;
+    fn xmlSchematronFree(schema: xmlSchematronPtr);
+    fn xmlSchematronNewValidCtxt(
+        schema: xmlSchematronPtr,
+        options: c_int,
+    ) -> xmlSchematronValidCtxtPtr;
+    fn xmlSchematronFreeValidCtxt(ctxt: xmlSchematronValidCtxtPtr);
+    fn xmlSchematronValidateDoc(ctxt: xmlSchematronValidCtxtPtr, doc: xmlDocPtr) -> c_int;
     fn close(fd: c_int) -> c_int;
 }
 
@@ -131,6 +195,9 @@ struct Config {
     noxincludenode: bool,
     repeat: usize,
     output: Option<CString>,
+    relaxng: Option<CString>,
+    schema: Option<CString>,
+    schematron: Option<CString>,
     options: c_int,
 }
 
@@ -141,7 +208,7 @@ struct ParseOutcome {
 
 fn usage(name: &str) {
     eprintln!(
-        "Usage : {name} [options] XMLfiles ...\n\tParse the XML files and output the result of the parsing\n\t--version : display the version of the XML library used\n\t--debug : dump a debug tree of the in-memory document\n\t--shell : run a navigating shell\n\t--noout : don't output the result tree\n\t--valid : validate the document in addition to std well-formed check\n\t--timing : print some timings\n\t--output file or -o file: save to a given file\n\t--repeat : repeat 100 times, for timing or profiling\n\t--memory : parse from memory\n\t--nowarning : do not emit warnings from parser/validator\n\t--xinclude : do XInclude processing\n\t--noxincludenode : same but do not generate XInclude nodes\n\t--stream : use the streaming interface to process very large files\n\t--walker : create a reader and walk though the resulting doc\n\t--nonet : refuse to fetch DTDs or entities over network\n\t--noent : substitute entity references by their value\n\t--oldxml10: use XML-1.0 parsing rules before the 5th edition"
+        "Usage : {name} [options] XMLfiles ...\n\tParse the XML files and output the result of the parsing\n\t--version : display the version of the XML library used\n\t--debug : dump a debug tree of the in-memory document\n\t--shell : run a navigating shell\n\t--noout : don't output the result tree\n\t--valid : validate the document in addition to std well-formed check\n\t--schema schema : do validation against the WXS schema\n\t--relaxng schema : do RelaxNG validation against the schema\n\t--schematron schema : do validation against a schematron\n\t--timing : print some timings\n\t--output file or -o file: save to a given file\n\t--repeat : repeat 100 times, for timing or profiling\n\t--memory : parse from memory\n\t--nowarning : do not emit warnings from parser/validator\n\t--xinclude : do XInclude processing\n\t--noxincludenode : same but do not generate XInclude nodes\n\t--stream : use the streaming interface to process very large files\n\t--walker : create a reader and walk though the resulting doc\n\t--nonet : refuse to fetch DTDs or entities over network\n\t--noent : substitute entity references by their value\n\t--oldxml10: use XML-1.0 parsing rules before the 5th edition"
     );
 }
 
@@ -172,6 +239,34 @@ fn parse_args(args: &[std::ffi::OsString]) -> Result<(Config, Vec<CString>), i32
                 cfg.valid = true;
                 cfg.options |= XML_PARSE_DTDVALID as c_int;
             }
+            "-schema" | "--schema" => {
+                i += 1;
+                if i >= args.len() {
+                    usage(&args[0].to_string_lossy());
+                    return Err(XMLLINT_ERR_UNCLASS);
+                }
+                cfg.schema = Some(cstring_from_os(args[i].as_os_str())?);
+                cfg.noent = true;
+            }
+            "-relaxng" | "--relaxng" => {
+                i += 1;
+                if i >= args.len() {
+                    usage(&args[0].to_string_lossy());
+                    return Err(XMLLINT_ERR_UNCLASS);
+                }
+                cfg.relaxng = Some(cstring_from_os(args[i].as_os_str())?);
+                cfg.noent = true;
+                cfg.options |= XML_PARSE_NOENT as c_int;
+            }
+            "-schematron" | "--schematron" => {
+                i += 1;
+                if i >= args.len() {
+                    usage(&args[0].to_string_lossy());
+                    return Err(XMLLINT_ERR_UNCLASS);
+                }
+                cfg.schematron = Some(cstring_from_os(args[i].as_os_str())?);
+                cfg.noent = true;
+            }
             "-xinclude" | "--xinclude" => {
                 cfg.xinclude = true;
                 cfg.options |= XML_PARSE_XINCLUDE as c_int;
@@ -183,7 +278,11 @@ fn parse_args(args: &[std::ffi::OsString]) -> Result<(Config, Vec<CString>), i32
             }
             "-timing" | "--timing" => cfg.timing = true,
             "-repeat" | "--repeat" => {
-                cfg.repeat = if cfg.repeat == 0 { 100 } else { cfg.repeat * 10 };
+                cfg.repeat = if cfg.repeat == 0 {
+                    100
+                } else {
+                    cfg.repeat * 10
+                };
             }
             "-stream" | "--stream" => cfg.stream = true,
             "-walker" | "--walker" => {
@@ -215,7 +314,10 @@ fn parse_args(args: &[std::ffi::OsString]) -> Result<(Config, Vec<CString>), i32
                 cfg.output = Some(cstring_from_os(args[i].as_os_str())?);
             }
             "-version" | "--version" => {
-                eprintln!("{name}: using staged libxml2-safe", name = args[0].to_string_lossy());
+                eprintln!(
+                    "{name}: using staged libxml2-safe",
+                    name = args[0].to_string_lossy()
+                );
                 return Err(XMLLINT_RETURN_OK);
             }
             "-help" | "--help" => {
@@ -245,7 +347,9 @@ unsafe fn c_string_lossy(ptr: *const c_char) -> String {
     if ptr.is_null() {
         String::new()
     } else {
-        unsafe { CStr::from_ptr(ptr) }.to_string_lossy().into_owned()
+        unsafe { CStr::from_ptr(ptr) }
+            .to_string_lossy()
+            .into_owned()
     }
 }
 
@@ -303,8 +407,8 @@ unsafe fn parse_doc(filename: &CString, cfg: &Config) -> Result<ParseOutcome, i3
     }
 
     let (doc, status) = if cfg.memory {
-        let bytes =
-            std::fs::read(OsStr::from_bytes(filename.as_bytes())).map_err(|_| XMLLINT_ERR_RDFILE)?;
+        let bytes = std::fs::read(OsStr::from_bytes(filename.as_bytes()))
+            .map_err(|_| XMLLINT_ERR_RDFILE)?;
         let doc = unsafe {
             xmlCtxtReadMemory(
                 ctxt,
@@ -385,6 +489,34 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
             let _ = xmlTextReaderSetParserProp(reader, XML_PARSER_VALIDATE as c_int, 1);
         }
     }
+    if let Some(schema) = cfg.relaxng.as_ref() {
+        if unsafe { xmlTextReaderRelaxNGValidate(reader, schema.as_ptr()) } != 0 {
+            eprintln!("Relax-NG schema {} failed to compile", unsafe {
+                c_string_lossy(schema.as_ptr())
+            });
+            unsafe { xmlFreeTextReader(reader) };
+            if let Some(fd) = fd.take() {
+                unsafe {
+                    let _ = close(fd);
+                }
+            }
+            return XMLLINT_ERR_SCHEMACOMP;
+        }
+    }
+    if let Some(schema) = cfg.schema.as_ref() {
+        if unsafe { xmlTextReaderSchemaValidate(reader, schema.as_ptr()) } != 0 {
+            eprintln!("WXS schema {} failed to compile", unsafe {
+                c_string_lossy(schema.as_ptr())
+            });
+            unsafe { xmlFreeTextReader(reader) };
+            if let Some(fd) = fd.take() {
+                unsafe {
+                    let _ = close(fd);
+                }
+            }
+            return XMLLINT_ERR_SCHEMACOMP;
+        }
+    }
 
     let mut ret = unsafe { xmlTextReaderRead(reader) };
     while ret == 1 {
@@ -394,7 +526,8 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
         ret = unsafe { xmlTextReaderRead(reader) };
     }
 
-    if cfg.valid && unsafe { xmlTextReaderIsValid(reader) } != 1 {
+    let is_valid = unsafe { xmlTextReaderIsValid(reader) };
+    if cfg.valid && is_valid != 1 {
         eprintln!("Document {filename_text} does not validate");
         unsafe { xmlFreeTextReader(reader) };
         if let Some(fd) = fd.take() {
@@ -403,6 +536,19 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
             }
         }
         return XMLLINT_ERR_VALID;
+    }
+    if cfg.relaxng.is_some() || cfg.schema.is_some() {
+        if is_valid != 1 {
+            eprintln!("{filename_text} fails to validate");
+            unsafe { xmlFreeTextReader(reader) };
+            if let Some(fd) = fd.take() {
+                unsafe {
+                    let _ = close(fd);
+                }
+            }
+            return XMLLINT_ERR_VALID;
+        }
+        eprintln!("{filename_text} validates");
     }
 
     unsafe { xmlFreeTextReader(reader) };
@@ -417,6 +563,157 @@ unsafe fn stream_file(filename: &CString, cfg: &Config) -> i32 {
     } else {
         XMLLINT_RETURN_OK
     }
+}
+
+unsafe fn validate_with_relaxng(schema_path: &CString, filename: &str, doc: xmlDocPtr) -> i32 {
+    let pctxt = unsafe { xmlRelaxNGNewParserCtxt(schema_path.as_ptr()) };
+    if pctxt.is_null() {
+        return XMLLINT_ERR_SCHEMACOMP;
+    }
+    let schema = unsafe { xmlRelaxNGParse(pctxt) };
+    unsafe { xmlRelaxNGFreeParserCtxt(pctxt) };
+    if schema.is_null() {
+        eprintln!("Relax-NG schema {} failed to compile", unsafe {
+            c_string_lossy(schema_path.as_ptr())
+        });
+        return XMLLINT_ERR_SCHEMACOMP;
+    }
+
+    let vctxt = unsafe { xmlRelaxNGNewValidCtxt(schema) };
+    if vctxt.is_null() {
+        unsafe { xmlRelaxNGFree(schema) };
+        return XMLLINT_ERR_UNCLASS;
+    }
+    unsafe {
+        xmlRelaxNGSetValidErrors(vctxt, xmlGenericError, xmlGenericError, null_mut());
+    }
+
+    let ret = unsafe { xmlRelaxNGValidateDoc(vctxt, doc) };
+    unsafe {
+        xmlRelaxNGFreeValidCtxt(vctxt);
+        xmlRelaxNGFree(schema);
+    }
+
+    if ret == 0 {
+        eprintln!("{filename} validates");
+        XMLLINT_RETURN_OK
+    } else if ret > 0 {
+        eprintln!("{filename} fails to validate");
+        XMLLINT_ERR_VALID
+    } else {
+        eprintln!("{filename} validation generated an internal error");
+        XMLLINT_ERR_UNCLASS
+    }
+}
+
+unsafe fn validate_with_schema(schema_path: &CString, filename: &str, doc: xmlDocPtr) -> i32 {
+    let pctxt = unsafe { xmlSchemaNewParserCtxt(schema_path.as_ptr()) };
+    if pctxt.is_null() {
+        return XMLLINT_ERR_SCHEMACOMP;
+    }
+    let schema = unsafe { xmlSchemaParse(pctxt) };
+    unsafe { xmlSchemaFreeParserCtxt(pctxt) };
+    if schema.is_null() {
+        eprintln!("WXS schema {} failed to compile", unsafe {
+            c_string_lossy(schema_path.as_ptr())
+        });
+        return XMLLINT_ERR_SCHEMACOMP;
+    }
+
+    let vctxt = unsafe { xmlSchemaNewValidCtxt(schema) };
+    if vctxt.is_null() {
+        unsafe { xmlSchemaFree(schema) };
+        return XMLLINT_ERR_UNCLASS;
+    }
+    let filename_c = CString::new(filename).unwrap();
+    unsafe {
+        xmlSchemaValidateSetFilename(vctxt, filename_c.as_ptr());
+        xmlSchemaSetValidErrors(vctxt, xmlGenericError, xmlGenericError, null_mut());
+    }
+
+    let ret = unsafe { xmlSchemaValidateDoc(vctxt, doc) };
+    unsafe {
+        xmlSchemaFreeValidCtxt(vctxt);
+        xmlSchemaFree(schema);
+    }
+
+    if ret == 0 {
+        eprintln!("{filename} validates");
+        XMLLINT_RETURN_OK
+    } else if ret > 0 {
+        eprintln!("{filename} fails to validate");
+        XMLLINT_ERR_VALID
+    } else {
+        eprintln!("{filename} validation generated an internal error");
+        XMLLINT_ERR_UNCLASS
+    }
+}
+
+unsafe fn validate_with_schematron(
+    schema_path: &CString,
+    filename: &str,
+    cfg: &Config,
+    doc: xmlDocPtr,
+) -> i32 {
+    let pctxt = unsafe { xmlSchematronNewParserCtxt(schema_path.as_ptr()) };
+    if pctxt.is_null() {
+        return XMLLINT_ERR_SCHEMACOMP;
+    }
+    let schema = unsafe { xmlSchematronParse(pctxt) };
+    unsafe { xmlSchematronFreeParserCtxt(pctxt) };
+    if schema.is_null() {
+        eprintln!("Schematron schema {} failed to compile", unsafe {
+            c_string_lossy(schema_path.as_ptr())
+        });
+        return XMLLINT_ERR_SCHEMACOMP;
+    }
+
+    let mut flag = if cfg.debug {
+        XML_SCHEMATRON_OUT_XML
+    } else {
+        XML_SCHEMATRON_OUT_TEXT
+    };
+    if cfg.noout {
+        flag |= XML_SCHEMATRON_OUT_QUIET;
+    }
+    let vctxt = unsafe { xmlSchematronNewValidCtxt(schema, flag) };
+    if vctxt.is_null() {
+        unsafe { xmlSchematronFree(schema) };
+        return XMLLINT_ERR_UNCLASS;
+    }
+
+    let ret = unsafe { xmlSchematronValidateDoc(vctxt, doc) };
+    unsafe {
+        xmlSchematronFreeValidCtxt(vctxt);
+        xmlSchematronFree(schema);
+    }
+
+    if ret == 0 {
+        eprintln!("{filename} validates");
+        XMLLINT_RETURN_OK
+    } else if ret > 0 {
+        eprintln!("{filename} fails to validate");
+        XMLLINT_ERR_VALID
+    } else {
+        eprintln!("{filename} validation generated an internal error");
+        XMLLINT_ERR_UNCLASS
+    }
+}
+
+unsafe fn validate_doc(filename: &str, doc: xmlDocPtr, cfg: &Config) -> i32 {
+    let mut status = XMLLINT_RETURN_OK;
+
+    if let Some(schema) = cfg.relaxng.as_ref() {
+        status = status.max(unsafe { validate_with_relaxng(schema, filename, doc) });
+    }
+    if let Some(schema) = cfg.schema.as_ref() {
+        status = status.max(unsafe { validate_with_schema(schema, filename, doc) });
+    }
+    if let Some(schema) = cfg.schematron.as_ref() {
+        status = status.max(unsafe { validate_with_schematron(schema, filename, cfg, doc) });
+    }
+
+    status
 }
 
 unsafe fn walk_doc(doc: xmlDocPtr, cfg: &Config) -> i32 {
@@ -442,7 +739,7 @@ unsafe fn walk_doc(doc: xmlDocPtr, cfg: &Config) -> i32 {
 }
 
 unsafe fn run_one(filename: &CString, cfg: &Config) -> i32 {
-    if cfg.stream {
+    if cfg.stream && cfg.schematron.is_none() {
         return unsafe { stream_file(filename, cfg) };
     }
 
@@ -454,6 +751,8 @@ unsafe fn run_one(filename: &CString, cfg: &Config) -> i32 {
     if cfg.xinclude && unsafe { xmlXIncludeProcessFlags(doc, cfg.options) } < 0 {
         status = status.max(XMLLINT_ERR_UNCLASS);
     }
+    let filename_text = unsafe { c_string_lossy(filename.as_ptr()) };
+    status = status.max(unsafe { validate_doc(&filename_text, doc, cfg) });
 
     if cfg.shell {
         unsafe {

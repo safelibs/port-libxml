@@ -1,4 +1,4 @@
-use crate::abi::opaque::{_xmlDict};
+use crate::abi::opaque::_xmlDict;
 
 extern "C" {
     fn xmlStrEqual(str1: *const xmlChar, str2: *const xmlChar) -> ::core::ffi::c_int;

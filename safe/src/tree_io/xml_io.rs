@@ -3955,9 +3955,6 @@ pub unsafe extern "C" fn __xmlParserInputBufferCreateFilename(
     if xmlInputCallbackInitialized == 0 as ::core::ffi::c_int {
         xmlRegisterDefaultInputCallbacks();
     }
-    if unsafe { deny_network_uri(URI) } {
-        return ::core::ptr::null_mut::<xmlParserInputBuffer>();
-    }
     if URI.is_null() {
         return ::core::ptr::null_mut::<xmlParserInputBuffer>();
     }
@@ -4020,9 +4017,6 @@ pub unsafe extern "C" fn xmlParserInputBufferCreateFilename(
     mut URI: *const ::core::ffi::c_char,
     mut enc: xmlCharEncoding,
 ) -> xmlParserInputBufferPtr {
-    if unsafe { deny_network_uri(URI) } {
-        return ::core::ptr::null_mut::<xmlParserInputBuffer>();
-    }
     if (*__xmlParserInputBufferCreateFilenameValue()).is_some() {
         return (*__xmlParserInputBufferCreateFilenameValue()).expect("non-null function pointer")(
             URI, enc,
@@ -5382,7 +5376,7 @@ unsafe extern "C" fn xmlDefaultExternalEntityLoader(
 }
 static mut xmlCurrentExternalEntityLoader: xmlExternalEntityLoader = unsafe {
     Some(
-        xmlNoNetExternalEntityLoader
+        xmlDefaultExternalEntityLoader
             as unsafe extern "C" fn(
                 *const ::core::ffi::c_char,
                 *const ::core::ffi::c_char,
@@ -5396,7 +5390,7 @@ pub unsafe extern "C" fn xmlSetExternalEntityLoader(mut f: xmlExternalEntityLoad
         f
     } else {
         Some(
-            xmlNoNetExternalEntityLoader
+            xmlDefaultExternalEntityLoader
                 as unsafe extern "C" fn(
                     *const ::core::ffi::c_char,
                     *const ::core::ffi::c_char,
@@ -5444,34 +5438,25 @@ pub unsafe extern "C" fn xmlNoNetExternalEntityLoader(
 ) -> xmlParserInputPtr {
     let mut input: xmlParserInputPtr = ::core::ptr::null_mut::<xmlParserInput>();
     let mut resource: *mut xmlChar = ::core::ptr::null_mut::<xmlChar>();
+    let url_is_network = deny_network_uri(URL);
     resource = xmlResolveResourceFromCatalog(URL, ID, ctxt);
     if resource.is_null() {
         resource = URL as *mut xmlChar;
     }
-    if unsafe { deny_network_uri(resource as *const ::core::ffi::c_char) } {
-        return ::core::ptr::null_mut::<xmlParserInput>();
-    }
-    if !resource.is_null() {
-        if xmlStrncasecmp(
-            resource,
-            b"ftp://\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-            6 as ::core::ffi::c_int,
-        ) == 0
-            || xmlStrncasecmp(
-                resource,
-                b"http://\0" as *const u8 as *const ::core::ffi::c_char as *mut xmlChar,
-                7 as ::core::ffi::c_int,
-            ) == 0
-        {
-            xmlIOErr(
-                XML_IO_NETWORK_ATTEMPT as ::core::ffi::c_int,
-                resource as *const ::core::ffi::c_char,
-            );
-            if resource != URL as *mut xmlChar {
-                xmlFree.expect("non-null function pointer")(resource as *mut ::core::ffi::c_void);
-            }
-            return ::core::ptr::null_mut::<xmlParserInput>();
+    if !resource.is_null()
+        && (deny_network_uri(resource as *const ::core::ffi::c_char)
+            || (url_is_network
+                && !URL.is_null()
+                && xmlStrEqual(resource, URL as *const xmlChar) != 0))
+    {
+        xmlIOErr(
+            XML_IO_NETWORK_ATTEMPT as ::core::ffi::c_int,
+            resource as *const ::core::ffi::c_char,
+        );
+        if resource != URL as *mut xmlChar {
+            xmlFree.expect("non-null function pointer")(resource as *mut ::core::ffi::c_void);
         }
+        return ::core::ptr::null_mut::<xmlParserInput>();
     }
     input = xmlDefaultExternalEntityLoader(resource as *const ::core::ffi::c_char, ID, ctxt);
     if resource != URL as *mut xmlChar {

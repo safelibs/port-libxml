@@ -22,7 +22,7 @@ pub mod common;
     unused_mut,
     unused_unsafe
 )]
-pub mod tree;
+pub mod encoding;
 #[allow(
     dead_code,
     improper_ctypes,
@@ -46,43 +46,7 @@ pub mod entities;
     unused_mut,
     unused_unsafe
 )]
-pub mod uri;
-#[allow(
-    dead_code,
-    improper_ctypes,
-    improper_ctypes_definitions,
-    non_camel_case_types,
-    non_snake_case,
-    non_upper_case_globals,
-    unsafe_op_in_unsafe_fn,
-    unused_mut,
-    unused_unsafe
-)]
-pub mod encoding;
-#[allow(
-    dead_code,
-    improper_ctypes,
-    improper_ctypes_definitions,
-    non_camel_case_types,
-    non_snake_case,
-    non_upper_case_globals,
-    unsafe_op_in_unsafe_fn,
-    unused_mut,
-    unused_unsafe
-)]
-pub mod xml_io;
-#[allow(
-    dead_code,
-    improper_ctypes,
-    improper_ctypes_definitions,
-    non_camel_case_types,
-    non_snake_case,
-    non_upper_case_globals,
-    unsafe_op_in_unsafe_fn,
-    unused_mut,
-    unused_unsafe
-)]
-pub mod nanohttp;
+pub mod htmltree;
 #[allow(
     dead_code,
     improper_ctypes,
@@ -106,7 +70,7 @@ pub mod nanoftp;
     unused_mut,
     unused_unsafe
 )]
-pub mod xzlib;
+pub mod nanohttp;
 #[allow(
     dead_code,
     improper_ctypes,
@@ -118,4 +82,40 @@ pub mod xzlib;
     unused_mut,
     unused_unsafe
 )]
-pub mod htmltree;
+pub mod tree;
+#[allow(
+    dead_code,
+    improper_ctypes,
+    improper_ctypes_definitions,
+    non_camel_case_types,
+    non_snake_case,
+    non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
+    unused_mut,
+    unused_unsafe
+)]
+pub mod uri;
+#[allow(
+    dead_code,
+    improper_ctypes,
+    improper_ctypes_definitions,
+    non_camel_case_types,
+    non_snake_case,
+    non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
+    unused_mut,
+    unused_unsafe
+)]
+pub mod xml_io;
+#[allow(
+    dead_code,
+    improper_ctypes,
+    improper_ctypes_definitions,
+    non_camel_case_types,
+    non_snake_case,
+    non_upper_case_globals,
+    unsafe_op_in_unsafe_fn,
+    unused_mut,
+    unused_unsafe
+)]
+pub mod xzlib;

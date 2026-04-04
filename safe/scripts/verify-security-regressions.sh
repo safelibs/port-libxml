@@ -54,7 +54,7 @@ print(
     f"{len(relevant_entries)} relevant CVEs from {len(all_ids)} authoritative corpus entries"
 )
 
-if subset not in {"tree-io", "xpath-valid", "cli-shell", ""}:
+if subset not in {"tree-io", "xpath-valid", "cli-shell", "schema", ""}:
     raise SystemExit(0)
 
 stage_candidates = sorted((root / "safe/target/stage").glob("usr/lib/*/libxml2.so.2.9.14"))
@@ -118,6 +118,17 @@ def run_stage_command(
             f"stderr:\n{completed.stderr}"
         )
     return completed
+
+
+def require_recoverable_failure(label: str, completed: subprocess.CompletedProcess[str]) -> None:
+    if completed.returncode in {-11, -6, 134, 139}:
+        raise SystemExit(
+            f"{label} terminated via crash-like exit {completed.returncode}\n"
+            f"stdout:\n{completed.stdout}\n"
+            f"stderr:\n{completed.stderr}"
+        )
+    if not completed.stdout.strip() and not completed.stderr.strip():
+        raise SystemExit(f"{label} failed without any diagnostic output")
 
 
 if subset in {"tree-io", ""}:
@@ -474,4 +485,92 @@ if subset in {"cli-shell", ""}:
         )
 
     print("cli-shell security checks passed: bounded long-command shell fixture matches expected output")
+
+
+if subset in {"schema", ""}:
+    security_root = root / "safe/tests/security"
+    schema_dir = security_root / "schema"
+    relaxng_dir = security_root / "relaxng"
+    include_limit = root / "original/test/relaxng/include/include-limit.rng"
+
+    for path in (
+        stage_xmllint,
+        schema_dir / "issue491_0.xsd",
+        schema_dir / "issue491_0.xml",
+        relaxng_dir / "invalid.rng",
+        relaxng_dir / "instance.xml",
+        include_limit,
+    ):
+        if not path.exists():
+            raise SystemExit(f"missing schema security fixture or tool: {path}")
+
+    issue491_result = run_stage_command(
+        "schema issue491 invalid complex type",
+        [
+            str(stage_xmllint),
+            "--noout",
+            "--schema",
+            str(schema_dir / "issue491_0.xsd"),
+            str(schema_dir / "issue491_0.xml"),
+        ],
+        root,
+        expect_success=False,
+    )
+    require_recoverable_failure("schema issue491 invalid complex type", issue491_result)
+
+    invalid_rng_result = run_stage_command(
+        "relaxng malformed schema",
+        [
+            str(stage_xmllint),
+            "--noout",
+            "--relaxng",
+            str(relaxng_dir / "invalid.rng"),
+            str(relaxng_dir / "instance.xml"),
+        ],
+        root,
+        expect_success=False,
+    )
+    require_recoverable_failure("relaxng malformed schema", invalid_rng_result)
+
+    lib.xmlRelaxNGNewParserCtxt.argtypes = [ctypes.c_char_p]
+    lib.xmlRelaxNGNewParserCtxt.restype = ctypes.c_void_p
+    lib.xmlRelaxParserSetIncLImit.argtypes = [ctypes.c_void_p, ctypes.c_int]
+    lib.xmlRelaxParserSetIncLImit.restype = ctypes.c_int
+    lib.xmlRelaxNGParse.argtypes = [ctypes.c_void_p]
+    lib.xmlRelaxNGParse.restype = ctypes.c_void_p
+    lib.xmlRelaxNGFreeParserCtxt.argtypes = [ctypes.c_void_p]
+    lib.xmlRelaxNGFreeParserCtxt.restype = None
+    lib.xmlRelaxNGFree.argtypes = [ctypes.c_void_p]
+    lib.xmlRelaxNGFree.restype = None
+
+    ctxt = lib.xmlRelaxNGNewParserCtxt(str(include_limit).encode())
+    if not ctxt:
+        raise SystemExit("xmlRelaxNGNewParserCtxt failed for include limit regression fixture")
+    if lib.xmlRelaxParserSetIncLImit(ctxt, 2) != 0:
+        lib.xmlRelaxNGFreeParserCtxt(ctxt)
+        raise SystemExit("xmlRelaxParserSetIncLImit rejected a valid limit of 2")
+    schema = lib.xmlRelaxNGParse(ctxt)
+    if schema:
+        lib.xmlRelaxNGFree(schema)
+        lib.xmlRelaxNGFreeParserCtxt(ctxt)
+        raise SystemExit("xmlRelaxNGParse unexpectedly ignored include limit 2")
+    lib.xmlRelaxNGFreeParserCtxt(ctxt)
+
+    ctxt = lib.xmlRelaxNGNewParserCtxt(str(include_limit).encode())
+    if not ctxt:
+        raise SystemExit("xmlRelaxNGNewParserCtxt failed on second include limit attempt")
+    if lib.xmlRelaxParserSetIncLImit(ctxt, 3) != 0:
+        lib.xmlRelaxNGFreeParserCtxt(ctxt)
+        raise SystemExit("xmlRelaxParserSetIncLImit rejected a valid limit of 3")
+    schema = lib.xmlRelaxNGParse(ctxt)
+    if not schema:
+        lib.xmlRelaxNGFreeParserCtxt(ctxt)
+        raise SystemExit("xmlRelaxNGParse failed with include limit 3; expected successful bounded parse")
+    lib.xmlRelaxNGFree(schema)
+    lib.xmlRelaxNGFreeParserCtxt(ctxt)
+
+    print(
+        "schema security checks passed: malformed XSD and RNG inputs fail with "
+        "recoverable diagnostics, and RelaxNG include depth limits are enforced"
+    )
 PY

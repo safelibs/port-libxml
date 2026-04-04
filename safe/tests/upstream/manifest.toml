@@ -6,6 +6,19 @@ ordered_subsets = [
   "xpath-valid",
   "cli-shell",
   "performance",
+  "schema",
+  "python-bindings",
+  "fuzz-smoke",
+]
+all = [
+  "foundation",
+  "tree-io",
+  "parser",
+  "xpath-valid",
+  "cli-shell",
+  "performance",
+  "schema",
+  "python-bindings",
   "fuzz-smoke",
 ]
 
@@ -363,6 +376,108 @@ cwd = "original"
 argv = []
 env = {}
 compare = "timing/memory checks against staged xmllint --valid"
+
+[[entry]]
+name = "PinnedRelaxAddressBook"
+subsets = ["schema"]
+runner = "target_body"
+target = "PinnedRelaxAddressBook"
+cwd = "original"
+argv = []
+env = {}
+compare = "testRelax --noout ./test/relaxng/tutorA.rng ./test/relaxng/addressBook.rng against original-linked helper"
+
+[[entry]]
+name = "Schemastests"
+subsets = ["schema"]
+runner = "target_body"
+target = "Schemastests"
+cwd = "original"
+argv = []
+env = {}
+compare = "schema xmllint output diff against original-linked xmllint"
+
+[[entry]]
+name = "Relaxtests"
+subsets = ["schema"]
+runner = "target_body"
+target = "Relaxtests"
+cwd = "original"
+argv = []
+env = {}
+compare = "Relax-NG xmllint output diff against original-linked xmllint"
+
+[[entry]]
+name = "Schematrontests"
+subsets = ["schema"]
+runner = "target_body"
+target = "Schematrontests"
+cwd = "original"
+argv = []
+env = {}
+compare = "schematron xmllint output diff against original-linked xmllint"
+
+[[entry]]
+name = "python-tests"
+subsets = ["python-bindings"]
+runner = "python_tests"
+cwd = "original/python/tests"
+argv = []
+env = {}
+
+[[entry]]
+name = "xmlconf-driver"
+subsets = ["python-bindings"]
+runner = "python_script"
+script = "safe/tests/upstream/xmlconf_driver.py"
+cwd = "safe/target/upstream-logs"
+argv = []
+env = {}
+
+[[entry]]
+name = "xinclude-driver"
+subsets = ["python-bindings"]
+runner = "python_script"
+script = "safe/tests/upstream/xinclude_driver.py"
+cwd = "safe/target/upstream-logs"
+argv = []
+env = {}
+
+[[entry]]
+name = "relaxng-suite1"
+subsets = ["python-bindings"]
+runner = "python_script"
+script = "safe/tests/upstream/relaxng_suite1.py"
+cwd = "safe/target/upstream-logs"
+argv = []
+env = {}
+
+[[entry]]
+name = "relaxng-suite2"
+subsets = ["python-bindings"]
+runner = "python_script"
+script = "safe/tests/upstream/relaxng_suite2.py"
+cwd = "safe/target/upstream-logs"
+argv = []
+env = {}
+
+[[entry]]
+name = "xsddata-suite"
+subsets = ["python-bindings"]
+runner = "python_script"
+script = "safe/tests/upstream/xsddata_suite.py"
+cwd = "safe/target/upstream-logs"
+argv = []
+env = {}
+
+[[entry]]
+name = "xstc-runner"
+subsets = ["python-bindings"]
+runner = "shell_script"
+script = "safe/tests/upstream/run_xstc.sh"
+cwd = "original/xstc"
+argv = []
+env = {}
 
 [[entry]]
 name = "fuzz-tests"

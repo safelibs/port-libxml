@@ -1245,8 +1245,7 @@ pub unsafe extern "C" fn __libxml2_xzread(
                 xz_error(
                     state,
                     -(1 as ::core::ffi::c_int),
-                    b"xz output budget exceeded\0" as *const u8
-                        as *const ::core::ffi::c_char,
+                    b"xz output budget exceeded\0" as *const u8 as *const ::core::ffi::c_char,
                 );
                 return -(1 as ::core::ffi::c_int);
             }
@@ -1290,8 +1289,7 @@ pub unsafe extern "C" fn __libxml2_xzread(
                     xz_error(
                         state,
                         -(1 as ::core::ffi::c_int),
-                        b"xz output budget exceeded\0" as *const u8
-                            as *const ::core::ffi::c_char,
+                        b"xz output budget exceeded\0" as *const u8 as *const ::core::ffi::c_char,
                     );
                     return -(1 as ::core::ffi::c_int);
                 }

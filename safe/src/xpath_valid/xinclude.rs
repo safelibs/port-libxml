@@ -1,4 +1,7 @@
-use crate::abi::opaque::{_xmlBuf, _xmlDict, _xmlHashTable, _xmlStartTag, _xmlAutomataState, _xmlAutomata, _xmlValidState, _xmlXPathCompExpr};
+use crate::abi::opaque::{
+    _xmlAutomata, _xmlAutomataState, _xmlBuf, _xmlDict, _xmlHashTable, _xmlStartTag,
+    _xmlValidState, _xmlXPathCompExpr,
+};
 
 extern "C" {
     fn xmlStrdup(cur: *const xmlChar) -> *mut xmlChar;

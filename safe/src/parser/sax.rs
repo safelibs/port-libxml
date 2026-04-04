@@ -1,16 +1,8 @@
 use crate::abi::opaque::{_xmlBuf, _xmlDict};
 
 extern "C" {
-    fn xmlParserError(
-        ctx: *mut ::core::ffi::c_void,
-        msg: *const ::core::ffi::c_char,
-        ...
-    );
-    fn xmlParserWarning(
-        ctx: *mut ::core::ffi::c_void,
-        msg: *const ::core::ffi::c_char,
-        ...
-    );
+    fn xmlParserError(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
+    fn xmlParserWarning(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
     fn xmlSAX2SetDocumentLocator(ctx: *mut ::core::ffi::c_void, loc: xmlSAXLocatorPtr);
     fn xmlSAX2IsStandalone(ctx: *mut ::core::ffi::c_void) -> ::core::ffi::c_int;
     fn xmlSAX2HasInternalSubset(ctx: *mut ::core::ffi::c_void) -> ::core::ffi::c_int;
@@ -27,10 +19,7 @@ extern "C" {
         ExternalID: *const xmlChar,
         SystemID: *const xmlChar,
     );
-    fn xmlSAX2GetEntity(
-        ctx: *mut ::core::ffi::c_void,
-        name: *const xmlChar,
-    ) -> xmlEntityPtr;
+    fn xmlSAX2GetEntity(ctx: *mut ::core::ffi::c_void, name: *const xmlChar) -> xmlEntityPtr;
     fn xmlSAX2GetParameterEntity(
         ctx: *mut ::core::ffi::c_void,
         name: *const xmlChar,
@@ -151,9 +140,8 @@ pub type xmlCharEncodingInputFunc = Option<
         *mut ::core::ffi::c_int,
     ) -> ::core::ffi::c_int,
 >;
-pub type xmlInputCloseCallback = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type xmlInputCloseCallback =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type xmlInputReadCallback = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -323,15 +311,10 @@ pub type externalSubsetSAXFunc = Option<
     ) -> (),
 >;
 pub type cdataBlockSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type getParameterEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getParameterEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type xmlEntityPtr = *mut xmlEntity;
 pub type xmlEntity = _xmlEntity;
 #[derive(Copy, Clone)]
@@ -364,74 +347,43 @@ pub const XML_INTERNAL_PARAMETER_ENTITY: xmlEntityType = 4;
 pub const XML_EXTERNAL_GENERAL_UNPARSED_ENTITY: xmlEntityType = 3;
 pub const XML_EXTERNAL_GENERAL_PARSED_ENTITY: xmlEntityType = 2;
 pub const XML_INTERNAL_GENERAL_ENTITY: xmlEntityType = 1;
-pub type fatalErrorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type errorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type warningSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> (),
->;
-pub type commentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type processingInstructionSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> (),
->;
+pub type fatalErrorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type errorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type warningSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const ::core::ffi::c_char, ...) -> ()>;
+pub type commentSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type processingInstructionSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> ()>;
 pub type ignorableWhitespaceSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
 pub type charactersSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        ::core::ffi::c_int,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, ::core::ffi::c_int) -> (),
 >;
-pub type referenceSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
-pub type endElementSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
->;
+pub type referenceSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
+pub type endElementSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> ()>;
 pub type startElementSAXFunc = Option<
-    unsafe extern "C" fn(
-        *mut ::core::ffi::c_void,
-        *const xmlChar,
-        *mut *const xmlChar,
-    ) -> (),
+    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *mut *const xmlChar) -> (),
 >;
-pub type endDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type startDocumentSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
->;
-pub type setDocumentLocatorSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
->;
+pub type endDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type startDocumentSAXFunc = Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ()>;
+pub type setDocumentLocatorSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> ()>;
 pub type xmlSAXLocatorPtr = *mut xmlSAXLocator;
 pub type xmlSAXLocator = _xmlSAXLocator;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct _xmlSAXLocator {
-    pub getPublicId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getSystemId: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-    >,
-    pub getLineNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
-    pub getColumnNumber: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-    >,
+    pub getPublicId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getSystemId: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>,
+    pub getLineNumber: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
+    pub getColumnNumber:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>,
 }
 pub type unparsedEntityDeclSAXFunc = Option<
     unsafe extern "C" fn(
@@ -510,9 +462,8 @@ pub type entityDeclSAXFunc = Option<
         *mut xmlChar,
     ) -> (),
 >;
-pub type getEntitySAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
->;
+pub type getEntitySAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr>;
 pub type resolveEntitySAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -520,15 +471,12 @@ pub type resolveEntitySAXFunc = Option<
         *const xmlChar,
     ) -> xmlParserInputPtr,
 >;
-pub type hasExternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type hasInternalSubsetSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
-pub type isStandaloneSAXFunc = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
->;
+pub type hasExternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type hasInternalSubsetSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+pub type isStandaloneSAXFunc =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
 pub type internalSubsetSAXFunc = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -570,9 +518,7 @@ pub struct _xmlSAXHandlerV1 {
     pub initialized: ::core::ffi::c_uint,
 }
 pub type xmlSAXHandlerV1 = _xmlSAXHandlerV1;
-pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 #[no_mangle]
 pub unsafe extern "C" fn initxmlDefaultSAXHandler(
     mut hdlr: *mut xmlSAXHandlerV1,
@@ -600,8 +546,7 @@ pub unsafe extern "C" fn initxmlDefaultSAXHandler(
             ) -> (),
     ) as externalSubsetSAXFunc;
     (*hdlr).isStandalone = Some(
-        xmlSAX2IsStandalone
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
+        xmlSAX2IsStandalone as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
     ) as isStandaloneSAXFunc;
     (*hdlr).hasInternalSubset = Some(
         xmlSAX2HasInternalSubset
@@ -621,17 +566,11 @@ pub unsafe extern "C" fn initxmlDefaultSAXHandler(
     ) as resolveEntitySAXFunc;
     (*hdlr).getEntity = Some(
         xmlSAX2GetEntity
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-            ) -> xmlEntityPtr,
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
     ) as getEntitySAXFunc;
     (*hdlr).getParameterEntity = Some(
         xmlSAX2GetParameterEntity
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-            ) -> xmlEntityPtr,
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
     ) as getParameterEntitySAXFunc;
     (*hdlr).entityDecl = Some(
         xmlSAX2EntityDecl
@@ -688,12 +627,12 @@ pub unsafe extern "C" fn initxmlDefaultSAXHandler(
         xmlSAX2SetDocumentLocator
             as unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
     ) as setDocumentLocatorSAXFunc;
-    (*hdlr).startDocument = Some(
-        xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as startDocumentSAXFunc;
-    (*hdlr).endDocument = Some(
-        xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as endDocumentSAXFunc;
+    (*hdlr).startDocument =
+        Some(xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as startDocumentSAXFunc;
+    (*hdlr).endDocument =
+        Some(xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as endDocumentSAXFunc;
     (*hdlr).startElement = Some(
         xmlSAX2StartElement
             as unsafe extern "C" fn(
@@ -703,12 +642,10 @@ pub unsafe extern "C" fn initxmlDefaultSAXHandler(
             ) -> (),
     ) as startElementSAXFunc;
     (*hdlr).endElement = Some(
-        xmlSAX2EndElement
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2EndElement as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as endElementSAXFunc;
     (*hdlr).reference = Some(
-        xmlSAX2Reference
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2Reference as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as referenceSAXFunc;
     (*hdlr).characters = Some(
         xmlSAX2Characters
@@ -736,11 +673,7 @@ pub unsafe extern "C" fn initxmlDefaultSAXHandler(
     ) as ignorableWhitespaceSAXFunc;
     (*hdlr).processingInstruction = Some(
         xmlSAX2ProcessingInstruction
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-                *const xmlChar,
-            ) -> (),
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> (),
     ) as processingInstructionSAXFunc;
     if warning == 0 as ::core::ffi::c_int {
         (*hdlr).warning = None;
@@ -793,10 +726,7 @@ pub unsafe extern "C" fn inithtmlDefaultSAXHandler(mut hdlr: *mut xmlSAXHandlerV
     (*hdlr).resolveEntity = None;
     (*hdlr).getEntity = Some(
         xmlSAX2GetEntity
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-            ) -> xmlEntityPtr,
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
     ) as getEntitySAXFunc;
     (*hdlr).getParameterEntity = None;
     (*hdlr).entityDecl = None;
@@ -808,12 +738,12 @@ pub unsafe extern "C" fn inithtmlDefaultSAXHandler(mut hdlr: *mut xmlSAXHandlerV
         xmlSAX2SetDocumentLocator
             as unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
     ) as setDocumentLocatorSAXFunc;
-    (*hdlr).startDocument = Some(
-        xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as startDocumentSAXFunc;
-    (*hdlr).endDocument = Some(
-        xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as endDocumentSAXFunc;
+    (*hdlr).startDocument =
+        Some(xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as startDocumentSAXFunc;
+    (*hdlr).endDocument =
+        Some(xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as endDocumentSAXFunc;
     (*hdlr).startElement = Some(
         xmlSAX2StartElement
             as unsafe extern "C" fn(
@@ -823,8 +753,7 @@ pub unsafe extern "C" fn inithtmlDefaultSAXHandler(mut hdlr: *mut xmlSAXHandlerV
             ) -> (),
     ) as startElementSAXFunc;
     (*hdlr).endElement = Some(
-        xmlSAX2EndElement
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2EndElement as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as endElementSAXFunc;
     (*hdlr).reference = None;
     (*hdlr).characters = Some(
@@ -853,15 +782,10 @@ pub unsafe extern "C" fn inithtmlDefaultSAXHandler(mut hdlr: *mut xmlSAXHandlerV
     ) as ignorableWhitespaceSAXFunc;
     (*hdlr).processingInstruction = Some(
         xmlSAX2ProcessingInstruction
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-                *const xmlChar,
-            ) -> (),
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar, *const xmlChar) -> (),
     ) as processingInstructionSAXFunc;
     (*hdlr).comment = Some(
-        xmlSAX2Comment
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2Comment as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as commentSAXFunc;
     (*hdlr).warning = Some(
         xmlParserWarning
@@ -905,8 +829,7 @@ pub unsafe extern "C" fn initdocbDefaultSAXHandler(mut hdlr: *mut xmlSAXHandlerV
     ) as internalSubsetSAXFunc;
     (*hdlr).externalSubset = None;
     (*hdlr).isStandalone = Some(
-        xmlSAX2IsStandalone
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
+        xmlSAX2IsStandalone as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
     ) as isStandaloneSAXFunc;
     (*hdlr).hasInternalSubset = Some(
         xmlSAX2HasInternalSubset
@@ -926,10 +849,7 @@ pub unsafe extern "C" fn initdocbDefaultSAXHandler(mut hdlr: *mut xmlSAXHandlerV
     ) as resolveEntitySAXFunc;
     (*hdlr).getEntity = Some(
         xmlSAX2GetEntity
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *const xmlChar,
-            ) -> xmlEntityPtr,
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> xmlEntityPtr,
     ) as getEntitySAXFunc;
     (*hdlr).getParameterEntity = None;
     (*hdlr).entityDecl = Some(
@@ -951,12 +871,12 @@ pub unsafe extern "C" fn initdocbDefaultSAXHandler(mut hdlr: *mut xmlSAXHandlerV
         xmlSAX2SetDocumentLocator
             as unsafe extern "C" fn(*mut ::core::ffi::c_void, xmlSAXLocatorPtr) -> (),
     ) as setDocumentLocatorSAXFunc;
-    (*hdlr).startDocument = Some(
-        xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as startDocumentSAXFunc;
-    (*hdlr).endDocument = Some(
-        xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> (),
-    ) as endDocumentSAXFunc;
+    (*hdlr).startDocument =
+        Some(xmlSAX2StartDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as startDocumentSAXFunc;
+    (*hdlr).endDocument =
+        Some(xmlSAX2EndDocument as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ())
+            as endDocumentSAXFunc;
     (*hdlr).startElement = Some(
         xmlSAX2StartElement
             as unsafe extern "C" fn(
@@ -966,12 +886,10 @@ pub unsafe extern "C" fn initdocbDefaultSAXHandler(mut hdlr: *mut xmlSAXHandlerV
             ) -> (),
     ) as startElementSAXFunc;
     (*hdlr).endElement = Some(
-        xmlSAX2EndElement
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2EndElement as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as endElementSAXFunc;
     (*hdlr).reference = Some(
-        xmlSAX2Reference
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2Reference as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as referenceSAXFunc;
     (*hdlr).characters = Some(
         xmlSAX2Characters
@@ -992,8 +910,7 @@ pub unsafe extern "C" fn initdocbDefaultSAXHandler(mut hdlr: *mut xmlSAXHandlerV
     ) as ignorableWhitespaceSAXFunc;
     (*hdlr).processingInstruction = None;
     (*hdlr).comment = Some(
-        xmlSAX2Comment
-            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
+        xmlSAX2Comment as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const xmlChar) -> (),
     ) as commentSAXFunc;
     (*hdlr).warning = Some(
         xmlParserWarning

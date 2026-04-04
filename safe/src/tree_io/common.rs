@@ -26,7 +26,10 @@ fn xz_budget_state() -> &'static Mutex<HashMap<usize, XzBudgetState>> {
 
 pub fn network_allowed() -> bool {
     match env::var(ALLOW_NETWORK_ENV) {
-        Ok(value) => matches!(value.to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on"),
+        Ok(value) => matches!(
+            value.to_ascii_lowercase().as_str(),
+            "1" | "true" | "yes" | "on"
+        ),
         Err(_) => false,
     }
 }

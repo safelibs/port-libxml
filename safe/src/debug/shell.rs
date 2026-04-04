@@ -193,7 +193,9 @@ unsafe fn c_string_lossy(ptr: *const c_char) -> String {
     if ptr.is_null() {
         String::new()
     } else {
-        unsafe { CStr::from_ptr(ptr) }.to_string_lossy().into_owned()
+        unsafe { CStr::from_ptr(ptr) }
+            .to_string_lossy()
+            .into_owned()
     }
 }
 
@@ -288,7 +290,12 @@ unsafe fn xml_shell_register_namespace(ctxt: xmlShellCtxtPtr, arg: &str) -> c_in
         let prefix = next;
         let eq = unsafe { strchr(next as *const c_char, b'=' as c_int) as *mut u8 };
         if eq.is_null() {
-            unsafe { write_file_str(output_or_stdout((*ctxt).output), "setns: prefix=[nsuri] required\n") };
+            unsafe {
+                write_file_str(
+                    output_or_stdout((*ctxt).output),
+                    "setns: prefix=[nsuri] required\n",
+                )
+            };
             return -1;
         }
         unsafe {
@@ -344,11 +351,7 @@ unsafe fn xml_shell_register_root_namespaces(ctxt: xmlShellCtxtPtr, root: xmlNod
         unsafe {
             if (*ns).prefix.is_null() {
                 let defaultns = b"defaultns\0";
-                let _ = xmlXPathRegisterNs(
-                    (*ctxt).pctxt,
-                    defaultns.as_ptr(),
-                    (*ns).href,
-                );
+                let _ = xmlXPathRegisterNs((*ctxt).pctxt, defaultns.as_ptr(), (*ns).href);
             } else {
                 let _ = xmlXPathRegisterNs((*ctxt).pctxt, (*ns).prefix, (*ns).href);
             }
@@ -369,7 +372,12 @@ unsafe fn xml_shell_set_content(ctxt: xmlShellCtxtPtr, value: &str, node: xmlNod
     let value = match CString::new(value) {
         Ok(value) => value,
         Err(_) => {
-            unsafe { write_file_str(output_or_stdout((*ctxt).output), "failed to parse content\n") };
+            unsafe {
+                write_file_str(
+                    output_or_stdout((*ctxt).output),
+                    "failed to parse content\n",
+                )
+            };
             return 0;
         }
     };
@@ -393,7 +401,12 @@ unsafe fn xml_shell_set_content(ctxt: xmlShellCtxtPtr, value: &str, node: xmlNod
             let _ = xmlAddChildList(node, results);
         }
     } else {
-        unsafe { write_file_str(output_or_stdout((*ctxt).output), "failed to parse content\n") };
+        unsafe {
+            write_file_str(
+                output_or_stdout((*ctxt).output),
+                "failed to parse content\n",
+            )
+        };
     }
     0
 }
@@ -410,12 +423,22 @@ unsafe fn xml_shell_grep(ctxt: xmlShellCtxtPtr, arg: &str, start: xmlNodePtr) ->
         let mut target = node;
         if node_type == crate::foundation::error::XML_COMMENT_NODE {
             let content = unsafe { (*node).content };
-            if !content.is_null() && unsafe { xml_string_lossy(content) }.as_bytes().windows(needle.len()).any(|w| w == needle) {
+            if !content.is_null()
+                && unsafe { xml_string_lossy(content) }
+                    .as_bytes()
+                    .windows(needle.len())
+                    .any(|w| w == needle)
+            {
                 matched = true;
             }
         } else if node_type == crate::foundation::error::XML_TEXT_NODE {
             let content = unsafe { (*node).content };
-            if !content.is_null() && unsafe { xml_string_lossy(content) }.as_bytes().windows(needle.len()).any(|w| w == needle) {
+            if !content.is_null()
+                && unsafe { xml_string_lossy(content) }
+                    .as_bytes()
+                    .windows(needle.len())
+                    .any(|w| w == needle)
+            {
                 matched = true;
                 target = unsafe { (*node).parent };
             }
@@ -424,7 +447,10 @@ unsafe fn xml_shell_grep(ctxt: xmlShellCtxtPtr, arg: &str, start: xmlNodePtr) ->
             let path = unsafe { xmlGetNodePath(target) };
             if !path.is_null() {
                 unsafe {
-                    write_file_str(output_or_stdout((*ctxt).output), &format!("{} : ", xml_string_lossy(path)));
+                    write_file_str(
+                        output_or_stdout((*ctxt).output),
+                        &format!("{} : ", xml_string_lossy(path)),
+                    );
                 }
                 unsafe { xmlFree.expect("non-null function pointer")(path as *mut c_void) };
             }
@@ -696,7 +722,12 @@ pub unsafe extern "C" fn xmlShellWrite(
 
     if unsafe { (*node).type_ } == crate::foundation::error::XML_DOCUMENT_NODE {
         if unsafe { xmlSaveFile(filename, (*ctxt).doc) } < 0 {
-            unsafe { write_error(&format!("Failed to write to {}\n", c_string_lossy(filename))) };
+            unsafe {
+                write_error(&format!(
+                    "Failed to write to {}\n",
+                    c_string_lossy(filename)
+                ))
+            };
             return -1;
         }
         return 0;
@@ -704,7 +735,12 @@ pub unsafe extern "C" fn xmlShellWrite(
 
     let out = unsafe { fopen_write(filename) };
     if out.is_null() {
-        unsafe { write_error(&format!("Failed to write to {}\n", c_string_lossy(filename))) };
+        unsafe {
+            write_error(&format!(
+                "Failed to write to {}\n",
+                c_string_lossy(filename)
+            ))
+        };
         return -1;
     }
     unsafe {
@@ -796,7 +832,10 @@ pub unsafe extern "C" fn xmlShellDu(
             unsafe {
                 write_file_str(output, &"  ".repeat(indent as usize));
                 if !(*node).ns.is_null() && !(*(*node).ns).prefix.is_null() {
-                    write_file_str(output, &format!("{}:", xml_string_lossy((*(*node).ns).prefix)));
+                    write_file_str(
+                        output,
+                        &format!("{}:", xml_string_lossy((*(*node).ns).prefix)),
+                    );
                 }
                 write_file_str(output, &format!("{}\n", xml_string_lossy((*node).name)));
             }
@@ -954,46 +993,92 @@ pub unsafe extern "C" fn xmlShell(
                 write_file_str(output, "\tsetbase URI  change the XML base of the node\n");
                 write_file_str(output, "\tbye          leave shell\n");
                 write_file_str(output, "\tcat [node]   display node or current node\n");
-                write_file_str(output, "\tcd [path]    change directory to path or to root\n");
+                write_file_str(
+                    output,
+                    "\tcd [path]    change directory to path or to root\n",
+                );
                 write_file_str(output, "\tdir [path]   dumps information about the node (namespace, attributes, content)\n");
                 write_file_str(output, "\tdu [path]    show the structure of the subtree under path or the current node\n");
                 write_file_str(output, "\texit         leave shell\n");
                 write_file_str(output, "\thelp         display this help\n");
                 write_file_str(output, "\tfree         display memory usage\n");
                 write_file_str(output, "\tload [name]  load a new document with name\n");
-                write_file_str(output, "\tls [path]    list contents of path or the current directory\n");
+                write_file_str(
+                    output,
+                    "\tls [path]    list contents of path or the current directory\n",
+                );
                 write_file_str(output, "\tset xml_fragment replace the current node content with the fragment parsed in context\n");
                 write_file_str(output, "\txpath expr   evaluate the XPath expression in that context and print the result\n");
                 write_file_str(output, "\tsetns nsreg  register a namespace to a prefix in the XPath evaluation context\n");
                 write_file_str(output, "\t             format for nsreg is: prefix=[nsuri] (i.e. prefix= unsets a prefix)\n");
-                write_file_str(output, "\tsetrootns    register all namespace found on the root element\n");
-                write_file_str(output, "\t             the default namespace if any uses 'defaultns' prefix\n");
+                write_file_str(
+                    output,
+                    "\tsetrootns    register all namespace found on the root element\n",
+                );
+                write_file_str(
+                    output,
+                    "\t             the default namespace if any uses 'defaultns' prefix\n",
+                );
                 write_file_str(output, "\tpwd          display current working directory\n");
-                write_file_str(output, "\twhereis      display absolute path of [path] or current working directory\n");
+                write_file_str(
+                    output,
+                    "\twhereis      display absolute path of [path] or current working directory\n",
+                );
                 write_file_str(output, "\tquit         leave shell\n");
-                write_file_str(output, "\tsave [name]  save this document to name or the original name\n");
-                write_file_str(output, "\twrite [name] write the current node to the filename\n");
+                write_file_str(
+                    output,
+                    "\tsave [name]  save this document to name or the original name\n",
+                );
+                write_file_str(
+                    output,
+                    "\twrite [name] write the current node to the filename\n",
+                );
                 write_file_str(output, "\tvalidate     check the document for errors\n");
-                write_file_str(output, "\tgrep string  search for a string in the subtree\n");
+                write_file_str(
+                    output,
+                    "\tgrep string  search for a string in the subtree\n",
+                );
             },
             "validate" => unsafe {
                 let carg = CString::new(arg.as_str()).ok();
-                xmlShellValidate(&mut ctxt, carg.as_ref().map_or(null_mut(), |s| s.as_ptr() as *mut c_char), null_mut(), null_mut());
+                xmlShellValidate(
+                    &mut ctxt,
+                    carg.as_ref()
+                        .map_or(null_mut(), |s| s.as_ptr() as *mut c_char),
+                    null_mut(),
+                    null_mut(),
+                );
             },
             "load" => unsafe {
                 if let Ok(carg) = CString::new(arg.as_str()) {
-                    let _ = xmlShellLoad(&mut ctxt, carg.as_ptr() as *mut c_char, null_mut(), null_mut());
+                    let _ = xmlShellLoad(
+                        &mut ctxt,
+                        carg.as_ptr() as *mut c_char,
+                        null_mut(),
+                        null_mut(),
+                    );
                 }
             },
             "save" => unsafe {
                 let carg = CString::new(arg.as_str()).ok();
-                let _ = xmlShellSave(&mut ctxt, carg.as_ref().map_or(null_mut(), |s| s.as_ptr() as *mut c_char), null_mut(), null_mut());
+                let _ = xmlShellSave(
+                    &mut ctxt,
+                    carg.as_ref()
+                        .map_or(null_mut(), |s| s.as_ptr() as *mut c_char),
+                    null_mut(),
+                    null_mut(),
+                );
             },
             "write" => unsafe {
                 if arg.is_empty() {
                     write_error("Write command requires a filename argument\n");
                 } else if let Ok(carg) = CString::new(arg.as_str()) {
-                    let _ = xmlShellWrite(&mut ctxt, carg.as_ptr() as *mut c_char, ctxt.node, null_mut());
+                    let _ = xmlShellWrite(
+                        &mut ctxt,
+                        carg.as_ptr() as *mut c_char,
+                        ctxt.node,
+                        null_mut(),
+                    );
                 }
             },
             "grep" => unsafe {
@@ -1086,9 +1171,19 @@ pub unsafe extern "C" fn xmlShell(
                                     for index in 0..(*set).nodeNr {
                                         let node = *(*set).nodeTab.add(index as usize);
                                         if show_dir {
-                                            let _ = xmlShellDir(&mut ctxt, null_mut(), node, null_mut());
+                                            let _ = xmlShellDir(
+                                                &mut ctxt,
+                                                null_mut(),
+                                                node,
+                                                null_mut(),
+                                            );
                                         } else {
-                                            let _ = xmlShellList(&mut ctxt, null_mut(), node, null_mut());
+                                            let _ = xmlShellList(
+                                                &mut ctxt,
+                                                null_mut(),
+                                                node,
+                                                null_mut(),
+                                            );
                                         }
                                     }
                                 }
@@ -1117,8 +1212,17 @@ pub unsafe extern "C" fn xmlShell(
                                 if !set.is_null() {
                                     for index in 0..(*set).nodeNr {
                                         let node = *(*set).nodeTab.add(index as usize);
-                                        if xmlShellPwd(&mut ctxt, dir.as_mut_ptr(), node, null_mut()) == 0 {
-                                            write_file_str(output, &format!("{}\n", c_string_lossy(dir.as_ptr())));
+                                        if xmlShellPwd(
+                                            &mut ctxt,
+                                            dir.as_mut_ptr(),
+                                            node,
+                                            null_mut(),
+                                        ) == 0
+                                        {
+                                            write_file_str(
+                                                output,
+                                                &format!("{}\n", c_string_lossy(dir.as_ptr())),
+                                            );
                                         }
                                     }
                                 }
@@ -1150,14 +1254,18 @@ pub unsafe extern "C" fn xmlShell(
                                     } else if (*set).nodeNr == 1 {
                                         let node = *(*set).nodeTab;
                                         if !node.is_null()
-                                            && (*node).type_ == crate::foundation::error::XML_NAMESPACE_DECL
+                                            && (*node).type_
+                                                == crate::foundation::error::XML_NAMESPACE_DECL
                                         {
                                             write_error("cannot cd to namespace\n");
                                         } else {
                                             ctxt.node = node;
                                         }
                                     } else {
-                                        write_error(&format!("{arg} is a {} Node Set\n", (*set).nodeNr));
+                                        write_error(&format!(
+                                            "{arg} is a {} Node Set\n",
+                                            (*set).nodeNr
+                                        ));
                                     }
                                 }
                                 other => xpath_type_error(&arg, other),
@@ -1185,7 +1293,8 @@ pub unsafe extern "C" fn xmlShell(
                                             write_file_str(output, " -------\n");
                                         }
                                         let node = *(*set).nodeTab.add(index as usize);
-                                        let _ = xmlShellCat(&mut ctxt, null_mut(), node, null_mut());
+                                        let _ =
+                                            xmlShellCat(&mut ctxt, null_mut(), node, null_mut());
                                     }
                                 }
                             }
