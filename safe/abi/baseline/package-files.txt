@@ -1,6 +1,5 @@
 # Canonical package-file baseline for the phase-1 replacement package set.
-# The three C package sections mirror the currently installed Ubuntu package paths.
-# The python3 section is derived from original/debian/python3-libxml2.install.
+# Derived from original/debian/*.install and *.manpages plus the materialized original build oracles.
 
 [libxml2]
 /usr/lib
@@ -63,17 +62,25 @@
 /usr/lib/x86_64-linux-gnu
 /usr/lib/x86_64-linux-gnu/libxml2.a
 /usr/lib/x86_64-linux-gnu/libxml2.so
+/usr/lib/x86_64-linux-gnu/pkgconfig
 /usr/lib/x86_64-linux-gnu/pkgconfig/libxml-2.0.pc
 /usr/lib/x86_64-linux-gnu/xml2Conf.sh
+/usr/share/aclocal
 /usr/share/aclocal/libxml2.m4
+/usr/share/man/man1
+/usr/share/man/man1/xml2-config.1.gz
+/usr/share/man/man3
+/usr/share/man/man3/libxml.3.gz
 
 [libxml2-utils]
 /usr/bin/xmlcatalog
 /usr/bin/xmllint
+/usr/share/man/man1
 /usr/share/man/man1/xmlcatalog.1.gz
 /usr/share/man/man1/xmllint.1.gz
 
 [python3-libxml2]
-/usr/lib/python3/dist-packages/libxml2.py
-/usr/lib/python3/dist-packages/drv_libxml2.py
-/usr/lib/python3/dist-packages/libxml2mod.cpython-312-x86_64-linux-gnu.so
+/usr/lib/python3.12/dist-packages
+/usr/lib/python3.12/dist-packages/drv_libxml2.py
+/usr/lib/python3.12/dist-packages/libxml2.py
+/usr/lib/python3.12/dist-packages/libxml2mod.so

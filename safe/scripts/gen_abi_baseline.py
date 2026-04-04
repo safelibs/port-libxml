@@ -88,13 +88,13 @@ def main() -> None:
         json.dumps(compile_enum_probe(ORIGINAL), indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    PKGCONFIG.write_text("-I/usr/include/libxml2 -lxml2\n", encoding="utf-8")
-    XML2_CONFIG.write_text("-I/usr/include/libxml2 -lxml2\n", encoding="utf-8")
+    PKGCONFIG.write_text(derive_pkgconfig_output(triplet), encoding="utf-8")
+    XML2_CONFIG.write_text(derive_xml2_config_output(triplet), encoding="utf-8")
     XML2CONF.write_text(
         normalize_xml2conf((ORIGINAL / "xml2Conf.sh").read_text(encoding="utf-8"), triplet),
         encoding="utf-8",
     )
-    SONAME.write_text("libxml2.so.2\n", encoding="utf-8")
+    SONAME.write_text(parse_soname(ORIGINAL / ".libs" / "libxml2.so.2.9.14"), encoding="utf-8")
     XMLLINT_HELP.write_text(
         normalize_help(run_capture([str(ORIGINAL / ".libs" / "xmllint"), "--help"])),
         encoding="utf-8",
@@ -144,6 +144,51 @@ def parse_version(path: Path) -> str:
         if line.startswith("Version:"):
             return line.split(":", 1)[1].strip()
     raise SystemExit("failed to locate version in libxml-2.0.pc")
+
+
+def parse_pc_fields(path: Path) -> dict[str, str]:
+    variables: dict[str, str] = {}
+    fields: dict[str, str] = {}
+
+    def expand(value: str) -> str:
+        previous = None
+        while previous != value:
+            previous = value
+            value = re.sub(r"\$\{([^}]+)\}", lambda match: variables.get(match.group(1), match.group(0)), value)
+        return value
+
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if re.match(r"^[A-Za-z_][A-Za-z0-9_]*=", line):
+            name, value = line.split("=", 1)
+            variables[name] = expand(value.strip())
+        elif ":" in line:
+            name, value = line.split(":", 1)
+            fields[name.strip()] = expand(value.strip())
+
+    return fields
+
+
+def normalize_command_output(text: str, triplet: str) -> str:
+    normalized = text.replace("/usr/local", "/usr").replace(f"/lib/{triplet}", "/lib")
+    tokens = [
+        token
+        for token in shlex.split(normalized)
+        if token not in {f"-L/usr/lib/{triplet}", "-L/usr/lib"}
+    ]
+    return (" ".join(tokens).strip() + "\n") if tokens else "\n"
+
+
+def derive_pkgconfig_output(triplet: str) -> str:
+    fields = parse_pc_fields(ORIGINAL / "libxml-2.0.pc")
+    return normalize_command_output(f"{fields.get('Cflags', '')} {fields.get('Libs', '')}", triplet)
+
+
+def derive_xml2_config_output(triplet: str) -> str:
+    output = subprocess.check_output([str(ORIGINAL / "xml2-config"), "--cflags", "--libs"], text=True)
+    return normalize_command_output(output, triplet)
 
 
 def compile_layout_probe(original_root: Path, stage_root: Path | None) -> dict[str, object]:
@@ -249,73 +294,30 @@ def normalize_xml2conf(text: str, triplet: str) -> str:
     return normalize_help(normalized)
 
 
+def parse_soname(path: Path) -> str:
+    output = subprocess.check_output(["readelf", "-d", str(path)], text=True)
+    match = re.search(r"\(SONAME\).*Library soname: \[(.+)\]", output)
+    if not match:
+        raise SystemExit(f"failed to locate SONAME in {path}")
+    return match.group(1) + "\n"
+
+
 def run_capture(argv: list[str]) -> str:
     process = subprocess.run(argv, check=False, text=True, capture_output=True)
     return process.stdout + process.stderr
 
 
 def package_file_manifest(triplet: str, version: str) -> str:
-    sections: list[tuple[str, list[str]]] = []
-    sections.append(
-        (
-            "libxml2",
-            [
-                "/usr/lib",
-                f"/usr/lib/{triplet}",
-                f"/usr/lib/{triplet}/libxml2.so.2",
-                f"/usr/lib/{triplet}/libxml2.so.{version}",
-            ],
-        )
-    )
-    sections.append(
-        (
-            "libxml2-dev",
-            sorted(
-                [
-                    "/usr/bin/xml2-config",
-                    "/usr/include/libxml2",
-                    "/usr/include/libxml2/libxml",
-                    "/usr/lib",
-                    f"/usr/lib/{triplet}",
-                    f"/usr/lib/{triplet}/libxml2.a",
-                    f"/usr/lib/{triplet}/libxml2.so",
-                    f"/usr/lib/{triplet}/pkgconfig/libxml-2.0.pc",
-                    f"/usr/lib/{triplet}/xml2Conf.sh",
-                    "/usr/share/aclocal/libxml2.m4",
-                ]
-                + [
-                    f"/usr/include/libxml2/libxml/{header.name}"
-                    for header in sorted((ORIGINAL / "include" / "libxml").glob("*.h"))
-                ]
-            ),
-        )
-    )
-    sections.append(
-        (
-            "libxml2-utils",
-            [
-                "/usr/bin/xmlcatalog",
-                "/usr/bin/xmllint",
-                "/usr/share/man/man1/xmlcatalog.1.gz",
-                "/usr/share/man/man1/xmllint.1.gz",
-            ],
-        )
-    )
-    sections.append(
-        (
-            "python3-libxml2",
-            [
-                "/usr/lib/python3/dist-packages/libxml2.py",
-                "/usr/lib/python3/dist-packages/drv_libxml2.py",
-                f"/usr/lib/python3/dist-packages/libxml2mod.cpython-{python_abi_tag()}-x86_64-linux-gnu.so",
-            ],
-        )
-    )
+    sections = [
+        ("libxml2", derive_package_entries("libxml2", triplet, version)),
+        ("libxml2-dev", derive_package_entries("libxml2-dev", triplet, version)),
+        ("libxml2-utils", derive_package_entries("libxml2-utils", triplet, version)),
+        ("python3-libxml2", derive_package_entries("python3-libxml2", triplet, version)),
+    ]
 
     lines = [
         "# Canonical package-file baseline for the phase-1 replacement package set.",
-        "# The three C package sections mirror the currently installed Ubuntu package paths.",
-        "# The python3 section is derived from original/debian/python3-libxml2.install.",
+        "# Derived from original/debian/*.install and *.manpages plus the materialized original build oracles.",
         "",
     ]
     for name, entries in sections:
@@ -325,10 +327,110 @@ def package_file_manifest(triplet: str, version: str) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def python_abi_tag() -> str:
-    import sys
+def derive_package_entries(package: str, triplet: str, version: str) -> list[str]:
+    entries: list[str] = []
+    install_manifest = ORIGINAL / "debian" / f"{package}.install"
+    for line in read_manifest_lines(install_manifest):
+        entries.extend(resolve_install_entry(package, line, triplet, version))
+    manpages = ORIGINAL / "debian" / f"{package}.manpages"
+    if manpages.exists():
+        for line in read_manifest_lines(manpages):
+            entries.extend(resolve_manpage_entry(line))
+    return sorted(dict.fromkeys(entries))
 
-    return f"{sys.version_info.major}{sys.version_info.minor}"
+
+def read_manifest_lines(path: Path) -> list[str]:
+    return [
+        line.strip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.lstrip().startswith("#")
+    ]
+
+
+def resolve_install_entry(package: str, line: str, triplet: str, version: str) -> list[str]:
+    if package == "libxml2" and line == "usr/lib/*/libxml2.so.*":
+        shared_names = sorted(
+            path.name
+            for path in (ORIGINAL / ".libs").iterdir()
+            if re.fullmatch(r"libxml2\.so\.\d+(?:\.\d+)*", path.name)
+        )
+        return ["/usr/lib", f"/usr/lib/{triplet}"] + [f"/usr/lib/{triplet}/{name}" for name in shared_names]
+
+    if package == "libxml2-dev" and line == "usr/bin/xml2-config":
+        return ["/usr/bin/xml2-config"]
+    if package == "libxml2-dev" and line == "usr/include/libxml2":
+        headers = [
+            f"/usr/include/libxml2/libxml/{header.name}"
+            for header in sorted((ORIGINAL / "include" / "libxml").glob("*.h"))
+        ]
+        return ["/usr/include/libxml2", "/usr/include/libxml2/libxml"] + headers
+    if package == "libxml2-dev" and line == "usr/lib/*/libxml2.a":
+        return ["/usr/lib", f"/usr/lib/{triplet}", f"/usr/lib/{triplet}/libxml2.a"]
+    if package == "libxml2-dev" and line == "usr/lib/*/libxml2.so":
+        return ["/usr/lib", f"/usr/lib/{triplet}", f"/usr/lib/{triplet}/libxml2.so"]
+    if package == "libxml2-dev" and line == "usr/lib/*/pkgconfig":
+        return [f"/usr/lib/{triplet}/pkgconfig", f"/usr/lib/{triplet}/pkgconfig/libxml-2.0.pc"]
+    if package == "libxml2-dev" and line == "usr/lib/*/xml2Conf.sh":
+        return [f"/usr/lib/{triplet}/xml2Conf.sh"]
+    if package == "libxml2-dev" and line == "usr/share/aclocal":
+        return ["/usr/share/aclocal", "/usr/share/aclocal/libxml2.m4"]
+
+    if package == "libxml2-utils" and line == "usr/bin/xmlcatalog":
+        return ["/usr/bin/xmlcatalog"]
+    if package == "libxml2-utils" and line == "usr/bin/xmllint":
+        return ["/usr/bin/xmllint"]
+
+    if package == "python3-libxml2" and line == "usr/lib/python3*/*-packages/*.py*":
+        python_dir = python_install_dir()
+        return [python_dir] + [f"{python_dir}/{name}" for name in parse_makefile_words(ORIGINAL / "python" / "Makefile.am", "dist_python_DATA")]
+    if package == "python3-libxml2" and line == "usr/lib/python3*/*-packages/*.so":
+        python_dir = python_install_dir()
+        module_names = sorted(path.name for path in (ORIGINAL / "python" / ".libs").glob("libxml2mod*.so"))
+        if not module_names:
+            module_names = [Path(name).stem + ".so" for name in parse_makefile_words(ORIGINAL / "python" / "Makefile.am", "python_LTLIBRARIES")]
+        return [python_dir] + [f"{python_dir}/{name}" for name in module_names]
+
+    raise SystemExit(f"unhandled install manifest entry {package}: {line}")
+
+
+def resolve_manpage_entry(line: str) -> list[str]:
+    path = "/" + line
+    if not path.endswith(".gz"):
+        path += ".gz"
+    return [str(Path(path).parent), path]
+
+
+def python_install_dir() -> str:
+    text = (ORIGINAL / "python" / "Makefile").read_text(encoding="utf-8")
+    match = re.search(r"^PYTHON_SITE_PACKAGES\s*=\s*(.+)$", text, re.M)
+    if not match:
+        raise SystemExit("failed to determine Python install dir from original/python/Makefile")
+    value = match.group(1).strip()
+    value = value.replace("${exec_prefix}", "/usr").replace("${prefix}", "/usr")
+    value = value.replace("/usr/local", "/usr").replace("site-packages", "dist-packages")
+    return value
+
+
+def parse_makefile_words(path: Path, variable: str) -> list[str]:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    chunks: list[str] = []
+    collecting = False
+    for raw_line in lines:
+        line = raw_line.split("#", 1)[0].rstrip()
+        if not collecting:
+            match = re.match(rf"^{re.escape(variable)}\s*=\s*(.*)$", line)
+            if not match:
+                continue
+            chunk = match.group(1).strip()
+            collecting = True
+        else:
+            chunk = line.strip()
+        if chunk.endswith("\\"):
+            chunks.append(chunk[:-1].strip())
+            continue
+        chunks.append(chunk)
+        break
+    return [word for word in " ".join(chunks).split() if word]
 
 
 if __name__ == "__main__":

@@ -77,3 +77,5 @@ original/xstc/ms-test.py
 original/xstc/nist-test.py
 original/xstc/sun-test.py
 safe/target/
+safe/Cargo.lock
+safe/**/__pycache__/
