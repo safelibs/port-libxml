@@ -1,0 +1,242 @@
+version = 1
+config_header = "include/config.h"
+private_include_dir = "../original"
+public_include_dir = "../original/include"
+version_script = "abi/libxml2.syms"
+shared_object_version = "2.9.14"
+link_libs = ["z", "lzma", "m", "dl", "pthread"]
+private_headers = [
+  "config.h",
+  "libxml.h",
+  "buf.h",
+  "enc.h",
+  "save.h",
+  "xzlib.h",
+  "elfgcchack.h",
+]
+
+[[module]]
+name = "buf"
+source = "../original/buf.c"
+provider = "c_fallback"
+
+[[module]]
+name = "c14n"
+source = "../original/c14n.c"
+provider = "c_fallback"
+
+[[module]]
+name = "catalog"
+source = "../original/catalog.c"
+provider = "c_fallback"
+
+[[module]]
+name = "chvalid"
+source = "../original/chvalid.c"
+provider = "c_fallback"
+
+[[module]]
+name = "debugXML"
+source = "../original/debugXML.c"
+provider = "c_fallback"
+
+[[module]]
+name = "dict"
+source = "../original/dict.c"
+provider = "c_fallback"
+
+[[module]]
+name = "DOCBparser"
+source = "../original/DOCBparser.c"
+provider = "c_fallback"
+enabled = false
+
+[[module]]
+name = "encoding"
+source = "../original/encoding.c"
+provider = "c_fallback"
+
+[[module]]
+name = "entities"
+source = "../original/entities.c"
+provider = "c_fallback"
+
+[[module]]
+name = "error"
+source = "../original/error.c"
+provider = "c_fallback"
+
+[[module]]
+name = "globals"
+source = "../original/globals.c"
+provider = "c_fallback"
+
+[[module]]
+name = "hash"
+source = "../original/hash.c"
+provider = "c_fallback"
+
+[[module]]
+name = "HTMLparser"
+source = "../original/HTMLparser.c"
+provider = "c_fallback"
+
+[[module]]
+name = "HTMLtree"
+source = "../original/HTMLtree.c"
+provider = "c_fallback"
+
+[[module]]
+name = "legacy"
+source = "../original/legacy.c"
+provider = "c_fallback"
+
+[[module]]
+name = "list"
+source = "../original/list.c"
+provider = "c_fallback"
+
+[[module]]
+name = "nanoftp"
+source = "../original/nanoftp.c"
+provider = "c_fallback"
+
+[[module]]
+name = "nanohttp"
+source = "../original/nanohttp.c"
+provider = "c_fallback"
+
+[[module]]
+name = "parser"
+source = "../original/parser.c"
+provider = "c_fallback"
+
+[[module]]
+name = "parserInternals"
+source = "../original/parserInternals.c"
+provider = "c_fallback"
+
+[[module]]
+name = "pattern"
+source = "../original/pattern.c"
+provider = "c_fallback"
+
+[[module]]
+name = "relaxng"
+source = "../original/relaxng.c"
+provider = "c_fallback"
+
+[[module]]
+name = "SAX"
+source = "../original/SAX.c"
+provider = "c_fallback"
+
+[[module]]
+name = "SAX2"
+source = "../original/SAX2.c"
+provider = "c_fallback"
+
+[[module]]
+name = "schematron"
+source = "../original/schematron.c"
+provider = "c_fallback"
+
+[[module]]
+name = "threads"
+source = "../original/threads.c"
+provider = "c_fallback"
+
+[[module]]
+name = "tree"
+source = "../original/tree.c"
+provider = "c_fallback"
+
+[[module]]
+name = "uri"
+source = "../original/uri.c"
+provider = "c_fallback"
+
+[[module]]
+name = "valid"
+source = "../original/valid.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xinclude"
+source = "../original/xinclude.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xlink"
+source = "../original/xlink.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlIO"
+source = "../original/xmlIO.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlmemory"
+source = "../original/xmlmemory.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlmodule"
+source = "../original/xmlmodule.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlreader"
+source = "../original/xmlreader.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlregexp"
+source = "../original/xmlregexp.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlsave"
+source = "../original/xmlsave.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlschemas"
+source = "../original/xmlschemas.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlschemastypes"
+source = "../original/xmlschemastypes.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlstring"
+source = "../original/xmlstring.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlunicode"
+source = "../original/xmlunicode.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xmlwriter"
+source = "../original/xmlwriter.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xpath"
+source = "../original/xpath.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xpointer"
+source = "../original/xpointer.c"
+provider = "c_fallback"
+
+[[module]]
+name = "xzlib"
+source = "../original/xzlib.c"
+provider = "c_fallback"

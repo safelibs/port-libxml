@@ -3,6 +3,7 @@ set -euo pipefail
 
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 IMAGE_TAG="${LIBXML_ORIGINAL_TEST_IMAGE:-libxml-original-test:ubuntu24.04}"
+PACKAGE_MODE="${LIBXML_PACKAGE_MODE:-original}"
 BUILD_CONTEXT="$(mktemp -d)"
 
 cleanup() {
@@ -157,10 +158,20 @@ build_original_libxml() {
   cd /
 }
 
+expected_libxml2_path() {
+  if [[ "$PACKAGE_MODE" == "safe" ]]; then
+    dpkg-query -L libxml2 | grep '/libxml2\.so\.2$' | head -n 1
+  else
+    printf '/usr/local/lib/libxml2.so.2\n'
+  fi
+}
+
 assert_original_libxml_is_used() {
   log_step "Verifying dynamic linker preference"
+  local expected
+  expected="$(expected_libxml2_path)"
   ldd "$(command -v xmlstarlet)" > /tmp/xmlstarlet-ldd.log
-  require_contains /tmp/xmlstarlet-ldd.log "/usr/local/lib/libxml2.so.2"
+  require_contains /tmp/xmlstarlet-ldd.log "$expected"
 }
 
 test_libvirt_daemon() {
