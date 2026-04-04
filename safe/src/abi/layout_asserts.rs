@@ -1,9 +1,9 @@
 use core::mem::{offset_of, size_of};
 
 use super::types::{
-    xmlAttr, xmlAttribute, xmlBuffer, xmlDoc, xmlDtd, xmlEntity, xmlError, xmlGlobalState,
-    xmlNode, xmlParserCtxt, xmlParserInputBuffer, xmlValidCtxt, xmlXPathContext, xmlXPathObject,
-    xmlOutputBuffer,
+    xmlAttr, xmlAttribute, xmlBuffer, xmlDoc, xmlDtd, xmlEntity, xmlError, xmlGlobalState, xmlNode,
+    xmlOutputBuffer, xmlParserCtxt, xmlParserInputBuffer, xmlValidCtxt, xmlXPathContext,
+    xmlXPathObject,
 };
 
 macro_rules! assert_size {

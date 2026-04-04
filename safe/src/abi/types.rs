@@ -11,8 +11,7 @@ pub type xmlFreeFunc = Option<unsafe extern "C" fn(*mut c_void)>;
 pub type xmlMallocFunc = Option<unsafe extern "C" fn(usize) -> *mut c_void>;
 pub type xmlReallocFunc = Option<unsafe extern "C" fn(*mut c_void, usize) -> *mut c_void>;
 pub type xmlStrdupFunc = Option<unsafe extern "C" fn(*const c_char) -> *mut c_char>;
-pub type xmlGenericErrorFunc =
-    Option<unsafe extern "C" fn(*mut c_void, *const c_char, ...)>;
+pub type xmlGenericErrorFunc = Option<unsafe extern "C" fn(*mut c_void, *const c_char, ...)>;
 pub type xmlStructuredErrorFunc = Option<unsafe extern "C" fn(*mut c_void, *mut xmlError)>;
 
 #[repr(C)]

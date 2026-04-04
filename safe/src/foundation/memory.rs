@@ -396,8 +396,8 @@ pub unsafe extern "C" fn xmlReallocLoc(
         unsafe { xmlInitMemory() };
     }
     p = unsafe {
-        (ptr as *mut ::core::ffi::c_char).offset(-(RESERVE_SIZE as isize)) as *mut ::core::ffi::c_void
-            as *mut MEMHDR
+        (ptr as *mut ::core::ffi::c_char).offset(-(RESERVE_SIZE as isize))
+            as *mut ::core::ffi::c_void as *mut MEMHDR
     };
     number = unsafe { (*p).mh_number };
     if xml_mem_stop_at_block() as ::core::ffi::c_ulong == number {
@@ -527,7 +527,9 @@ pub unsafe extern "C" fn xmlMemFree(mut ptr: *mut ::core::ffi::c_void) {
                     (*p).mh_size,
                 );
                 xmlMutexLock(xml_mem_mutex());
-                set_debug_mem_size(debug_mem_size().wrapping_sub((*p).mh_size as ::core::ffi::c_ulong));
+                set_debug_mem_size(
+                    debug_mem_size().wrapping_sub((*p).mh_size as ::core::ffi::c_ulong),
+                );
                 set_debug_mem_blocks(debug_mem_blocks().wrapping_sub(1));
                 xmlMutexUnlock(xml_mem_mutex());
                 free(p as *mut ::core::ffi::c_void);
@@ -726,9 +728,8 @@ pub unsafe extern "C" fn xmlInitMemory() -> ::core::ffi::c_int {
     }
     set_xml_mem_initialized(1 as ::core::ffi::c_int);
     unsafe { set_xml_mem_mutex(xmlNewMutex()) };
-    breakpoint = unsafe {
-        getenv(b"XML_MEM_BREAKPOINT\0" as *const u8 as *const ::core::ffi::c_char)
-    };
+    breakpoint =
+        unsafe { getenv(b"XML_MEM_BREAKPOINT\0" as *const u8 as *const ::core::ffi::c_char) };
     if !breakpoint.is_null() {
         unsafe {
             sscanf(
@@ -738,8 +739,7 @@ pub unsafe extern "C" fn xmlInitMemory() -> ::core::ffi::c_int {
             );
         }
     }
-    breakpoint =
-        unsafe { getenv(b"XML_MEM_TRACE\0" as *const u8 as *const ::core::ffi::c_char) };
+    breakpoint = unsafe { getenv(b"XML_MEM_TRACE\0" as *const u8 as *const ::core::ffi::c_char) };
     if !breakpoint.is_null() {
         unsafe {
             sscanf(

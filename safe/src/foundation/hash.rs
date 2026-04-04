@@ -154,6 +154,86 @@ unsafe extern "C" fn xmlHashComputeKey(
     }
     return value.wrapping_rem(unsafe { (*table).size as ::core::ffi::c_ulong });
 }
+#[inline]
+fn hash_mix_step(value: ::core::ffi::c_ulong, ch: ::core::ffi::c_ulong) -> ::core::ffi::c_ulong {
+    value
+        ^ (value << 5 as ::core::ffi::c_int)
+            .wrapping_add(value >> 3 as ::core::ffi::c_int)
+            .wrapping_add(ch)
+}
+#[inline]
+fn hash_mix_finalize(value: ::core::ffi::c_ulong) -> ::core::ffi::c_ulong {
+    value ^ (value << 5 as ::core::ffi::c_int).wrapping_add(value >> 3 as ::core::ffi::c_int)
+}
+#[inline]
+fn hash_mix_cstr(mut value: ::core::ffi::c_ulong, mut ptr: *const xmlChar) -> ::core::ffi::c_ulong {
+    while !ptr.is_null() {
+        let ch = unsafe { *ptr as ::core::ffi::c_ulong };
+        if ch == 0 as ::core::ffi::c_ulong {
+            break;
+        }
+        value = hash_mix_step(value, ch);
+        ptr = unsafe { ptr.offset(1) };
+    }
+    value
+}
+#[inline]
+fn hash_bucket_entry(table: &xmlHashTable, key: ::core::ffi::c_ulong) -> xmlHashEntryPtr {
+    unsafe { table.table.offset(key as isize) as xmlHashEntryPtr }
+}
+#[inline]
+fn hash_entry_next(entry: xmlHashEntryPtr) -> xmlHashEntryPtr {
+    unsafe { (*entry).next as xmlHashEntryPtr }
+}
+#[inline]
+fn hash_entry_valid(entry: xmlHashEntryPtr) -> bool {
+    unsafe { (*entry).valid != 0 as ::core::ffi::c_int }
+}
+#[inline]
+fn hash_entry_payload(entry: xmlHashEntryPtr) -> *mut ::core::ffi::c_void {
+    unsafe { (*entry).payload }
+}
+#[inline]
+fn hash_entry_name(entry: xmlHashEntryPtr) -> *const xmlChar {
+    unsafe { (*entry).name }
+}
+#[inline]
+fn hash_entry_name2(entry: xmlHashEntryPtr) -> *const xmlChar {
+    unsafe { (*entry).name2 }
+}
+#[inline]
+fn hash_entry_name3(entry: xmlHashEntryPtr) -> *const xmlChar {
+    unsafe { (*entry).name3 }
+}
+#[inline]
+fn hash_entry_matches_qname(
+    entry: xmlHashEntryPtr,
+    prefix: *const xmlChar,
+    name: *const xmlChar,
+    prefix2: *const xmlChar,
+    name2: *const xmlChar,
+    prefix3: *const xmlChar,
+    name3: *const xmlChar,
+) -> bool {
+    unsafe {
+        xmlStrQEqual(prefix, name, (*entry).name) != 0
+            && xmlStrQEqual(prefix2, name2, (*entry).name2) != 0
+            && xmlStrQEqual(prefix3, name3, (*entry).name3) != 0
+    }
+}
+#[inline]
+fn hash_entry_matches_str(
+    entry: xmlHashEntryPtr,
+    name: *const xmlChar,
+    name2: *const xmlChar,
+    name3: *const xmlChar,
+) -> bool {
+    unsafe {
+        xmlStrEqual((*entry).name, name) != 0
+            && xmlStrEqual((*entry).name2, name2) != 0
+            && xmlStrEqual((*entry).name3, name3) != 0
+    }
+}
 unsafe extern "C" fn xmlHashComputeQKey(
     mut table: xmlHashTablePtr,
     mut prefix: *const xmlChar,
@@ -162,144 +242,74 @@ unsafe extern "C" fn xmlHashComputeQKey(
     mut name2: *const xmlChar,
     mut prefix3: *const xmlChar,
     mut name3: *const xmlChar,
-) -> ::core::ffi::c_ulong { unsafe {
-    let mut value: ::core::ffi::c_ulong = 0 as ::core::ffi::c_ulong;
-    let mut ch: ::core::ffi::c_ulong = 0;
-    value = (*table).random_seed as ::core::ffi::c_ulong;
+) -> ::core::ffi::c_ulong {
+    let table_ref = unsafe { &*table };
+    let mut value = table_ref.random_seed as ::core::ffi::c_ulong;
     if !prefix.is_null() {
         value = value.wrapping_add(
-            (30 as ::core::ffi::c_int * *prefix as ::core::ffi::c_int) as ::core::ffi::c_ulong,
+            (30 as ::core::ffi::c_int as ::core::ffi::c_ulong)
+                .wrapping_mul(unsafe { *prefix as ::core::ffi::c_ulong }),
         );
     } else {
         value = value.wrapping_add(
-            (30 as ::core::ffi::c_int * *name as ::core::ffi::c_int) as ::core::ffi::c_ulong,
+            (30 as ::core::ffi::c_int as ::core::ffi::c_ulong)
+                .wrapping_mul(unsafe { *name as ::core::ffi::c_ulong }),
         );
     }
     if !prefix.is_null() {
-        loop {
-            let fresh6 = prefix;
-            prefix = prefix.offset(1);
-            ch = *fresh6 as ::core::ffi::c_ulong;
-            if !(ch != 0 as ::core::ffi::c_ulong) {
-                break;
-            }
-            value = value
-                ^ (value << 5 as ::core::ffi::c_int)
-                    .wrapping_add(value >> 3 as ::core::ffi::c_int)
-                    .wrapping_add(ch);
-        }
-        value = value
-            ^ (value << 5 as ::core::ffi::c_int)
-                .wrapping_add(value >> 3 as ::core::ffi::c_int)
-                .wrapping_add(':' as i32 as ::core::ffi::c_ulong);
+        value = hash_mix_cstr(value, prefix);
+        value = hash_mix_step(value, ':' as i32 as ::core::ffi::c_ulong);
     }
     if !name.is_null() {
-        loop {
-            let fresh7 = name;
-            name = name.offset(1);
-            ch = *fresh7 as ::core::ffi::c_ulong;
-            if !(ch != 0 as ::core::ffi::c_ulong) {
-                break;
-            }
-            value = value
-                ^ (value << 5 as ::core::ffi::c_int)
-                    .wrapping_add(value >> 3 as ::core::ffi::c_int)
-                    .wrapping_add(ch);
-        }
+        value = hash_mix_cstr(value, name);
     }
-    value =
-        value ^ (value << 5 as ::core::ffi::c_int).wrapping_add(value >> 3 as ::core::ffi::c_int);
+    value = hash_mix_finalize(value);
     if !prefix2.is_null() {
-        loop {
-            let fresh8 = prefix2;
-            prefix2 = prefix2.offset(1);
-            ch = *fresh8 as ::core::ffi::c_ulong;
-            if !(ch != 0 as ::core::ffi::c_ulong) {
-                break;
-            }
-            value = value
-                ^ (value << 5 as ::core::ffi::c_int)
-                    .wrapping_add(value >> 3 as ::core::ffi::c_int)
-                    .wrapping_add(ch);
-        }
-        value = value
-            ^ (value << 5 as ::core::ffi::c_int)
-                .wrapping_add(value >> 3 as ::core::ffi::c_int)
-                .wrapping_add(':' as i32 as ::core::ffi::c_ulong);
+        value = hash_mix_cstr(value, prefix2);
+        value = hash_mix_step(value, ':' as i32 as ::core::ffi::c_ulong);
     }
     if !name2.is_null() {
-        loop {
-            let fresh9 = name2;
-            name2 = name2.offset(1);
-            ch = *fresh9 as ::core::ffi::c_ulong;
-            if !(ch != 0 as ::core::ffi::c_ulong) {
-                break;
-            }
-            value = value
-                ^ (value << 5 as ::core::ffi::c_int)
-                    .wrapping_add(value >> 3 as ::core::ffi::c_int)
-                    .wrapping_add(ch);
-        }
+        value = hash_mix_cstr(value, name2);
     }
-    value =
-        value ^ (value << 5 as ::core::ffi::c_int).wrapping_add(value >> 3 as ::core::ffi::c_int);
+    value = hash_mix_finalize(value);
     if !prefix3.is_null() {
-        loop {
-            let fresh10 = prefix3;
-            prefix3 = prefix3.offset(1);
-            ch = *fresh10 as ::core::ffi::c_ulong;
-            if !(ch != 0 as ::core::ffi::c_ulong) {
-                break;
-            }
-            value = value
-                ^ (value << 5 as ::core::ffi::c_int)
-                    .wrapping_add(value >> 3 as ::core::ffi::c_int)
-                    .wrapping_add(ch);
-        }
-        value = value
-            ^ (value << 5 as ::core::ffi::c_int)
-                .wrapping_add(value >> 3 as ::core::ffi::c_int)
-                .wrapping_add(':' as i32 as ::core::ffi::c_ulong);
+        value = hash_mix_cstr(value, prefix3);
+        value = hash_mix_step(value, ':' as i32 as ::core::ffi::c_ulong);
     }
     if !name3.is_null() {
-        loop {
-            let fresh11 = name3;
-            name3 = name3.offset(1);
-            ch = *fresh11 as ::core::ffi::c_ulong;
-            if !(ch != 0 as ::core::ffi::c_ulong) {
-                break;
-            }
-            value = value
-                ^ (value << 5 as ::core::ffi::c_int)
-                    .wrapping_add(value >> 3 as ::core::ffi::c_int)
-                    .wrapping_add(ch);
-        }
+        value = hash_mix_cstr(value, name3);
     }
-    return value.wrapping_rem((*table).size as ::core::ffi::c_ulong);
-}}
+    return value.wrapping_rem(table_ref.size as ::core::ffi::c_ulong);
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashCreate(mut size: ::core::ffi::c_int) -> xmlHashTablePtr {
     let mut table: xmlHashTablePtr = ::core::ptr::null_mut::<xmlHashTable>();
     if size <= 0 as ::core::ffi::c_int {
         size = 256 as ::core::ffi::c_int;
     }
-    table = unsafe { xmlMalloc.expect("non-null function pointer")(
-        ::core::mem::size_of::<xmlHashTable>() as size_t
-    ) as xmlHashTablePtr };
+    table = unsafe {
+        xmlMalloc.expect("non-null function pointer")(
+            ::core::mem::size_of::<xmlHashTable>() as size_t
+        ) as xmlHashTablePtr
+    };
     if !table.is_null() {
         let table_ref = unsafe { &mut *table };
         table_ref.dict = ::core::ptr::null_mut::<xmlDict>();
         table_ref.size = size;
         table_ref.nbElems = 0 as ::core::ffi::c_int;
-        table_ref.table = unsafe { xmlMalloc.expect("non-null function pointer")(
-            (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
-        ) as *mut _xmlHashEntry };
-        if !table_ref.table.is_null() {
-            unsafe { memset(
-                table_ref.table as *mut ::core::ffi::c_void,
-                0 as ::core::ffi::c_int,
+        table_ref.table = unsafe {
+            xmlMalloc.expect("non-null function pointer")(
                 (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
-            ) };
+            ) as *mut _xmlHashEntry
+        };
+        if !table_ref.table.is_null() {
+            unsafe {
+                memset(
+                    table_ref.table as *mut ::core::ffi::c_void,
+                    0 as ::core::ffi::c_int,
+                    (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
+                )
+            };
             table_ref.random_seed = unsafe { __xmlRandom() };
             return table;
         }
@@ -337,17 +347,21 @@ unsafe extern "C" fn xmlHashGrow(
     if oldtable.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    let newtable = unsafe { xmlMalloc.expect("non-null function pointer")(
-        (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
-    ) as *mut _xmlHashEntry };
+    let newtable = unsafe {
+        xmlMalloc.expect("non-null function pointer")(
+            (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
+        ) as *mut _xmlHashEntry
+    };
     if newtable.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    unsafe { memset(
-        newtable as *mut ::core::ffi::c_void,
-        0 as ::core::ffi::c_int,
-        (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
-    ) };
+    unsafe {
+        memset(
+            newtable as *mut ::core::ffi::c_void,
+            0 as ::core::ffi::c_int,
+            (size as size_t).wrapping_mul(::core::mem::size_of::<xmlHashEntry>() as size_t),
+        )
+    };
     table.table = newtable;
     table.size = size;
     let old_entries = unsafe { ::core::slice::from_raw_parts_mut(oldtable, oldsize as usize) };
@@ -357,14 +371,9 @@ unsafe extern "C" fn xmlHashGrow(
         if old_entry.valid == 0 as ::core::ffi::c_int {
             continue;
         }
-        let key = unsafe {
-            xmlHashComputeKey(
-                table,
-                old_entry.name,
-                old_entry.name2,
-                old_entry.name3,
-            )
-        } as usize;
+        let key =
+            unsafe { xmlHashComputeKey(table, old_entry.name, old_entry.name2, old_entry.name3) }
+                as usize;
         new_entries[key] = *old_entry;
         new_entries[key].next = ::core::ptr::null_mut::<_xmlHashEntry>();
     }
@@ -378,7 +387,9 @@ unsafe extern "C" fn xmlHashGrow(
             if new_entries[key].valid == 0 as ::core::ffi::c_int {
                 new_entries[key] = unsafe { *iter };
                 new_entries[key].next = ::core::ptr::null_mut::<_xmlHashEntry>();
-                unsafe { xmlFree.expect("non-null function pointer")(iter as *mut ::core::ffi::c_void) };
+                unsafe {
+                    xmlFree.expect("non-null function pointer")(iter as *mut ::core::ffi::c_void)
+                };
             } else {
                 unsafe { (*iter).next = new_entries[key].next };
                 new_entries[key].next = iter as *mut _xmlHashEntry;
@@ -390,64 +401,84 @@ unsafe extern "C" fn xmlHashGrow(
     return 0 as ::core::ffi::c_int;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlHashFree(mut table: xmlHashTablePtr, mut f: xmlHashDeallocator) { unsafe {
-    let mut i: ::core::ffi::c_int = 0;
-    let mut iter: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    let mut next: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    let mut inside_table: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
-    let mut nbElems: ::core::ffi::c_int = 0;
-    if table.is_null() {
+pub unsafe extern "C" fn xmlHashFree(mut table: xmlHashTablePtr, mut f: xmlHashDeallocator) {
+    let Some(table_ref) = (unsafe { table.as_mut() }) else {
         return;
-    }
-    if !(*table).table.is_null() {
-        nbElems = (*table).nbElems;
-        i = 0 as ::core::ffi::c_int;
-        while i < (*table).size && nbElems > 0 as ::core::ffi::c_int {
-            iter = (*table).table.offset(i as isize) as *mut _xmlHashEntry as xmlHashEntryPtr;
-            if !((*iter).valid == 0 as ::core::ffi::c_int) {
-                inside_table = 1 as ::core::ffi::c_int;
+    };
+    let table_entries = table_ref.table;
+    if !table_entries.is_null() {
+        let mut nb_elems = table_ref.nbElems;
+        let mut i = 0 as ::core::ffi::c_int;
+        while i < table_ref.size && nb_elems > 0 as ::core::ffi::c_int {
+            let mut iter = unsafe { table_entries.offset(i as isize) as xmlHashEntryPtr };
+            if hash_entry_valid(iter) {
+                let mut inside_table = true;
                 while !iter.is_null() {
-                    next = (*iter).next as xmlHashEntryPtr;
-                    if f.is_some() && !(*iter).payload.is_null() {
-                        f.expect("non-null function pointer")((*iter).payload, (*iter).name);
-                    }
-                    if (*table).dict.is_null() {
-                        if !(*iter).name.is_null() {
-                            xmlFree.expect("non-null function pointer")(
-                                (*iter).name as *mut ::core::ffi::c_void,
-                            );
-                        }
-                        if !(*iter).name2.is_null() {
-                            xmlFree.expect("non-null function pointer")(
-                                (*iter).name2 as *mut ::core::ffi::c_void,
-                            );
-                        }
-                        if !(*iter).name3.is_null() {
-                            xmlFree.expect("non-null function pointer")(
-                                (*iter).name3 as *mut ::core::ffi::c_void,
-                            );
+                    let next = hash_entry_next(iter);
+                    let payload = hash_entry_payload(iter);
+                    if let Some(dealloc) = f {
+                        if !payload.is_null() {
+                            unsafe {
+                                dealloc(payload, hash_entry_name(iter));
+                            }
                         }
                     }
-                    (*iter).payload = NULL;
-                    if inside_table == 0 {
-                        xmlFree.expect("non-null function pointer")(
-                            iter as *mut ::core::ffi::c_void,
-                        );
+                    if table_ref.dict.is_null() {
+                        let name = hash_entry_name(iter);
+                        if !name.is_null() {
+                            unsafe {
+                                xmlFree.expect("non-null function pointer")(
+                                    name as *mut ::core::ffi::c_void,
+                                );
+                            }
+                        }
+                        let name2 = hash_entry_name2(iter);
+                        if !name2.is_null() {
+                            unsafe {
+                                xmlFree.expect("non-null function pointer")(
+                                    name2 as *mut ::core::ffi::c_void,
+                                );
+                            }
+                        }
+                        let name3 = hash_entry_name3(iter);
+                        if !name3.is_null() {
+                            unsafe {
+                                xmlFree.expect("non-null function pointer")(
+                                    name3 as *mut ::core::ffi::c_void,
+                                );
+                            }
+                        }
                     }
-                    nbElems -= 1;
-                    inside_table = 0 as ::core::ffi::c_int;
+                    unsafe {
+                        (*iter).payload = NULL;
+                    }
+                    if !inside_table {
+                        unsafe {
+                            xmlFree.expect("non-null function pointer")(
+                                iter as *mut ::core::ffi::c_void,
+                            );
+                        }
+                    }
+                    nb_elems -= 1;
+                    inside_table = false;
                     iter = next;
                 }
             }
             i += 1;
         }
-        xmlFree.expect("non-null function pointer")((*table).table as *mut ::core::ffi::c_void);
+        unsafe {
+            xmlFree.expect("non-null function pointer")(table_entries as *mut ::core::ffi::c_void);
+        }
     }
-    if !(*table).dict.is_null() {
-        xmlDictFree((*table).dict);
+    if !table_ref.dict.is_null() {
+        unsafe {
+            xmlDictFree(table_ref.dict);
+        }
     }
-    xmlFree.expect("non-null function pointer")(table as *mut ::core::ffi::c_void);
-}}
+    unsafe {
+        xmlFree.expect("non-null function pointer")(table as *mut ::core::ffi::c_void);
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashDefaultDeallocator(
     mut entry: *mut ::core::ffi::c_void,
@@ -462,13 +493,15 @@ pub unsafe extern "C" fn xmlHashAddEntry(
     mut name: *const xmlChar,
     mut userdata: *mut ::core::ffi::c_void,
 ) -> ::core::ffi::c_int {
-    return unsafe { xmlHashAddEntry3(
-        table,
-        name,
-        ::core::ptr::null::<xmlChar>(),
-        ::core::ptr::null::<xmlChar>(),
-        userdata,
-    ) };
+    return unsafe {
+        xmlHashAddEntry3(
+            table,
+            name,
+            ::core::ptr::null::<xmlChar>(),
+            ::core::ptr::null::<xmlChar>(),
+            userdata,
+        )
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashAddEntry2(
@@ -477,7 +510,9 @@ pub unsafe extern "C" fn xmlHashAddEntry2(
     mut name2: *const xmlChar,
     mut userdata: *mut ::core::ffi::c_void,
 ) -> ::core::ffi::c_int {
-    return unsafe { xmlHashAddEntry3(table, name, name2, ::core::ptr::null::<xmlChar>(), userdata) };
+    return unsafe {
+        xmlHashAddEntry3(table, name, name2, ::core::ptr::null::<xmlChar>(), userdata)
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashUpdateEntry(
@@ -486,14 +521,16 @@ pub unsafe extern "C" fn xmlHashUpdateEntry(
     mut userdata: *mut ::core::ffi::c_void,
     mut f: xmlHashDeallocator,
 ) -> ::core::ffi::c_int {
-    return unsafe { xmlHashUpdateEntry3(
-        table,
-        name,
-        ::core::ptr::null::<xmlChar>(),
-        ::core::ptr::null::<xmlChar>(),
-        userdata,
-        f,
-    ) };
+    return unsafe {
+        xmlHashUpdateEntry3(
+            table,
+            name,
+            ::core::ptr::null::<xmlChar>(),
+            ::core::ptr::null::<xmlChar>(),
+            userdata,
+            f,
+        )
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashUpdateEntry2(
@@ -503,26 +540,30 @@ pub unsafe extern "C" fn xmlHashUpdateEntry2(
     mut userdata: *mut ::core::ffi::c_void,
     mut f: xmlHashDeallocator,
 ) -> ::core::ffi::c_int {
-    return unsafe { xmlHashUpdateEntry3(
-        table,
-        name,
-        name2,
-        ::core::ptr::null::<xmlChar>(),
-        userdata,
-        f,
-    ) };
+    return unsafe {
+        xmlHashUpdateEntry3(
+            table,
+            name,
+            name2,
+            ::core::ptr::null::<xmlChar>(),
+            userdata,
+            f,
+        )
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashLookup(
     mut table: xmlHashTablePtr,
     mut name: *const xmlChar,
 ) -> *mut ::core::ffi::c_void {
-    return unsafe { xmlHashLookup3(
-        table,
-        name,
-        ::core::ptr::null::<xmlChar>(),
-        ::core::ptr::null::<xmlChar>(),
-    ) };
+    return unsafe {
+        xmlHashLookup3(
+            table,
+            name,
+            ::core::ptr::null::<xmlChar>(),
+            ::core::ptr::null::<xmlChar>(),
+        )
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashLookup2(
@@ -538,15 +579,17 @@ pub unsafe extern "C" fn xmlHashQLookup(
     mut prefix: *const xmlChar,
     mut name: *const xmlChar,
 ) -> *mut ::core::ffi::c_void {
-    return unsafe { xmlHashQLookup3(
-        table,
-        prefix,
-        name,
-        ::core::ptr::null::<xmlChar>(),
-        ::core::ptr::null::<xmlChar>(),
-        ::core::ptr::null::<xmlChar>(),
-        ::core::ptr::null::<xmlChar>(),
-    ) };
+    return unsafe {
+        xmlHashQLookup3(
+            table,
+            prefix,
+            name,
+            ::core::ptr::null::<xmlChar>(),
+            ::core::ptr::null::<xmlChar>(),
+            ::core::ptr::null::<xmlChar>(),
+            ::core::ptr::null::<xmlChar>(),
+        )
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashQLookup2(
@@ -556,15 +599,17 @@ pub unsafe extern "C" fn xmlHashQLookup2(
     mut prefix2: *const xmlChar,
     mut name2: *const xmlChar,
 ) -> *mut ::core::ffi::c_void {
-    return unsafe { xmlHashQLookup3(
-        table,
-        prefix,
-        name,
-        prefix2,
-        name2,
-        ::core::ptr::null::<xmlChar>(),
-        ::core::ptr::null::<xmlChar>(),
-    ) };
+    return unsafe {
+        xmlHashQLookup3(
+            table,
+            prefix,
+            name,
+            prefix2,
+            name2,
+            ::core::ptr::null::<xmlChar>(),
+            ::core::ptr::null::<xmlChar>(),
+        )
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashAddEntry3(
@@ -613,8 +658,7 @@ pub unsafe extern "C" fn xmlHashAddEntry3(
                 (*insert).name == name as *mut xmlChar
                     && (*insert).name2 == name2 as *mut xmlChar
                     && (*insert).name3 == name3 as *mut xmlChar
-            }
-            {
+            } {
                 return -(1 as ::core::ffi::c_int);
             }
             len = len.wrapping_add(1);
@@ -624,8 +668,7 @@ pub unsafe extern "C" fn xmlHashAddEntry3(
             (*insert).name == name as *mut xmlChar
                 && (*insert).name2 == name2 as *mut xmlChar
                 && (*insert).name3 == name3 as *mut xmlChar
-        }
-        {
+        } {
             return -(1 as ::core::ffi::c_int);
         }
     } else {
@@ -652,7 +695,7 @@ pub unsafe extern "C" fn xmlHashAddEntry3(
     } else {
         entry = unsafe {
             xmlMalloc.expect("non-null function pointer")(
-                ::core::mem::size_of::<xmlHashEntry>() as size_t,
+                ::core::mem::size_of::<xmlHashEntry>() as size_t
             ) as xmlHashEntryPtr
         };
         if entry.is_null() {
@@ -736,8 +779,7 @@ pub unsafe extern "C" fn xmlHashUpdateEntry3(
                     (*insert).name == name as *mut xmlChar
                         && (*insert).name2 == name2 as *mut xmlChar
                         && (*insert).name3 == name3 as *mut xmlChar
-                }
-                {
+                } {
                     if let Some(dealloc) = f {
                         unsafe { dealloc((*insert).payload, (*insert).name) };
                     }
@@ -767,8 +809,7 @@ pub unsafe extern "C" fn xmlHashUpdateEntry3(
                     xmlStrEqual((*insert).name, name) != 0
                         && xmlStrEqual((*insert).name2, name2) != 0
                         && xmlStrEqual((*insert).name3, name3) != 0
-                }
-            {
+                } {
                     if let Some(dealloc) = f {
                         unsafe { dealloc((*insert).payload, (*insert).name) };
                     }
@@ -799,7 +840,7 @@ pub unsafe extern "C" fn xmlHashUpdateEntry3(
     } else {
         let entry = unsafe {
             xmlMalloc.expect("non-null function pointer")(
-                ::core::mem::size_of::<xmlHashEntry>() as size_t,
+                ::core::mem::size_of::<xmlHashEntry>() as size_t
             ) as xmlHashEntryPtr
         };
         if entry.is_null() {
@@ -858,8 +899,7 @@ pub unsafe extern "C" fn xmlHashLookup3(
                 (*entry).name == name as *mut xmlChar
                     && (*entry).name2 == name2 as *mut xmlChar
                     && (*entry).name3 == name3 as *mut xmlChar
-            }
-            {
+            } {
                 return unsafe { (*entry).payload };
             }
             entry = unsafe { (*entry).next as xmlHashEntryPtr };
@@ -871,8 +911,7 @@ pub unsafe extern "C" fn xmlHashLookup3(
             xmlStrEqual((*entry).name, name) != 0
                 && xmlStrEqual((*entry).name2, name2) != 0
                 && xmlStrEqual((*entry).name3, name3) != 0
-        }
-        {
+        } {
             return unsafe { (*entry).payload };
         }
         entry = unsafe { (*entry).next as xmlHashEntryPtr };
@@ -888,43 +927,42 @@ pub unsafe extern "C" fn xmlHashQLookup3(
     mut name2: *const xmlChar,
     mut prefix3: *const xmlChar,
     mut name3: *const xmlChar,
-) -> *mut ::core::ffi::c_void { unsafe {
-    let mut key: ::core::ffi::c_ulong = 0;
-    let mut entry: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    if table.is_null() {
+) -> *mut ::core::ffi::c_void {
+    let Some(table_ref) = (unsafe { table.as_ref() }) else {
         return ::core::ptr::null_mut::<::core::ffi::c_void>();
-    }
+    };
     if name.is_null() {
         return ::core::ptr::null_mut::<::core::ffi::c_void>();
     }
-    key = xmlHashComputeQKey(table, prefix, name, prefix2, name2, prefix3, name3);
-    if (*(*table).table.offset(key as isize)).valid == 0 as ::core::ffi::c_int {
+    let key = unsafe { xmlHashComputeQKey(table, prefix, name, prefix2, name2, prefix3, name3) };
+    let mut entry = hash_bucket_entry(table_ref, key);
+    if !hash_entry_valid(entry) {
         return ::core::ptr::null_mut::<::core::ffi::c_void>();
     }
-    entry = (*table).table.offset(key as isize) as *mut _xmlHashEntry as xmlHashEntryPtr;
     while !entry.is_null() {
-        if xmlStrQEqual(prefix, name, (*entry).name) != 0
-            && xmlStrQEqual(prefix2, name2, (*entry).name2) != 0
-            && xmlStrQEqual(prefix3, name3, (*entry).name3) != 0
-        {
-            return (*entry).payload;
+        if hash_entry_matches_qname(entry, prefix, name, prefix2, name2, prefix3, name3) {
+            return hash_entry_payload(entry);
         }
-        entry = (*entry).next as xmlHashEntryPtr;
+        entry = hash_entry_next(entry);
     }
     return ::core::ptr::null_mut::<::core::ffi::c_void>();
-}}
+}
 unsafe extern "C" fn stubHashScannerFull(
     mut payload: *mut ::core::ffi::c_void,
     mut data: *mut ::core::ffi::c_void,
     mut name: *const xmlChar,
     mut _name2: *const xmlChar,
     mut _name3: *const xmlChar,
-) { unsafe {
-    let mut stubdata: *mut stubData = data as *mut stubData;
-    if let Some(scanner) = (*stubdata).hashscanner {
-        scanner(payload, (*stubdata).data, name as *mut xmlChar);
+) {
+    let stubdata = data as *mut stubData;
+    let Some(scanner) = (unsafe { (*stubdata).hashscanner }) else {
+        return;
+    };
+    let scanner_data = unsafe { (*stubdata).data };
+    unsafe {
+        scanner(payload, scanner_data, name as *mut xmlChar);
     }
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashScan(
     mut table: xmlHashTablePtr,
@@ -940,76 +978,79 @@ pub unsafe extern "C" fn xmlHashScan(
     }
     stubdata.data = data;
     stubdata.hashscanner = f;
-    unsafe { xmlHashScanFull(
-        table,
-        Some(
-            stubHashScannerFull
-                as unsafe extern "C" fn(
-                    *mut ::core::ffi::c_void,
-                    *mut ::core::ffi::c_void,
-                    *const xmlChar,
-                    *const xmlChar,
-                    *const xmlChar,
-                ) -> (),
-        ),
-        &raw mut stubdata as *mut ::core::ffi::c_void,
-    ) };
+    unsafe {
+        xmlHashScanFull(
+            table,
+            Some(
+                stubHashScannerFull
+                    as unsafe extern "C" fn(
+                        *mut ::core::ffi::c_void,
+                        *mut ::core::ffi::c_void,
+                        *const xmlChar,
+                        *const xmlChar,
+                        *const xmlChar,
+                    ) -> (),
+            ),
+            &raw mut stubdata as *mut ::core::ffi::c_void,
+        )
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashScanFull(
     mut table: xmlHashTablePtr,
     mut f: xmlHashScannerFull,
     mut data: *mut ::core::ffi::c_void,
-) { unsafe {
-    let mut i: ::core::ffi::c_int = 0;
-    let mut nb: ::core::ffi::c_int = 0;
-    let mut iter: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    let mut next: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    if table.is_null() {
+) {
+    let Some(table_ref) = (unsafe { table.as_ref() }) else {
+        return;
+    };
+    let Some(scanner) = f else {
+        return;
+    };
+    let table_entries = table_ref.table;
+    if table_entries.is_null() {
         return;
     }
-    if f.is_none() {
-        return;
-    }
-    if !(*table).table.is_null() {
-        i = 0 as ::core::ffi::c_int;
-        while i < (*table).size {
-            if !((*(*table).table.offset(i as isize)).valid == 0 as ::core::ffi::c_int) {
-                iter = (*table).table.offset(i as isize) as *mut _xmlHashEntry as xmlHashEntryPtr;
-                while !iter.is_null() {
-                    next = (*iter).next as xmlHashEntryPtr;
-                    nb = (*table).nbElems;
-                    if f.is_some() && !(*iter).payload.is_null() {
-                        f.expect("non-null function pointer")(
-                            (*iter).payload,
+    let mut i = 0 as ::core::ffi::c_int;
+    while i < table_ref.size {
+        let bucket = unsafe { table_entries.offset(i as isize) as xmlHashEntryPtr };
+        if hash_entry_valid(bucket) {
+            let mut iter = bucket;
+            while !iter.is_null() {
+                let next = hash_entry_next(iter);
+                let nb = table_ref.nbElems;
+                let payload = hash_entry_payload(iter);
+                if !payload.is_null() {
+                    unsafe {
+                        scanner(
+                            payload,
                             data,
-                            (*iter).name,
-                            (*iter).name2,
-                            (*iter).name3,
+                            hash_entry_name(iter),
+                            hash_entry_name2(iter),
+                            hash_entry_name3(iter),
                         );
                     }
-                    if nb != (*table).nbElems {
-                        if iter == (*table).table.offset(i as isize) as *mut _xmlHashEntry {
-                            if (*(*table).table.offset(i as isize)).valid == 0 as ::core::ffi::c_int
-                            {
-                                iter = ::core::ptr::null_mut::<xmlHashEntry>();
-                            }
-                            if (*(*table).table.offset(i as isize)).next != next {
-                                iter = (*table).table.offset(i as isize) as *mut _xmlHashEntry
-                                    as xmlHashEntryPtr;
-                            }
+                }
+                if nb != table_ref.nbElems {
+                    if iter == bucket {
+                        if !hash_entry_valid(bucket) {
+                            iter = ::core::ptr::null_mut::<xmlHashEntry>();
+                        } else if hash_entry_next(bucket) != next {
+                            iter = bucket;
                         } else {
                             iter = next;
                         }
                     } else {
                         iter = next;
                     }
+                } else {
+                    iter = next;
                 }
             }
-            i += 1;
         }
+        i += 1;
     }
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashScan3(
     mut table: xmlHashTablePtr,
@@ -1028,23 +1069,25 @@ pub unsafe extern "C" fn xmlHashScan3(
     }
     stubdata.data = data;
     stubdata.hashscanner = f;
-    unsafe { xmlHashScanFull3(
-        table,
-        name,
-        name2,
-        name3,
-        Some(
-            stubHashScannerFull
-                as unsafe extern "C" fn(
-                    *mut ::core::ffi::c_void,
-                    *mut ::core::ffi::c_void,
-                    *const xmlChar,
-                    *const xmlChar,
-                    *const xmlChar,
-                ) -> (),
-        ),
-        &raw mut stubdata as *mut ::core::ffi::c_void,
-    ) };
+    unsafe {
+        xmlHashScanFull3(
+            table,
+            name,
+            name2,
+            name3,
+            Some(
+                stubHashScannerFull
+                    as unsafe extern "C" fn(
+                        *mut ::core::ffi::c_void,
+                        *mut ::core::ffi::c_void,
+                        *const xmlChar,
+                        *const xmlChar,
+                        *const xmlChar,
+                    ) -> (),
+            ),
+            &raw mut stubdata as *mut ::core::ffi::c_void,
+        )
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashScanFull3(
@@ -1054,34 +1097,79 @@ pub unsafe extern "C" fn xmlHashScanFull3(
     mut name3: *const xmlChar,
     mut f: xmlHashScannerFull,
     mut data: *mut ::core::ffi::c_void,
-) { unsafe {
-    let mut i: ::core::ffi::c_int = 0;
-    let mut iter: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    let mut next: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    if table.is_null() {
+) {
+    let Some(table_ref) = (unsafe { table.as_ref() }) else {
+        return;
+    };
+    let Some(scanner) = f else {
+        return;
+    };
+    let table_entries = table_ref.table;
+    if table_entries.is_null() {
         return;
     }
-    if f.is_none() {
-        return;
-    }
-    if !(*table).table.is_null() {
-        i = 0 as ::core::ffi::c_int;
-        while i < (*table).size {
-            if !((*(*table).table.offset(i as isize)).valid == 0 as ::core::ffi::c_int) {
-                iter = (*table).table.offset(i as isize) as *mut _xmlHashEntry as xmlHashEntryPtr;
-                while !iter.is_null() {
-                    next = (*iter).next as xmlHashEntryPtr;
-                    if (name.is_null() || xmlStrEqual(name, (*iter).name) != 0)
-                        && (name2.is_null() || xmlStrEqual(name2, (*iter).name2) != 0)
-                        && (name3.is_null() || xmlStrEqual(name3, (*iter).name3) != 0)
-                        && !(*iter).payload.is_null()
-                    {
-                        f.expect("non-null function pointer")(
-                            (*iter).payload,
+    let mut i = 0 as ::core::ffi::c_int;
+    while i < table_ref.size {
+        let bucket = unsafe { table_entries.offset(i as isize) as xmlHashEntryPtr };
+        if hash_entry_valid(bucket) {
+            let mut iter = bucket;
+            while !iter.is_null() {
+                let next = hash_entry_next(iter);
+                let payload = hash_entry_payload(iter);
+                if (name.is_null() || unsafe { xmlStrEqual(name, hash_entry_name(iter)) } != 0)
+                    && (name2.is_null()
+                        || unsafe { xmlStrEqual(name2, hash_entry_name2(iter)) } != 0)
+                    && (name3.is_null()
+                        || unsafe { xmlStrEqual(name3, hash_entry_name3(iter)) } != 0)
+                    && !payload.is_null()
+                {
+                    unsafe {
+                        scanner(
+                            payload,
                             data,
-                            (*iter).name,
-                            (*iter).name2,
-                            (*iter).name3,
+                            hash_entry_name(iter),
+                            hash_entry_name2(iter),
+                            hash_entry_name3(iter),
+                        );
+                    }
+                }
+                iter = next;
+            }
+        }
+        i += 1;
+    }
+}
+#[no_mangle]
+pub unsafe extern "C" fn xmlHashCopy(
+    mut table: xmlHashTablePtr,
+    mut f: xmlHashCopier,
+) -> xmlHashTablePtr {
+    let Some(table_ref) = (unsafe { table.as_ref() }) else {
+        return ::core::ptr::null_mut::<xmlHashTable>();
+    };
+    let Some(copier) = f else {
+        return ::core::ptr::null_mut::<xmlHashTable>();
+    };
+    let ret = unsafe { xmlHashCreate(table_ref.size) };
+    if ret.is_null() {
+        return ::core::ptr::null_mut::<xmlHashTable>();
+    }
+    let table_entries = table_ref.table;
+    if !table_entries.is_null() {
+        let mut i = 0 as ::core::ffi::c_int;
+        while i < table_ref.size {
+            let bucket = unsafe { table_entries.offset(i as isize) as xmlHashEntryPtr };
+            if hash_entry_valid(bucket) {
+                let mut iter = bucket;
+                while !iter.is_null() {
+                    let next = hash_entry_next(iter);
+                    unsafe {
+                        xmlHashAddEntry3(
+                            ret,
+                            hash_entry_name(iter),
+                            hash_entry_name2(iter),
+                            hash_entry_name3(iter),
+                            copier(hash_entry_payload(iter), hash_entry_name(iter)),
                         );
                     }
                     iter = next;
@@ -1090,49 +1178,11 @@ pub unsafe extern "C" fn xmlHashScanFull3(
             i += 1;
         }
     }
-}}
-#[no_mangle]
-pub unsafe extern "C" fn xmlHashCopy(
-    mut table: xmlHashTablePtr,
-    mut f: xmlHashCopier,
-) -> xmlHashTablePtr { unsafe {
-    let mut i: ::core::ffi::c_int = 0;
-    let mut iter: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    let mut next: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    let mut ret: xmlHashTablePtr = ::core::ptr::null_mut::<xmlHashTable>();
-    if table.is_null() {
-        return ::core::ptr::null_mut::<xmlHashTable>();
+    unsafe {
+        (*ret).nbElems = table_ref.nbElems;
     }
-    if f.is_none() {
-        return ::core::ptr::null_mut::<xmlHashTable>();
-    }
-    ret = xmlHashCreate((*table).size);
-    if ret.is_null() {
-        return ::core::ptr::null_mut::<xmlHashTable>();
-    }
-    if !(*table).table.is_null() {
-        i = 0 as ::core::ffi::c_int;
-        while i < (*table).size {
-            if !((*(*table).table.offset(i as isize)).valid == 0 as ::core::ffi::c_int) {
-                iter = (*table).table.offset(i as isize) as *mut _xmlHashEntry as xmlHashEntryPtr;
-                while !iter.is_null() {
-                    next = (*iter).next as xmlHashEntryPtr;
-                    xmlHashAddEntry3(
-                        ret,
-                        (*iter).name,
-                        (*iter).name2,
-                        (*iter).name3,
-                        f.expect("non-null function pointer")((*iter).payload, (*iter).name),
-                    );
-                    iter = next;
-                }
-            }
-            i += 1;
-        }
-    }
-    (*ret).nbElems = (*table).nbElems;
     return ret;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashSize(mut table: xmlHashTablePtr) -> ::core::ffi::c_int {
     let Some(table) = (unsafe { table.as_ref() }) else {
@@ -1146,13 +1196,15 @@ pub unsafe extern "C" fn xmlHashRemoveEntry(
     mut name: *const xmlChar,
     mut f: xmlHashDeallocator,
 ) -> ::core::ffi::c_int {
-    return unsafe { xmlHashRemoveEntry3(
-        table,
-        name,
-        ::core::ptr::null::<xmlChar>(),
-        ::core::ptr::null::<xmlChar>(),
-        f,
-    ) };
+    return unsafe {
+        xmlHashRemoveEntry3(
+            table,
+            name,
+            ::core::ptr::null::<xmlChar>(),
+            ::core::ptr::null::<xmlChar>(),
+            f,
+        )
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashRemoveEntry2(
@@ -1170,65 +1222,88 @@ pub unsafe extern "C" fn xmlHashRemoveEntry3(
     mut name2: *const xmlChar,
     mut name3: *const xmlChar,
     mut f: xmlHashDeallocator,
-) -> ::core::ffi::c_int { unsafe {
-    let mut key: ::core::ffi::c_ulong = 0;
-    let mut entry: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    let mut prev: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
-    if table.is_null() || name.is_null() {
-        return -(1 as ::core::ffi::c_int);
-    }
-    key = xmlHashComputeKey(table, name, name2, name3);
-    if (*(*table).table.offset(key as isize)).valid == 0 as ::core::ffi::c_int {
-        return -(1 as ::core::ffi::c_int);
-    } else {
-        entry = (*table).table.offset(key as isize) as *mut _xmlHashEntry as xmlHashEntryPtr;
-        while !entry.is_null() {
-            if xmlStrEqual((*entry).name, name) != 0
-                && xmlStrEqual((*entry).name2, name2) != 0
-                && xmlStrEqual((*entry).name3, name3) != 0
-            {
-                if f.is_some() && !(*entry).payload.is_null() {
-                    f.expect("non-null function pointer")((*entry).payload, (*entry).name);
-                }
-                (*entry).payload = NULL;
-                if (*table).dict.is_null() {
-                    if !(*entry).name.is_null() {
-                        xmlFree.expect("non-null function pointer")(
-                            (*entry).name as *mut ::core::ffi::c_void,
-                        );
-                    }
-                    if !(*entry).name2.is_null() {
-                        xmlFree.expect("non-null function pointer")(
-                            (*entry).name2 as *mut ::core::ffi::c_void,
-                        );
-                    }
-                    if !(*entry).name3.is_null() {
-                        xmlFree.expect("non-null function pointer")(
-                            (*entry).name3 as *mut ::core::ffi::c_void,
-                        );
-                    }
-                }
-                if !prev.is_null() {
-                    (*prev).next = (*entry).next;
-                    xmlFree.expect("non-null function pointer")(entry as *mut ::core::ffi::c_void);
-                } else if (*entry).next.is_null() {
-                    (*entry).valid = 0 as ::core::ffi::c_int;
-                } else {
-                    entry = (*entry).next as xmlHashEntryPtr;
-                    memcpy(
-                        (*table).table.offset(key as isize) as *mut _xmlHashEntry
-                            as *mut ::core::ffi::c_void,
-                        entry as *const ::core::ffi::c_void,
-                        ::core::mem::size_of::<xmlHashEntry>() as size_t,
-                    );
-                    xmlFree.expect("non-null function pointer")(entry as *mut ::core::ffi::c_void);
-                }
-                (*table).nbElems -= 1;
-                return 0 as ::core::ffi::c_int;
-            }
-            prev = entry;
-            entry = (*entry).next as xmlHashEntryPtr;
-        }
+) -> ::core::ffi::c_int {
+    let Some(table_ref) = (unsafe { table.as_mut() }) else {
         return -(1 as ::core::ffi::c_int);
     };
-}}
+    if name.is_null() {
+        return -(1 as ::core::ffi::c_int);
+    }
+    let key = unsafe { xmlHashComputeKey(table, name, name2, name3) };
+    let bucket = hash_bucket_entry(table_ref, key);
+    if !hash_entry_valid(bucket) {
+        return -(1 as ::core::ffi::c_int);
+    }
+    let mut entry = bucket;
+    let mut prev = ::core::ptr::null_mut::<xmlHashEntry>();
+    while !entry.is_null() {
+        if hash_entry_matches_str(entry, name, name2, name3) {
+            let payload = hash_entry_payload(entry);
+            if let Some(dealloc) = f {
+                if !payload.is_null() {
+                    unsafe {
+                        dealloc(payload, hash_entry_name(entry));
+                    }
+                }
+            }
+            unsafe {
+                (*entry).payload = NULL;
+            }
+            if table_ref.dict.is_null() {
+                let entry_name = hash_entry_name(entry);
+                if !entry_name.is_null() {
+                    unsafe {
+                        xmlFree.expect("non-null function pointer")(
+                            entry_name as *mut ::core::ffi::c_void,
+                        );
+                    }
+                }
+                let entry_name2 = hash_entry_name2(entry);
+                if !entry_name2.is_null() {
+                    unsafe {
+                        xmlFree.expect("non-null function pointer")(
+                            entry_name2 as *mut ::core::ffi::c_void,
+                        );
+                    }
+                }
+                let entry_name3 = hash_entry_name3(entry);
+                if !entry_name3.is_null() {
+                    unsafe {
+                        xmlFree.expect("non-null function pointer")(
+                            entry_name3 as *mut ::core::ffi::c_void,
+                        );
+                    }
+                }
+            }
+            if !prev.is_null() {
+                unsafe {
+                    (*prev).next = (*entry).next;
+                    xmlFree.expect("non-null function pointer")(entry as *mut ::core::ffi::c_void);
+                }
+            } else {
+                let next = hash_entry_next(entry);
+                if next.is_null() {
+                    unsafe {
+                        (*entry).valid = 0 as ::core::ffi::c_int;
+                    }
+                } else {
+                    unsafe {
+                        memcpy(
+                            bucket as *mut _xmlHashEntry as *mut ::core::ffi::c_void,
+                            next as *const ::core::ffi::c_void,
+                            ::core::mem::size_of::<xmlHashEntry>() as size_t,
+                        );
+                        xmlFree.expect("non-null function pointer")(
+                            next as *mut ::core::ffi::c_void,
+                        );
+                    }
+                }
+            }
+            table_ref.nbElems -= 1;
+            return 0 as ::core::ffi::c_int;
+        }
+        prev = entry;
+        entry = hash_entry_next(entry);
+    }
+    return -(1 as ::core::ffi::c_int);
+}

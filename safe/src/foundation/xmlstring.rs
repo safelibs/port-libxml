@@ -1407,25 +1407,31 @@ pub unsafe extern "C" fn xmlStrncat(
     if size < 0 as ::core::ffi::c_int || size > INT_MAX - len {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    ret = unsafe { xmlRealloc.expect("non-null function pointer")(
-        cur as *mut ::core::ffi::c_void,
-        (size as size_t)
-            .wrapping_add(len as size_t)
-            .wrapping_add(1 as size_t)
-            .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) as *mut xmlChar };
+    ret = unsafe {
+        xmlRealloc.expect("non-null function pointer")(
+            cur as *mut ::core::ffi::c_void,
+            (size as size_t)
+                .wrapping_add(len as size_t)
+                .wrapping_add(1 as size_t)
+                .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        ) as *mut xmlChar
+    };
     if ret.is_null() {
-        unsafe { xmlErrMemory(
-            ::core::ptr::null_mut::<xmlParserCtxt>(),
-            ::core::ptr::null::<::core::ffi::c_char>(),
-        ) };
+        unsafe {
+            xmlErrMemory(
+                ::core::ptr::null_mut::<xmlParserCtxt>(),
+                ::core::ptr::null::<::core::ffi::c_char>(),
+            )
+        };
         return cur;
     }
-    unsafe { memcpy(
-        ret.add(size as usize) as *mut xmlChar as *mut ::core::ffi::c_void,
-        add as *const ::core::ffi::c_void,
-        (len as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) };
+    unsafe {
+        memcpy(
+            ret.add(size as usize) as *mut xmlChar as *mut ::core::ffi::c_void,
+            add as *const ::core::ffi::c_void,
+            (len as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        )
+    };
     unsafe { *ret.add((size + len) as usize) = 0 as xmlChar };
     return ret;
 }
@@ -1453,29 +1459,37 @@ pub unsafe extern "C" fn xmlStrncatNew(
     if size < 0 as ::core::ffi::c_int || size > INT_MAX - len {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    ret = unsafe { xmlMalloc.expect("non-null function pointer")(
-        (size as size_t)
-            .wrapping_add(len as size_t)
-            .wrapping_add(1 as size_t)
-            .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) as *mut xmlChar };
+    ret = unsafe {
+        xmlMalloc.expect("non-null function pointer")(
+            (size as size_t)
+                .wrapping_add(len as size_t)
+                .wrapping_add(1 as size_t)
+                .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        ) as *mut xmlChar
+    };
     if ret.is_null() {
-        unsafe { xmlErrMemory(
-            ::core::ptr::null_mut::<xmlParserCtxt>(),
-            ::core::ptr::null::<::core::ffi::c_char>(),
-        ) };
+        unsafe {
+            xmlErrMemory(
+                ::core::ptr::null_mut::<xmlParserCtxt>(),
+                ::core::ptr::null::<::core::ffi::c_char>(),
+            )
+        };
         return unsafe { xmlStrndup(str1, size) };
     }
-    unsafe { memcpy(
-        ret as *mut ::core::ffi::c_void,
-        str1 as *const ::core::ffi::c_void,
-        (size as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) };
-    unsafe { memcpy(
-        ret.add(size as usize) as *mut xmlChar as *mut ::core::ffi::c_void,
-        str2 as *const ::core::ffi::c_void,
-        (len as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) };
+    unsafe {
+        memcpy(
+            ret as *mut ::core::ffi::c_void,
+            str1 as *const ::core::ffi::c_void,
+            (size as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        )
+    };
+    unsafe {
+        memcpy(
+            ret.add(size as usize) as *mut xmlChar as *mut ::core::ffi::c_void,
+            str2 as *const ::core::ffi::c_void,
+            (len as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        )
+    };
     unsafe { *ret.add((size + len) as usize) = 0 as xmlChar };
     return ret;
 }
@@ -1488,11 +1502,7 @@ pub unsafe extern "C" fn xmlStrcat(mut cur: *mut xmlChar, mut add: *const xmlCha
         return unsafe { xmlStrdup(add) };
     }
     let len = unsafe { xmlStrlen(add) };
-    return unsafe { xmlStrncat(
-        cur,
-        add,
-        len,
-    ) };
+    return unsafe { xmlStrncat(cur, add, len) };
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlUTF8Size(mut utf: *const xmlChar) -> ::core::ffi::c_int {
@@ -1539,9 +1549,7 @@ pub unsafe extern "C" fn xmlUTF8Strlen(mut utf: *const xmlChar) -> ::core::ffi::
         return -(1 as ::core::ffi::c_int);
     }
     while unsafe { *utf } as ::core::ffi::c_int != 0 as ::core::ffi::c_int {
-        if unsafe { *utf } as ::core::ffi::c_int & 0x80 as ::core::ffi::c_int
-            != 0
-        {
+        if unsafe { *utf } as ::core::ffi::c_int & 0x80 as ::core::ffi::c_int != 0 {
             if unsafe { *utf.add(1) } as ::core::ffi::c_int & 0xc0 as ::core::ffi::c_int
                 != 0x80 as ::core::ffi::c_int
             {
@@ -1607,9 +1615,8 @@ pub unsafe extern "C" fn xmlGetUTF8Char(
         return -(1 as ::core::ffi::c_int);
     }
     if first & 0xe0 as ::core::ffi::c_uint != 0xe0 as ::core::ffi::c_uint {
-        let mut c =
-            (((first as ::core::ffi::c_int) & 0x1f as ::core::ffi::c_int) << 6 as ::core::ffi::c_int)
-                as ::core::ffi::c_uint;
+        let mut c = (((first as ::core::ffi::c_int) & 0x1f as ::core::ffi::c_int)
+            << 6 as ::core::ffi::c_int) as ::core::ffi::c_uint;
         c |= (unsafe { *utf.add(1) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
             as ::core::ffi::c_uint;
         unsafe { *len = 2 as ::core::ffi::c_int };
@@ -1623,9 +1630,8 @@ pub unsafe extern "C" fn xmlGetUTF8Char(
         return -(1 as ::core::ffi::c_int);
     }
     if first & 0xf0 as ::core::ffi::c_uint != 0xf0 as ::core::ffi::c_uint {
-        let mut c =
-            (((first as ::core::ffi::c_int) & 0xf as ::core::ffi::c_int) << 12 as ::core::ffi::c_int)
-                as ::core::ffi::c_uint;
+        let mut c = (((first as ::core::ffi::c_int) & 0xf as ::core::ffi::c_int)
+            << 12 as ::core::ffi::c_int) as ::core::ffi::c_uint;
         c |= ((unsafe { *utf.add(1) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
             << 6 as ::core::ffi::c_int) as ::core::ffi::c_uint;
         c |= (unsafe { *utf.add(2) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
@@ -1641,9 +1647,8 @@ pub unsafe extern "C" fn xmlGetUTF8Char(
         unsafe { *len = 0 as ::core::ffi::c_int };
         return -(1 as ::core::ffi::c_int);
     }
-    let mut c =
-        (((first as ::core::ffi::c_int) & 0x7 as ::core::ffi::c_int) << 18 as ::core::ffi::c_int)
-            as ::core::ffi::c_uint;
+    let mut c = (((first as ::core::ffi::c_int) & 0x7 as ::core::ffi::c_int)
+        << 18 as ::core::ffi::c_int) as ::core::ffi::c_uint;
     c |= ((unsafe { *utf.add(1) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
         << 12 as ::core::ffi::c_int) as ::core::ffi::c_uint;
     c |= ((unsafe { *utf.add(2) } as ::core::ffi::c_int & 0x3f as ::core::ffi::c_int)
@@ -1761,19 +1766,23 @@ pub unsafe extern "C" fn xmlUTF8Strndup(
         return ::core::ptr::null_mut::<xmlChar>();
     }
     i = unsafe { xmlUTF8Strsize(utf, len) };
-    ret = unsafe { xmlMallocAtomic.expect("non-null function pointer")(
-        (i as size_t)
-            .wrapping_add(1 as size_t)
-            .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) as *mut xmlChar };
+    ret = unsafe {
+        xmlMallocAtomic.expect("non-null function pointer")(
+            (i as size_t)
+                .wrapping_add(1 as size_t)
+                .wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        ) as *mut xmlChar
+    };
     if ret.is_null() {
         return ::core::ptr::null_mut::<xmlChar>();
     }
-    unsafe { memcpy(
-        ret as *mut ::core::ffi::c_void,
-        utf as *const ::core::ffi::c_void,
-        (i as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) };
+    unsafe {
+        memcpy(
+            ret as *mut ::core::ffi::c_void,
+            utf as *const ::core::ffi::c_void,
+            (i as size_t).wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        )
+    };
     unsafe { *ret.add(i as usize) = 0 as xmlChar };
     return ret;
 }
@@ -1811,9 +1820,7 @@ pub unsafe extern "C" fn xmlUTF8Strpos(
                 }
                 let cont = unsafe { *utf } as ::core::ffi::c_int;
                 utf = unsafe { utf.add(1) };
-                if cont & 0xc0 as ::core::ffi::c_int
-                    != 0x80 as ::core::ffi::c_int
-                {
+                if cont & 0xc0 as ::core::ffi::c_int != 0x80 as ::core::ffi::c_int {
                     return ::core::ptr::null::<xmlChar>();
                 }
             }
@@ -1858,9 +1865,7 @@ pub unsafe extern "C" fn xmlUTF8Strloc(
                 }
                 let cont = unsafe { *utf } as ::core::ffi::c_int;
                 utf = unsafe { utf.add(1) };
-                if cont & 0xc0 as ::core::ffi::c_int
-                    != 0x80 as ::core::ffi::c_int
-                {
+                if cont & 0xc0 as ::core::ffi::c_int != 0x80 as ::core::ffi::c_int {
                     return -(1 as ::core::ffi::c_int);
                 }
             }
@@ -1904,9 +1909,7 @@ pub unsafe extern "C" fn xmlUTF8Strsub(
                 }
                 let cont = unsafe { *utf } as ::core::ffi::c_int;
                 utf = unsafe { utf.add(1) };
-                if cont & 0xc0 as ::core::ffi::c_int
-                    != 0x80 as ::core::ffi::c_int
-                {
+                if cont & 0xc0 as ::core::ffi::c_int != 0x80 as ::core::ffi::c_int {
                     return ::core::ptr::null_mut::<xmlChar>();
                 }
             }
@@ -1941,16 +1944,20 @@ pub unsafe extern "C" fn xmlEscapeFormatString(mut msg: *mut *mut xmlChar) -> *m
         return ::core::ptr::null_mut::<xmlChar>();
     }
     resultLen = msgLen.wrapping_add(count).wrapping_add(1 as size_t);
-    result = unsafe { xmlMallocAtomic.expect("non-null function pointer")(
-        resultLen.wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
-    ) as *mut xmlChar };
+    result = unsafe {
+        xmlMallocAtomic.expect("non-null function pointer")(
+            resultLen.wrapping_mul(::core::mem::size_of::<xmlChar>() as size_t),
+        ) as *mut xmlChar
+    };
     if result.is_null() {
         unsafe { xmlFree.expect("non-null function pointer")(*msg as *mut ::core::ffi::c_void) };
         unsafe { *msg = ::core::ptr::null_mut::<xmlChar>() };
-        unsafe { xmlErrMemory(
-            ::core::ptr::null_mut::<xmlParserCtxt>(),
-            ::core::ptr::null::<::core::ffi::c_char>(),
-        ) };
+        unsafe {
+            xmlErrMemory(
+                ::core::ptr::null_mut::<xmlParserCtxt>(),
+                ::core::ptr::null::<::core::ffi::c_char>(),
+            )
+        };
         return ::core::ptr::null_mut::<xmlChar>();
     }
     msgPtr = unsafe { *msg };

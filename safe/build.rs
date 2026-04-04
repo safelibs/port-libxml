@@ -89,7 +89,12 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     ];
     let env_cflags = env::var("CFLAGS")
         .ok()
-        .map(|value| value.split_whitespace().map(OsString::from).collect::<Vec<_>>())
+        .map(|value| {
+            value
+                .split_whitespace()
+                .map(OsString::from)
+                .collect::<Vec<_>>()
+        })
         .unwrap_or_else(|| default_cflags.clone());
 
     let mut objects = Vec::new();

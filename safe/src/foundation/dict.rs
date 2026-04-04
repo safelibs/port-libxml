@@ -151,7 +151,8 @@ unsafe extern "C" fn xmlDictAddString(
             current_block = 7351195479953500246;
             break;
         }
-        let available = unsafe { (*pool).end.offset_from((*pool).free) as ::core::ffi::c_long as size_t };
+        let available =
+            unsafe { (*pool).end.offset_from((*pool).free) as ::core::ffi::c_long as size_t };
         if available > namelen as size_t {
             current_block = 12564705494504611164;
             break;
@@ -348,19 +349,100 @@ unsafe extern "C" fn xmlDictComputeBigKey(
     hash = hash.wrapping_add(hash << 15 as ::core::ffi::c_int);
     return hash;
 }
+#[inline]
+fn dict_code_unit(ptr: *const xmlChar, index: ::core::ffi::c_int) -> ::core::ffi::c_ulong {
+    unsafe { *ptr.offset(index as isize) as ::core::ffi::c_ulong }
+}
+#[inline]
+fn dict_bucket_entry(dict: &xmlDict, key: ::core::ffi::c_ulong) -> xmlDictEntryPtr {
+    unsafe { dict.dict.offset(key as isize) as xmlDictEntryPtr }
+}
+#[inline]
+fn dict_entry_next(entry: xmlDictEntryPtr) -> xmlDictEntryPtr {
+    unsafe { (*entry).next as xmlDictEntryPtr }
+}
+#[inline]
+fn dict_entry_valid(entry: xmlDictEntryPtr) -> bool {
+    unsafe { (*entry).valid != 0 as ::core::ffi::c_int }
+}
+#[inline]
+fn dict_entry_name(entry: xmlDictEntryPtr) -> *const xmlChar {
+    unsafe { (*entry).name }
+}
+#[inline]
+fn dict_entry_matches(
+    entry: xmlDictEntryPtr,
+    okey: ::core::ffi::c_ulong,
+    len: ::core::ffi::c_uint,
+    name: *const xmlChar,
+) -> bool {
+    unsafe {
+        (*entry).okey == okey
+            && (*entry).len == len
+            && memcmp(
+                (*entry).name as *const ::core::ffi::c_void,
+                name as *const ::core::ffi::c_void,
+                len as size_t,
+            ) == 0
+    }
+}
+#[inline]
+fn dict_qentry_matches(
+    entry: xmlDictEntryPtr,
+    okey: ::core::ffi::c_ulong,
+    len: ::core::ffi::c_uint,
+    prefix: *const xmlChar,
+    name: *const xmlChar,
+) -> bool {
+    unsafe {
+        (*entry).okey == okey
+            && (*entry).len == len
+            && xmlStrQEqual(prefix, name, (*entry).name) != 0
+    }
+}
+#[inline]
+fn dict_compute_key(
+    size: size_t,
+    name: *const xmlChar,
+    len: ::core::ffi::c_int,
+    seed: ::core::ffi::c_int,
+) -> ::core::ffi::c_ulong {
+    if size == MIN_DICT_SIZE as size_t {
+        unsafe { xmlDictComputeFastKey(name, len, seed) }
+    } else {
+        unsafe { xmlDictComputeBigKey(name, len, seed) as ::core::ffi::c_ulong }
+    }
+}
+#[inline]
+fn dict_compute_qkey(
+    size: size_t,
+    prefix: *const xmlChar,
+    plen: ::core::ffi::c_int,
+    name: *const xmlChar,
+    len: ::core::ffi::c_int,
+    seed: ::core::ffi::c_int,
+) -> ::core::ffi::c_ulong {
+    if prefix.is_null() {
+        dict_compute_key(size, name, len, seed)
+    } else if size == MIN_DICT_SIZE as size_t {
+        unsafe { xmlDictComputeFastQKey(prefix, plen, name, len, seed) }
+    } else {
+        unsafe { xmlDictComputeBigQKey(prefix, plen, name, len, seed) }
+    }
+}
 unsafe extern "C" fn xmlDictComputeBigQKey(
     mut prefix: *const xmlChar,
     mut plen: ::core::ffi::c_int,
     mut name: *const xmlChar,
     mut len: ::core::ffi::c_int,
     mut seed: ::core::ffi::c_int,
-) -> ::core::ffi::c_ulong { unsafe {
+) -> ::core::ffi::c_ulong {
     let mut hash: uint32_t = 0;
     let mut i: ::core::ffi::c_int = 0;
     hash = seed as uint32_t;
     i = 0 as ::core::ffi::c_int;
     while i < plen {
-        hash = hash.wrapping_add(*prefix.offset(i as isize) as uint32_t);
+        hash = hash.wrapping_add(dict_code_unit(prefix, i) as uint32_t);
         hash = hash.wrapping_add(hash << 10 as ::core::ffi::c_int);
         hash ^= hash >> 6 as ::core::ffi::c_int;
         i += 1;
@@ -370,7 +452,7 @@ unsafe extern "C" fn xmlDictComputeBigQKey(
     hash ^= hash >> 6 as ::core::ffi::c_int;
     i = 0 as ::core::ffi::c_int;
     while i < len {
-        hash = hash.wrapping_add(*name.offset(i as isize) as uint32_t);
+        hash = hash.wrapping_add(dict_code_unit(name, i) as uint32_t);
         hash = hash.wrapping_add(hash << 10 as ::core::ffi::c_int);
         hash ^= hash >> 6 as ::core::ffi::c_int;
         i += 1;
@@ -379,31 +461,26 @@ unsafe extern "C" fn xmlDictComputeBigQKey(
     hash ^= hash >> 11 as ::core::ffi::c_int;
     hash = hash.wrapping_add(hash << 15 as ::core::ffi::c_int);
     return hash as ::core::ffi::c_ulong;
-}}
+}
 unsafe extern "C" fn xmlDictComputeFastKey(
     mut name: *const xmlChar,
     mut namelen: ::core::ffi::c_int,
     mut seed: ::core::ffi::c_int,
-) -> ::core::ffi::c_ulong { unsafe {
+) -> ::core::ffi::c_ulong {
     let mut value: ::core::ffi::c_ulong = seed as ::core::ffi::c_ulong;
     if name.is_null() || namelen <= 0 as ::core::ffi::c_int {
         return value;
     }
-    value = value.wrapping_add(*name as ::core::ffi::c_ulong);
+    value = value.wrapping_add(dict_code_unit(name, 0));
     value <<= 5 as ::core::ffi::c_int;
     if namelen > 10 as ::core::ffi::c_int {
-        value =
-            value
-                .wrapping_add(*name.offset((namelen - 1 as ::core::ffi::c_int) as isize)
-                    as ::core::ffi::c_ulong);
+        value = value.wrapping_add(dict_code_unit(name, namelen - 1 as ::core::ffi::c_int));
         namelen = 10 as ::core::ffi::c_int;
     }
     let mut current_block_16: u64;
     match namelen {
         10 => {
-            value = value.wrapping_add(
-                *name.offset(9 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 9 as ::core::ffi::c_int));
             current_block_16 = 14140296040720354316;
         }
         9 => {
@@ -436,84 +513,68 @@ unsafe extern "C" fn xmlDictComputeFastKey(
     }
     match current_block_16 {
         14140296040720354316 => {
-            value = value.wrapping_add(
-                *name.offset(8 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 8 as ::core::ffi::c_int));
             current_block_16 = 10477942228951044767;
         }
         _ => {}
     }
     match current_block_16 {
         10477942228951044767 => {
-            value = value.wrapping_add(
-                *name.offset(7 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 7 as ::core::ffi::c_int));
             current_block_16 = 6178868810057640957;
         }
         _ => {}
     }
     match current_block_16 {
         6178868810057640957 => {
-            value = value.wrapping_add(
-                *name.offset(6 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 6 as ::core::ffi::c_int));
             current_block_16 = 9879368920036322223;
         }
         _ => {}
     }
     match current_block_16 {
         9879368920036322223 => {
-            value = value.wrapping_add(
-                *name.offset(5 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 5 as ::core::ffi::c_int));
             current_block_16 = 7599933913323472286;
         }
         _ => {}
     }
     match current_block_16 {
         7599933913323472286 => {
-            value = value.wrapping_add(
-                *name.offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 4 as ::core::ffi::c_int));
             current_block_16 = 1634274037810632810;
         }
         _ => {}
     }
     match current_block_16 {
         1634274037810632810 => {
-            value = value.wrapping_add(
-                *name.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 3 as ::core::ffi::c_int));
             current_block_16 = 3992153788896120206;
         }
         _ => {}
     }
     match current_block_16 {
         3992153788896120206 => {
-            value = value.wrapping_add(
-                *name.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 2 as ::core::ffi::c_int));
             current_block_16 = 8753412356531521447;
         }
         _ => {}
     }
     match current_block_16 {
         8753412356531521447 => {
-            value = value.wrapping_add(
-                *name.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 1 as ::core::ffi::c_int));
         }
         _ => {}
     }
     return value;
-}}
+}
 unsafe extern "C" fn xmlDictComputeFastQKey(
     mut prefix: *const xmlChar,
     mut plen: ::core::ffi::c_int,
     mut name: *const xmlChar,
     mut len: ::core::ffi::c_int,
     mut seed: ::core::ffi::c_int,
-) -> ::core::ffi::c_ulong { unsafe {
+) -> ::core::ffi::c_ulong {
     let mut value: ::core::ffi::c_ulong = seed as ::core::ffi::c_ulong;
     if plen == 0 as ::core::ffi::c_int {
         value = value.wrapping_add(
@@ -521,7 +582,8 @@ unsafe extern "C" fn xmlDictComputeFastQKey(
         );
     } else {
         value = value.wrapping_add(
-            (30 as ::core::ffi::c_int * *prefix as ::core::ffi::c_int) as ::core::ffi::c_ulong,
+            (30 as ::core::ffi::c_int as ::core::ffi::c_ulong)
+                .wrapping_mul(dict_code_unit(prefix, 0)),
         );
     }
     if len > 10 as ::core::ffi::c_int {
@@ -530,7 +592,7 @@ unsafe extern "C" fn xmlDictComputeFastQKey(
         if offset < 0 as ::core::ffi::c_int {
             offset = len - (10 as ::core::ffi::c_int + 1 as ::core::ffi::c_int);
         }
-        value = value.wrapping_add(*name.offset(offset as isize) as ::core::ffi::c_ulong);
+        value = value.wrapping_add(dict_code_unit(name, offset));
         len = 10 as ::core::ffi::c_int;
         if plen > 10 as ::core::ffi::c_int {
             plen = 10 as ::core::ffi::c_int;
@@ -539,9 +601,7 @@ unsafe extern "C" fn xmlDictComputeFastQKey(
     let mut current_block_20: u64;
     match plen {
         10 => {
-            value = value.wrapping_add(
-                *prefix.offset(9 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(prefix, 9 as ::core::ffi::c_int));
             current_block_20 = 9537446021666286793;
         }
         9 => {
@@ -577,81 +637,63 @@ unsafe extern "C" fn xmlDictComputeFastQKey(
     }
     match current_block_20 {
         9537446021666286793 => {
-            value = value.wrapping_add(
-                *prefix.offset(8 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(prefix, 8 as ::core::ffi::c_int));
             current_block_20 = 9570895743713506940;
         }
         _ => {}
     }
     match current_block_20 {
         9570895743713506940 => {
-            value = value.wrapping_add(
-                *prefix.offset(7 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(prefix, 7 as ::core::ffi::c_int));
             current_block_20 = 3809271318960479663;
         }
         _ => {}
     }
     match current_block_20 {
         3809271318960479663 => {
-            value = value.wrapping_add(
-                *prefix.offset(6 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(prefix, 6 as ::core::ffi::c_int));
             current_block_20 = 1760573699125010265;
         }
         _ => {}
     }
     match current_block_20 {
         1760573699125010265 => {
-            value = value.wrapping_add(
-                *prefix.offset(5 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(prefix, 5 as ::core::ffi::c_int));
             current_block_20 = 8203539728489389117;
         }
         _ => {}
     }
     match current_block_20 {
         8203539728489389117 => {
-            value = value.wrapping_add(
-                *prefix.offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(prefix, 4 as ::core::ffi::c_int));
             current_block_20 = 3174106958175389174;
         }
         _ => {}
     }
     match current_block_20 {
         3174106958175389174 => {
-            value = value.wrapping_add(
-                *prefix.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(prefix, 3 as ::core::ffi::c_int));
             current_block_20 = 71433336188168654;
         }
         _ => {}
     }
     match current_block_20 {
         71433336188168654 => {
-            value = value.wrapping_add(
-                *prefix.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(prefix, 2 as ::core::ffi::c_int));
             current_block_20 = 6539070127515362870;
         }
         _ => {}
     }
     match current_block_20 {
         6539070127515362870 => {
-            value = value.wrapping_add(
-                *prefix.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(prefix, 1 as ::core::ffi::c_int));
             current_block_20 = 10006674590530960285;
         }
         _ => {}
     }
     match current_block_20 {
         10006674590530960285 => {
-            value = value.wrapping_add(
-                *prefix.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(prefix, 0 as ::core::ffi::c_int));
         }
         _ => {}
     }
@@ -663,9 +705,7 @@ unsafe extern "C" fn xmlDictComputeFastQKey(
     let mut current_block_36: u64;
     match len {
         10 => {
-            value = value.wrapping_add(
-                *name.offset(9 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 9 as ::core::ffi::c_int));
             current_block_36 = 9108573116658949053;
         }
         9 => {
@@ -701,86 +741,68 @@ unsafe extern "C" fn xmlDictComputeFastQKey(
     }
     match current_block_36 {
         9108573116658949053 => {
-            value = value.wrapping_add(
-                *name.offset(8 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 8 as ::core::ffi::c_int));
             current_block_36 = 16454796981030128573;
         }
         _ => {}
     }
     match current_block_36 {
         16454796981030128573 => {
-            value = value.wrapping_add(
-                *name.offset(7 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 7 as ::core::ffi::c_int));
             current_block_36 = 10379619488888424139;
         }
         _ => {}
     }
     match current_block_36 {
         10379619488888424139 => {
-            value = value.wrapping_add(
-                *name.offset(6 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 6 as ::core::ffi::c_int));
             current_block_36 = 18024754184016332365;
         }
         _ => {}
     }
     match current_block_36 {
         18024754184016332365 => {
-            value = value.wrapping_add(
-                *name.offset(5 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 5 as ::core::ffi::c_int));
             current_block_36 = 8167404252455708155;
         }
         _ => {}
     }
     match current_block_36 {
         8167404252455708155 => {
-            value = value.wrapping_add(
-                *name.offset(4 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 4 as ::core::ffi::c_int));
             current_block_36 = 16790513941173568777;
         }
         _ => {}
     }
     match current_block_36 {
         16790513941173568777 => {
-            value = value.wrapping_add(
-                *name.offset(3 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 3 as ::core::ffi::c_int));
             current_block_36 = 2447873016272255407;
         }
         _ => {}
     }
     match current_block_36 {
         2447873016272255407 => {
-            value = value.wrapping_add(
-                *name.offset(2 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 2 as ::core::ffi::c_int));
             current_block_36 = 3840978892466691305;
         }
         _ => {}
     }
     match current_block_36 {
         3840978892466691305 => {
-            value = value.wrapping_add(
-                *name.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 1 as ::core::ffi::c_int));
             current_block_36 = 11321417492605204613;
         }
         _ => {}
     }
     match current_block_36 {
         11321417492605204613 => {
-            value = value.wrapping_add(
-                *name.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_ulong
-            );
+            value = value.wrapping_add(dict_code_unit(name, 0 as ::core::ffi::c_int));
         }
         _ => {}
     }
     return value;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDictCreate() -> xmlDictPtr {
     let mut dict: xmlDictPtr = ::core::ptr::null_mut::<xmlDict>();
@@ -799,19 +821,23 @@ pub unsafe extern "C" fn xmlDictCreate() -> xmlDictPtr {
         dict_ref.limit = 0 as size_t;
         dict_ref.size = MIN_DICT_SIZE as size_t;
         dict_ref.nbElems = 0 as ::core::ffi::c_uint;
-        dict_ref.dict = unsafe { xmlMalloc.expect("non-null function pointer")(
-            (MIN_DICT_SIZE as size_t)
-                .wrapping_mul(::core::mem::size_of::<xmlDictEntry>() as size_t),
-        ) as *mut _xmlDictEntry };
+        dict_ref.dict = unsafe {
+            xmlMalloc.expect("non-null function pointer")(
+                (MIN_DICT_SIZE as size_t)
+                    .wrapping_mul(::core::mem::size_of::<xmlDictEntry>() as size_t),
+            ) as *mut _xmlDictEntry
+        };
         dict_ref.strings = ::core::ptr::null_mut::<xmlDictStrings>();
         dict_ref.subdict = ::core::ptr::null_mut::<_xmlDict>();
         if !dict_ref.dict.is_null() {
-            unsafe { memset(
-                dict_ref.dict as *mut ::core::ffi::c_void,
-                0 as ::core::ffi::c_int,
-                (MIN_DICT_SIZE as size_t)
-                    .wrapping_mul(::core::mem::size_of::<xmlDictEntry>() as size_t),
-            ) };
+            unsafe {
+                memset(
+                    dict_ref.dict as *mut ::core::ffi::c_void,
+                    0 as ::core::ffi::c_int,
+                    (MIN_DICT_SIZE as size_t)
+                        .wrapping_mul(::core::mem::size_of::<xmlDictEntry>() as size_t),
+                )
+            };
             dict_ref.seed = unsafe { __xmlRandom() };
             return dict;
         }
@@ -890,9 +916,21 @@ unsafe extern "C" fn xmlDictGrow(mut dict: xmlDictPtr, mut size: size_t) -> ::co
         let okey = if keep_keys != 0 {
             old_entry.okey
         } else if dict.size == MIN_DICT_SIZE as size_t {
-            unsafe { xmlDictComputeFastKey(old_entry.name, old_entry.len as ::core::ffi::c_int, dict.seed) }
+            unsafe {
+                xmlDictComputeFastKey(
+                    old_entry.name,
+                    old_entry.len as ::core::ffi::c_int,
+                    dict.seed,
+                )
+            }
         } else {
-            unsafe { xmlDictComputeBigKey(old_entry.name, old_entry.len as ::core::ffi::c_int, dict.seed) as ::core::ffi::c_ulong }
+            unsafe {
+                xmlDictComputeBigKey(
+                    old_entry.name,
+                    old_entry.len as ::core::ffi::c_int,
+                    dict.seed,
+                ) as ::core::ffi::c_ulong
+            }
         };
         let key = (okey as size_t).wrapping_rem(dict.size) as usize;
         if new_entries[key].valid == 0 as ::core::ffi::c_int {
@@ -926,9 +964,18 @@ unsafe extern "C" fn xmlDictGrow(mut dict: xmlDictPtr, mut size: size_t) -> ::co
             let okey = if keep_keys != 0 {
                 unsafe { (*iter).okey }
             } else if dict.size == MIN_DICT_SIZE as size_t {
-                unsafe { xmlDictComputeFastKey((*iter).name, (*iter).len as ::core::ffi::c_int, dict.seed) }
+                unsafe {
+                    xmlDictComputeFastKey(
+                        (*iter).name,
+                        (*iter).len as ::core::ffi::c_int,
+                        dict.seed,
+                    )
+                }
             } else {
-                unsafe { xmlDictComputeBigKey((*iter).name, (*iter).len as ::core::ffi::c_int, dict.seed) as ::core::ffi::c_ulong }
+                unsafe {
+                    xmlDictComputeBigKey((*iter).name, (*iter).len as ::core::ffi::c_int, dict.seed)
+                        as ::core::ffi::c_ulong
+                }
             };
             let key = (okey as size_t).wrapping_rem(dict.size) as usize;
             if new_entries[key].valid == 0 as ::core::ffi::c_int {
@@ -936,7 +983,9 @@ unsafe extern "C" fn xmlDictGrow(mut dict: xmlDictPtr, mut size: size_t) -> ::co
                 new_entries[key].next = ::core::ptr::null_mut::<_xmlDictEntry>();
                 new_entries[key].valid = 1 as ::core::ffi::c_int;
                 new_entries[key].okey = okey;
-                unsafe { xmlFree.expect("non-null function pointer")(iter as *mut ::core::ffi::c_void) };
+                unsafe {
+                    xmlFree.expect("non-null function pointer")(iter as *mut ::core::ffi::c_void)
+                };
             } else {
                 unsafe { (*iter).next = new_entries[key].next };
                 unsafe { (*iter).okey = okey };
@@ -949,476 +998,368 @@ unsafe extern "C" fn xmlDictGrow(mut dict: xmlDictPtr, mut size: size_t) -> ::co
     return ret;
 }
 #[no_mangle]
-pub unsafe extern "C" fn xmlDictFree(mut dict: xmlDictPtr) { unsafe {
-    let mut i: size_t = 0;
-    let mut iter: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-    let mut next: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-    let mut inside_dict: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
-    let mut pool: xmlDictStringsPtr = ::core::ptr::null_mut::<xmlDictStrings>();
-    let mut nextp: xmlDictStringsPtr = ::core::ptr::null_mut::<xmlDictStrings>();
-    if dict.is_null() {
+pub unsafe extern "C" fn xmlDictFree(mut dict: xmlDictPtr) {
+    let Some(dict_ref) = (unsafe { dict.as_mut() }) else {
         return;
-    }
-    if xmlDictInitialized == 0 {
-        if __xmlInitializeDict() == 0 {
+    };
+    if unsafe { xmlDictInitialized } == 0 {
+        if unsafe { __xmlInitializeDict() } == 0 {
             return;
         }
     }
-    xmlRMutexLock(xmlDictMutex);
-    (*dict).ref_counter -= 1;
-    if (*dict).ref_counter > 0 as ::core::ffi::c_int {
-        xmlRMutexUnlock(xmlDictMutex);
+    unsafe {
+        xmlRMutexLock(xmlDictMutex);
+    }
+    dict_ref.ref_counter -= 1;
+    if dict_ref.ref_counter > 0 as ::core::ffi::c_int {
+        unsafe {
+            xmlRMutexUnlock(xmlDictMutex);
+        }
         return;
     }
-    xmlRMutexUnlock(xmlDictMutex);
-    if !(*dict).subdict.is_null() {
-        xmlDictFree((*dict).subdict as xmlDictPtr);
+    unsafe {
+        xmlRMutexUnlock(xmlDictMutex);
     }
-    if !(*dict).dict.is_null() {
-        i = 0 as size_t;
-        while i < (*dict).size && (*dict).nbElems > 0 as ::core::ffi::c_uint {
-            iter = (*dict).dict.offset(i as isize) as *mut _xmlDictEntry as xmlDictEntryPtr;
-            if !((*iter).valid == 0 as ::core::ffi::c_int) {
-                inside_dict = 1 as ::core::ffi::c_int;
+    let subdict = dict_ref.subdict as xmlDictPtr;
+    if !subdict.is_null() {
+        unsafe {
+            xmlDictFree(subdict);
+        }
+    }
+    let dict_table = dict_ref.dict;
+    let size = dict_ref.size;
+    if !dict_table.is_null() {
+        let mut i = 0 as size_t;
+        while i < size && dict_ref.nbElems > 0 as ::core::ffi::c_uint {
+            let mut iter = unsafe { dict_table.offset(i as isize) as xmlDictEntryPtr };
+            if dict_entry_valid(iter) {
+                let mut inside_dict = true;
                 while !iter.is_null() {
-                    next = (*iter).next as xmlDictEntryPtr;
-                    if inside_dict == 0 {
-                        xmlFree.expect("non-null function pointer")(
-                            iter as *mut ::core::ffi::c_void,
-                        );
+                    let next = dict_entry_next(iter);
+                    if !inside_dict {
+                        unsafe {
+                            xmlFree.expect("non-null function pointer")(
+                                iter as *mut ::core::ffi::c_void,
+                            );
+                        }
                     }
-                    (*dict).nbElems = (*dict).nbElems.wrapping_sub(1);
-                    inside_dict = 0 as ::core::ffi::c_int;
+                    dict_ref.nbElems = dict_ref.nbElems.wrapping_sub(1);
+                    inside_dict = false;
                     iter = next;
                 }
             }
             i = i.wrapping_add(1);
         }
-        xmlFree.expect("non-null function pointer")((*dict).dict as *mut ::core::ffi::c_void);
+        unsafe {
+            xmlFree.expect("non-null function pointer")(dict_table as *mut ::core::ffi::c_void);
+        }
     }
-    pool = (*dict).strings;
+    let mut pool = dict_ref.strings;
     while !pool.is_null() {
-        nextp = (*pool).next;
-        xmlFree.expect("non-null function pointer")(pool as *mut ::core::ffi::c_void);
+        let nextp = unsafe { (*pool).next };
+        unsafe {
+            xmlFree.expect("non-null function pointer")(pool as *mut ::core::ffi::c_void);
+        }
         pool = nextp;
     }
-    xmlFree.expect("non-null function pointer")(dict as *mut ::core::ffi::c_void);
-}}
+    unsafe {
+        xmlFree.expect("non-null function pointer")(dict as *mut ::core::ffi::c_void);
+    }
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDictLookup(
     mut dict: xmlDictPtr,
     mut name: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> *const xmlChar { unsafe {
-    let mut key: ::core::ffi::c_ulong = 0;
-    let mut okey: ::core::ffi::c_ulong = 0;
-    let mut nbi: ::core::ffi::c_ulong = 0 as ::core::ffi::c_ulong;
-    let mut entry: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-    let mut insert: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-    let mut ret: *const xmlChar = ::core::ptr::null::<xmlChar>();
-    let mut l: ::core::ffi::c_uint = 0;
-    if dict.is_null() || name.is_null() {
+) -> *const xmlChar {
+    let Some(dict_ref) = (unsafe { dict.as_mut() }) else {
+        return ::core::ptr::null::<xmlChar>();
+    };
+    if name.is_null() {
         return ::core::ptr::null::<xmlChar>();
     }
-    if len < 0 as ::core::ffi::c_int {
-        l = strlen(name as *const ::core::ffi::c_char) as ::core::ffi::c_uint;
+    let l = if len < 0 as ::core::ffi::c_int {
+        unsafe { strlen(name as *const ::core::ffi::c_char) as ::core::ffi::c_uint }
     } else {
-        l = len as ::core::ffi::c_uint;
-    }
-    if (*dict).limit > 0 as size_t && l as size_t >= (*dict).limit
+        len as ::core::ffi::c_uint
+    };
+    if (dict_ref.limit > 0 as size_t && l as size_t >= dict_ref.limit)
         || l > (INT_MAX / 2 as ::core::ffi::c_int) as ::core::ffi::c_uint
     {
         return ::core::ptr::null::<xmlChar>();
     }
-    okey = if (*dict).size == MIN_DICT_SIZE as size_t {
-        xmlDictComputeFastKey(name, l as ::core::ffi::c_int, (*dict).seed)
+    let okey = dict_compute_key(dict_ref.size, name, l as ::core::ffi::c_int, dict_ref.seed);
+    let mut key = (okey as size_t).wrapping_rem(dict_ref.size) as ::core::ffi::c_ulong;
+    let bucket = dict_bucket_entry(dict_ref, key);
+    let mut nbi = 0 as ::core::ffi::c_ulong;
+    let mut insert = if dict_entry_valid(bucket) {
+        bucket
     } else {
-        xmlDictComputeBigKey(name, l as ::core::ffi::c_int, (*dict).seed) as ::core::ffi::c_ulong
+        ::core::ptr::null_mut::<xmlDictEntry>()
     };
-    key = (okey as size_t).wrapping_rem((*dict).size) as ::core::ffi::c_ulong;
-    if (*(*dict).dict.offset(key as isize)).valid == 0 as ::core::ffi::c_int {
-        insert = ::core::ptr::null_mut::<xmlDictEntry>();
-    } else {
-        insert = (*dict).dict.offset(key as isize) as *mut _xmlDictEntry as xmlDictEntryPtr;
-        while !(*insert).next.is_null() {
-            if (*insert).okey == okey && (*insert).len == l {
-                if memcmp(
-                    (*insert).name as *const ::core::ffi::c_void,
-                    name as *const ::core::ffi::c_void,
-                    l as size_t,
-                ) == 0
-                {
-                    return (*insert).name;
-                }
-            }
-            nbi = nbi.wrapping_add(1);
-            insert = (*insert).next as xmlDictEntryPtr;
+    while !insert.is_null() {
+        if dict_entry_matches(insert, okey, l, name) {
+            return dict_entry_name(insert);
         }
-        if (*insert).okey == okey && (*insert).len == l {
-            if memcmp(
-                (*insert).name as *const ::core::ffi::c_void,
-                name as *const ::core::ffi::c_void,
-                l as size_t,
-            ) == 0
-            {
-                return (*insert).name;
-            }
+        let next = dict_entry_next(insert);
+        if next.is_null() {
+            break;
         }
+        nbi = nbi.wrapping_add(1);
+        insert = next;
     }
-    if !(*dict).subdict.is_null() {
-        let mut skey: ::core::ffi::c_ulong = 0;
-        if (*dict).size == MIN_DICT_SIZE as size_t
-            && (*(*dict).subdict).size != MIN_DICT_SIZE as size_t
-            || (*dict).size != MIN_DICT_SIZE as size_t
-                && (*(*dict).subdict).size == MIN_DICT_SIZE as size_t
+    if let Some(subdict) = unsafe { dict_ref.subdict.as_ref() } {
+        let skey = if (dict_ref.size == MIN_DICT_SIZE as size_t
+            && subdict.size != MIN_DICT_SIZE as size_t)
+            || (dict_ref.size != MIN_DICT_SIZE as size_t && subdict.size == MIN_DICT_SIZE as size_t)
         {
-            skey = if (*(*dict).subdict).size == MIN_DICT_SIZE as size_t {
-                xmlDictComputeFastKey(name, l as ::core::ffi::c_int, (*(*dict).subdict).seed)
-            } else {
-                xmlDictComputeBigKey(name, l as ::core::ffi::c_int, (*(*dict).subdict).seed)
-                    as ::core::ffi::c_ulong
-            };
+            dict_compute_key(subdict.size, name, l as ::core::ffi::c_int, subdict.seed)
         } else {
-            skey = okey;
-        }
-        key = (skey as size_t).wrapping_rem((*(*dict).subdict).size) as ::core::ffi::c_ulong;
-        if (*(*(*dict).subdict).dict.offset(key as isize)).valid != 0 as ::core::ffi::c_int {
-            let mut tmp: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-            tmp = (*(*dict).subdict).dict.offset(key as isize) as *mut _xmlDictEntry
-                as xmlDictEntryPtr;
-            while !(*tmp).next.is_null() {
-                if (*tmp).okey == skey && (*tmp).len == l {
-                    if memcmp(
-                        (*tmp).name as *const ::core::ffi::c_void,
-                        name as *const ::core::ffi::c_void,
-                        l as size_t,
-                    ) == 0
-                    {
-                        return (*tmp).name;
-                    }
+            okey
+        };
+        key = (skey as size_t).wrapping_rem(subdict.size) as ::core::ffi::c_ulong;
+        let mut tmp = dict_bucket_entry(subdict, key);
+        if dict_entry_valid(tmp) {
+            while !tmp.is_null() {
+                if dict_entry_matches(tmp, skey, l, name) {
+                    return dict_entry_name(tmp);
+                }
+                let next = dict_entry_next(tmp);
+                if next.is_null() {
+                    break;
                 }
                 nbi = nbi.wrapping_add(1);
-                tmp = (*tmp).next as xmlDictEntryPtr;
-            }
-            if (*tmp).okey == skey && (*tmp).len == l {
-                if memcmp(
-                    (*tmp).name as *const ::core::ffi::c_void,
-                    name as *const ::core::ffi::c_void,
-                    l as size_t,
-                ) == 0
-                {
-                    return (*tmp).name;
-                }
+                tmp = next;
             }
         }
-        key = (okey as size_t).wrapping_rem((*dict).size) as ::core::ffi::c_ulong;
+        key = (okey as size_t).wrapping_rem(dict_ref.size) as ::core::ffi::c_ulong;
     }
-    ret = xmlDictAddString(dict, name, l);
+    let ret = unsafe { xmlDictAddString(dict, name, l) };
     if ret.is_null() {
         return ::core::ptr::null::<xmlChar>();
     }
-    if insert.is_null() {
-        entry = (*dict).dict.offset(key as isize) as *mut _xmlDictEntry as xmlDictEntryPtr;
+    let entry = if insert.is_null() {
+        bucket
     } else {
-        entry = xmlMalloc.expect("non-null function pointer")(
-            ::core::mem::size_of::<xmlDictEntry>() as size_t,
-        ) as xmlDictEntryPtr;
+        let entry = unsafe {
+            xmlMalloc.expect("non-null function pointer")(
+                ::core::mem::size_of::<xmlDictEntry>() as size_t
+            ) as xmlDictEntryPtr
+        };
         if entry.is_null() {
             return ::core::ptr::null::<xmlChar>();
         }
+        entry
+    };
+    unsafe {
+        (*entry).name = ret;
+        (*entry).len = l;
+        (*entry).next = ::core::ptr::null_mut::<_xmlDictEntry>();
+        (*entry).valid = 1 as ::core::ffi::c_int;
+        (*entry).okey = okey;
     }
-    (*entry).name = ret;
-    (*entry).len = l;
-    (*entry).next = ::core::ptr::null_mut::<_xmlDictEntry>();
-    (*entry).valid = 1 as ::core::ffi::c_int;
-    (*entry).okey = okey;
     if !insert.is_null() {
-        (*insert).next = entry as *mut _xmlDictEntry;
-    }
-    (*dict).nbElems = (*dict).nbElems.wrapping_add(1);
-    if nbi > MAX_HASH_LEN as ::core::ffi::c_ulong
-        && (*dict).size <= (MAX_DICT_HASH / 2 as ::core::ffi::c_int / MAX_HASH_LEN) as size_t
-    {
-        if xmlDictGrow(
-            dict,
-            ((MAX_HASH_LEN * 2 as ::core::ffi::c_int) as size_t).wrapping_mul((*dict).size),
-        ) != 0 as ::core::ffi::c_int
-        {
-            return ::core::ptr::null::<xmlChar>();
+        unsafe {
+            (*insert).next = entry as *mut _xmlDictEntry;
         }
     }
+    dict_ref.nbElems = dict_ref.nbElems.wrapping_add(1);
+    if nbi > MAX_HASH_LEN as ::core::ffi::c_ulong
+        && dict_ref.size <= (MAX_DICT_HASH / 2 as ::core::ffi::c_int / MAX_HASH_LEN) as size_t
+        && unsafe {
+            xmlDictGrow(
+                dict,
+                ((MAX_HASH_LEN * 2 as ::core::ffi::c_int) as size_t).wrapping_mul(dict_ref.size),
+            )
+        } != 0 as ::core::ffi::c_int
+    {
+        return ::core::ptr::null::<xmlChar>();
+    }
     return ret;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDictExists(
     mut dict: xmlDictPtr,
     mut name: *const xmlChar,
     mut len: ::core::ffi::c_int,
-) -> *const xmlChar { unsafe {
-    let mut key: ::core::ffi::c_ulong = 0;
-    let mut okey: ::core::ffi::c_ulong = 0;
-    let mut nbi: ::core::ffi::c_ulong = 0 as ::core::ffi::c_ulong;
-    let mut insert: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-    let mut l: ::core::ffi::c_uint = 0;
-    if dict.is_null() || name.is_null() {
+) -> *const xmlChar {
+    let Some(dict_ref) = (unsafe { dict.as_ref() }) else {
+        return ::core::ptr::null::<xmlChar>();
+    };
+    if name.is_null() {
         return ::core::ptr::null::<xmlChar>();
     }
-    if len < 0 as ::core::ffi::c_int {
-        l = strlen(name as *const ::core::ffi::c_char) as ::core::ffi::c_uint;
+    let l = if len < 0 as ::core::ffi::c_int {
+        unsafe { strlen(name as *const ::core::ffi::c_char) as ::core::ffi::c_uint }
     } else {
-        l = len as ::core::ffi::c_uint;
-    }
-    if (*dict).limit > 0 as size_t && l as size_t >= (*dict).limit
+        len as ::core::ffi::c_uint
+    };
+    if (dict_ref.limit > 0 as size_t && l as size_t >= dict_ref.limit)
         || l > (INT_MAX / 2 as ::core::ffi::c_int) as ::core::ffi::c_uint
     {
         return ::core::ptr::null::<xmlChar>();
     }
-    okey = if (*dict).size == MIN_DICT_SIZE as size_t {
-        xmlDictComputeFastKey(name, l as ::core::ffi::c_int, (*dict).seed)
-    } else {
-        xmlDictComputeBigKey(name, l as ::core::ffi::c_int, (*dict).seed) as ::core::ffi::c_ulong
-    };
-    key = (okey as size_t).wrapping_rem((*dict).size) as ::core::ffi::c_ulong;
-    if (*(*dict).dict.offset(key as isize)).valid == 0 as ::core::ffi::c_int {
-        insert = ::core::ptr::null_mut::<xmlDictEntry>();
-    } else {
-        insert = (*dict).dict.offset(key as isize) as *mut _xmlDictEntry as xmlDictEntryPtr;
-        while !(*insert).next.is_null() {
-            if (*insert).okey == okey && (*insert).len == l {
-                if memcmp(
-                    (*insert).name as *const ::core::ffi::c_void,
-                    name as *const ::core::ffi::c_void,
-                    l as size_t,
-                ) == 0
-                {
-                    return (*insert).name;
-                }
+    let okey = dict_compute_key(dict_ref.size, name, l as ::core::ffi::c_int, dict_ref.seed);
+    let key = (okey as size_t).wrapping_rem(dict_ref.size) as ::core::ffi::c_ulong;
+    let mut insert = dict_bucket_entry(dict_ref, key);
+    if dict_entry_valid(insert) {
+        while !insert.is_null() {
+            if dict_entry_matches(insert, okey, l, name) {
+                return dict_entry_name(insert);
             }
-            nbi = nbi.wrapping_add(1);
-            insert = (*insert).next as xmlDictEntryPtr;
-        }
-        if (*insert).okey == okey && (*insert).len == l {
-            if memcmp(
-                (*insert).name as *const ::core::ffi::c_void,
-                name as *const ::core::ffi::c_void,
-                l as size_t,
-            ) == 0
-            {
-                return (*insert).name;
+            let next = dict_entry_next(insert);
+            if next.is_null() {
+                break;
             }
+            insert = next;
         }
     }
-    if !(*dict).subdict.is_null() {
-        let mut skey: ::core::ffi::c_ulong = 0;
-        if (*dict).size == MIN_DICT_SIZE as size_t
-            && (*(*dict).subdict).size != MIN_DICT_SIZE as size_t
-            || (*dict).size != MIN_DICT_SIZE as size_t
-                && (*(*dict).subdict).size == MIN_DICT_SIZE as size_t
+    if let Some(subdict) = unsafe { dict_ref.subdict.as_ref() } {
+        let skey = if (dict_ref.size == MIN_DICT_SIZE as size_t
+            && subdict.size != MIN_DICT_SIZE as size_t)
+            || (dict_ref.size != MIN_DICT_SIZE as size_t && subdict.size == MIN_DICT_SIZE as size_t)
         {
-            skey = if (*(*dict).subdict).size == MIN_DICT_SIZE as size_t {
-                xmlDictComputeFastKey(name, l as ::core::ffi::c_int, (*(*dict).subdict).seed)
-            } else {
-                xmlDictComputeBigKey(name, l as ::core::ffi::c_int, (*(*dict).subdict).seed)
-                    as ::core::ffi::c_ulong
-            };
+            dict_compute_key(subdict.size, name, l as ::core::ffi::c_int, subdict.seed)
         } else {
-            skey = okey;
-        }
-        key = (skey as size_t).wrapping_rem((*(*dict).subdict).size) as ::core::ffi::c_ulong;
-        if (*(*(*dict).subdict).dict.offset(key as isize)).valid != 0 as ::core::ffi::c_int {
-            let mut tmp: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-            tmp = (*(*dict).subdict).dict.offset(key as isize) as *mut _xmlDictEntry
-                as xmlDictEntryPtr;
-            while !(*tmp).next.is_null() {
-                if (*tmp).okey == skey && (*tmp).len == l {
-                    if memcmp(
-                        (*tmp).name as *const ::core::ffi::c_void,
-                        name as *const ::core::ffi::c_void,
-                        l as size_t,
-                    ) == 0
-                    {
-                        return (*tmp).name;
-                    }
+            okey
+        };
+        let key = (skey as size_t).wrapping_rem(subdict.size) as ::core::ffi::c_ulong;
+        let mut tmp = dict_bucket_entry(subdict, key);
+        if dict_entry_valid(tmp) {
+            while !tmp.is_null() {
+                if dict_entry_matches(tmp, skey, l, name) {
+                    return dict_entry_name(tmp);
                 }
-                nbi = nbi.wrapping_add(1);
-                tmp = (*tmp).next as xmlDictEntryPtr;
-            }
-            if (*tmp).okey == skey && (*tmp).len == l {
-                if memcmp(
-                    (*tmp).name as *const ::core::ffi::c_void,
-                    name as *const ::core::ffi::c_void,
-                    l as size_t,
-                ) == 0
-                {
-                    return (*tmp).name;
+                let next = dict_entry_next(tmp);
+                if next.is_null() {
+                    break;
                 }
+                tmp = next;
             }
         }
     }
     return ::core::ptr::null::<xmlChar>();
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDictQLookup(
     mut dict: xmlDictPtr,
     mut prefix: *const xmlChar,
     mut name: *const xmlChar,
-) -> *const xmlChar { unsafe {
-    let mut okey: ::core::ffi::c_ulong = 0;
-    let mut key: ::core::ffi::c_ulong = 0;
-    let mut nbi: ::core::ffi::c_ulong = 0 as ::core::ffi::c_ulong;
-    let mut entry: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-    let mut insert: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-    let mut ret: *const xmlChar = ::core::ptr::null::<xmlChar>();
-    let mut len: ::core::ffi::c_uint = 0;
-    let mut plen: ::core::ffi::c_uint = 0;
-    let mut l: ::core::ffi::c_uint = 0;
-    if dict.is_null() || name.is_null() {
+) -> *const xmlChar {
+    let Some(dict_ref) = (unsafe { dict.as_mut() }) else {
+        return ::core::ptr::null::<xmlChar>();
+    };
+    if name.is_null() {
         return ::core::ptr::null::<xmlChar>();
     }
     if prefix.is_null() {
-        return xmlDictLookup(dict, name, -(1 as ::core::ffi::c_int));
+        return unsafe { xmlDictLookup(dict, name, -(1 as ::core::ffi::c_int)) };
     }
-    len = strlen(name as *const ::core::ffi::c_char) as ::core::ffi::c_uint;
-    l = len;
-    plen = strlen(prefix as *const ::core::ffi::c_char) as ::core::ffi::c_uint;
-    len = len.wrapping_add((1 as ::core::ffi::c_uint).wrapping_add(plen));
-    okey = if prefix.is_null() {
-        if (*dict).size == MIN_DICT_SIZE as size_t {
-            xmlDictComputeFastKey(name, l as ::core::ffi::c_int, (*dict).seed)
-        } else {
-            xmlDictComputeBigKey(name, l as ::core::ffi::c_int, (*dict).seed)
-                as ::core::ffi::c_ulong
-        }
-    } else if (*dict).size == MIN_DICT_SIZE as size_t {
-        xmlDictComputeFastQKey(
-            prefix,
-            plen as ::core::ffi::c_int,
-            name,
-            l as ::core::ffi::c_int,
-            (*dict).seed,
-        )
+    let l = unsafe { strlen(name as *const ::core::ffi::c_char) as ::core::ffi::c_uint };
+    let plen = unsafe { strlen(prefix as *const ::core::ffi::c_char) as ::core::ffi::c_uint };
+    let len = l.wrapping_add((1 as ::core::ffi::c_uint).wrapping_add(plen));
+    let okey = dict_compute_qkey(
+        dict_ref.size,
+        prefix,
+        plen as ::core::ffi::c_int,
+        name,
+        l as ::core::ffi::c_int,
+        dict_ref.seed,
+    );
+    let mut key = (okey as size_t).wrapping_rem(dict_ref.size) as ::core::ffi::c_ulong;
+    let bucket = dict_bucket_entry(dict_ref, key);
+    let mut nbi = 0 as ::core::ffi::c_ulong;
+    let mut insert = if dict_entry_valid(bucket) {
+        bucket
     } else {
-        xmlDictComputeBigQKey(
-            prefix,
-            plen as ::core::ffi::c_int,
-            name,
-            l as ::core::ffi::c_int,
-            (*dict).seed,
-        )
+        ::core::ptr::null_mut::<xmlDictEntry>()
     };
-    key = (okey as size_t).wrapping_rem((*dict).size) as ::core::ffi::c_ulong;
-    if (*(*dict).dict.offset(key as isize)).valid == 0 as ::core::ffi::c_int {
-        insert = ::core::ptr::null_mut::<xmlDictEntry>();
-    } else {
-        insert = (*dict).dict.offset(key as isize) as *mut _xmlDictEntry as xmlDictEntryPtr;
-        while !(*insert).next.is_null() {
-            if (*insert).okey == okey
-                && (*insert).len == len
-                && xmlStrQEqual(prefix, name, (*insert).name) != 0
-            {
-                return (*insert).name;
-            }
-            nbi = nbi.wrapping_add(1);
-            insert = (*insert).next as xmlDictEntryPtr;
+    while !insert.is_null() {
+        if dict_qentry_matches(insert, okey, len, prefix, name) {
+            return dict_entry_name(insert);
         }
-        if (*insert).okey == okey
-            && (*insert).len == len
-            && xmlStrQEqual(prefix, name, (*insert).name) != 0
-        {
-            return (*insert).name;
+        let next = dict_entry_next(insert);
+        if next.is_null() {
+            break;
         }
+        nbi = nbi.wrapping_add(1);
+        insert = next;
     }
-    if !(*dict).subdict.is_null() {
-        let mut skey: ::core::ffi::c_ulong = 0;
-        if (*dict).size == MIN_DICT_SIZE as size_t
-            && (*(*dict).subdict).size != MIN_DICT_SIZE as size_t
-            || (*dict).size != MIN_DICT_SIZE as size_t
-                && (*(*dict).subdict).size == MIN_DICT_SIZE as size_t
+    if let Some(subdict) = unsafe { dict_ref.subdict.as_ref() } {
+        let skey = if (dict_ref.size == MIN_DICT_SIZE as size_t
+            && subdict.size != MIN_DICT_SIZE as size_t)
+            || (dict_ref.size != MIN_DICT_SIZE as size_t && subdict.size == MIN_DICT_SIZE as size_t)
         {
-            skey = if prefix.is_null() {
-                if (*(*dict).subdict).size == MIN_DICT_SIZE as size_t {
-                    xmlDictComputeFastKey(name, l as ::core::ffi::c_int, (*(*dict).subdict).seed)
-                } else {
-                    xmlDictComputeBigKey(name, l as ::core::ffi::c_int, (*(*dict).subdict).seed)
-                        as ::core::ffi::c_ulong
-                }
-            } else if (*(*dict).subdict).size == MIN_DICT_SIZE as size_t {
-                xmlDictComputeFastQKey(
-                    prefix,
-                    plen as ::core::ffi::c_int,
-                    name,
-                    l as ::core::ffi::c_int,
-                    (*(*dict).subdict).seed,
-                )
-            } else {
-                xmlDictComputeBigQKey(
-                    prefix,
-                    plen as ::core::ffi::c_int,
-                    name,
-                    l as ::core::ffi::c_int,
-                    (*(*dict).subdict).seed,
-                )
-            };
+            dict_compute_qkey(
+                subdict.size,
+                prefix,
+                plen as ::core::ffi::c_int,
+                name,
+                l as ::core::ffi::c_int,
+                subdict.seed,
+            )
         } else {
-            skey = okey;
-        }
-        key = (skey as size_t).wrapping_rem((*(*dict).subdict).size) as ::core::ffi::c_ulong;
-        if (*(*(*dict).subdict).dict.offset(key as isize)).valid != 0 as ::core::ffi::c_int {
-            let mut tmp: xmlDictEntryPtr = ::core::ptr::null_mut::<xmlDictEntry>();
-            tmp = (*(*dict).subdict).dict.offset(key as isize) as *mut _xmlDictEntry
-                as xmlDictEntryPtr;
-            while !(*tmp).next.is_null() {
-                if (*tmp).okey == skey
-                    && (*tmp).len == len
-                    && xmlStrQEqual(prefix, name, (*tmp).name) != 0
-                {
-                    return (*tmp).name;
+            okey
+        };
+        key = (skey as size_t).wrapping_rem(subdict.size) as ::core::ffi::c_ulong;
+        let mut tmp = dict_bucket_entry(subdict, key);
+        if dict_entry_valid(tmp) {
+            while !tmp.is_null() {
+                if dict_qentry_matches(tmp, skey, len, prefix, name) {
+                    return dict_entry_name(tmp);
+                }
+                let next = dict_entry_next(tmp);
+                if next.is_null() {
+                    break;
                 }
                 nbi = nbi.wrapping_add(1);
-                tmp = (*tmp).next as xmlDictEntryPtr;
-            }
-            if (*tmp).okey == skey
-                && (*tmp).len == len
-                && xmlStrQEqual(prefix, name, (*tmp).name) != 0
-            {
-                return (*tmp).name;
+                tmp = next;
             }
         }
-        key = (okey as size_t).wrapping_rem((*dict).size) as ::core::ffi::c_ulong;
+        key = (okey as size_t).wrapping_rem(dict_ref.size) as ::core::ffi::c_ulong;
     }
-    ret = xmlDictAddQString(dict, prefix, plen, name, l);
+    let ret = unsafe { xmlDictAddQString(dict, prefix, plen, name, l) };
     if ret.is_null() {
         return ::core::ptr::null::<xmlChar>();
     }
-    if insert.is_null() {
-        entry = (*dict).dict.offset(key as isize) as *mut _xmlDictEntry as xmlDictEntryPtr;
+    let entry = if insert.is_null() {
+        bucket
     } else {
-        entry = xmlMalloc.expect("non-null function pointer")(
-            ::core::mem::size_of::<xmlDictEntry>() as size_t,
-        ) as xmlDictEntryPtr;
+        let entry = unsafe {
+            xmlMalloc.expect("non-null function pointer")(
+                ::core::mem::size_of::<xmlDictEntry>() as size_t
+            ) as xmlDictEntryPtr
+        };
         if entry.is_null() {
             return ::core::ptr::null::<xmlChar>();
         }
+        entry
+    };
+    unsafe {
+        (*entry).name = ret;
+        (*entry).len = len;
+        (*entry).next = ::core::ptr::null_mut::<_xmlDictEntry>();
+        (*entry).valid = 1 as ::core::ffi::c_int;
+        (*entry).okey = okey;
     }
-    (*entry).name = ret;
-    (*entry).len = len;
-    (*entry).next = ::core::ptr::null_mut::<_xmlDictEntry>();
-    (*entry).valid = 1 as ::core::ffi::c_int;
-    (*entry).okey = okey;
     if !insert.is_null() {
-        (*insert).next = entry as *mut _xmlDictEntry;
+        unsafe {
+            (*insert).next = entry as *mut _xmlDictEntry;
+        }
     }
-    (*dict).nbElems = (*dict).nbElems.wrapping_add(1);
+    dict_ref.nbElems = dict_ref.nbElems.wrapping_add(1);
     if nbi > MAX_HASH_LEN as ::core::ffi::c_ulong
-        && (*dict).size <= (MAX_DICT_HASH / 2 as ::core::ffi::c_int / MAX_HASH_LEN) as size_t
+        && dict_ref.size <= (MAX_DICT_HASH / 2 as ::core::ffi::c_int / MAX_HASH_LEN) as size_t
     {
-        xmlDictGrow(
-            dict,
-            ((MAX_HASH_LEN * 2 as ::core::ffi::c_int) as size_t).wrapping_mul((*dict).size),
-        );
+        unsafe {
+            xmlDictGrow(
+                dict,
+                ((MAX_HASH_LEN * 2 as ::core::ffi::c_int) as size_t).wrapping_mul(dict_ref.size),
+            );
+        }
     }
     return ret;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlDictOwns(
     mut dict: xmlDictPtr,
@@ -1433,12 +1374,10 @@ pub unsafe extern "C" fn xmlDictOwns(
     }
     pool = dict.strings;
     while !pool.is_null() {
-        let start = unsafe { ::core::ptr::addr_of!((*pool).array).cast::<xmlChar>() } as *const xmlChar;
+        let start =
+            unsafe { ::core::ptr::addr_of!((*pool).array).cast::<xmlChar>() } as *const xmlChar;
         let end = unsafe { (*pool).free } as *const xmlChar;
-        if str
-            >= start
-            && str <= end
-        {
+        if str >= start && str <= end {
             return 1 as ::core::ffi::c_int;
         }
         pool = unsafe { (*pool).next };
@@ -1454,7 +1393,9 @@ pub unsafe extern "C" fn xmlDictSize(mut dict: xmlDictPtr) -> ::core::ffi::c_int
         return -(1 as ::core::ffi::c_int);
     };
     if !dict.subdict.is_null() {
-        return dict.nbElems.wrapping_add(unsafe { (*dict.subdict).nbElems }) as ::core::ffi::c_int;
+        return dict
+            .nbElems
+            .wrapping_add(unsafe { (*dict.subdict).nbElems }) as ::core::ffi::c_int;
     }
     return dict.nbElems as ::core::ffi::c_int;
 }

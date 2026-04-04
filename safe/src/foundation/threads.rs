@@ -973,13 +973,14 @@ unsafe extern "C" fn xmlFreeGlobalState(mut state: *mut ::core::ffi::c_void) {
 }
 unsafe extern "C" fn xmlNewGlobalState() -> xmlGlobalStatePtr {
     let mut gs: *mut xmlGlobalState = ::core::ptr::null_mut::<xmlGlobalState>();
-    gs = unsafe { malloc(::core::mem::size_of::<xmlGlobalState>() as size_t) as *mut xmlGlobalState };
+    gs = unsafe {
+        malloc(::core::mem::size_of::<xmlGlobalState>() as size_t) as *mut xmlGlobalState
+    };
     if gs.is_null() {
         unsafe {
             (*__xmlGenericError()).expect("non-null function pointer")(
                 *__xmlGenericErrorContext(),
-                b"xmlGetGlobalState: out of memory\n\0" as *const u8
-                    as *const ::core::ffi::c_char,
+                b"xmlGetGlobalState: out of memory\n\0" as *const u8 as *const ::core::ffi::c_char,
             );
         }
         return ::core::ptr::null_mut::<xmlGlobalState>();

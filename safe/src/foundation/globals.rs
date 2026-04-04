@@ -1364,28 +1364,34 @@ pub unsafe extern "C" fn xmlInitializeGlobalState(mut gs: xmlGlobalStatePtr) {
         initxmlDefaultSAXHandler(&raw mut (*gs).xmlDefaultSAXHandler, 1 as ::core::ffi::c_int);
         (*gs).xmlDefaultSAXLocator.getPublicId = Some(
             xmlSAX2GetPublicId as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-        ) as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>;
+        )
+            as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>;
         (*gs).xmlDefaultSAXLocator.getSystemId = Some(
             xmlSAX2GetSystemId as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar,
-        ) as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>;
+        )
+            as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> *const xmlChar>;
         (*gs).xmlDefaultSAXLocator.getLineNumber = Some(
             xmlSAX2GetLineNumber
                 as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-        ) as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+        )
+            as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
         (*gs).xmlDefaultSAXLocator.getColumnNumber = Some(
             xmlSAX2GetColumnNumber
                 as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int,
-        ) as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
+        )
+            as Option<unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ::core::ffi::c_int>;
         (*gs).xmlDoValidityCheckingDefaultValue =
             *::core::ptr::addr_of!(xmlDoValidityCheckingDefaultValueThrDef);
         (*gs).xmlFree = Some(free as unsafe extern "C" fn(*mut ::core::ffi::c_void) -> ());
-        (*gs).xmlMalloc =
-            Some(malloc as unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void);
+        (*gs).xmlMalloc = Some(malloc as unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void);
         (*gs).xmlMallocAtomic =
             Some(malloc as unsafe extern "C" fn(size_t) -> *mut ::core::ffi::c_void);
         (*gs).xmlRealloc = Some(
             realloc
-                as unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t) -> *mut ::core::ffi::c_void,
+                as unsafe extern "C" fn(
+                    *mut ::core::ffi::c_void,
+                    size_t,
+                ) -> *mut ::core::ffi::c_void,
         );
         (*gs).xmlMemStrdup = Some(
             xmlPosixStrdup
@@ -1407,8 +1413,7 @@ pub unsafe extern "C" fn xmlInitializeGlobalState(mut gs: xmlGlobalStatePtr) {
         (*gs).xmlGenericError = *::core::ptr::addr_of!(xmlGenericErrorThrDef);
         (*gs).xmlStructuredError = *::core::ptr::addr_of!(xmlStructuredErrorThrDef);
         (*gs).xmlGenericErrorContext = *::core::ptr::addr_of!(xmlGenericErrorContextThrDef);
-        (*gs).xmlStructuredErrorContext =
-            *::core::ptr::addr_of!(xmlStructuredErrorContextThrDef);
+        (*gs).xmlStructuredErrorContext = *::core::ptr::addr_of!(xmlStructuredErrorContextThrDef);
         (*gs).xmlRegisterNodeDefaultValue =
             *::core::ptr::addr_of!(xmlRegisterNodeDefaultValueThrDef);
         (*gs).xmlDeregisterNodeDefaultValue =
@@ -1734,7 +1739,7 @@ pub unsafe extern "C" fn __xmlPedanticParserDefaultValue() -> *mut ::core::ffi::
 #[no_mangle]
 pub unsafe extern "C" fn xmlThrDefPedanticParserDefaultValue(
     mut v: ::core::ffi::c_int,
-)-> ::core::ffi::c_int {
+) -> ::core::ffi::c_int {
     swap_thr_def_value!(xmlPedanticParserDefaultValueThrDef, v)
 }
 #[no_mangle]

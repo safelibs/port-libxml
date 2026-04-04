@@ -99,7 +99,11 @@ extern "C" {
     fn xmlParserError(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
     fn xmlParserWarning(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
     fn xmlParserValidityError(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
-    fn xmlParserValidityWarning(ctx: *mut ::core::ffi::c_void, msg: *const ::core::ffi::c_char, ...);
+    fn xmlParserValidityWarning(
+        ctx: *mut ::core::ffi::c_void,
+        msg: *const ::core::ffi::c_char,
+        ...
+    );
     fn __xmlGetWarningsDefaultValue() -> *mut ::core::ffi::c_int;
 }
 pub type xmlChar = ::core::ffi::c_uchar;
@@ -1688,7 +1692,9 @@ unsafe extern "C" fn xmlParserPrintFileContextInternal(
         }
         cur = unsafe { cur.offset(-1) };
     }
-    if unsafe { *cur as ::core::ffi::c_int == '\n' as i32 || *cur as ::core::ffi::c_int == '\r' as i32 } {
+    if unsafe {
+        *cur as ::core::ffi::c_int == '\n' as i32 || *cur as ::core::ffi::c_int == '\r' as i32
+    } {
         cur = unsafe { cur.offset(1) };
     }
     col = unsafe { (*input).cur.offset_from(cur) as ::core::ffi::c_long as ::core::ffi::c_uint };
@@ -1745,7 +1751,9 @@ unsafe extern "C" fn xmlParserPrintFileContextInternal(
 }
 #[no_mangle]
 pub unsafe extern "C" fn xmlParserPrintFileContext(mut input: xmlParserInputPtr) {
-    unsafe { xmlParserPrintFileContextInternal(input, *__xmlGenericError(), *__xmlGenericErrorContext()) };
+    unsafe {
+        xmlParserPrintFileContextInternal(input, *__xmlGenericError(), *__xmlGenericErrorContext())
+    };
 }
 fn xmlReportError(
     mut err: xmlErrorPtr,
@@ -1891,10 +1899,7 @@ fn xmlReportError(
             );
         }
         8 => {
-            emit!(
-                data,
-                b"I/O \0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            emit!(data, b"I/O \0" as *const u8 as *const ::core::ffi::c_char,);
         }
         11 => {
             emit!(
@@ -1903,10 +1908,7 @@ fn xmlReportError(
             );
         }
         12 => {
-            emit!(
-                data,
-                b"XPath \0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            emit!(data, b"XPath \0" as *const u8 as *const ::core::ffi::c_char,);
         }
         13 => {
             emit!(
@@ -1957,16 +1959,10 @@ fn xmlReportError(
             );
         }
         21 => {
-            emit!(
-                data,
-                b"C14N \0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            emit!(data, b"C14N \0" as *const u8 as *const ::core::ffi::c_char,);
         }
         22 => {
-            emit!(
-                data,
-                b"XSLT \0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            emit!(data, b"XSLT \0" as *const u8 as *const ::core::ffi::c_char,);
         }
         27 => {
             emit!(
@@ -1987,19 +1983,13 @@ fn xmlReportError(
             );
         }
         30 => {
-            emit!(
-                data,
-                b"URI \0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            emit!(data, b"URI \0" as *const u8 as *const ::core::ffi::c_char,);
         }
         _ => {}
     }
     match level as ::core::ffi::c_uint {
         0 => {
-            emit!(
-                data,
-                b": \0" as *const u8 as *const ::core::ffi::c_char,
-            );
+            emit!(data, b": \0" as *const u8 as *const ::core::ffi::c_char,);
         }
         1 => {
             emit!(
@@ -2128,8 +2118,7 @@ pub unsafe extern "C" fn __xmlSimpleError(
                     ::core::ptr::null::<::core::ffi::c_char>(),
                     0 as ::core::ffi::c_int,
                     0 as ::core::ffi::c_int,
-                    b"Memory allocation failed : %s\n\0" as *const u8
-                        as *const ::core::ffi::c_char,
+                    b"Memory allocation failed : %s\n\0" as *const u8 as *const ::core::ffi::c_char,
                     extra,
                 );
             }
@@ -2151,8 +2140,7 @@ pub unsafe extern "C" fn __xmlSimpleError(
                     ::core::ptr::null::<::core::ffi::c_char>(),
                     0 as ::core::ffi::c_int,
                     0 as ::core::ffi::c_int,
-                    b"Memory allocation failed\n\0" as *const u8
-                        as *const ::core::ffi::c_char,
+                    b"Memory allocation failed\n\0" as *const u8 as *const ::core::ffi::c_char,
                 );
             }
         }
