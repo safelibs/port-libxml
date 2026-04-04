@@ -92,18 +92,21 @@ unsafe extern "C" fn xmlHashComputeKey(
     mut name: *const xmlChar,
     mut name2: *const xmlChar,
     mut name3: *const xmlChar,
-) -> ::core::ffi::c_ulong { unsafe {
+) -> ::core::ffi::c_ulong {
     let mut value: ::core::ffi::c_ulong = 0 as ::core::ffi::c_ulong;
     let mut ch: ::core::ffi::c_ulong = 0;
-    value = (*table).random_seed as ::core::ffi::c_ulong;
+    value = unsafe { (*table).random_seed as ::core::ffi::c_ulong };
     if !name.is_null() {
         value = value.wrapping_add(
-            (30 as ::core::ffi::c_int * *name as ::core::ffi::c_int) as ::core::ffi::c_ulong,
+            (30 as ::core::ffi::c_int * unsafe { *name } as ::core::ffi::c_int)
+                as ::core::ffi::c_ulong,
         );
         loop {
-            let fresh3 = name;
-            name = name.offset(1);
-            ch = *fresh3 as ::core::ffi::c_ulong;
+            ch = unsafe {
+                let fresh3 = name;
+                name = name.offset(1);
+                *fresh3 as ::core::ffi::c_ulong
+            };
             if !(ch != 0 as ::core::ffi::c_ulong) {
                 break;
             }
@@ -117,9 +120,11 @@ unsafe extern "C" fn xmlHashComputeKey(
         value ^ (value << 5 as ::core::ffi::c_int).wrapping_add(value >> 3 as ::core::ffi::c_int);
     if !name2.is_null() {
         loop {
-            let fresh4 = name2;
-            name2 = name2.offset(1);
-            ch = *fresh4 as ::core::ffi::c_ulong;
+            ch = unsafe {
+                let fresh4 = name2;
+                name2 = name2.offset(1);
+                *fresh4 as ::core::ffi::c_ulong
+            };
             if !(ch != 0 as ::core::ffi::c_ulong) {
                 break;
             }
@@ -133,9 +138,11 @@ unsafe extern "C" fn xmlHashComputeKey(
         value ^ (value << 5 as ::core::ffi::c_int).wrapping_add(value >> 3 as ::core::ffi::c_int);
     if !name3.is_null() {
         loop {
-            let fresh5 = name3;
-            name3 = name3.offset(1);
-            ch = *fresh5 as ::core::ffi::c_ulong;
+            ch = unsafe {
+                let fresh5 = name3;
+                name3 = name3.offset(1);
+                *fresh5 as ::core::ffi::c_ulong
+            };
             if !(ch != 0 as ::core::ffi::c_ulong) {
                 break;
             }
@@ -145,8 +152,8 @@ unsafe extern "C" fn xmlHashComputeKey(
                     .wrapping_add(ch);
         }
     }
-    return value.wrapping_rem((*table).size as ::core::ffi::c_ulong);
-}}
+    return value.wrapping_rem(unsafe { (*table).size as ::core::ffi::c_ulong });
+}
 unsafe extern "C" fn xmlHashComputeQKey(
     mut table: xmlHashTablePtr,
     mut prefix: *const xmlChar,
@@ -580,7 +587,7 @@ pub unsafe extern "C" fn xmlHashAddEntry3(
     mut name2: *const xmlChar,
     mut name3: *const xmlChar,
     mut userdata: *mut ::core::ffi::c_void,
-) -> ::core::ffi::c_int { unsafe {
+) -> ::core::ffi::c_int {
     let mut key: ::core::ffi::c_ulong = 0;
     let mut len: ::core::ffi::c_ulong = 0 as ::core::ffi::c_ulong;
     let mut entry: xmlHashEntryPtr = ::core::ptr::null_mut::<xmlHashEntry>();
@@ -588,97 +595,117 @@ pub unsafe extern "C" fn xmlHashAddEntry3(
     if table.is_null() || name.is_null() {
         return -(1 as ::core::ffi::c_int);
     }
-    if !(*table).dict.is_null() {
-        if xmlDictOwns((*table).dict, name) == 0 {
-            name = xmlDictLookup((*table).dict, name, -(1 as ::core::ffi::c_int));
+    let dict = unsafe { (*table).dict };
+    if !dict.is_null() {
+        if unsafe { xmlDictOwns(dict, name) } == 0 {
+            name = unsafe { xmlDictLookup(dict, name, -(1 as ::core::ffi::c_int)) };
             if name.is_null() {
                 return -(1 as ::core::ffi::c_int);
             }
         }
-        if !name2.is_null() && xmlDictOwns((*table).dict, name2) == 0 {
-            name2 = xmlDictLookup((*table).dict, name2, -(1 as ::core::ffi::c_int));
+        if !name2.is_null() && unsafe { xmlDictOwns(dict, name2) } == 0 {
+            name2 = unsafe { xmlDictLookup(dict, name2, -(1 as ::core::ffi::c_int)) };
             if name2.is_null() {
                 return -(1 as ::core::ffi::c_int);
             }
         }
-        if !name3.is_null() && xmlDictOwns((*table).dict, name3) == 0 {
-            name3 = xmlDictLookup((*table).dict, name3, -(1 as ::core::ffi::c_int));
+        if !name3.is_null() && unsafe { xmlDictOwns(dict, name3) } == 0 {
+            name3 = unsafe { xmlDictLookup(dict, name3, -(1 as ::core::ffi::c_int)) };
             if name3.is_null() {
                 return -(1 as ::core::ffi::c_int);
             }
         }
     }
-    key = xmlHashComputeKey(table, name, name2, name3);
-    if (*(*table).table.offset(key as isize)).valid == 0 as ::core::ffi::c_int {
+    key = unsafe { xmlHashComputeKey(table, name, name2, name3) };
+    let bucket = unsafe { (*table).table.offset(key as isize) as xmlHashEntryPtr };
+    if unsafe { (*bucket).valid } == 0 as ::core::ffi::c_int {
         insert = ::core::ptr::null_mut::<xmlHashEntry>();
-    } else if !(*table).dict.is_null() {
-        insert = (*table).table.offset(key as isize) as *mut _xmlHashEntry as xmlHashEntryPtr;
-        while !(*insert).next.is_null() {
-            if (*insert).name == name as *mut xmlChar
-                && (*insert).name2 == name2 as *mut xmlChar
-                && (*insert).name3 == name3 as *mut xmlChar
+    } else if !dict.is_null() {
+        insert = bucket;
+        while unsafe { !(*insert).next.is_null() } {
+            if unsafe {
+                (*insert).name == name as *mut xmlChar
+                    && (*insert).name2 == name2 as *mut xmlChar
+                    && (*insert).name3 == name3 as *mut xmlChar
+            }
             {
                 return -(1 as ::core::ffi::c_int);
             }
             len = len.wrapping_add(1);
-            insert = (*insert).next as xmlHashEntryPtr;
+            insert = unsafe { (*insert).next as xmlHashEntryPtr };
         }
-        if (*insert).name == name as *mut xmlChar
-            && (*insert).name2 == name2 as *mut xmlChar
-            && (*insert).name3 == name3 as *mut xmlChar
+        if unsafe {
+            (*insert).name == name as *mut xmlChar
+                && (*insert).name2 == name2 as *mut xmlChar
+                && (*insert).name3 == name3 as *mut xmlChar
+        }
         {
             return -(1 as ::core::ffi::c_int);
         }
     } else {
-        insert = (*table).table.offset(key as isize) as *mut _xmlHashEntry as xmlHashEntryPtr;
-        while !(*insert).next.is_null() {
-            if xmlStrEqual((*insert).name, name) != 0
-                && xmlStrEqual((*insert).name2, name2) != 0
-                && xmlStrEqual((*insert).name3, name3) != 0
+        insert = bucket;
+        while unsafe { !(*insert).next.is_null() } {
+            if unsafe { xmlStrEqual((*insert).name, name) } != 0
+                && unsafe { xmlStrEqual((*insert).name2, name2) } != 0
+                && unsafe { xmlStrEqual((*insert).name3, name3) } != 0
             {
                 return -(1 as ::core::ffi::c_int);
             }
             len = len.wrapping_add(1);
-            insert = (*insert).next as xmlHashEntryPtr;
+            insert = unsafe { (*insert).next as xmlHashEntryPtr };
         }
-        if xmlStrEqual((*insert).name, name) != 0
-            && xmlStrEqual((*insert).name2, name2) != 0
-            && xmlStrEqual((*insert).name3, name3) != 0
+        if unsafe { xmlStrEqual((*insert).name, name) } != 0
+            && unsafe { xmlStrEqual((*insert).name2, name2) } != 0
+            && unsafe { xmlStrEqual((*insert).name3, name3) } != 0
         {
             return -(1 as ::core::ffi::c_int);
         }
     }
     if insert.is_null() {
-        entry = (*table).table.offset(key as isize) as *mut _xmlHashEntry as xmlHashEntryPtr;
+        entry = bucket;
     } else {
-        entry = xmlMalloc.expect("non-null function pointer")(
-            ::core::mem::size_of::<xmlHashEntry>() as size_t,
-        ) as xmlHashEntryPtr;
+        entry = unsafe {
+            xmlMalloc.expect("non-null function pointer")(
+                ::core::mem::size_of::<xmlHashEntry>() as size_t,
+            ) as xmlHashEntryPtr
+        };
         if entry.is_null() {
             return -(1 as ::core::ffi::c_int);
         }
     }
-    if !(*table).dict.is_null() {
-        (*entry).name = name as *mut xmlChar;
-        (*entry).name2 = name2 as *mut xmlChar;
-        (*entry).name3 = name3 as *mut xmlChar;
+    if !dict.is_null() {
+        unsafe {
+            (*entry).name = name as *mut xmlChar;
+            (*entry).name2 = name2 as *mut xmlChar;
+            (*entry).name3 = name3 as *mut xmlChar;
+        }
     } else {
-        (*entry).name = xmlStrdup(name);
-        (*entry).name2 = xmlStrdup(name2);
-        (*entry).name3 = xmlStrdup(name3);
+        unsafe {
+            (*entry).name = xmlStrdup(name);
+            (*entry).name2 = xmlStrdup(name2);
+            (*entry).name3 = xmlStrdup(name3);
+        }
     }
-    (*entry).payload = userdata;
-    (*entry).next = ::core::ptr::null_mut::<_xmlHashEntry>();
-    (*entry).valid = 1 as ::core::ffi::c_int;
+    unsafe {
+        (*entry).payload = userdata;
+        (*entry).next = ::core::ptr::null_mut::<_xmlHashEntry>();
+        (*entry).valid = 1 as ::core::ffi::c_int;
+    }
     if !insert.is_null() {
-        (*insert).next = entry as *mut _xmlHashEntry;
+        unsafe {
+            (*insert).next = entry as *mut _xmlHashEntry;
+        }
     }
-    (*table).nbElems += 1;
+    unsafe {
+        (*table).nbElems += 1;
+    }
     if len > MAX_HASH_LEN as ::core::ffi::c_ulong {
-        xmlHashGrow(table, MAX_HASH_LEN * (*table).size);
+        unsafe {
+            xmlHashGrow(table, MAX_HASH_LEN * (*table).size);
+        }
     }
     return 0 as ::core::ffi::c_int;
-}}
+}
 #[no_mangle]
 pub unsafe extern "C" fn xmlHashUpdateEntry3(
     mut table: xmlHashTablePtr,
