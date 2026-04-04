@@ -935,7 +935,7 @@ pub unsafe extern "C" fn xmlStrncmp(
     }
     return 0 as ::core::ffi::c_int;
 }}
-static mut casemap: [xmlChar; 256] = [
+static casemap: [xmlChar; 256] = [
     0 as ::core::ffi::c_int as xmlChar,
     0x1 as ::core::ffi::c_int as xmlChar,
     0x2 as ::core::ffi::c_int as xmlChar,

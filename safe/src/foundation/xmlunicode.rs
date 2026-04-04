@@ -15,12 +15,15 @@ pub struct xmlUnicodeNameTable {
     pub table: *const xmlUnicodeRange,
     pub numentries: ::core::ffi::c_int,
 }
+// These generated lookup descriptors reference immutable static tables.
+unsafe impl Sync for xmlUnicodeNameTable {}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct xmlUnicodeRange {
     pub rangename: *const ::core::ffi::c_char,
     pub func: Option<xmlIntFunc>,
 }
+unsafe impl Sync for xmlUnicodeRange {}
 pub type xmlChRangeGroup = _xmlChRangeGroup;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -30,6 +33,7 @@ pub struct _xmlChRangeGroup {
     pub shortRange: *const xmlChSRange,
     pub longRange: *const xmlChLRange,
 }
+unsafe impl Sync for _xmlChRangeGroup {}
 pub type xmlChLRange = _xmlChLRange;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -45,7 +49,7 @@ pub struct _xmlChSRange {
     pub high: ::core::ffi::c_ushort,
 }
 pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
-static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
+static xmlUnicodeBlocks: [xmlUnicodeRange; 128] = {
     [
         xmlUnicodeRange {
             rangename: b"AegeanNumbers\0" as *const u8 as *const ::core::ffi::c_char,
@@ -911,7 +915,7 @@ static mut xmlUnicodeBlocks: [xmlUnicodeRange; 128] = unsafe {
         },
     ]
 };
-static mut xmlUnicodeCats: [xmlUnicodeRange; 36] = unsafe {
+static xmlUnicodeCats: [xmlUnicodeRange; 36] = {
     [
         xmlUnicodeRange {
             rangename: b"C\0" as *const u8 as *const ::core::ffi::c_char,
@@ -1131,7 +1135,7 @@ static mut xmlUnicodeCats: [xmlUnicodeRange; 36] = unsafe {
         },
     ]
 };
-static mut xmlCS: [xmlChSRange; 18] = [
+static xmlCS: [xmlChSRange; 18] = [
     _xmlChSRange {
         low: 0 as ::core::ffi::c_ushort,
         high: 0x1f as ::core::ffi::c_ushort,
@@ -1205,7 +1209,7 @@ static mut xmlCS: [xmlChSRange; 18] = [
         high: 0xfffb as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlCL: [xmlChLRange; 7] = [
+static xmlCL: [xmlChLRange; 7] = [
     _xmlChLRange {
         low: 0x1d173 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x1d17a as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -1235,7 +1239,7 @@ static mut xmlCL: [xmlChLRange; 7] = [
         high: 0x10fffd as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlCG: xmlChRangeGroup = unsafe {
+static xmlCG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 18 as ::core::ffi::c_int,
         nbLongRange: 7 as ::core::ffi::c_int,
@@ -1243,7 +1247,7 @@ static mut xmlCG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlCL as *const xmlChLRange,
     }
 };
-static mut xmlCfS: [xmlChSRange; 11] = [
+static xmlCfS: [xmlChSRange; 11] = [
     _xmlChSRange {
         low: 0xad as ::core::ffi::c_ushort,
         high: 0xad as ::core::ffi::c_ushort,
@@ -1289,7 +1293,7 @@ static mut xmlCfS: [xmlChSRange; 11] = [
         high: 0xfffb as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlCfL: [xmlChLRange; 3] = [
+static xmlCfL: [xmlChLRange; 3] = [
     _xmlChLRange {
         low: 0x1d173 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x1d17a as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -1303,7 +1307,7 @@ static mut xmlCfL: [xmlChLRange; 3] = [
         high: 0xe007f as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlCfG: xmlChRangeGroup = unsafe {
+static xmlCfG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 11 as ::core::ffi::c_int,
         nbLongRange: 3 as ::core::ffi::c_int,
@@ -1311,7 +1315,7 @@ static mut xmlCfG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlCfL as *const xmlChLRange,
     }
 };
-static mut xmlLS: [xmlChSRange; 279] = [
+static xmlLS: [xmlChSRange; 279] = [
     _xmlChSRange {
         low: 0x41 as ::core::ffi::c_ushort,
         high: 0x5a as ::core::ffi::c_ushort,
@@ -2429,7 +2433,7 @@ static mut xmlLS: [xmlChSRange; 279] = [
         high: 0xffdc as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlLL: [xmlChLRange; 50] = [
+static xmlLL: [xmlChLRange; 50] = [
     _xmlChLRange {
         low: 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x1000b as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -2631,7 +2635,7 @@ static mut xmlLL: [xmlChLRange; 50] = [
         high: 0x2fa1d as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlLG: xmlChRangeGroup = unsafe {
+static xmlLG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 279 as ::core::ffi::c_int,
         nbLongRange: 50 as ::core::ffi::c_int,
@@ -2639,7 +2643,7 @@ static mut xmlLG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlLL as *const xmlChLRange,
     }
 };
-static mut xmlLlS: [xmlChSRange; 396] = [
+static xmlLlS: [xmlChSRange; 396] = [
     _xmlChSRange {
         low: 0x61 as ::core::ffi::c_ushort,
         high: 0x7a as ::core::ffi::c_ushort,
@@ -4225,7 +4229,7 @@ static mut xmlLlS: [xmlChSRange; 396] = [
         high: 0xff5a as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlLlL: [xmlChLRange; 28] = [
+static xmlLlL: [xmlChLRange; 28] = [
     _xmlChLRange {
         low: 0x10428 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x1044f as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -4339,7 +4343,7 @@ static mut xmlLlL: [xmlChLRange; 28] = [
         high: 0x1d7c9 as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlLlG: xmlChRangeGroup = unsafe {
+static xmlLlG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 396 as ::core::ffi::c_int,
         nbLongRange: 28 as ::core::ffi::c_int,
@@ -4347,7 +4351,7 @@ static mut xmlLlG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlLlL as *const xmlChLRange,
     }
 };
-static mut xmlLmS: [xmlChSRange; 20] = [
+static xmlLmS: [xmlChSRange; 20] = [
     _xmlChSRange {
         low: 0x2b0 as ::core::ffi::c_ushort,
         high: 0x2c1 as ::core::ffi::c_ushort,
@@ -4429,7 +4433,7 @@ static mut xmlLmS: [xmlChSRange; 20] = [
         high: 0xff9f as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlLmG: xmlChRangeGroup = unsafe {
+static xmlLmG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 20 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -4437,7 +4441,7 @@ static mut xmlLmG: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>(),
     }
 };
-static mut xmlLoS: [xmlChSRange; 211] = [
+static xmlLoS: [xmlChSRange; 211] = [
     _xmlChSRange {
         low: 0x1bb as ::core::ffi::c_ushort,
         high: 0x1bb as ::core::ffi::c_ushort,
@@ -5283,7 +5287,7 @@ static mut xmlLoS: [xmlChSRange; 211] = [
         high: 0xffdc as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlLoL: [xmlChLRange; 20] = [
+static xmlLoL: [xmlChLRange; 20] = [
     _xmlChLRange {
         low: 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x1000b as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -5365,7 +5369,7 @@ static mut xmlLoL: [xmlChLRange; 20] = [
         high: 0x2fa1d as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlLoG: xmlChRangeGroup = unsafe {
+static xmlLoG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 211 as ::core::ffi::c_int,
         nbLongRange: 20 as ::core::ffi::c_int,
@@ -5373,7 +5377,7 @@ static mut xmlLoG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlLoL as *const xmlChLRange,
     }
 };
-static mut xmlLtS: [xmlChSRange; 10] = [
+static xmlLtS: [xmlChSRange; 10] = [
     _xmlChSRange {
         low: 0x1c5 as ::core::ffi::c_ushort,
         high: 0x1c5 as ::core::ffi::c_ushort,
@@ -5415,7 +5419,7 @@ static mut xmlLtS: [xmlChSRange; 10] = [
         high: 0x1ffc as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlLtG: xmlChRangeGroup = unsafe {
+static xmlLtG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 10 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -5423,7 +5427,7 @@ static mut xmlLtG: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>(),
     }
 };
-static mut xmlLuS: [xmlChSRange; 390] = [
+static xmlLuS: [xmlChSRange; 390] = [
     _xmlChSRange {
         low: 0x41 as ::core::ffi::c_ushort,
         high: 0x5a as ::core::ffi::c_ushort,
@@ -6985,7 +6989,7 @@ static mut xmlLuS: [xmlChSRange; 390] = [
         high: 0xff3a as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlLuL: [xmlChLRange; 31] = [
+static xmlLuL: [xmlChLRange; 31] = [
     _xmlChLRange {
         low: 0x10400 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x10427 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -7111,7 +7115,7 @@ static mut xmlLuL: [xmlChLRange; 31] = [
         high: 0x1d7a8 as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlLuG: xmlChRangeGroup = unsafe {
+static xmlLuG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 390 as ::core::ffi::c_int,
         nbLongRange: 31 as ::core::ffi::c_int,
@@ -7119,7 +7123,7 @@ static mut xmlLuG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlLuL as *const xmlChLRange,
     }
 };
-static mut xmlMS: [xmlChSRange; 113] = [
+static xmlMS: [xmlChSRange; 113] = [
     _xmlChSRange {
         low: 0x300 as ::core::ffi::c_ushort,
         high: 0x357 as ::core::ffi::c_ushort,
@@ -7573,7 +7577,7 @@ static mut xmlMS: [xmlChSRange; 113] = [
         high: 0xfe23 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlML: [xmlChLRange; 6] = [
+static xmlML: [xmlChLRange; 6] = [
     _xmlChLRange {
         low: 0x1d165 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x1d169 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -7599,7 +7603,7 @@ static mut xmlML: [xmlChLRange; 6] = [
         high: 0xe01ef as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlMG: xmlChRangeGroup = unsafe {
+static xmlMG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 113 as ::core::ffi::c_int,
         nbLongRange: 6 as ::core::ffi::c_int,
@@ -7607,7 +7611,7 @@ static mut xmlMG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlML as *const xmlChLRange,
     }
 };
-static mut xmlMcS: [xmlChSRange; 55] = [
+static xmlMcS: [xmlChSRange; 55] = [
     _xmlChSRange {
         low: 0x903 as ::core::ffi::c_ushort,
         high: 0x903 as ::core::ffi::c_ushort,
@@ -7829,7 +7833,7 @@ static mut xmlMcS: [xmlChSRange; 55] = [
         high: 0x1938 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlMcL: [xmlChLRange; 2] = [
+static xmlMcL: [xmlChLRange; 2] = [
     _xmlChLRange {
         low: 0x1d165 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x1d166 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -7839,7 +7843,7 @@ static mut xmlMcL: [xmlChLRange; 2] = [
         high: 0x1d172 as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlMcG: xmlChRangeGroup = unsafe {
+static xmlMcG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 55 as ::core::ffi::c_int,
         nbLongRange: 2 as ::core::ffi::c_int,
@@ -7847,7 +7851,7 @@ static mut xmlMcG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlMcL as *const xmlChLRange,
     }
 };
-static mut xmlMnS: [xmlChSRange; 108] = [
+static xmlMnS: [xmlChSRange; 108] = [
     _xmlChSRange {
         low: 0x300 as ::core::ffi::c_ushort,
         high: 0x357 as ::core::ffi::c_ushort,
@@ -8281,7 +8285,7 @@ static mut xmlMnS: [xmlChSRange; 108] = [
         high: 0xfe23 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlMnL: [xmlChLRange; 5] = [
+static xmlMnL: [xmlChLRange; 5] = [
     _xmlChLRange {
         low: 0x1d167 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x1d169 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -8303,7 +8307,7 @@ static mut xmlMnL: [xmlChLRange; 5] = [
         high: 0xe01ef as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlMnG: xmlChRangeGroup = unsafe {
+static xmlMnG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 108 as ::core::ffi::c_int,
         nbLongRange: 5 as ::core::ffi::c_int,
@@ -8311,7 +8315,7 @@ static mut xmlMnG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlMnL as *const xmlChLRange,
     }
 };
-static mut xmlNS: [xmlChSRange; 42] = [
+static xmlNS: [xmlChSRange; 42] = [
     _xmlChSRange {
         low: 0x30 as ::core::ffi::c_ushort,
         high: 0x39 as ::core::ffi::c_ushort,
@@ -8481,7 +8485,7 @@ static mut xmlNS: [xmlChSRange; 42] = [
         high: 0xff19 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlNL: [xmlChLRange; 5] = [
+static xmlNL: [xmlChLRange; 5] = [
     _xmlChLRange {
         low: 0x10107 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x10133 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -8503,7 +8507,7 @@ static mut xmlNL: [xmlChLRange; 5] = [
         high: 0x1d7ff as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlNG: xmlChRangeGroup = unsafe {
+static xmlNG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 42 as ::core::ffi::c_int,
         nbLongRange: 5 as ::core::ffi::c_int,
@@ -8511,7 +8515,7 @@ static mut xmlNG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlNL as *const xmlChLRange,
     }
 };
-static mut xmlNdS: [xmlChSRange; 21] = [
+static xmlNdS: [xmlChSRange; 21] = [
     _xmlChSRange {
         low: 0x30 as ::core::ffi::c_ushort,
         high: 0x39 as ::core::ffi::c_ushort,
@@ -8597,7 +8601,7 @@ static mut xmlNdS: [xmlChSRange; 21] = [
         high: 0xff19 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlNdL: [xmlChLRange; 2] = [
+static xmlNdL: [xmlChLRange; 2] = [
     _xmlChLRange {
         low: 0x104a0 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x104a9 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -8607,7 +8611,7 @@ static mut xmlNdL: [xmlChLRange; 2] = [
         high: 0x1d7ff as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlNdG: xmlChRangeGroup = unsafe {
+static xmlNdG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 21 as ::core::ffi::c_int,
         nbLongRange: 2 as ::core::ffi::c_int,
@@ -8615,7 +8619,7 @@ static mut xmlNdG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlNdL as *const xmlChLRange,
     }
 };
-static mut xmlNoS: [xmlChSRange; 20] = [
+static xmlNoS: [xmlChSRange; 20] = [
     _xmlChSRange {
         low: 0xb2 as ::core::ffi::c_ushort,
         high: 0xb3 as ::core::ffi::c_ushort,
@@ -8697,7 +8701,7 @@ static mut xmlNoS: [xmlChSRange; 20] = [
         high: 0x32bf as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlNoL: [xmlChLRange; 2] = [
+static xmlNoL: [xmlChLRange; 2] = [
     _xmlChLRange {
         low: 0x10107 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x10133 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -8707,7 +8711,7 @@ static mut xmlNoL: [xmlChLRange; 2] = [
         high: 0x10323 as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlNoG: xmlChRangeGroup = unsafe {
+static xmlNoG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 20 as ::core::ffi::c_int,
         nbLongRange: 2 as ::core::ffi::c_int,
@@ -8715,7 +8719,7 @@ static mut xmlNoG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlNoL as *const xmlChLRange,
     }
 };
-static mut xmlPS: [xmlChSRange; 84] = [
+static xmlPS: [xmlChSRange; 84] = [
     _xmlChSRange {
         low: 0x21 as ::core::ffi::c_ushort,
         high: 0x23 as ::core::ffi::c_ushort,
@@ -9053,7 +9057,7 @@ static mut xmlPS: [xmlChSRange; 84] = [
         high: 0xff65 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlPL: [xmlChLRange; 2] = [
+static xmlPL: [xmlChLRange; 2] = [
     _xmlChLRange {
         low: 0x10100 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x10101 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -9063,7 +9067,7 @@ static mut xmlPL: [xmlChLRange; 2] = [
         high: 0x1039f as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlPG: xmlChRangeGroup = unsafe {
+static xmlPG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 84 as ::core::ffi::c_int,
         nbLongRange: 2 as ::core::ffi::c_int,
@@ -9071,7 +9075,7 @@ static mut xmlPG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlPL as *const xmlChLRange,
     }
 };
-static mut xmlPdS: [xmlChSRange; 11] = [
+static xmlPdS: [xmlChSRange; 11] = [
     _xmlChSRange {
         low: 0x2d as ::core::ffi::c_ushort,
         high: 0x2d as ::core::ffi::c_ushort,
@@ -9117,7 +9121,7 @@ static mut xmlPdS: [xmlChSRange; 11] = [
         high: 0xff0d as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlPdG: xmlChRangeGroup = unsafe {
+static xmlPdG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 11 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -9125,7 +9129,7 @@ static mut xmlPdG: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>(),
     }
 };
-static mut xmlPeS: [xmlChSRange; 63] = [
+static xmlPeS: [xmlChSRange; 63] = [
     _xmlChSRange {
         low: 0x29 as ::core::ffi::c_ushort,
         high: 0x29 as ::core::ffi::c_ushort,
@@ -9379,7 +9383,7 @@ static mut xmlPeS: [xmlChSRange; 63] = [
         high: 0xff63 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlPeG: xmlChRangeGroup = unsafe {
+static xmlPeG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 63 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -9387,7 +9391,7 @@ static mut xmlPeG: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>(),
     }
 };
-static mut xmlPoS: [xmlChSRange; 72] = [
+static xmlPoS: [xmlChSRange; 72] = [
     _xmlChSRange {
         low: 0x21 as ::core::ffi::c_ushort,
         high: 0x23 as ::core::ffi::c_ushort,
@@ -9677,7 +9681,7 @@ static mut xmlPoS: [xmlChSRange; 72] = [
         high: 0xff64 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlPoL: [xmlChLRange; 2] = [
+static xmlPoL: [xmlChLRange; 2] = [
     _xmlChLRange {
         low: 0x10100 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x10101 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -9687,7 +9691,7 @@ static mut xmlPoL: [xmlChLRange; 2] = [
         high: 0x1039f as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlPoG: xmlChRangeGroup = unsafe {
+static xmlPoG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 72 as ::core::ffi::c_int,
         nbLongRange: 2 as ::core::ffi::c_int,
@@ -9695,7 +9699,7 @@ static mut xmlPoG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlPoL as *const xmlChLRange,
     }
 };
-static mut xmlPsS: [xmlChSRange; 65] = [
+static xmlPsS: [xmlChSRange; 65] = [
     _xmlChSRange {
         low: 0x28 as ::core::ffi::c_ushort,
         high: 0x28 as ::core::ffi::c_ushort,
@@ -9957,7 +9961,7 @@ static mut xmlPsS: [xmlChSRange; 65] = [
         high: 0xff62 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlPsG: xmlChRangeGroup = unsafe {
+static xmlPsG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 65 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -9965,7 +9969,7 @@ static mut xmlPsG: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>(),
     }
 };
-static mut xmlSS: [xmlChSRange; 133] = [
+static xmlSS: [xmlChSRange; 133] = [
     _xmlChSRange {
         low: 0x24 as ::core::ffi::c_ushort,
         high: 0x24 as ::core::ffi::c_ushort,
@@ -10499,7 +10503,7 @@ static mut xmlSS: [xmlChSRange; 133] = [
         high: 0xfffd as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlSL: [xmlChLRange; 20] = [
+static xmlSL: [xmlChLRange; 20] = [
     _xmlChLRange {
         low: 0x10102 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x10102 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -10581,7 +10585,7 @@ static mut xmlSL: [xmlChLRange; 20] = [
         high: 0x1d7c3 as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlSG: xmlChRangeGroup = unsafe {
+static xmlSG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 133 as ::core::ffi::c_int,
         nbLongRange: 20 as ::core::ffi::c_int,
@@ -10589,7 +10593,7 @@ static mut xmlSG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlSL as *const xmlChLRange,
     }
 };
-static mut xmlScS: [xmlChSRange; 13] = [
+static xmlScS: [xmlChSRange; 13] = [
     _xmlChSRange {
         low: 0x24 as ::core::ffi::c_ushort,
         high: 0x24 as ::core::ffi::c_ushort,
@@ -10643,7 +10647,7 @@ static mut xmlScS: [xmlChSRange; 13] = [
         high: 0xffe6 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlScG: xmlChRangeGroup = unsafe {
+static xmlScG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 13 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -10651,7 +10655,7 @@ static mut xmlScG: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>(),
     }
 };
-static mut xmlSkS: [xmlChSRange; 22] = [
+static xmlSkS: [xmlChSRange; 22] = [
     _xmlChSRange {
         low: 0x5e as ::core::ffi::c_ushort,
         high: 0x5e as ::core::ffi::c_ushort,
@@ -10741,7 +10745,7 @@ static mut xmlSkS: [xmlChSRange; 22] = [
         high: 0xffe3 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlSkG: xmlChRangeGroup = unsafe {
+static xmlSkG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 22 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -10749,7 +10753,7 @@ static mut xmlSkG: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>(),
     }
 };
-static mut xmlSmS: [xmlChSRange; 48] = [
+static xmlSmS: [xmlChSRange; 48] = [
     _xmlChSRange {
         low: 0x2b as ::core::ffi::c_ushort,
         high: 0x2b as ::core::ffi::c_ushort,
@@ -10943,7 +10947,7 @@ static mut xmlSmS: [xmlChSRange; 48] = [
         high: 0xffec as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlSmL: [xmlChLRange; 10] = [
+static xmlSmL: [xmlChLRange; 10] = [
     _xmlChLRange {
         low: 0x1d6c1 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x1d6c1 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -10985,7 +10989,7 @@ static mut xmlSmL: [xmlChLRange; 10] = [
         high: 0x1d7c3 as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlSmG: xmlChRangeGroup = unsafe {
+static xmlSmG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 48 as ::core::ffi::c_int,
         nbLongRange: 10 as ::core::ffi::c_int,
@@ -10993,7 +10997,7 @@ static mut xmlSmG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlSmL as *const xmlChLRange,
     }
 };
-static mut xmlSoS: [xmlChSRange; 103] = [
+static xmlSoS: [xmlChSRange; 103] = [
     _xmlChSRange {
         low: 0xa6 as ::core::ffi::c_ushort,
         high: 0xa7 as ::core::ffi::c_ushort,
@@ -11407,7 +11411,7 @@ static mut xmlSoS: [xmlChSRange; 103] = [
         high: 0xfffd as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlSoL: [xmlChLRange; 10] = [
+static xmlSoL: [xmlChLRange; 10] = [
     _xmlChLRange {
         low: 0x10102 as ::core::ffi::c_int as ::core::ffi::c_uint,
         high: 0x10102 as ::core::ffi::c_int as ::core::ffi::c_uint,
@@ -11449,7 +11453,7 @@ static mut xmlSoL: [xmlChLRange; 10] = [
         high: 0x1d356 as ::core::ffi::c_int as ::core::ffi::c_uint,
     },
 ];
-static mut xmlSoG: xmlChRangeGroup = unsafe {
+static xmlSoG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 103 as ::core::ffi::c_int,
         nbLongRange: 10 as ::core::ffi::c_int,
@@ -11457,7 +11461,7 @@ static mut xmlSoG: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlSoL as *const xmlChLRange,
     }
 };
-static mut xmlZS: [xmlChSRange; 9] = [
+static xmlZS: [xmlChSRange; 9] = [
     _xmlChSRange {
         low: 0x20 as ::core::ffi::c_ushort,
         high: 0x20 as ::core::ffi::c_ushort,
@@ -11495,7 +11499,7 @@ static mut xmlZS: [xmlChSRange; 9] = [
         high: 0x3000 as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlZG: xmlChRangeGroup = unsafe {
+static xmlZG: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 9 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -11503,20 +11507,20 @@ static mut xmlZG: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>(),
     }
 };
-static mut xmlUnicodeBlockTbl: xmlUnicodeNameTable = unsafe {
+static xmlUnicodeBlockTbl: xmlUnicodeNameTable = {
     xmlUnicodeNameTable {
         table: &raw const xmlUnicodeBlocks as *const xmlUnicodeRange,
         numentries: 128 as ::core::ffi::c_int,
     }
 };
-static mut xmlUnicodeCatTbl: xmlUnicodeNameTable = unsafe {
+static xmlUnicodeCatTbl: xmlUnicodeNameTable = {
     xmlUnicodeNameTable {
-        table: &raw const xmlUnicodeCats as *mut xmlUnicodeRange,
+        table: &raw const xmlUnicodeCats as *const xmlUnicodeRange,
         numentries: 36 as ::core::ffi::c_int,
     }
 };
 fn xmlUnicodeLookup(
-    mut tptr: *mut xmlUnicodeNameTable,
+    mut tptr: *const xmlUnicodeNameTable,
     mut tname: *const ::core::ffi::c_char,
 ) -> Option<xmlIntFunc> {
     let mut low: ::core::ffi::c_int = 0;
@@ -12326,7 +12330,7 @@ pub extern "C" fn xmlUCSIsBlock(
     mut block: *const ::core::ffi::c_char,
 ) -> ::core::ffi::c_int {
     let mut func: Option<xmlIntFunc> = None;
-    func = xmlUnicodeLookup(&raw mut xmlUnicodeBlockTbl, block);
+    func = xmlUnicodeLookup(&raw const xmlUnicodeBlockTbl, block);
     if func.is_none() {
         return -(1 as ::core::ffi::c_int);
     }
@@ -12334,7 +12338,7 @@ pub extern "C" fn xmlUCSIsBlock(
 }
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatC(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlCG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlCG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatCc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
@@ -12344,7 +12348,7 @@ pub extern "C" fn xmlUCSIsCatCc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_
 }
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatCf(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlCfG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlCfG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatCo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
@@ -12364,35 +12368,35 @@ pub extern "C" fn xmlUCSIsCatCs(mut code: ::core::ffi::c_int) -> ::core::ffi::c_
 }
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatL(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlLG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatLl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLlG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlLlG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatLm(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLmG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlLmG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatLo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLoG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlLoG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatLt(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLtG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlLtG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatLu(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlLuG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlLuG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatM(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlMG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlMG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatMc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlMcG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlMcG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatMe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
@@ -12404,15 +12408,15 @@ pub extern "C" fn xmlUCSIsCatMe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_
 }
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatMn(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlMnG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlMnG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatN(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlNG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlNG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatNd(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlNdG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlNdG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatNl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
@@ -12425,11 +12429,11 @@ pub extern "C" fn xmlUCSIsCatNl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_
 }
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatNo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlNoG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlNoG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatP(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlPG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatPc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
@@ -12444,11 +12448,11 @@ pub extern "C" fn xmlUCSIsCatPc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_
 }
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatPd(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPdG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlPdG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatPe(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPeG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlPeG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatPf(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
@@ -12467,35 +12471,35 @@ pub extern "C" fn xmlUCSIsCatPi(mut code: ::core::ffi::c_int) -> ::core::ffi::c_
 }
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatPo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPoG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlPoG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatPs(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlPsG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlPsG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatS(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlSG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatSc(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlScG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlScG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatSk(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSkG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlSkG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatSm(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSmG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlSmG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatSo(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlSoG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlSoG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatZ(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int { unsafe {
-    return xmlCharInRange(code as ::core::ffi::c_uint, &raw mut xmlZG);
+    return xmlCharInRange(code as ::core::ffi::c_uint, &raw const xmlZG);
 }}
 #[no_mangle]
 pub extern "C" fn xmlUCSIsCatZl(mut code: ::core::ffi::c_int) -> ::core::ffi::c_int {
@@ -12522,7 +12526,7 @@ pub extern "C" fn xmlUCSIsCat(
     mut cat: *const ::core::ffi::c_char,
 ) -> ::core::ffi::c_int {
     let mut func: Option<xmlIntFunc> = None;
-    func = xmlUnicodeLookup(&raw mut xmlUnicodeCatTbl, cat);
+    func = xmlUnicodeLookup(&raw const xmlUnicodeCatTbl, cat);
     if func.is_none() {
         return -(1 as ::core::ffi::c_int);
     }

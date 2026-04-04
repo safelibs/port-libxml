@@ -22,9 +22,12 @@ pub struct _xmlChRangeGroup {
     pub longRange: *const xmlChLRange,
 }
 pub type xmlChRangeGroup = _xmlChRangeGroup;
+// These exported group descriptors point at immutable lookup tables, matching
+// libxml2's `const xmlChRangeGroup` ABI.
+unsafe impl Sync for _xmlChRangeGroup {}
 pub const NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 #[no_mangle]
-pub static mut xmlIsPubidChar_tab: [::core::ffi::c_uchar; 256] = [
+pub static xmlIsPubidChar_tab: [::core::ffi::c_uchar; 256] = [
     0 as ::core::ffi::c_int as ::core::ffi::c_uchar,
     0 as ::core::ffi::c_int as ::core::ffi::c_uchar,
     0 as ::core::ffi::c_int as ::core::ffi::c_uchar,
@@ -282,7 +285,7 @@ pub static mut xmlIsPubidChar_tab: [::core::ffi::c_uchar; 256] = [
     0 as ::core::ffi::c_int as ::core::ffi::c_uchar,
     0 as ::core::ffi::c_int as ::core::ffi::c_uchar,
 ];
-static mut xmlIsBaseChar_srng: [xmlChSRange; 197] = [
+static xmlIsBaseChar_srng: [xmlChSRange; 197] = [
     _xmlChSRange {
         low: 0x100 as ::core::ffi::c_ushort,
         high: 0x131 as ::core::ffi::c_ushort,
@@ -1073,7 +1076,7 @@ static mut xmlIsBaseChar_srng: [xmlChSRange; 197] = [
     },
 ];
 #[no_mangle]
-pub static mut xmlIsBaseCharGroup: xmlChRangeGroup = unsafe {
+pub static xmlIsBaseCharGroup: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 197 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -1081,7 +1084,7 @@ pub static mut xmlIsBaseCharGroup: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>() as *mut xmlChLRange as *const xmlChLRange,
     }
 };
-static mut xmlIsChar_srng: [xmlChSRange; 2] = [
+static xmlIsChar_srng: [xmlChSRange; 2] = [
     _xmlChSRange {
         low: 0x100 as ::core::ffi::c_ushort,
         high: 0xd7ff as ::core::ffi::c_ushort,
@@ -1091,12 +1094,12 @@ static mut xmlIsChar_srng: [xmlChSRange; 2] = [
         high: 0xfffd as ::core::ffi::c_ushort,
     },
 ];
-static mut xmlIsChar_lrng: [xmlChLRange; 1] = [_xmlChLRange {
+static xmlIsChar_lrng: [xmlChLRange; 1] = [_xmlChLRange {
     low: 0x10000 as ::core::ffi::c_int as ::core::ffi::c_uint,
     high: 0x10ffff as ::core::ffi::c_int as ::core::ffi::c_uint,
 }];
 #[no_mangle]
-pub static mut xmlIsCharGroup: xmlChRangeGroup = unsafe {
+pub static xmlIsCharGroup: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 2 as ::core::ffi::c_int,
         nbLongRange: 1 as ::core::ffi::c_int,
@@ -1104,7 +1107,7 @@ pub static mut xmlIsCharGroup: xmlChRangeGroup = unsafe {
         longRange: &raw const xmlIsChar_lrng as *const xmlChLRange,
     }
 };
-static mut xmlIsCombining_srng: [xmlChSRange; 95] = [
+static xmlIsCombining_srng: [xmlChSRange; 95] = [
     _xmlChSRange {
         low: 0x300 as ::core::ffi::c_ushort,
         high: 0x345 as ::core::ffi::c_ushort,
@@ -1487,7 +1490,7 @@ static mut xmlIsCombining_srng: [xmlChSRange; 95] = [
     },
 ];
 #[no_mangle]
-pub static mut xmlIsCombiningGroup: xmlChRangeGroup = unsafe {
+pub static xmlIsCombiningGroup: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 95 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -1495,7 +1498,7 @@ pub static mut xmlIsCombiningGroup: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>() as *mut xmlChLRange as *const xmlChLRange,
     }
 };
-static mut xmlIsDigit_srng: [xmlChSRange; 14] = [
+static xmlIsDigit_srng: [xmlChSRange; 14] = [
     _xmlChSRange {
         low: 0x660 as ::core::ffi::c_ushort,
         high: 0x669 as ::core::ffi::c_ushort,
@@ -1554,7 +1557,7 @@ static mut xmlIsDigit_srng: [xmlChSRange; 14] = [
     },
 ];
 #[no_mangle]
-pub static mut xmlIsDigitGroup: xmlChRangeGroup = unsafe {
+pub static xmlIsDigitGroup: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 14 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -1562,7 +1565,7 @@ pub static mut xmlIsDigitGroup: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>() as *mut xmlChLRange as *const xmlChLRange,
     }
 };
-static mut xmlIsExtender_srng: [xmlChSRange; 10] = [
+static xmlIsExtender_srng: [xmlChSRange; 10] = [
     _xmlChSRange {
         low: 0x2d0 as ::core::ffi::c_ushort,
         high: 0x2d0 as ::core::ffi::c_ushort,
@@ -1605,7 +1608,7 @@ static mut xmlIsExtender_srng: [xmlChSRange; 10] = [
     },
 ];
 #[no_mangle]
-pub static mut xmlIsExtenderGroup: xmlChRangeGroup = unsafe {
+pub static xmlIsExtenderGroup: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 10 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -1613,7 +1616,7 @@ pub static mut xmlIsExtenderGroup: xmlChRangeGroup = unsafe {
         longRange: ::core::ptr::null::<xmlChLRange>() as *mut xmlChLRange as *const xmlChLRange,
     }
 };
-static mut xmlIsIdeographic_srng: [xmlChSRange; 3] = [
+static xmlIsIdeographic_srng: [xmlChSRange; 3] = [
     _xmlChSRange {
         low: 0x3007 as ::core::ffi::c_ushort,
         high: 0x3007 as ::core::ffi::c_ushort,
@@ -1628,7 +1631,7 @@ static mut xmlIsIdeographic_srng: [xmlChSRange; 3] = [
     },
 ];
 #[no_mangle]
-pub static mut xmlIsIdeographicGroup: xmlChRangeGroup = unsafe {
+pub static xmlIsIdeographicGroup: xmlChRangeGroup = {
     _xmlChRangeGroup {
         nbShortRange: 3 as ::core::ffi::c_int,
         nbLongRange: 0 as ::core::ffi::c_int,
@@ -1769,7 +1772,7 @@ pub extern "C" fn xmlIsIdeographic(mut ch: ::core::ffi::c_uint) -> ::core::ffi::
 #[no_mangle]
 pub extern "C" fn xmlIsPubidChar(mut ch: ::core::ffi::c_uint) -> ::core::ffi::c_int {
     return if ch < 0x100 as ::core::ffi::c_uint {
-        unsafe { xmlIsPubidChar_tab[ch as usize] as ::core::ffi::c_int }
+        xmlIsPubidChar_tab[ch as usize] as ::core::ffi::c_int
     } else {
         0 as ::core::ffi::c_int
     };
