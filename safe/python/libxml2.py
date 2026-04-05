@@ -1,6 +1,9 @@
+import ctypes
 import libxml2mod
+import os
 import types
 import sys
+import sysconfig
 
 # The root of all libxml2 errors.
 class libxmlError(Exception): pass
@@ -51,6 +54,69 @@ class xpathError(libxmlError):
     def __str__(self):
         return self.msg
 
+_PyCapsule_GetPointer = ctypes.pythonapi.PyCapsule_GetPointer
+_PyCapsule_GetPointer.restype = ctypes.c_void_p
+_PyCapsule_GetPointer.argtypes = [ctypes.py_object, ctypes.c_char_p]
+_libxml2Compat = None
+_libxml2Triplet = sysconfig.get_config_var("MULTIARCH")
+
+def _coerce_path_arg(value):
+    try:
+        return os.fspath(value)
+    except TypeError:
+        return value
+
+def _iter_libxml2_compat_candidates():
+    env = os.environ.get("LIBXML2_PY_LIBXML2")
+    if env:
+        yield env
+
+    module_path = getattr(libxml2mod, "__file__", None)
+    if module_path and _libxml2Triplet:
+        module_dir = os.path.dirname(os.path.abspath(module_path))
+        lib_root = os.path.dirname(os.path.dirname(module_dir))
+        for soname in ("libxml2.so.2", "libxml2.so"):
+            yield os.path.join(lib_root, _libxml2Triplet, soname)
+
+    for soname in ("libxml2.so.2", "libxml2.so"):
+        yield soname
+
+def _load_libxml2_compat():
+    global _libxml2Compat
+    if _libxml2Compat is not None:
+        return _libxml2Compat
+
+    last_error = None
+    for candidate in _iter_libxml2_compat_candidates():
+        try:
+            _libxml2Compat = ctypes.CDLL(candidate)
+            break
+        except OSError as exc:
+            last_error = exc
+    else:
+        raise parserError("could not load libxml2 for Python compatibility wrappers: %s" % (last_error,))
+
+    _libxml2Compat.xmlRelaxParserSetIncLImit.argtypes = [ctypes.c_void_p, ctypes.c_int]
+    _libxml2Compat.xmlRelaxParserSetIncLImit.restype = ctypes.c_int
+    return _libxml2Compat
+
+def _unwrap_relaxng_parser_ctxt(ctxt):
+    if hasattr(ctxt, "_o"):
+        ctxt = ctxt._o
+    if ctxt is None:
+        return None
+    if type(ctxt).__name__ == "PyCapsule":
+        return _PyCapsule_GetPointer(ctxt, b"xmlRelaxNGParserCtxtPtr")
+    return ctxt
+
+def relaxParserSetIncLImit(ctxt, limit):
+    """Set the Relax NG include recursion limit on a parser context. """
+    return _load_libxml2_compat().xmlRelaxParserSetIncLImit(
+        _unwrap_relaxng_parser_ctxt(ctxt), limit
+    )
+
+relaxParserSetIncLimit = relaxParserSetIncLImit
+
 class ioWrapper:
     def __init__(self, _obj):
         self.__io = _obj
@@ -100,7 +166,6 @@ class ioReadWrapper(ioWrapper):
         self._o = libxml2mod.xmlCreateInputBuffer(self, enc)
 
     def __del__(self):
-        print("__del__")
         self.io_close()
         if self._o != None:
             libxml2mod.xmlFreeParserInputBuffer(self._o)
@@ -1649,6 +1714,7 @@ def relaxNGNewMemParserCtxt(buffer, size):
 def relaxNGNewParserCtxt(URL):
     """Create an XML RelaxNGs parse context for that file/resource
        expected to contain an XML RelaxNGs file. """
+    URL = _coerce_path_arg(URL)
     ret = libxml2mod.xmlRelaxNGNewParserCtxt(URL)
     if ret is None:raise parserError('xmlRelaxNGNewParserCtxt() failed')
     return relaxNgParserCtxt(_obj=ret)
@@ -1948,6 +2014,7 @@ def resetLastError():
 def newTextReaderFilename(URI):
     """Create an xmlTextReader structure fed with the resource at
        @URI """
+    URI = _coerce_path_arg(URI)
     ret = libxml2mod.xmlNewTextReaderFilename(URI)
     if ret is None:raise treeError('xmlNewTextReaderFilename() failed')
     return xmlTextReader(_obj=ret)
@@ -1971,6 +2038,7 @@ def readerForFd(fd, URL, encoding, options):
 def readerForFile(filename, encoding, options):
     """parse an XML file from the filesystem or the network. The
       parsing flags @options are a combination of xmlParserOption. """
+    filename = _coerce_path_arg(filename)
     ret = libxml2mod.xmlReaderForFile(filename, encoding, options)
     if ret is None:raise treeError('xmlReaderForFile() failed')
     return xmlTextReader(_obj=ret)
@@ -2008,6 +2076,7 @@ def schemaNewMemParserCtxt(buffer, size):
 def schemaNewParserCtxt(URL):
     """Create an XML Schemas parse context for that file/resource
        expected to contain an XML Schemas file. """
+    URL = _coerce_path_arg(URL)
     ret = libxml2mod.xmlSchemaNewParserCtxt(URL)
     if ret is None:raise parserError('xmlSchemaNewParserCtxt() failed')
     return SchemaParserCtxt(_obj=ret)
@@ -6196,6 +6265,7 @@ class inputBuffer(ioReadWrapper):
 
     def newTextReader(self, URI):
         """Create an xmlTextReader structure fed with @input """
+        URI = _coerce_path_arg(URI)
         ret = libxml2mod.xmlNewTextReader(self._o, URI)
         if ret is None:raise treeError('xmlNewTextReader() failed')
         __tmp = xmlTextReader(_obj=ret)
@@ -6258,6 +6328,12 @@ class relaxNgParserCtxt:
            context which are a combination of xmlRelaxNGParserFlag . """
         ret = libxml2mod.xmlRelaxParserSetFlag(self._o, flags)
         return ret
+
+    def relaxParserSetIncLImit(self, limit):
+        """Set the Relax NG include recursion limit on the parser context. """
+        return relaxParserSetIncLImit(self, limit)
+
+    relaxParserSetIncLimit = relaxParserSetIncLImit
 
 class relaxNgSchema:
     def __init__(self, _obj=None):
@@ -6502,6 +6578,7 @@ class SchemaValidCtxt(SchemaValidCtxtCore):
     def schemaValidateFile(self, filename, options):
         """Do a schemas validation of the given resource, it will use
            the SAX streamable validation internally. """
+        filename = _coerce_path_arg(filename)
         ret = libxml2mod.xmlSchemaValidateFile(self._o, filename, options)
         return ret
 
@@ -6774,6 +6851,7 @@ class xmlTextReader(xmlTextReaderCore):
           parsing flags @options are a combination of
           xmlParserOption. This reuses the existing @reader
            xmlTextReader. """
+        filename = _coerce_path_arg(filename)
         ret = libxml2mod.xmlReaderNewFile(self._o, filename, encoding, options)
         return ret
 
@@ -6894,6 +6972,7 @@ class xmlTextReader(xmlTextReaderCore):
           processed. Activation is only possible before the first
           Read(). If @rng is None, then RelaxNG schema validation is
            deactivated. """
+        rng = _coerce_path_arg(rng)
         ret = libxml2mod.xmlTextReaderRelaxNGValidate(self._o, rng)
         return ret
 
@@ -6912,6 +6991,7 @@ class xmlTextReader(xmlTextReaderCore):
           processed. Activation is only possible before the first
           Read(). If @xsd is None, then XML Schema validation is
            deactivated. """
+        xsd = _coerce_path_arg(xsd)
         ret = libxml2mod.xmlTextReaderSchemaValidate(self._o, xsd)
         return ret
 
@@ -9343,4 +9423,3 @@ XPATH_STACK_ERROR = 23
 XPATH_FORBID_VARIABLE_ERROR = 24
 XPATH_OP_LIMIT_EXCEEDED = 25
 XPATH_RECURSION_LIMIT_EXCEEDED = 26
-

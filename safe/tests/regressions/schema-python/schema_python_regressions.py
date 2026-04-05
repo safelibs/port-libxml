@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import ctypes
 import os
 from io import BytesIO, StringIO
 from pathlib import Path
@@ -17,9 +16,7 @@ ROOT = Path(__file__).resolve().parents[4]
 STAGE = ROOT / "safe" / "target" / "stage"
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 ORIGINAL = ROOT / "original"
-TRIPLET = subprocess.check_output(["gcc", "-print-multiarch"], text=True).strip()
 SITE_PACKAGES = STAGE / "usr" / "lib" / "python3" / "dist-packages"
-LIBXML2_SO = STAGE / "usr" / "lib" / TRIPLET / "libxml2.so"
 SAFE_XMLLINT = STAGE / "usr" / "bin" / "xmllint"
 ORIGINAL_XMLLINT = ORIGINAL / ".libs" / "xmllint"
 
@@ -84,10 +81,10 @@ def run_python_reader_schema_regression() -> None:
     def collect_errors(_arg, msg, _severity, _locator) -> None:
         valid_errors.append(str(msg))
 
-    reader = libxml2.newTextReaderFilename(str(valid_xml))
+    reader = libxml2.newTextReaderFilename(valid_xml)
     require(reader is not None, "failed to create reader for valid XML fixture")
     reader.SetErrorHandler(collect_errors, None)
-    require(reader.SchemaValidate(str(schema_path)) == 0, "SchemaValidate rejected valid schema")
+    require(reader.SchemaValidate(schema_path) == 0, "SchemaValidate rejected valid schema")
     status = drain_reader(reader)
     require(status == 0, f"reader failed on valid XML fixture with status {status}")
     require(reader.IsValid() == 1, f"reader did not report a valid document: {reader.IsValid()}")
@@ -98,67 +95,45 @@ def run_python_reader_schema_regression() -> None:
     def collect_invalid_errors(_arg, msg, _severity, _locator) -> None:
         invalid_errors.append(str(msg))
 
-    reader = libxml2.newTextReaderFilename(str(invalid_xml))
+    reader = libxml2.newTextReaderFilename(invalid_xml)
     require(reader is not None, "failed to create reader for invalid XML fixture")
     reader.SetErrorHandler(collect_invalid_errors, None)
-    require(reader.SchemaValidate(str(schema_path)) == 0, "SchemaValidate rejected schema for invalid fixture")
+    require(reader.SchemaValidate(schema_path) == 0, "SchemaValidate rejected schema for invalid fixture")
     status = drain_reader(reader)
     require(status in (0, -1), f"reader returned unexpected status on invalid XML fixture: {status}")
     require(reader.IsValid() != 1, "reader incorrectly reported the invalid fixture as valid")
     require(invalid_errors, "reader validation did not report an error for the invalid fixture")
 
-
-def load_libxml2() -> ctypes.CDLL:
-    lib = ctypes.CDLL(str(LIBXML2_SO))
-    lib.xmlRelaxNGNewParserCtxt.argtypes = [ctypes.c_char_p]
-    lib.xmlRelaxNGNewParserCtxt.restype = ctypes.c_void_p
-    lib.xmlRelaxParserSetIncLImit.argtypes = [ctypes.c_void_p, ctypes.c_int]
-    lib.xmlRelaxParserSetIncLImit.restype = ctypes.c_int
-    lib.xmlRelaxNGParse.argtypes = [ctypes.c_void_p]
-    lib.xmlRelaxNGParse.restype = ctypes.c_void_p
-    lib.xmlRelaxNGFree.argtypes = [ctypes.c_void_p]
-    lib.xmlRelaxNGFree.restype = None
-    lib.xmlRelaxNGFreeParserCtxt.argtypes = [ctypes.c_void_p]
-    lib.xmlRelaxNGFreeParserCtxt.restype = None
-    return lib
-
-
-def parse_relaxng_schema(lib: ctypes.CDLL, schema_path: Path, include_limit: int | None = None) -> int:
-    parser_ctxt = lib.xmlRelaxNGNewParserCtxt(os.fsencode(schema_path))
-    require(parser_ctxt != 0, f"failed to allocate parser context for {schema_path}")
+def parse_relaxng_schema(schema_path: Path, include_limit: int | None = None):
+    parser_ctxt = libxml2.relaxNGNewParserCtxt(schema_path)
+    if include_limit is not None:
+        require(
+            parser_ctxt.relaxParserSetIncLImit(include_limit) == 0,
+            f"xmlRelaxParserSetIncLImit rejected {include_limit}",
+        )
     try:
-        if include_limit is not None:
-            require(
-                lib.xmlRelaxParserSetIncLImit(parser_ctxt, include_limit) == 0,
-                f"xmlRelaxParserSetIncLImit rejected {include_limit}",
-            )
-        schema = lib.xmlRelaxNGParse(parser_ctxt)
-        if schema:
-            lib.xmlRelaxNGFree(schema)
-            return int(schema)
-        return 0
-    finally:
-        lib.xmlRelaxNGFreeParserCtxt(parser_ctxt)
+        return parser_ctxt.relaxNGParse()
+    except libxml2.parserError:
+        return None
 
 
 def run_relaxng_include_limit_regression() -> None:
-    lib = load_libxml2()
     schema_path = ORIGINAL / "test" / "relaxng" / "include" / "include-limit.rng"
 
-    require(parse_relaxng_schema(lib, schema_path) != 0, "default Relax NG include limit rejected the fixture")
-    require(parse_relaxng_schema(lib, schema_path, 2) == 0, "Relax NG include limit 2 should reject the fixture")
-    require(parse_relaxng_schema(lib, schema_path, 3) != 0, "Relax NG include limit 3 should accept the fixture")
+    require(parse_relaxng_schema(schema_path) is not None, "default Relax NG include limit rejected the fixture")
+    require(parse_relaxng_schema(schema_path, 2) is None, "Relax NG include limit 2 should reject the fixture")
+    require(parse_relaxng_schema(schema_path, 3) is not None, "Relax NG include limit 3 should accept the fixture")
 
     previous = os.environ.get("RNG_INCLUDE_LIMIT")
     try:
         os.environ["RNG_INCLUDE_LIMIT"] = "2"
         require(
-            parse_relaxng_schema(lib, schema_path) == 0,
+            parse_relaxng_schema(schema_path) is None,
             "RNG_INCLUDE_LIMIT=2 should reject the include-limit fixture",
         )
         os.environ["RNG_INCLUDE_LIMIT"] = "3"
         require(
-            parse_relaxng_schema(lib, schema_path) != 0,
+            parse_relaxng_schema(schema_path) is not None,
             "RNG_INCLUDE_LIMIT=3 should accept the include-limit fixture",
         )
     finally:
