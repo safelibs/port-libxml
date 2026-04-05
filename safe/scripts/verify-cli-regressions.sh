@@ -38,6 +38,7 @@ unset SGML_CATALOG_FILES
 
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
+TESTAPI_ROOT_SCRATCH="$ROOT/test.out"
 
 normalize_help() {
   python3 -c 'import sys; text = sys.stdin.read().replace("\r\n", "\n"); print("\n".join(line.rstrip() for line in text.splitlines()) + "\n", end="")'
@@ -72,8 +73,29 @@ python3 "$ROOT/safe/tests/regressions/core/cli/xmllint_compat.py" "$ROOT" "$STAG
 
 "$ROOT/safe/tests/upstream/build_helpers.sh"
 
-env LD_LIBRARY_PATH="$LIBDIR:${LD_LIBRARY_PATH:-}" \
-  "$ROOT/safe/target/upstream-bin/testapi" -q debugXML
+run_testapi_debugxml_probe() {
+  local probe_cwd="$TMPDIR/testapi-debugxml"
+
+  if [[ -e "$TESTAPI_ROOT_SCRATCH" ]]; then
+    printf 'unexpected preexisting repo-root scratch file: %s\n' "$TESTAPI_ROOT_SCRATCH" >&2
+    exit 1
+  fi
+
+  mkdir -p "$probe_cwd"
+  (
+    # testapi writes test.out relative to the current working directory.
+    cd "$probe_cwd"
+    env LD_LIBRARY_PATH="$LIBDIR:${LD_LIBRARY_PATH:-}" \
+      "$ROOT/safe/target/upstream-bin/testapi" -q debugXML
+  )
+
+  if [[ -e "$TESTAPI_ROOT_SCRATCH" ]]; then
+    printf 'testapi debugXML probe dirtied repo root: %s\n' "$TESTAPI_ROOT_SCRATCH" >&2
+    exit 1
+  fi
+}
+
+run_testapi_debugxml_probe
 
 "$ROOT/safe/scripts/run-upstream-tests.sh" cli-shell
 
