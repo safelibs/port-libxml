@@ -65,8 +65,10 @@ capture_help() {
   fi
 }
 
-capture_help xmllint 0
+capture_help xmllint 1
 capture_help xmlcatalog 1
+
+python3 "$ROOT/safe/tests/regressions/core/cli/xmllint_compat.py" "$ROOT" "$STAGE"
 
 "$ROOT/safe/tests/upstream/build_helpers.sh"
 

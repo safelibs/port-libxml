@@ -8,13 +8,21 @@ use crate::debug::debug_xml::xmlDebugDumpDocument;
 use crate::debug::shell::{order_doc_for_shell, stdout_handle, xmllint_shell_readline};
 use crate::foundation::globals::{
     xmlDoValidityCheckingDefaultValue, xmlGetWarningsDefaultValue, xmlLoadExtDtdDefaultValue,
+    LIBXML_VERSION_STRING,
 };
 use crate::foundation::memory::xmlMemoryDump;
 use crate::internal_ffi;
 use crate::parser::parser::{
-    xmlParserCtxt, XML_PARSE_BIG_LINES, XML_PARSE_COMPACT, XML_PARSE_DTDVALID, XML_PARSE_NOENT,
-    XML_PARSE_NONET, XML_PARSE_NOWARNING, XML_PARSE_NOXINCNODE, XML_PARSE_OLD10,
-    XML_PARSE_XINCLUDE,
+    xmlHasFeature, xmlParserCtxt, XML_PARSE_BIG_LINES, XML_PARSE_COMPACT, XML_PARSE_DTDVALID,
+    XML_PARSE_NOENT, XML_PARSE_NONET, XML_PARSE_NOWARNING, XML_PARSE_NOXINCNODE,
+    XML_PARSE_OLD10, XML_PARSE_XINCLUDE, XML_WITH_AUTOMATA, XML_WITH_C14N,
+    XML_WITH_CATALOG, XML_WITH_DEBUG, XML_WITH_DEBUG_MEM, XML_WITH_DEBUG_RUN, XML_WITH_EXPR,
+    XML_WITH_FTP, XML_WITH_HTML, XML_WITH_HTTP, XML_WITH_ICONV, XML_WITH_ICU,
+    XML_WITH_ISO8859X, XML_WITH_LEGACY, XML_WITH_LZMA, XML_WITH_MODULES, XML_WITH_OUTPUT,
+    XML_WITH_PATTERN, XML_WITH_PUSH, XML_WITH_READER, XML_WITH_REGEXP, XML_WITH_SAX1,
+    XML_WITH_SCHEMAS, XML_WITH_SCHEMATRON, XML_WITH_THREAD, XML_WITH_TREE, XML_WITH_UNICODE,
+    XML_WITH_VALID, XML_WITH_WRITER, XML_WITH_XINCLUDE, XML_WITH_XPATH, XML_WITH_XPTR,
+    XML_WITH_ZLIB,
 };
 use crate::parser::xmlreader::XML_PARSER_VALIDATE;
 use core::ffi::{c_char, c_int, c_void};
@@ -260,6 +268,58 @@ fn usage(name: &str) {
     );
 }
 
+fn show_version(name: &str) {
+    let version = CStr::from_bytes_with_nul(&LIBXML_VERSION_STRING)
+        .expect("LIBXML_VERSION_STRING must be NUL-terminated")
+        .to_string_lossy();
+    eprintln!("{name}: using libxml version {version}");
+
+    let features = [
+        (XML_WITH_THREAD, "Threads"),
+        (XML_WITH_TREE, "Tree"),
+        (XML_WITH_OUTPUT, "Output"),
+        (XML_WITH_PUSH, "Push"),
+        (XML_WITH_READER, "Reader"),
+        (XML_WITH_PATTERN, "Patterns"),
+        (XML_WITH_WRITER, "Writer"),
+        (XML_WITH_SAX1, "SAXv1"),
+        (XML_WITH_FTP, "FTP"),
+        (XML_WITH_HTTP, "HTTP"),
+        (XML_WITH_VALID, "DTDValid"),
+        (XML_WITH_HTML, "HTML"),
+        (XML_WITH_LEGACY, "Legacy"),
+        (XML_WITH_C14N, "C14N"),
+        (XML_WITH_CATALOG, "Catalog"),
+        (XML_WITH_XPATH, "XPath"),
+        (XML_WITH_XPTR, "XPointer"),
+        (XML_WITH_XINCLUDE, "XInclude"),
+        (XML_WITH_ICONV, "Iconv"),
+        (XML_WITH_ICU, "ICU"),
+        (XML_WITH_ISO8859X, "ISO8859X"),
+        (XML_WITH_UNICODE, "Unicode"),
+        (XML_WITH_REGEXP, "Regexps"),
+        (XML_WITH_AUTOMATA, "Automata"),
+        (XML_WITH_EXPR, "Expr"),
+        (XML_WITH_SCHEMAS, "Schemas"),
+        (XML_WITH_SCHEMATRON, "Schematron"),
+        (XML_WITH_MODULES, "Modules"),
+        (XML_WITH_DEBUG, "Debug"),
+        (XML_WITH_DEBUG_MEM, "MemDebug"),
+        (XML_WITH_DEBUG_RUN, "RunDebug"),
+        (XML_WITH_ZLIB, "Zlib"),
+        (XML_WITH_LZMA, "Lzma"),
+    ];
+
+    let mut compiled = String::from("   compiled with: ");
+    for (feature, label) in features {
+        if unsafe { xmlHasFeature(feature) } != 0 {
+            compiled.push_str(label);
+            compiled.push(' ');
+        }
+    }
+    eprintln!("{compiled}");
+}
+
 fn parse_args(args: &[std::ffi::OsString]) -> Result<(Config, Vec<CString>), i32> {
     let mut cfg = Config {
         options: XML_PARSE_COMPACT as c_int | XML_PARSE_BIG_LINES as c_int,
@@ -376,14 +436,7 @@ fn parse_args(args: &[std::ffi::OsString]) -> Result<(Config, Vec<CString>), i32
                 cfg.output = Some(cstring_from_os(args[i].as_os_str())?);
             }
             "-version" | "--version" => {
-                eprintln!(
-                    "{name}: using staged libxml2-safe",
-                    name = args[0].to_string_lossy()
-                );
-                return Err(XMLLINT_RETURN_OK);
-            }
-            "-help" | "--help" => {
-                usage(&args[0].to_string_lossy());
+                show_version(&args[0].to_string_lossy());
                 return Err(XMLLINT_RETURN_OK);
             }
             _ => {
