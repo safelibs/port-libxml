@@ -418,6 +418,15 @@ env = {}
 compare = "schematron xmllint output diff against original-linked xmllint"
 
 [[entry]]
+name = "schema-python-regressions"
+subsets = ["schema", "python-bindings"]
+runner = "python_script"
+script = "safe/tests/regressions/schema-python/schema_python_regressions.py"
+cwd = "safe/target/upstream-logs"
+argv = []
+env = {}
+
+[[entry]]
 name = "python-tests"
 subsets = ["python-bindings"]
 runner = "python_tests"
