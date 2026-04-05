@@ -1,6 +1,8 @@
 #!/bin/sh
 
-python3 <<EOF
+set -e
+
+python3 <<'EOF'
 import libxml2
 import sys
 

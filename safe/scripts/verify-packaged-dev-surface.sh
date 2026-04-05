@@ -160,6 +160,17 @@ split_dependencies() {
   done
 }
 
+validate_control_local_packages() {
+  local package
+
+  for package in "${LOCAL_PACKAGES[@]}"; do
+    if ! printf '%s\n' "${CONTROL_DEPS[@]}" | grep -Fx "$package" >/dev/null; then
+      printf 'autopkgtest control is missing local package dependency: %s\n' "$package" >&2
+      exit 1
+    fi
+  done
+}
+
 install_packages() {
   local deb_path
   local package
@@ -192,6 +203,140 @@ normalize_xml2conf() {
   local triplet="$1"
   local path="$2"
   sed "s#/lib/$triplet#/lib#g" "$path" | sed '/^$/d' | tr -s ' ' | sed 's/ $//'
+}
+
+verify_package_file_contract() {
+  local triplet
+
+  triplet="$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
+  python3 - "$BASELINE_DIR/package-files.txt" "$triplet" <<'PY'
+import difflib
+import re
+import subprocess
+import sys
+from pathlib import Path
+
+baseline_path = Path(sys.argv[1])
+triplet = sys.argv[2]
+packages = ["libxml2", "libxml2-dev", "libxml2-utils", "python3-libxml2"]
+
+
+def parse_baseline(path: Path) -> dict[str, list[str]]:
+    sections: dict[str, list[str]] = {}
+    current: str | None = None
+    for raw_line in path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("[") and line.endswith("]"):
+            current = line[1:-1]
+            sections[current] = []
+            continue
+        if current is None:
+            raise SystemExit(f"{path}: encountered entry outside a package section: {line}")
+        sections[current].append(line)
+    return sections
+
+
+def installed_paths(package: str) -> set[str]:
+    output = subprocess.check_output(["dpkg-query", "-L", package], text=True)
+    return {line.strip() for line in output.splitlines() if line.strip() and line.strip() != "/."}
+
+
+def require_all(paths: set[str], required: list[str], package: str) -> None:
+    missing = [path for path in required if path not in paths]
+    if missing:
+        missing_text = "\n".join(f"  {path}" for path in missing)
+        raise SystemExit(f"{package}: missing installed contract paths:\n{missing_text}")
+
+
+def contract_paths(package: str, paths: set[str], triplet: str) -> list[str]:
+    if package == "libxml2":
+        shared = sorted(
+            path
+            for path in paths
+            if re.fullmatch(rf"/usr/lib/{re.escape(triplet)}/libxml2\.so\.\d+(?:\.\d+)*", path)
+        )
+        fixed = ["/usr/lib", f"/usr/lib/{triplet}"]
+        require_all(paths, fixed, package)
+        if not shared:
+            raise SystemExit(f"{package}: no shared library payload found under /usr/lib/{triplet}")
+        return fixed + shared
+
+    if package == "libxml2-dev":
+        headers = sorted(
+            path
+            for path in paths
+            if path.startswith("/usr/include/libxml2/libxml/") and path.endswith(".h")
+        )
+        prefix = [
+            "/usr/bin/xml2-config",
+            "/usr/include/libxml2",
+            "/usr/include/libxml2/config.h",
+            "/usr/include/libxml2/libxml",
+        ]
+        suffix = [
+            "/usr/lib",
+            f"/usr/lib/{triplet}",
+            f"/usr/lib/{triplet}/libxml2.a",
+            f"/usr/lib/{triplet}/libxml2.so",
+            f"/usr/lib/{triplet}/pkgconfig",
+            f"/usr/lib/{triplet}/pkgconfig/libxml-2.0.pc",
+            f"/usr/lib/{triplet}/xml2Conf.sh",
+            "/usr/share/aclocal",
+            "/usr/share/aclocal/libxml2.m4",
+            "/usr/share/man/man1",
+            "/usr/share/man/man1/xml2-config.1.gz",
+            "/usr/share/man/man3",
+            "/usr/share/man/man3/libxml.3.gz",
+        ]
+        require_all(paths, prefix + suffix, package)
+        return prefix + headers + suffix
+
+    if package == "libxml2-utils":
+        fixed = [
+            "/usr/bin/xmlcatalog",
+            "/usr/bin/xmllint",
+            "/usr/share/man/man1",
+            "/usr/share/man/man1/xmlcatalog.1.gz",
+            "/usr/share/man/man1/xmllint.1.gz",
+        ]
+        require_all(paths, fixed, package)
+        return fixed
+
+    if package == "python3-libxml2":
+        fixed = [
+            "/usr/lib/python3/dist-packages",
+            "/usr/lib/python3/dist-packages/drv_libxml2.py",
+            "/usr/lib/python3/dist-packages/libxml2.py",
+            "/usr/lib/python3/dist-packages/libxml2mod.so",
+        ]
+        require_all(paths, fixed, package)
+        return fixed
+
+    raise SystemExit(f"unsupported package {package}")
+
+
+baseline = parse_baseline(baseline_path)
+missing_sections = [package for package in packages if package not in baseline]
+if missing_sections:
+    raise SystemExit(f"{baseline_path}: missing package sections: {', '.join(missing_sections)}")
+
+for package in packages:
+    actual = contract_paths(package, installed_paths(package), triplet)
+    expected = baseline[package]
+    if actual != expected:
+        diff = "\n".join(
+            difflib.unified_diff(
+                expected,
+                actual,
+                fromfile=f"{package}-baseline",
+                tofile=f"{package}-installed",
+                lineterm="",
+            )
+        )
+        raise SystemExit(f"{package}: installed contract differs from baseline:\n{diff}")
+PY
 }
 
 verify_surface() {
@@ -247,9 +392,11 @@ verify_surface() {
 
 run_inside_current_env() {
   load_control_metadata
+  validate_control_local_packages
   split_dependencies
   resolve_local_debs
   install_packages
+  verify_package_file_contract
   verify_surface
 }
 

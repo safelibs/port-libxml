@@ -73,6 +73,36 @@ verify_dev_package_static_archive() {
   fi
 }
 
+require_single_output() {
+  local pattern="$1"
+  local label="$2"
+  local matches
+
+  mapfile -t matches < <(find "$OUT" -maxdepth 1 -type f -name "$pattern" | sort)
+  if [[ "${#matches[@]}" -ne 1 ]]; then
+    printf 'expected exactly one %s under %s (pattern %s)\n' "$label" "$OUT" "$pattern" >&2
+    exit 1
+  fi
+}
+
+verify_output_contract() {
+  local arch
+  local package
+
+  arch="$(dpkg --print-architecture)"
+  for package in libxml2 libxml2-dev libxml2-utils python3-libxml2; do
+    require_single_output "${package}_*.deb" "${package} binary package"
+  done
+
+  require_single_output 'libxml2_*.dsc' 'source package descriptor'
+  require_single_output 'libxml2_*.debian.tar.*' 'debian source tarball'
+  require_single_output 'libxml2_*.orig.tar.*' 'orig source tarball'
+  require_single_output 'libxml2_*_source.buildinfo' 'source buildinfo'
+  require_single_output 'libxml2_*_source.changes' 'source changes'
+  require_single_output "libxml2_*_${arch}.buildinfo" 'binary buildinfo'
+  require_single_output "libxml2_*_${arch}.changes" 'binary changes'
+}
+
 ensure_orig_tarball() {
   local build_root="$1"
   local version
@@ -158,6 +188,7 @@ run_inside_current_env() {
 
   run_build source
   run_build binary
+  verify_output_contract
   verify_dev_package_static_archive
 }
 
@@ -218,6 +249,7 @@ run_in_docker() {
   reset_output_dir
   cp -a "$snapshot_root/safe/target/debs/." "$OUT/"
   rm -rf "$snapshot_root"
+  verify_output_contract
   verify_dev_package_static_archive
 
   return "$status"

@@ -171,6 +171,17 @@ split_dependencies() {
   done
 }
 
+validate_control_local_packages() {
+  local package
+
+  for package in "${LOCAL_PACKAGES[@]}"; do
+    if ! printf '%s\n' "${CONTROL_DEPS[@]}" | grep -Fx "$package" >/dev/null; then
+      printf 'autopkgtest control is missing local package dependency: %s\n' "$package" >&2
+      exit 1
+    fi
+  done
+}
+
 install_packages() {
   local deb_path
   local package
@@ -211,6 +222,7 @@ run_tests() {
 
 run_inside_current_env() {
   load_control_metadata
+  validate_control_local_packages
   split_dependencies
   resolve_local_debs
   install_packages
