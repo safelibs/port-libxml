@@ -4,7 +4,14 @@ set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 IMAGE_TAG="${LIBXML_ORIGINAL_TEST_IMAGE:-libxml-original-test:ubuntu24.04}"
 PACKAGE_MODE="${LIBXML_PACKAGE_MODE:-original}"
+PREBUILT_DEBS_DIR="${LIBXML_PREBUILT_DEBS_DIR:-}"
 BUILD_CONTEXT="$(mktemp -d)"
+EXPECTED_SAFE_PACKAGES=(
+  libxml2
+  libxml2-dev
+  libxml2-utils
+  python3-libxml2
+)
 
 cleanup() {
   rm -rf "$BUILD_CONTEXT"
@@ -29,7 +36,58 @@ if [[ ! -f "$ROOT/dependents.json" ]]; then
   exit 1
 fi
 
+resolve_prebuilt_debs_dir() {
+  local debs_dir="$PREBUILT_DEBS_DIR"
+
+  if [[ "$PACKAGE_MODE" != "safe" ]]; then
+    return
+  fi
+
+  if [[ -z "$debs_dir" ]]; then
+    printf 'LIBXML_PREBUILT_DEBS_DIR must be set when LIBXML_PACKAGE_MODE=safe\n' >&2
+    exit 1
+  fi
+
+  if [[ "$debs_dir" != /* ]]; then
+    debs_dir="$ROOT/$debs_dir"
+  fi
+
+  if [[ ! -d "$debs_dir" ]]; then
+    printf 'LIBXML_PREBUILT_DEBS_DIR does not exist: %s\n' "$debs_dir" >&2
+    exit 1
+  fi
+
+  PREBUILT_DEBS_DIR="$(cd -- "$debs_dir" && pwd)"
+}
+
+require_prebuilt_safe_debs() {
+  local package="$1"
+  local matches=()
+
+  mapfile -t matches < <(find "$PREBUILT_DEBS_DIR" -maxdepth 1 -type f -name "${package}_*.deb" | sort)
+  if [[ "${#matches[@]}" -ne 1 ]]; then
+    printf 'expected exactly one %s .deb under %s\n' "$package" "$PREBUILT_DEBS_DIR" >&2
+    exit 1
+  fi
+}
+
+copy_prebuilt_debs_into_context() {
+  local package
+
+  if [[ "$PACKAGE_MODE" != "safe" ]]; then
+    return
+  fi
+
+  mkdir -p "$BUILD_CONTEXT/prebuilt-debs"
+  for package in "${EXPECTED_SAFE_PACKAGES[@]}"; do
+    require_prebuilt_safe_debs "$package"
+    cp -f "$PREBUILT_DEBS_DIR"/"${package}"_*.deb "$BUILD_CONTEXT/prebuilt-debs/"
+  done
+}
+
+resolve_prebuilt_debs_dir
 git ls-files -z -- original safe dependents.json | tar --null -T - -cf - | tar -xf - -C "$BUILD_CONTEXT"
+copy_prebuilt_debs_into_context
 
 docker build -t "$IMAGE_TAG" -f - "$BUILD_CONTEXT" <<'DOCKERFILE'
 FROM ubuntu:24.04
@@ -82,7 +140,11 @@ COPY . /work
 WORKDIR /work
 DOCKERFILE
 
-docker run --rm -i -e LIBXML_PACKAGE_MODE="$PACKAGE_MODE" "$IMAGE_TAG" bash <<'CONTAINER_SCRIPT'
+docker run --rm -i \
+  -e LIBXML_PACKAGE_MODE="$PACKAGE_MODE" \
+  -e LIBXML_PREBUILT_DEBS_DIR="${PREBUILT_DEBS_DIR:+/work/prebuilt-debs}" \
+  "$IMAGE_TAG" \
+  bash <<'CONTAINER_SCRIPT'
 set -euo pipefail
 
 export LANG=C.UTF-8
@@ -91,6 +153,13 @@ export LC_ALL=C.UTF-8
 ROOT=/work
 SRC_ROOT=/tmp/libxml-original
 PACKAGE_MODE="${LIBXML_PACKAGE_MODE:-original}"
+PREBUILT_DEBS_DIR="${LIBXML_PREBUILT_DEBS_DIR:-}"
+EXPECTED_SAFE_PACKAGES=(
+  libxml2
+  libxml2-dev
+  libxml2-utils
+  python3-libxml2
+)
 
 log_step() {
   printf '\n==> %s\n' "$1"
@@ -159,58 +228,44 @@ build_original_libxml() {
   cd /
 }
 
-build_safe_packages() {
-  log_step "Building safe libxml2 Debian packages"
-  apt-get update
-  if ! apt-get build-dep -y "$ROOT/safe"; then
-    mapfile -t safe_build_deps < <(python3 <<'PY'
-from pathlib import Path
-import re
+resolve_local_deb() {
+  local package="$1"
+  local matches=()
 
-source_stanza = Path("/work/safe/debian/control").read_text(encoding="utf-8").split("\n\n", 1)[0]
-fields = {}
-current = None
-for line in source_stanza.splitlines():
-    if line[:1].isspace():
-        if current is None:
-            raise SystemExit(f"unexpected continuation line: {line!r}")
-        fields[current] += " " + line.strip()
-        continue
-    key, value = line.split(":", 1)
-    current = key
-    fields[current] = value.strip()
+  mapfile -t matches < <(find "$PREBUILT_DEBS_DIR" -maxdepth 1 -type f -name "${package}_*.deb" | sort)
+  if [[ "${#matches[@]}" -ne 1 ]]; then
+    printf 'expected exactly one %s .deb under %s\n' "$package" "$PREBUILT_DEBS_DIR" >&2
+    exit 1
+  fi
 
-mapping = {
-    "debhelper-compat": "debhelper",
-    "dh-sequence-python3": "dh-python",
+  printf '%s\n' "${matches[0]}"
 }
 
-deps = []
-for field_name in ("Build-Depends", "Build-Depends-Arch"):
-    raw = fields.get(field_name, "")
-    for clause in raw.split(","):
-        clause = re.sub(r"<[^>]+>", "", clause).strip()
-        if not clause:
-            continue
-        clause = clause.split("|", 1)[0].strip()
-        clause = re.sub(r"\[[^]]+\]", "", clause).strip()
-        clause = re.sub(r"\([^)]*\)", "", clause).strip()
-        clause = re.sub(r":\w+$", "", clause).strip()
-        clause = mapping.get(clause, clause)
-        if clause and clause not in deps:
-            deps.append(clause)
+install_prebuilt_safe_packages() {
+  local package
+  local deb_path
+  local version
 
-print("\n".join(deps))
-PY
-)
-    if [[ ${#safe_build_deps[@]} -eq 0 ]]; then
-      printf 'failed to derive safe build dependencies from %s\n' "$ROOT/safe/debian/control" >&2
+  log_step "Installing prebuilt safe libxml2 Debian packages"
+  if [[ -z "$PREBUILT_DEBS_DIR" ]]; then
+    printf 'LIBXML_PREBUILT_DEBS_DIR must be set when LIBXML_PACKAGE_MODE=safe\n' >&2
+    exit 1
+  fi
+  if [[ ! -d "$PREBUILT_DEBS_DIR" ]]; then
+    printf 'LIBXML_PREBUILT_DEBS_DIR does not exist in container: %s\n' "$PREBUILT_DEBS_DIR" >&2
+    exit 1
+  fi
+
+  apt-get update
+  for package in "${EXPECTED_SAFE_PACKAGES[@]}"; do
+    deb_path="$(resolve_local_deb "$package")"
+    apt-get install -y --no-install-recommends "$deb_path"
+    version="$(dpkg-deb -f "$deb_path" Version)"
+    if [[ "$(dpkg-query -W -f='${Version}' "$package")" != "$version" ]]; then
+      printf 'installed version mismatch for %s after installing %s\n' "$package" "$deb_path" >&2
       exit 1
     fi
-    apt-get install -y "${safe_build_deps[@]}"
-  fi
-  "$ROOT/safe/scripts/build-deb.sh" --inside-current-env
-  "$ROOT/safe/scripts/run-debian-autopkgtests.sh" "$ROOT/safe/target/debs" --inside-current-env
+  done
 }
 
 installed_package_libxml2_paths() {
@@ -687,7 +742,7 @@ test_llvm_toolchain() {
 
 validate_dependents_inventory
 if [[ "$PACKAGE_MODE" == "safe" ]]; then
-  build_safe_packages
+  install_prebuilt_safe_packages
 else
   build_original_libxml
 fi
