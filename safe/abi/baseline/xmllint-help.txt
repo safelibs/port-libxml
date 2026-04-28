@@ -1,5 +1,5 @@
 Unknown option --help
-Usage : /home/yans/safelibs/pipeline/ports/port-libxml/original/.libs/xmllint [options] XMLfiles ...
+Usage : /home/yans/code/safelibs/ported/libxml/original/.libs/xmllint [options] XMLfiles ...
 	Parse the XML files and output the result of the parsing
 	--version : display the version of the XML library used
 	--debug : dump a debug tree of the in-memory document
