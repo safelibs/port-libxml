@@ -19,5 +19,7 @@ fi
 
 grep -F 'scratch_dir = summary_path.resolve().parent' "$DRIVER" >/dev/null
 grep -F 'tmp = scratch_dir / ".xinclude-driver.res"' "$DRIVER" >/dev/null
+grep -F 'has_live_network_xinclude' "$DRIVER" >/dev/null
+grep -F 'Skipped live-network test' "$DRIVER" >/dev/null
 
-printf 'XInclude driver scratch isolation regression passed\n'
+printf 'XInclude driver scratch isolation and network determinism regression passed\n'

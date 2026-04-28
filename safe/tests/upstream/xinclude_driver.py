@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -11,6 +12,7 @@ import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from urllib.parse import unquote, urlparse
+from xml.etree import ElementTree
 
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -19,6 +21,9 @@ LOG_NAME = "check-xinclude-test-suite.log"
 PYTHON_SITE = ROOT / "safe" / "target" / "stage" / "usr" / "lib" / "python3" / "dist-packages"
 STAGE_LIB = next((ROOT / "safe" / "target" / "stage" / "usr" / "lib").glob("*/libxml2.so.2.9.14")).parent
 ORIGINAL_LIB = ROOT / "original" / ".libs"
+XML_BASE = "{http://www.w3.org/XML/1998/namespace}base"
+XINCLUDE_INCLUDE = "{http://www.w3.org/2001/XInclude}include"
+HTTP_ATTR_RE = re.compile(br"""(?:href|xml:base)\s*=\s*(['"])\s*https?://""", re.IGNORECASE)
 
 
 @dataclass
@@ -27,6 +32,7 @@ class Summary:
     succeeded: int
     failed: int
     errors: int
+    skipped: int = 0
 
 
 def child_env(libdir: Path, *, allow_network: bool) -> dict[str, str]:
@@ -76,17 +82,21 @@ def ensure_matching_baseline() -> int:
     log_path.write_text(safe_log, encoding="utf-8")
 
     if safe_summary != original_summary or safe_log != original_log:
+        (Path.cwd() / f"{LOG_NAME}.safe").write_text(safe_log, encoding="utf-8")
+        (Path.cwd() / f"{LOG_NAME}.original").write_text(original_log, encoding="utf-8")
         print("XInclude suite diverged from original-linked baseline", file=sys.stderr)
         print(
             "safe   : "
             f"{safe_summary.total} tests, {safe_summary.succeeded} succeeded, "
-            f"{safe_summary.failed} failed, {safe_summary.errors} errors",
+            f"{safe_summary.failed} failed, {safe_summary.errors} errors, "
+            f"{safe_summary.skipped} skipped",
             file=sys.stderr,
         )
         print(
             "original: "
             f"{original_summary.total} tests, {original_summary.succeeded} succeeded, "
-            f"{original_summary.failed} failed, {original_summary.errors} errors",
+            f"{original_summary.failed} failed, {original_summary.errors} errors, "
+            f"{original_summary.skipped} skipped",
             file=sys.stderr,
         )
         raise SystemExit(1)
@@ -94,9 +104,36 @@ def ensure_matching_baseline() -> int:
     print("XInclude suite matched original-linked baseline")
     print(
         f"Totals: {safe_summary.total} tests, {safe_summary.succeeded} succeeded, "
-        f"{safe_summary.failed} inherited failure, {safe_summary.errors} inherited errors."
+        f"{safe_summary.failed} inherited failure, {safe_summary.errors} inherited errors, "
+        f"{safe_summary.skipped} skipped live-network cases."
     )
     return 0
+
+
+def is_http_uri(value: str | None) -> bool:
+    if value is None:
+        return False
+    return value.strip().lower().startswith(("http://", "https://"))
+
+
+def has_live_network_xinclude(path: Path) -> bool:
+    """Detect XInclude cases whose result depends on external HTTP services."""
+    try:
+        root = ElementTree.parse(path).getroot()
+    except ElementTree.ParseError:
+        return bool(HTTP_ATTR_RE.search(path.read_bytes()))
+
+    def walk(element, inherited_base: str | None) -> bool:
+        base = element.attrib.get(XML_BASE, inherited_base)
+        if element.tag == XINCLUDE_INCLUDE:
+            href = element.attrib.get("href")
+            if is_http_uri(href):
+                return True
+            if href in {None, ""} and is_http_uri(base):
+                return True
+        return any(walk(child, base) for child in element)
+
+    return walk(root, None)
 
 
 def uri_to_path(value: str) -> Path:
@@ -122,6 +159,7 @@ def suite_run(summary_path: Path) -> int:
     test_succeed = 0
     test_failed = 0
     test_error = 0
+    test_skipped = 0
     error_nr = 0
     error_msg = ""
 
@@ -143,6 +181,7 @@ def suite_run(summary_path: Path) -> int:
         nonlocal test_succeed
         nonlocal test_failed
         nonlocal test_error
+        nonlocal test_skipped
         nonlocal error_nr
         nonlocal error_msg
 
@@ -164,6 +203,12 @@ def suite_run(summary_path: Path) -> int:
         if not uri_path.is_file():
             print(f"Test {uri_value} missing: base {basedir} uri {uri}")
             return -1
+
+        if has_live_network_xinclude(uri_path):
+            test_skipped += 1
+            log.write(f"Skipped live-network test {ident}\n")
+            log.write(f"   File: {uri_value}\n\n")
+            return 0
 
         expected = None
         outputfile = None
@@ -284,14 +329,16 @@ def suite_run(summary_path: Path) -> int:
             old_test_succeed = test_succeed
             old_test_failed = test_failed
             old_test_error = test_error
+            old_test_skipped = test_skipped
             run_test_cases(case)
             print(
-                "   Ran %d tests: %d succeeded, %d failed and %d generated an error"
+                "   Ran %d tests: %d succeeded, %d failed, %d generated an error and %d skipped"
                 % (
                     test_nr - old_test_nr,
                     test_succeed - old_test_succeed,
                     test_failed - old_test_failed,
                     test_error - old_test_error,
+                    test_skipped - old_test_skipped,
                 )
             )
         case = case.next
@@ -300,8 +347,8 @@ def suite_run(summary_path: Path) -> int:
     log.close()
 
     print(
-        "Ran %d tests: %d succeeded, %d failed and %d generated an error in %.2f s."
-        % (test_nr, test_succeed, test_failed, test_error, time.time() - start)
+        "Ran %d tests: %d succeeded, %d failed, %d generated an error and %d skipped in %.2f s."
+        % (test_nr, test_succeed, test_failed, test_error, test_skipped, time.time() - start)
     )
 
     summary_path.write_text(
@@ -312,6 +359,7 @@ def suite_run(summary_path: Path) -> int:
                     succeeded=test_succeed,
                     failed=test_failed,
                     errors=test_error,
+                    skipped=test_skipped,
                 )
             ),
             sort_keys=True,
