@@ -110,6 +110,7 @@ def suite_run(summary_path: Path) -> int:
     sys.path.insert(0, str(PYTHON_SITE))
     import libxml2
 
+    scratch_dir = summary_path.resolve().parent
     log_path = Path.cwd() / LOG_NAME
     if log_path.exists():
         log_path.unlink()
@@ -192,7 +193,7 @@ def suite_run(summary_path: Path) -> int:
         else:
             res = doc.xincludeProcess()
             if res >= 0 and expected is not None:
-                tmp = Path(".xinclude-driver.res")
+                tmp = scratch_dir / ".xinclude-driver.res"
                 tmp.write_bytes(b"")
                 doc.saveFile(str(tmp))
                 result = tmp.read_bytes()
