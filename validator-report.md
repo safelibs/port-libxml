@@ -446,3 +446,97 @@ PY
 ## Remaining Assignments
 
 - None.
+
+# Phase 6 Report
+
+Phase: `impl_06_safety_timeout_crash_failures`
+
+## Commits
+
+- Source/test changes: none; the latest phase input artifacts had no failures assigned to `impl_06_safety_timeout_crash_failures`.
+- Package tree commit used for rebuilt `.deb` files and validator lock: `d7514982dbfc13e8ba374089b18dae509ab8af60`
+- Validator commit: `1319bb0374ef66428a42dd71e49553c6d057feaf`
+
+## Scope
+
+- No safety, timeout, crash, panic, hang, resource, network/entity, or decompressor validator failures were assigned to this phase.
+- No Rust budget/resource/parser/tree/schema/XPath/I/O/FFI changes were needed.
+- No new `safe/tests/regressions/validator/safety/` or `safe/tests/security/validator/` tests were needed.
+- Rebuilt the canonical local packages and regenerated the local validator override lock from the committed package tree for phase-6 acceptance evidence.
+
+## Commands
+
+Phase-6 acceptance block:
+
+```bash
+cd /home/yans/safelibs/pipeline/ports/port-libxml
+cargo fmt --manifest-path safe/Cargo.toml --check
+safe/scripts/build-safe.sh
+safe/scripts/verify-validator-regressions.sh safety
+safe/scripts/verify-security-regressions.sh all
+safe/scripts/run-upstream-tests.sh all
+safe/scripts/audit_unsafe.sh
+safe/scripts/audit_residual_c.sh safe/target/stage
+safe/scripts/build-deb.sh
+safe/scripts/prepare-validator-deb-root.sh
+cd validator
+if [ -x .venv/bin/python ]; then VALIDATOR_PYTHON=.venv/bin/python; else VALIDATOR_PYTHON=python3; fi
+if ! "$VALIDATOR_PYTHON" -c 'import yaml' >/dev/null 2>&1; then python3 -m venv .venv && .venv/bin/python -m pip install PyYAML && VALIDATOR_PYTHON=.venv/bin/python; fi
+rm -rf artifacts/libxml-local-safety
+set +e
+PYTHON="$VALIDATOR_PYTHON" bash test.sh --config repositories.yml --tests-root tests --artifact-root artifacts/libxml-local-safety --mode port-04-test --override-deb-root ../safe/target/validator-deb-root --port-deb-lock ../safe/target/validator-deb-root/port-04-test-debs-lock.json --library libxml --record-casts
+validator_status=$?
+set -e
+printf 'validator_status=%s\n' "$validator_status"
+VALIDATOR_STATUS="$validator_status" ARTIFACT_ROOT=artifacts/libxml-local-safety CURRENT_PHASE=impl_06_safety_timeout_crash_failures ALLOWED_NEXT=impl_07_catch_all_remaining_validator_failures "$VALIDATOR_PYTHON" - <<'PY'
+import json, os, pathlib, re
+
+root = pathlib.Path(os.environ["ARTIFACT_ROOT"]) / "port-04-test/results/libxml"
+summary = json.loads((root / "summary.json").read_text())
+assert summary.get("cases") == 86 and summary.get("source_cases") == 5 and summary.get("usage_cases") == 81, summary
+results = [json.loads(path.read_text()) for path in root.glob("*.json") if path.name != "summary.json"]
+failures = [result for result in results if result.get("status") == "failed"]
+assert summary.get("failed") == len(failures), summary
+validator_status = int(os.environ.get("VALIDATOR_STATUS", "0"))
+if validator_status != 0 and not failures:
+    raise AssertionError(f"validator exited {validator_status} without recorded failed testcases")
+remaining = [result["testcase_id"] for result in failures]
+report = pathlib.Path("../validator-report.md").read_text()
+assignments = dict(re.findall(r"^- `([^`]+)` -> `(impl_[^`]+)`:", report, re.MULTILINE))
+current = os.environ["CURRENT_PHASE"]
+targeted = [case_id for case_id in remaining if assignments.get(case_id) == current]
+assert not targeted, f"validator failures assigned to {current} remain: {targeted}"
+allowed = set(os.environ["ALLOWED_NEXT"].split(","))
+missing = [case_id for case_id in remaining if assignments.get(case_id) not in allowed]
+assert not missing, f"remaining failures must be assigned to impl_07; elapsed natural categories cannot point backward: {missing}"
+PY
+```
+
+## Artifacts
+
+- Acceptance log: `safe/target/impl_06_acceptance.log`
+- Rebuilt packages: `safe/target/debs/`
+- Override root: `safe/target/validator-deb-root/libxml`
+- Lock: `safe/target/validator-deb-root/port-04-test-debs-lock.json`
+- Lock release tag: `build-d7514982dbfc`
+- Validator artifact root: `validator/artifacts/libxml-local-safety`
+- Validator summary: `validator/artifacts/libxml-local-safety/port-04-test/results/libxml/summary.json`
+- Validator per-case JSON: `validator/artifacts/libxml-local-safety/port-04-test/results/libxml/*.json`
+- Validator logs: `validator/artifacts/libxml-local-safety/port-04-test/logs/libxml/*.log`
+- Validator casts: `validator/artifacts/libxml-local-safety/port-04-test/casts/libxml/*.cast`
+
+## Results
+
+- Full phase-6 acceptance block passed.
+- `safe/scripts/verify-validator-regressions.sh safety`: no local safety validator regression tests found, matching the no-assigned-failure scope.
+- `safe/scripts/verify-security-regressions.sh all`: passed for the loaded CVE/security corpus.
+- `safe/scripts/run-upstream-tests.sh all`: passed.
+- `safe/scripts/audit_unsafe.sh`: passed and wrote `safe/target/audits/unsafe-audit.tsv`.
+- `safe/scripts/audit_residual_c.sh safe/target/stage`: passed and wrote `safe/target/audits/residual-c-audit.txt`.
+- Validator matrix shell status: `0`.
+- Validator summary: 86 cases, 5 source, 81 usage, 86 passed, 0 failed, 86 casts.
+- No remaining validator failure is assigned to `impl_06_safety_timeout_crash_failures`.
+
+## Remaining Assignments
+
+- None.
