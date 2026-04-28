@@ -117,7 +117,8 @@ Phase: `impl_02_source_cli_c_api_failures`
 - Source/test fix: `996c62da33470814b149cb832043b5de260680a7` (`impl_02 restore xmllint format support`)
 - CLI version parity fix: `4cc76555c1041cf7649d91562a80b4e257735850`
 - Scope correction restoring preexisting ABI baselines: `1109833eaaa9a1dcef29d20133354bac0cdb4fbb`
-- Package tree commit used for rebuilt `.deb` files and validator lock: `1109833eaaa9a1dcef29d20133354bac0cdb4fbb`
+- Lock helper fix for package-tree commit recording: `7a6e3cf86182b00132753c36f77f42dccb257cca`
+- Package tree commit used for rebuilt `.deb` files and validator lock: `7a6e3cf86182b00132753c36f77f42dccb257cca`
 
 ## Fix Summary
 
@@ -125,6 +126,7 @@ Phase: `impl_02_source_cli_c_api_failures`
 - Restored `xmllint --version` parity by printing `xmlParserVersion`, matching the original CLI banner including `LIBXML_VERSION_EXTRA`.
 - Added validator-derived regression `safe/tests/regressions/validator/source/xmllint-parse-format.sh`.
 - Preserved preexisting ABI baseline files; final scoped diff does not include `safe/abi/baseline/`.
+- Updated `safe/scripts/prepare-validator-deb-root.sh` so the lock records the latest `safe/` or `original/` package-tree commit instead of report-only `HEAD`.
 
 ## Commands
 
@@ -162,7 +164,7 @@ PYTHON="$VALIDATOR_PYTHON" bash test.sh --config repositories.yml --tests-root t
 - Rebuilt packages: `safe/target/debs/`
 - Override root: `safe/target/validator-deb-root/libxml`
 - Lock: `safe/target/validator-deb-root/port-04-test-debs-lock.json`
-- Pre-validator log: `safe/target/impl_02_acceptance-pre-validator-rerun.log`
+- Pre-validator log: `safe/target/impl_02_acceptance-pre-validator-lockfix.log`
 - Validator summary: `validator/artifacts/libxml-local-source/port-04-test/results/libxml/summary.json`
 - Validator per-case JSON: `validator/artifacts/libxml-local-source/port-04-test/results/libxml/*.json`
 - Validator logs: `validator/artifacts/libxml-local-source/port-04-test/logs/libxml/*.log`
