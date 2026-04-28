@@ -8,7 +8,7 @@ use crate::debug::debug_xml::xmlDebugDumpDocument;
 use crate::debug::shell::{order_doc_for_shell, stdout_handle, xmllint_shell_readline};
 use crate::foundation::globals::{
     xmlDoValidityCheckingDefaultValue, xmlGetWarningsDefaultValue, xmlLoadExtDtdDefaultValue,
-    LIBXML_VERSION_STRING,
+    xmlParserVersion,
 };
 use crate::foundation::memory::xmlMemoryDump;
 use crate::internal_ffi;
@@ -653,9 +653,7 @@ fn usage(name: &str) {
 }
 
 fn show_version(name: &str) {
-    let version = CStr::from_bytes_with_nul(&LIBXML_VERSION_STRING)
-        .expect("LIBXML_VERSION_STRING must be NUL-terminated")
-        .to_string_lossy();
+    let version = unsafe { CStr::from_ptr(xmlParserVersion) }.to_string_lossy();
     eprintln!("{name}: using libxml version {version}");
 
     let features = [
