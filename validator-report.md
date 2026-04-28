@@ -268,3 +268,91 @@ PY
 ## Remaining Assignments
 
 - `usage-shared-mime-info-mime-cache-build` -> `impl_05_packaging_dependent_failures`: still exits 139 in `update-mime-database`; this is the existing dependent-client crash assignment and is outside phase 3.
+
+# Phase 4 Report
+
+Phase: `impl_04_xmlstarlet_usage_failures`
+
+## Commits
+
+- Source/test changes: none; latest phase input artifacts had no failures assigned to `impl_04_xmlstarlet_usage_failures`.
+- Package tree commit used for rebuilt `.deb` files and validator lock: `1d5ad1ebd39e5d443f1525cb6fef0204789e3f6a`
+- Validator commit: `1319bb0374ef66428a42dd71e49553c6d057feaf`
+
+## Scope
+
+- XMLStarlet validator cases already passed in the phase input artifacts.
+- No Rust, public-header, or XMLStarlet-specific regression test change was needed.
+- `safe/scripts/verify-validator-regressions.sh xmlstarlet` reported no local XMLStarlet validator regression tests, matching the no-assigned-failure scope.
+
+## Commands
+
+Phase-4 acceptance block:
+
+```bash
+cd /home/yans/safelibs/pipeline/ports/port-libxml
+cargo fmt --manifest-path safe/Cargo.toml --check
+safe/scripts/build-safe.sh
+safe/scripts/verify-validator-regressions.sh xmlstarlet
+safe/scripts/run-upstream-tests.sh xpath-valid
+safe/scripts/run-upstream-tests.sh parser
+safe/scripts/run-upstream-tests.sh schema
+safe/scripts/verify-link-compat.sh safe/target/stage --subset full
+safe/scripts/build-deb.sh
+safe/scripts/prepare-validator-deb-root.sh
+cd validator
+if [ -x .venv/bin/python ]; then VALIDATOR_PYTHON=.venv/bin/python; else VALIDATOR_PYTHON=python3; fi
+if ! "$VALIDATOR_PYTHON" -c 'import yaml' >/dev/null 2>&1; then python3 -m venv .venv && .venv/bin/python -m pip install PyYAML && VALIDATOR_PYTHON=.venv/bin/python; fi
+rm -rf artifacts/libxml-local-xmlstarlet
+set +e
+PYTHON="$VALIDATOR_PYTHON" bash test.sh --config repositories.yml --tests-root tests --artifact-root artifacts/libxml-local-xmlstarlet --mode port-04-test --override-deb-root ../safe/target/validator-deb-root --port-deb-lock ../safe/target/validator-deb-root/port-04-test-debs-lock.json --library libxml --record-casts
+validator_status=$?
+set -e
+printf 'validator_status=%s\n' "$validator_status"
+VALIDATOR_STATUS="$validator_status" ARTIFACT_ROOT=artifacts/libxml-local-xmlstarlet CURRENT_PHASE=impl_04_xmlstarlet_usage_failures ALLOWED_NEXT=impl_05_packaging_dependent_failures,impl_06_safety_timeout_crash_failures,impl_07_catch_all_remaining_validator_failures "$VALIDATOR_PYTHON" - <<'PY'
+import json, os, pathlib, re
+
+root = pathlib.Path(os.environ["ARTIFACT_ROOT"]) / "port-04-test/results/libxml"
+summary = json.loads((root / "summary.json").read_text())
+assert summary.get("cases") == 86 and summary.get("source_cases") == 5 and summary.get("usage_cases") == 81, summary
+results = [json.loads(path.read_text()) for path in root.glob("*.json") if path.name != "summary.json"]
+failures = [result for result in results if result.get("status") == "failed"]
+assert summary.get("failed") == len(failures), summary
+validator_status = int(os.environ.get("VALIDATOR_STATUS", "0"))
+if validator_status != 0 and not failures:
+    raise AssertionError(f"validator exited {validator_status} without recorded failed testcases")
+remaining = [result["testcase_id"] for result in failures]
+report = pathlib.Path("../validator-report.md").read_text()
+assignments = dict(re.findall(r"^- `([^`]+)` -> `(impl_[^`]+)`:", report, re.MULTILINE))
+current = os.environ["CURRENT_PHASE"]
+targeted = [case_id for case_id in remaining if assignments.get(case_id) == current]
+assert not targeted, f"validator failures assigned to {current} remain: {targeted}"
+allowed = set(os.environ["ALLOWED_NEXT"].split(","))
+missing = [case_id for case_id in remaining if assignments.get(case_id) not in allowed]
+assert not missing, f"remaining failures lack later-phase assignment: {missing}"
+PY
+```
+
+## Artifacts
+
+- Acceptance log: `safe/target/impl_04_acceptance.log`
+- Rebuilt packages: `safe/target/debs/`
+- Override root: `safe/target/validator-deb-root/libxml`
+- Lock: `safe/target/validator-deb-root/port-04-test-debs-lock.json`
+- Lock release tag: `build-1d5ad1ebd39e`
+- Validator artifact root: `validator/artifacts/libxml-local-xmlstarlet`
+- Validator summary: `validator/artifacts/libxml-local-xmlstarlet/port-04-test/results/libxml/summary.json`
+- Validator per-case JSON: `validator/artifacts/libxml-local-xmlstarlet/port-04-test/results/libxml/*.json`
+- Validator logs: `validator/artifacts/libxml-local-xmlstarlet/port-04-test/logs/libxml/*.log`
+- Validator casts: `validator/artifacts/libxml-local-xmlstarlet/port-04-test/casts/libxml/*.cast`
+
+## Results
+
+- Full phase-4 acceptance block passed.
+- Validator matrix shell status: `0`.
+- Validator summary: 86 cases, 5 source, 81 usage, 85 passed, 1 failed, 86 casts.
+- No remaining validator failure is assigned to `impl_04_xmlstarlet_usage_failures`.
+
+## Remaining Assignments
+
+- `usage-shared-mime-info-mime-cache-build` -> `impl_05_packaging_dependent_failures`: still exits 139 in `update-mime-database`; this is the existing dependent-client crash assignment and is outside phase 4.
