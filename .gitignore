@@ -1,6 +1,7 @@
 check-*.log
 runsuite.log
 typescript
+/validator/
 original/.deps/
 original/.libs/
 original/.memdump
