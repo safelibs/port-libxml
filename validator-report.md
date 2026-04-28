@@ -545,3 +545,75 @@ PY
 ## Remaining Assignments
 
 - None.
+
+# Phase 7 Report
+
+Phase: `impl_07_catch_all_remaining_validator_failures`
+
+## Commits
+
+- Report/no-op phase commit: this commit (`impl_07 record catch-all validator acceptance`)
+- Package tree commit used for rebuilt `.deb` files and validator lock: `831c1e432395eebbb884286615891c2626c27b2c`
+- Validator commit: `1319bb0374ef66428a42dd71e49553c6d057feaf`
+
+## Scope
+
+- Re-parsed the latest phase-6 validator result at `validator/artifacts/libxml-local-safety/port-04-test/results/libxml/summary.json`: 86 cases, 5 source, 81 usage, 86 passed, 0 failed.
+- No remaining validator failure class existed, so no additional safe-side fix or validator regression test was needed.
+- No accepted validator bugs were identified or documented for this phase.
+- Rebuilt the canonical local packages and regenerated the local validator override lock from the committed package tree.
+
+## Commands
+
+Full phase-7 acceptance block:
+
+```bash
+cd /home/yans/safelibs/pipeline/ports/port-libxml
+cargo fmt --manifest-path safe/Cargo.toml --check
+safe/scripts/build-safe.sh
+safe/scripts/verify-validator-regressions.sh all
+safe/scripts/verify-cli-regressions.sh safe/target/stage --schema
+safe/scripts/verify-security-regressions.sh all
+safe/scripts/run-upstream-tests.sh all
+safe/scripts/verify-link-compat.sh safe/target/stage --subset full
+safe/scripts/verify-layouts.sh original safe/target/stage
+safe/scripts/verify-exports.sh safe/target/stage original/.libs/libxml2.so.2.9.14
+safe/scripts/build-deb.sh
+safe/scripts/run-debian-autopkgtests.sh safe/target/debs
+safe/scripts/prepare-validator-deb-root.sh
+cd validator
+PYTHON="$VALIDATOR_PYTHON" bash test.sh --config repositories.yml --tests-root tests --artifact-root artifacts/libxml-local-catch-all --mode port-04-test --override-deb-root ../safe/target/validator-deb-root --port-deb-lock ../safe/target/validator-deb-root/port-04-test-debs-lock.json --library libxml --record-casts
+"$VALIDATOR_PYTHON" tools/verify_proof_artifacts.py --config repositories.yml --tests-root tests --artifact-root artifacts/libxml-local-catch-all --proof-output artifacts/libxml-local-catch-all/proof/port-04-test-validation-proof.json --mode port-04-test --library libxml --require-casts --min-source-cases 5 --min-usage-cases 81 --min-cases 86 --ports-root /home/yans/safelibs/pipeline/ports
+```
+
+## Artifacts
+
+- Rebuilt packages: `safe/target/debs/`
+- Override root: `safe/target/validator-deb-root/libxml`
+- Lock: `safe/target/validator-deb-root/port-04-test-debs-lock.json`
+- Lock release tag: `build-831c1e432395`
+- Validator artifact root: `validator/artifacts/libxml-local-catch-all`
+- Validator summary: `validator/artifacts/libxml-local-catch-all/port-04-test/results/libxml/summary.json`
+- Validator per-case JSON: `validator/artifacts/libxml-local-catch-all/port-04-test/results/libxml/*.json`
+- Validator proof: `validator/artifacts/libxml-local-catch-all/proof/port-04-test-validation-proof.json`
+- Filtered validator artifact root: not created; accepted validator bug count was 0.
+
+## Results
+
+- Full phase-7 acceptance block passed.
+- `safe/scripts/verify-validator-regressions.sh all`: passed all 3 validator regression scripts.
+- `safe/scripts/verify-cli-regressions.sh safe/target/stage --schema`: passed.
+- `safe/scripts/verify-security-regressions.sh all`: passed.
+- `safe/scripts/run-upstream-tests.sh all`: passed.
+- `safe/scripts/verify-link-compat.sh safe/target/stage --subset full`: passed.
+- `safe/scripts/verify-layouts.sh original safe/target/stage`: passed.
+- `safe/scripts/verify-exports.sh safe/target/stage original/.libs/libxml2.so.2.9.14`: passed.
+- Debian autopkgtests for rebuilt local packages: passed (`build`, `run`, `xml2-config`, `xml2Conf.sh`, `utils`).
+- Validator matrix shell status: `0`.
+- Validator summary: 86 cases, 5 source, 81 usage, 86 passed, 0 failed, 86 casts.
+- Proof totals: 86 cases, 5 source, 81 usage, 86 passed, 0 failed, 86 casts.
+- No accepted validator bugs and no remaining validator failures.
+
+## Remaining Assignments
+
+- None.
