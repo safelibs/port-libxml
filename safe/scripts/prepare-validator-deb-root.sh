@@ -86,7 +86,7 @@ lock_path = pathlib.Path(sys.argv[3])
 packages = sys.argv[4:]
 
 commit = subprocess.check_output(
-    ["git", "-C", str(root), "rev-parse", "HEAD"],
+    ["git", "-C", str(root), "log", "-1", "--format=%H", "--", "safe", "original"],
     text=True,
 ).strip()
 
