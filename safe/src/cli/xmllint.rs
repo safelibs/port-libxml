@@ -14,16 +14,18 @@ use crate::foundation::memory::xmlMemoryDump;
 use crate::internal_ffi;
 use crate::parser::parser::{
     xmlHasFeature, xmlParserCtxt, XML_PARSE_BIG_LINES, XML_PARSE_COMPACT, XML_PARSE_DTDVALID,
-    XML_PARSE_NOENT, XML_PARSE_NONET, XML_PARSE_NOWARNING, XML_PARSE_NOXINCNODE, XML_PARSE_OLD10,
-    XML_PARSE_XINCLUDE, XML_WITH_AUTOMATA, XML_WITH_C14N, XML_WITH_CATALOG, XML_WITH_DEBUG,
-    XML_WITH_DEBUG_MEM, XML_WITH_DEBUG_RUN, XML_WITH_EXPR, XML_WITH_FTP, XML_WITH_HTML,
-    XML_WITH_HTTP, XML_WITH_ICONV, XML_WITH_ICU, XML_WITH_ISO8859X, XML_WITH_LEGACY, XML_WITH_LZMA,
-    XML_WITH_MODULES, XML_WITH_OUTPUT, XML_WITH_PATTERN, XML_WITH_PUSH, XML_WITH_READER,
-    XML_WITH_REGEXP, XML_WITH_SAX1, XML_WITH_SCHEMAS, XML_WITH_SCHEMATRON, XML_WITH_THREAD,
-    XML_WITH_TREE, XML_WITH_UNICODE, XML_WITH_VALID, XML_WITH_WRITER, XML_WITH_XINCLUDE,
-    XML_WITH_XPATH, XML_WITH_XPTR, XML_WITH_ZLIB,
+    XML_PARSE_NOBLANKS, XML_PARSE_NOENT, XML_PARSE_NONET, XML_PARSE_NOWARNING,
+    XML_PARSE_NOXINCNODE, XML_PARSE_OLD10, XML_PARSE_XINCLUDE, XML_WITH_AUTOMATA, XML_WITH_C14N,
+    XML_WITH_CATALOG, XML_WITH_DEBUG, XML_WITH_DEBUG_MEM, XML_WITH_DEBUG_RUN, XML_WITH_EXPR,
+    XML_WITH_FTP, XML_WITH_HTML, XML_WITH_HTTP, XML_WITH_ICONV, XML_WITH_ICU, XML_WITH_ISO8859X,
+    XML_WITH_LEGACY, XML_WITH_LZMA, XML_WITH_MODULES, XML_WITH_OUTPUT, XML_WITH_PATTERN,
+    XML_WITH_PUSH, XML_WITH_READER, XML_WITH_REGEXP, XML_WITH_SAX1, XML_WITH_SCHEMAS,
+    XML_WITH_SCHEMATRON, XML_WITH_THREAD, XML_WITH_TREE, XML_WITH_UNICODE, XML_WITH_VALID,
+    XML_WITH_WRITER, XML_WITH_XINCLUDE, XML_WITH_XPATH, XML_WITH_XPTR, XML_WITH_ZLIB,
 };
+use crate::parser::parser_internals::xmlKeepBlanksDefault;
 use crate::parser::xmlreader::XML_PARSER_VALIDATE;
+use crate::parser::xmlsave::XML_SAVE_FORMAT;
 use core::ffi::{c_char, c_int, c_uint, c_void};
 use std::ffi::{CStr, CString, OsStr};
 use std::fs::File;
@@ -233,6 +235,7 @@ struct Config {
     valid: bool,
     xinclude: bool,
     timing: bool,
+    format: bool,
     stream: bool,
     walker: bool,
     noent: bool,
@@ -469,11 +472,11 @@ impl Drop for Reader {
 struct SaveContext(NonNull<xmlSaveCtxt>);
 
 impl SaveContext {
-    fn new(output: Option<&CString>) -> Option<Self> {
+    fn new(output: Option<&CString>, options: c_int) -> Option<Self> {
         let ctxt = if let Some(path) = output {
-            unsafe { xmlSaveToFilename(path.as_ptr(), null(), 0) }
+            unsafe { xmlSaveToFilename(path.as_ptr(), null(), options) }
         } else {
-            unsafe { xmlSaveToFd(1, null(), 0) }
+            unsafe { xmlSaveToFd(1, null(), options) }
         };
         NonNull::new(ctxt).map(Self)
     }
@@ -645,7 +648,7 @@ impl Drop for PatternState<'_> {
 
 fn usage(name: &str) {
     eprintln!(
-        "Usage : {name} [options] XMLfiles ...\n\tParse the XML files and output the result of the parsing\n\t--version : display the version of the XML library used\n\t--debug : dump a debug tree of the in-memory document\n\t--shell : run a navigating shell\n\t--noout : don't output the result tree\n\t--valid : validate the document in addition to std well-formed check\n\t--schema schema : do validation against the WXS schema\n\t--relaxng schema : do RelaxNG validation against the schema\n\t--schematron schema : do validation against a schematron\n\t--timing : print some timings\n\t--output file or -o file: save to a given file\n\t--repeat : repeat 100 times, for timing or profiling\n\t--memory : parse from memory\n\t--nowarning : do not emit warnings from parser/validator\n\t--xinclude : do XInclude processing\n\t--noxincludenode : same but do not generate XInclude nodes\n\t--stream : use the streaming interface to process very large files\n\t--walker : create a reader and walk though the resulting doc\n\t--push : use the push mode of the parser\n\t--pushsmall : use the push mode of the parser using tiny increments\n\t--pattern pattern_value : test the pattern support\n\t--nonet : refuse to fetch DTDs or entities over network\n\t--noent : substitute entity references by their value\n\t--oldxml10: use XML-1.0 parsing rules before the 5th edition"
+        "Usage : {name} [options] XMLfiles ...\n\tParse the XML files and output the result of the parsing\n\t--version : display the version of the XML library used\n\t--debug : dump a debug tree of the in-memory document\n\t--shell : run a navigating shell\n\t--noout : don't output the result tree\n\t--valid : validate the document in addition to std well-formed check\n\t--schema schema : do validation against the WXS schema\n\t--relaxng schema : do RelaxNG validation against the schema\n\t--schematron schema : do validation against a schematron\n\t--timing : print some timings\n\t--output file or -o file: save to a given file\n\t--format : reformat/reindent the output\n\t--repeat : repeat 100 times, for timing or profiling\n\t--memory : parse from memory\n\t--nowarning : do not emit warnings from parser/validator\n\t--xinclude : do XInclude processing\n\t--noxincludenode : same but do not generate XInclude nodes\n\t--stream : use the streaming interface to process very large files\n\t--walker : create a reader and walk though the resulting doc\n\t--push : use the push mode of the parser\n\t--pushsmall : use the push mode of the parser using tiny increments\n\t--pattern pattern_value : test the pattern support\n\t--nonet : refuse to fetch DTDs or entities over network\n\t--noent : substitute entity references by their value\n\t--oldxml10: use XML-1.0 parsing rules before the 5th edition"
     );
 }
 
@@ -767,6 +770,10 @@ fn parse_args(args: &[std::ffi::OsString]) -> Result<(Config, Vec<CString>), i32
                 cfg.options |= XML_PARSE_XINCLUDE as c_int | XML_PARSE_NOXINCNODE as c_int;
             }
             "-timing" | "--timing" => cfg.timing = true,
+            "-format" | "--format" => {
+                cfg.format = true;
+                cfg.options |= XML_PARSE_NOBLANKS as c_int;
+            }
             "-repeat" | "--repeat" => {
                 cfg.repeat = if cfg.repeat == 0 {
                     100
@@ -915,8 +922,13 @@ fn process_node(reader: &Reader, debug: bool, pattern: Option<&mut PatternState<
     }
 }
 
-fn save_doc(doc: &OwnedDoc, output: Option<&CString>) -> i32 {
-    let Some(ctxt) = SaveContext::new(output) else {
+fn save_doc(doc: &OwnedDoc, cfg: &Config) -> i32 {
+    let mut save_options = 0;
+    if cfg.format {
+        save_options |= XML_SAVE_FORMAT as c_int;
+    }
+
+    let Some(ctxt) = SaveContext::new(cfg.output.as_ref(), save_options) else {
         return XMLLINT_ERR_OUT;
     };
     if ctxt.save_doc(doc) {
@@ -1322,6 +1334,9 @@ fn configure_runtime(cfg: &Config) {
         if cfg.noent {
             let _ = xmlSubstituteEntitiesDefault(1);
         }
+        if cfg.format {
+            let _ = xmlKeepBlanksDefault(0);
+        }
         if cfg.valid {
             xmlDoValidityCheckingDefaultValue = 1;
             xmlLoadExtDtdDefaultValue |= 1;
@@ -1372,7 +1387,7 @@ fn run_one(filename: &CString, cfg: &Config) -> i32 {
         if cfg.debug {
             debug_dump_document(&doc);
         } else {
-            status = status.max(save_doc(&doc, cfg.output.as_ref()));
+            status = status.max(save_doc(&doc, cfg));
         }
     }
 
