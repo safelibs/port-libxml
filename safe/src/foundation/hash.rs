@@ -1001,24 +1001,24 @@ pub unsafe extern "C" fn xmlHashScanFull(
     mut f: xmlHashScannerFull,
     mut data: *mut ::core::ffi::c_void,
 ) {
-    let Some(table_ref) = (unsafe { table.as_ref() }) else {
+    if table.is_null() {
         return;
     };
     let Some(scanner) = f else {
         return;
     };
-    let table_entries = table_ref.table;
+    let table_entries = unsafe { (*table).table };
     if table_entries.is_null() {
         return;
     }
     let mut i = 0 as ::core::ffi::c_int;
-    while i < table_ref.size {
+    while i < unsafe { (*table).size } {
         let bucket = unsafe { table_entries.offset(i as isize) as xmlHashEntryPtr };
         if hash_entry_valid(bucket) {
             let mut iter = bucket;
             while !iter.is_null() {
                 let next = hash_entry_next(iter);
-                let nb = table_ref.nbElems;
+                let nb = unsafe { (*table).nbElems };
                 let payload = hash_entry_payload(iter);
                 if !payload.is_null() {
                     unsafe {
@@ -1031,7 +1031,7 @@ pub unsafe extern "C" fn xmlHashScanFull(
                         );
                     }
                 }
-                if nb != table_ref.nbElems {
+                if nb != unsafe { (*table).nbElems } {
                     if iter == bucket {
                         if !hash_entry_valid(bucket) {
                             iter = ::core::ptr::null_mut::<xmlHashEntry>();
@@ -1098,18 +1098,18 @@ pub unsafe extern "C" fn xmlHashScanFull3(
     mut f: xmlHashScannerFull,
     mut data: *mut ::core::ffi::c_void,
 ) {
-    let Some(table_ref) = (unsafe { table.as_ref() }) else {
+    if table.is_null() {
         return;
     };
     let Some(scanner) = f else {
         return;
     };
-    let table_entries = table_ref.table;
+    let table_entries = unsafe { (*table).table };
     if table_entries.is_null() {
         return;
     }
     let mut i = 0 as ::core::ffi::c_int;
-    while i < table_ref.size {
+    while i < unsafe { (*table).size } {
         let bucket = unsafe { table_entries.offset(i as isize) as xmlHashEntryPtr };
         if hash_entry_valid(bucket) {
             let mut iter = bucket;
