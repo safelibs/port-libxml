@@ -617,3 +617,210 @@ PYTHON="$VALIDATOR_PYTHON" bash test.sh --config repositories.yml --tests-root t
 ## Remaining Assignments
 
 - None.
+
+# Phase 8 Final Report
+
+Phase: `impl_08_final_report_clean_run`
+
+## Final Validator Checkout
+
+- Validator URL: `https://github.com/safelibs/validator`
+- Validator branch: `main`
+- Validator commit: `1319bb0374ef66428a42dd71e49553c6d057feaf` (`ci: pre-warm ubuntu:24.04 with retries in each matrix job`)
+- Validator source status: no tracked source modifications; untracked files under `validator/artifacts/` are run artifacts only.
+
+## Safe Commit Range and Phase Commits
+
+- Final package tree commit used for rebuilt `.deb` files and validator lock: `831c1e432395eebbb884286615891c2626c27b2c`
+- Final package lock release tag: `build-831c1e432395`
+- Package-affecting safe/original range covered by the local validator package locks: `be1efbfa371d94cbbf89d512a6f6a1be1c37e458..831c1e432395eebbb884286615891c2626c27b2c`
+- Report/evidence range covered by this final report: `c92a6b3f82088fae47584f3fe69751682c133187..this commit`
+
+Per-phase commits:
+
+| Phase | Commits |
+| --- | --- |
+| `impl_01_validator_baseline` | `be1efbfa371d94cbbf89d512a6f6a1be1c37e458`, `c92a6b3f82088fae47584f3fe69751682c133187` |
+| `impl_02_source_cli_c_api_failures` | `996c62ddae1383f837546a1650cdb4f094f7ab79`, `48979fd7204e4d337a4c10073a3d6d89fed6a527`, `4cc76555c1041cf7649d91562a80b4e257735850`, `763148cfd9be694883a1e1ea6a41d76adf6d2fbd`, `1109833eaaa9a1dcef29d20133354bac0cdb4fbb`, `34e72a7e3026c773286f9f91386abe611275d04a`, `7a6e3cf86182b00132753c36f77f42dccb257cca`, `f89f537531eaa878fd89e8c8115168bccf5f7b2f` |
+| `impl_03_python_lxml_failures` | `1d5ad1ebd39e5d443f1525cb6fef0204789e3f6a`, `27e8321c60ac2bb0b8323a097ec87620a2f6ffb7` |
+| `impl_04_xmlstarlet_usage_failures` | `8fb75d4a6a5f05ccdc733100954ee54916a3a78e` |
+| `impl_05_packaging_dependent_failures` | `d7514982dbfc13e8ba374089b18dae509ab8af60`, `fa40515e3430a5436db6afd2177f387c66cbc0b9` |
+| `impl_06_safety_timeout_crash_failures` | `2a79e7105a107321d511c020004b03dd39bc0927`, `d200c88cce023969954ef6607068e3d29eacd7fa`, `08a229bc188079902216db3654729153f53c2efb`, `d33f2ac7d3fe130c93af7c3b0b79ffc7a6ca3a6f`, `abd87f340d9599e18ac2f5010ebc9457b2ab0296`, `831c1e432395eebbb884286615891c2626c27b2c`, `bf21af2fe96dd1a1814c1ba6243e8211f7a40de4` |
+| `impl_07_catch_all_remaining_validator_failures` | `3d093eb1d1ff3412ea9290981eb58bbda97759da` |
+| `impl_08_final_report_clean_run` | this commit (`impl_08 final report and clean validator run`) |
+
+## Final Package Artifacts
+
+- Rebuilt packages: `safe/target/debs/`
+- Override root: `safe/target/validator-deb-root/libxml`
+- Lock: `safe/target/validator-deb-root/port-04-test-debs-lock.json`
+- Lock package set: `libxml2`, `libxml2-dev`, `libxml2-utils`, `python3-libxml2`
+- Lock package hashes:
+  - `libxml2_2.9.14+dfsg-1.3ubuntu3.7+safelibs1_amd64.deb`: `3b5328eda562b48e0b2a85bcf05146b015069d4119bdf1eb7adf9ace86024bd9`
+  - `libxml2-dev_2.9.14+dfsg-1.3ubuntu3.7+safelibs1_amd64.deb`: `fa08599734c9730556166526223da92d895d484d0057cb7973535a8160c8b83e`
+  - `libxml2-utils_2.9.14+dfsg-1.3ubuntu3.7+safelibs1_amd64.deb`: `ee55d35c8bf9e7c1b283b1f3c2b8c6c5b74c260af7458278e4d4e080697609c6`
+  - `python3-libxml2_2.9.14+dfsg-1.3ubuntu3.7+safelibs1_amd64.deb`: `1bf6aa8c1aa24faaacfe524be04c39f50fdcd27497687863fa6d7f5d02b8e072`
+
+## Fixed Failures and Regression Tests
+
+Fixed validator failures:
+
+- `xmllint-parse-format`: restored `xmllint --format` compatibility and CLI version/banner parity.
+- `usage-shared-mime-info-mime-cache-build`: fixed mutating `xmlHashScanFull`/`xmlHashScanFull3` callback safety so `shared-mime-info` cache generation no longer crashes.
+
+Regression tests retained for validator-derived coverage:
+
+- `safe/tests/regressions/validator/source/xmllint-parse-format.sh`
+- `safe/tests/regressions/validator/dependent/usage-shared-mime-info-mime-cache-build.sh`
+- `safe/tests/regressions/validator/safety/xinclude-driver-scratch-isolation.sh`
+
+No Python/lxml, XMLStarlet, catch-all, or final phase product fix was needed beyond those committed earlier. No update to `safe/tests/regressions/validator/README.md` was required.
+
+## Accepted Validator Bugs
+
+No accepted validator bugs or skips remain in the final run.
+
+```accepted-validator-bugs
+{"case_ids":[]}
+```
+
+Filtered validator artifact root: not created, because accepted validator bug count is 0.
+
+## Final Commands
+
+Final acceptance block executed with `bash`:
+
+```bash
+cd /home/yans/safelibs/pipeline/ports/port-libxml
+set -euo pipefail
+cargo fmt --manifest-path safe/Cargo.toml --check
+safe/scripts/build-safe.sh
+safe/scripts/verify-validator-regressions.sh all
+safe/scripts/verify-cli-regressions.sh safe/target/stage --schema
+safe/scripts/verify-security-regressions.sh all
+safe/scripts/run-upstream-tests.sh all
+safe/scripts/verify-link-compat.sh safe/target/stage --subset full
+safe/scripts/verify-layouts.sh original safe/target/stage
+safe/scripts/verify-exports.sh safe/target/stage original/.libs/libxml2.so.2.9.14
+safe/scripts/verify-pkgconfig.sh safe/target/stage safe/abi/baseline/pkgconfig.txt safe/abi/baseline/xml2-config.txt safe/abi/baseline/xml2Conf.sh.txt
+safe/scripts/audit_unsafe.sh
+safe/scripts/audit_residual_c.sh safe/target/stage
+safe/scripts/build-deb.sh
+safe/scripts/verify-packaged-dev-surface.sh safe/target/debs safe/abi/baseline
+safe/scripts/run-debian-autopkgtests.sh safe/target/debs
+safe/scripts/prepare-validator-deb-root.sh
+cd validator
+if [ -x .venv/bin/python ]; then VALIDATOR_PYTHON=.venv/bin/python; else VALIDATOR_PYTHON=python3; fi
+if ! "$VALIDATOR_PYTHON" -c 'import yaml' >/dev/null 2>&1; then python3 -m venv .venv && .venv/bin/python -m pip install PyYAML && VALIDATOR_PYTHON=.venv/bin/python; fi
+git rev-parse HEAD
+"$VALIDATOR_PYTHON" tools/testcases.py --config repositories.yml --tests-root tests --library libxml --check --min-source-cases 5 --min-usage-cases 81 --min-cases 86
+rm -rf artifacts/libxml-local-final
+set +e
+PYTHON="$VALIDATOR_PYTHON" bash test.sh --config repositories.yml --tests-root tests --artifact-root artifacts/libxml-local-final --mode port-04-test --override-deb-root ../safe/target/validator-deb-root --port-deb-lock ../safe/target/validator-deb-root/port-04-test-debs-lock.json --library libxml --record-casts
+validator_status=$?
+set -e
+printf 'validator_status=%s\n' "$validator_status"
+"$VALIDATOR_PYTHON" tools/verify_proof_artifacts.py --config repositories.yml --tests-root tests --artifact-root artifacts/libxml-local-final --proof-output artifacts/libxml-local-final/proof/port-04-test-validation-proof.json --mode port-04-test --library libxml --require-casts --min-source-cases 5 --min-usage-cases 81 --min-cases 86 --ports-root /home/yans/safelibs/pipeline/ports
+VALIDATOR_STATUS="$validator_status" "$VALIDATOR_PYTHON" - <<'PY'
+import json, os, pathlib, re
+
+report = pathlib.Path("../validator-report.md").read_text()
+match = re.search(r"```accepted-validator-bugs\n(.*?)\n```", report, re.DOTALL)
+accepted = set()
+if match:
+    payload = json.loads(match.group(1))
+    accepted = set(payload.get("case_ids", []))
+root = pathlib.Path("artifacts/libxml-local-final/port-04-test/results/libxml")
+summary = json.loads((root / "summary.json").read_text())
+assert summary.get("cases") == 86 and summary.get("source_cases") == 5 and summary.get("usage_cases") == 81, summary
+failed = set()
+for path in root.glob("*.json"):
+    if path.name == "summary.json":
+        continue
+    result = json.loads(path.read_text())
+    if result.get("status") == "failed":
+        failed.add(result["testcase_id"])
+validator_status = int(os.environ.get("VALIDATOR_STATUS", "0"))
+if validator_status != 0 and not failed:
+    raise AssertionError(f"validator exited {validator_status} without recorded failed testcases")
+assert failed == accepted, f"final unmodified failures differ from accepted validator bugs: failed={sorted(failed)} accepted={sorted(accepted)}"
+PY
+ACCEPTED_COUNT=$("$VALIDATOR_PYTHON" - <<'PY'
+import json, pathlib, re
+report = pathlib.Path("../validator-report.md").read_text()
+match = re.search(r"```accepted-validator-bugs\n(.*?)\n```", report, re.DOTALL)
+print(len(json.loads(match.group(1)).get("case_ids", [])) if match else 0)
+PY
+)
+if [ "$ACCEPTED_COUNT" -gt 0 ]; then
+  FILTERED_ROOT=../safe/target/validator-filtered-tests
+  rm -rf "$FILTERED_ROOT"
+  mkdir -p "$FILTERED_ROOT"
+  cp -a tests "$FILTERED_ROOT/tests"
+  ln -s tests/libxml "$FILTERED_ROOT/libxml"
+  test -f "$FILTERED_ROOT/tests/libxml/testcases.yml"
+  test -f "$FILTERED_ROOT/libxml/Dockerfile"
+  test -d "$FILTERED_ROOT/libxml/tests/cases"
+  FILTERED_ROOT="$FILTERED_ROOT" "$VALIDATOR_PYTHON" - <<'PY'
+import json, os, pathlib, re, yaml
+report = pathlib.Path("../validator-report.md").read_text()
+payload = json.loads(re.search(r"```accepted-validator-bugs\n(.*?)\n```", report, re.DOTALL).group(1))
+accepted = set(payload["case_ids"])
+path = pathlib.Path(os.environ["FILTERED_ROOT"]) / "tests/libxml/testcases.yml"
+data = yaml.safe_load(path.read_text())
+data["testcases"] = [case for case in data["testcases"] if case["id"] not in accepted]
+path.write_text(yaml.safe_dump(data, sort_keys=False))
+PY
+  rm -rf artifacts/libxml-local-final-filtered
+  "$VALIDATOR_PYTHON" tools/testcases.py --config repositories.yml --tests-root "$FILTERED_ROOT" --library libxml --check
+  PYTHON="$VALIDATOR_PYTHON" bash test.sh --config repositories.yml --tests-root "$FILTERED_ROOT" --artifact-root artifacts/libxml-local-final-filtered --mode port-04-test --override-deb-root ../safe/target/validator-deb-root --port-deb-lock ../safe/target/validator-deb-root/port-04-test-debs-lock.json --library libxml --record-casts
+  "$VALIDATOR_PYTHON" tools/verify_proof_artifacts.py --config repositories.yml --tests-root "$FILTERED_ROOT" --artifact-root artifacts/libxml-local-final-filtered --proof-output artifacts/libxml-local-final-filtered/proof/port-04-test-validation-proof.json --mode port-04-test --library libxml --require-casts --ports-root /home/yans/safelibs/pipeline/ports
+  "$VALIDATOR_PYTHON" -c 'import json, pathlib; summary=json.loads(pathlib.Path("artifacts/libxml-local-final-filtered/port-04-test/results/libxml/summary.json").read_text()); assert summary.get("failed") == 0, summary'
+fi
+```
+
+## Final Results
+
+Safe-side checks:
+
+- `cargo fmt --manifest-path safe/Cargo.toml --check`: passed.
+- `safe/scripts/build-safe.sh`: passed.
+- `safe/scripts/verify-validator-regressions.sh all`: passed all 3 validator regression scripts.
+- `safe/scripts/verify-cli-regressions.sh safe/target/stage --schema`: passed.
+- `safe/scripts/verify-security-regressions.sh all`: passed for the relevant CVE/security corpus.
+- `safe/scripts/run-upstream-tests.sh all`: passed, including 3359 main upstream tests with no errors, 2507 XML conformance tests with no failures, XInclude parity with 165 deterministic cases, and schema/fuzzer suites.
+- `safe/scripts/verify-link-compat.sh safe/target/stage --subset full`: passed.
+- `safe/scripts/verify-layouts.sh original safe/target/stage`: passed.
+- `safe/scripts/verify-exports.sh safe/target/stage original/.libs/libxml2.so.2.9.14`: passed.
+- `safe/scripts/verify-pkgconfig.sh safe/target/stage safe/abi/baseline/pkgconfig.txt safe/abi/baseline/xml2-config.txt safe/abi/baseline/xml2Conf.sh.txt`: passed.
+- `safe/scripts/audit_unsafe.sh`: passed; final audit recorded 6290 unsafe occurrences across 50 files and wrote `safe/target/audits/unsafe-audit.tsv`.
+- `safe/scripts/audit_residual_c.sh safe/target/stage`: passed; final audit recorded 44 Rust core modules and 5 residual C shim modules and wrote `safe/target/audits/residual-c-audit.txt`.
+- `safe/scripts/build-deb.sh`: passed.
+- `safe/scripts/verify-packaged-dev-surface.sh safe/target/debs safe/abi/baseline`: passed.
+- `safe/scripts/run-debian-autopkgtests.sh safe/target/debs`: passed (`build`, `run`, `xml2-config`, `xml2Conf.sh`, `utils`).
+- `safe/scripts/prepare-validator-deb-root.sh`: passed and recreated `safe/target/validator-deb-root/` from the freshly built packages.
+
+Validator checks:
+
+- Inventory command passed with 5 source cases, 81 usage cases, 86 total cases.
+- Final matrix shell status: `0`.
+- Final summary: 86 cases, 5 source, 81 usage, 86 passed, 0 failed, 86 casts.
+- Per-case distribution: 44 `python3-lxml`, 36 `xmlstarlet`, 5 source, 1 `shared-mime-info`.
+- Result JSON count: 87 files under `validator/artifacts/libxml-local-final/port-04-test/results/libxml/` including `summary.json`.
+- Logs count: 87 files under `validator/artifacts/libxml-local-final/port-04-test/logs/libxml/` including `docker-build.log`.
+- Cast count: 86 files under `validator/artifacts/libxml-local-final/port-04-test/casts/libxml/`.
+- Proof verification passed: 86 cases, 5 source, 81 usage, 86 passed, 0 failed, 86 casts.
+
+Final artifact paths:
+
+- Validator artifact root: `validator/artifacts/libxml-local-final`
+- Summary: `validator/artifacts/libxml-local-final/port-04-test/results/libxml/summary.json`
+- Per-case JSON: `validator/artifacts/libxml-local-final/port-04-test/results/libxml/*.json`
+- Logs: `validator/artifacts/libxml-local-final/port-04-test/logs/libxml/*.log`
+- Casts: `validator/artifacts/libxml-local-final/port-04-test/casts/libxml/*.cast`
+- Proof: `validator/artifacts/libxml-local-final/proof/port-04-test-validation-proof.json`
+- Filtered proof: not applicable; no accepted validator bugs.
+
+## Final Conclusion
+
+Final local validator conclusion: pass. The final unmodified libxml validator run is clean with zero accepted validator bugs, and all final safe-side regression, ABI, package, audit, upstream, link-compat, and Debian autopkgtest checks passed against freshly rebuilt packages.
