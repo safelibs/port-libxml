@@ -19,9 +19,9 @@ original/.libs/testAutomata	found	preexisting helper oracle
 original/.libs/testModule	found	preexisting helper oracle
 original/.libs/testdso.so	found	preexisting helper oracle
 original/dba100000.xml	found	preexisting generated corpus
-check-xml-test-suite.log	found	preexisting optional oracle
-check-xinclude-test-suite.log	found	preexisting optional oracle
-original/check-xml-test-suite.log	found	preexisting optional oracle
-original/check-xinclude-test-suite.log	found	preexisting optional oracle
+check-xml-test-suite.log	missing	not required for phase-1 build and abi verification
+check-xinclude-test-suite.log	missing	not required for phase-1 build and abi verification
+original/check-xml-test-suite.log	missing	not required for phase-1 build and abi verification
+original/check-xinclude-test-suite.log	missing	not required for phase-1 build and abi verification
 original/xstc/Tests	found	preexisting optional oracle
-original/xstc/Tests/.stamp	found	preexisting optional oracle
+original/xstc/Tests/.stamp	missing	not required for phase-1 build and abi verification
