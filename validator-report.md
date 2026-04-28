@@ -647,7 +647,7 @@ Per-phase commits:
 | `impl_05_packaging_dependent_failures` | `d7514982dbfc13e8ba374089b18dae509ab8af60`, `fa40515e3430a5436db6afd2177f387c66cbc0b9` |
 | `impl_06_safety_timeout_crash_failures` | `2a79e7105a107321d511c020004b03dd39bc0927`, `d200c88cce023969954ef6607068e3d29eacd7fa`, `08a229bc188079902216db3654729153f53c2efb`, `d33f2ac7d3fe130c93af7c3b0b79ffc7a6ca3a6f`, `abd87f340d9599e18ac2f5010ebc9457b2ab0296`, `831c1e432395eebbb884286615891c2626c27b2c`, `bf21af2fe96dd1a1814c1ba6243e8211f7a40de4` |
 | `impl_07_catch_all_remaining_validator_failures` | `3d093eb1d1ff3412ea9290981eb58bbda97759da` |
-| `impl_08_final_report_clean_run` | this commit (`impl_08 final report and clean validator run`) |
+| `impl_08_final_report_clean_run` | `b9c4f4d4668c49fddce320c5715531235b9e9b12`, this commit (`impl_08 align final report with regenerated artifacts`) |
 
 ## Final Package Artifacts
 
@@ -655,11 +655,7 @@ Per-phase commits:
 - Override root: `safe/target/validator-deb-root/libxml`
 - Lock: `safe/target/validator-deb-root/port-04-test-debs-lock.json`
 - Lock package set: `libxml2`, `libxml2-dev`, `libxml2-utils`, `python3-libxml2`
-- Lock package hashes:
-  - `libxml2_2.9.14+dfsg-1.3ubuntu3.7+safelibs1_amd64.deb`: `3b5328eda562b48e0b2a85bcf05146b015069d4119bdf1eb7adf9ace86024bd9`
-  - `libxml2-dev_2.9.14+dfsg-1.3ubuntu3.7+safelibs1_amd64.deb`: `fa08599734c9730556166526223da92d895d484d0057cb7973535a8160c8b83e`
-  - `libxml2-utils_2.9.14+dfsg-1.3ubuntu3.7+safelibs1_amd64.deb`: `ee55d35c8bf9e7c1b283b1f3c2b8c6c5b74c260af7458278e4d4e080697609c6`
-  - `python3-libxml2_2.9.14+dfsg-1.3ubuntu3.7+safelibs1_amd64.deb`: `1bf6aa8c1aa24faaacfe524be04c39f50fdcd27497687863fa6d7f5d02b8e072`
+- Lock content: per-package filenames, sizes, and hashes are recorded in `safe/target/validator-deb-root/port-04-test-debs-lock.json` after `safe/scripts/prepare-validator-deb-root.sh` recreates the override root from the freshly rebuilt packages.
 
 ## Fixed Failures and Regression Tests
 
@@ -688,11 +684,10 @@ Filtered validator artifact root: not created, because accepted validator bug co
 
 ## Final Commands
 
-Final acceptance block executed with `bash`:
+Final acceptance command block:
 
 ```bash
 cd /home/yans/safelibs/pipeline/ports/port-libxml
-set -euo pipefail
 cargo fmt --manifest-path safe/Cargo.toml --check
 safe/scripts/build-safe.sh
 safe/scripts/verify-validator-regressions.sh all
