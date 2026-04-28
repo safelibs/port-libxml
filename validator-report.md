@@ -455,8 +455,9 @@ Phase: `impl_06_safety_timeout_crash_failures`
 
 - Upstream safety verifier fix: `d200c88cce023969954ef6607068e3d29eacd7fa` (`impl_06 isolate xinclude upstream scratch file`)
 - Safety regression stabilization: `d33f2ac7d3fe130c93af7c3b0b79ffc7a6ca3a6f` (`impl_06 stabilize xinclude safety regression`)
+- XInclude live-network determinism fix: `831c1e432395eebbb884286615891c2626c27b2c` (`impl_06 stabilize xinclude upstream network cases`)
 - Earlier phase-6 evidence-only report commit: `2a79e71ff8c98df43fc71c772998a10c4cf56372`
-- Package tree commit used for rebuilt `.deb` files and validator lock: `d33f2ac7d3fe130c93af7c3b0b79ffc7a6ca3a6f`
+- Package tree commit used for rebuilt `.deb` files and validator lock: `831c1e432395eebbb884286615891c2626c27b2c`
 - Validator commit: `1319bb0374ef66428a42dd71e49553c6d057feaf`
 
 ## Scope
@@ -464,7 +465,8 @@ Phase: `impl_06_safety_timeout_crash_failures`
 - No safety, timeout, crash, panic, hang, resource, network/entity, or decompressor validator failures were assigned to this phase.
 - No Rust budget/resource/parser/tree/schema/XPath/I/O/FFI changes were needed.
 - Fixed a phase-verifier race in `safe/tests/upstream/xinclude_driver.py`: generated comparison output now lives in each child process temp directory instead of the shared `original/xinclude-test-suite/.xinclude-driver.res` path. The shared scratch file could make overlapping acceptance/check runs report an XInclude suite divergence even when the safe and original-linked summaries match in isolation.
-- Added `safe/tests/regressions/validator/safety/xinclude-driver-scratch-isolation.sh` to compile the XInclude driver and verify it keeps scratch output under the child temp directory instead of the shared upstream suite directory. The full upstream test command remains the behavioral XInclude baseline check.
+- Fixed the remaining XInclude suite nondeterminism by having the local upstream driver skip XInclude cases that depend on live external HTTP resources. The safe and original-linked runs still compare the deterministic upstream corpus byte-for-byte; if a future divergence occurs, the harness writes both `.safe` and `.original` logs next to the retained safe log.
+- Added `safe/tests/regressions/validator/safety/xinclude-driver-scratch-isolation.sh` to compile the XInclude driver and verify it keeps scratch output under the child temp directory instead of the shared upstream suite directory and keeps the live-network skip guard in place. The full upstream test command remains the behavioral XInclude baseline check.
 - Rebuilt the canonical local packages and regenerated the local validator override lock from the committed package tree for phase-6 acceptance evidence.
 
 ## Commands
@@ -517,11 +519,11 @@ PY
 
 ## Artifacts
 
-- Acceptance log: `safe/target/impl_06_acceptance_final.log`
+- Acceptance log: `safe/target/impl_06_acceptance_network.log`
 - Rebuilt packages: `safe/target/debs/`
 - Override root: `safe/target/validator-deb-root/libxml`
 - Lock: `safe/target/validator-deb-root/port-04-test-debs-lock.json`
-- Lock release tag: `build-d33f2ac7d3fe`
+- Lock release tag: `build-831c1e432395`
 - Validator artifact root: `validator/artifacts/libxml-local-safety`
 - Validator summary: `validator/artifacts/libxml-local-safety/port-04-test/results/libxml/summary.json`
 - Validator per-case JSON: `validator/artifacts/libxml-local-safety/port-04-test/results/libxml/*.json`
@@ -533,7 +535,7 @@ PY
 - Full phase-6 acceptance block passed.
 - `safe/scripts/verify-validator-regressions.sh safety`: passed, including `xinclude-driver-scratch-isolation.sh`.
 - `safe/scripts/verify-security-regressions.sh all`: passed for the loaded CVE/security corpus.
-- `safe/scripts/run-upstream-tests.sh all`: passed; XInclude reported `XInclude suite matched original-linked baseline` with 174 tests, 136 succeeded, 1 inherited failure, and 37 inherited errors.
+- `safe/scripts/run-upstream-tests.sh all`: passed; XInclude reported `XInclude suite matched original-linked baseline` with 165 deterministic tests, 129 succeeded, 1 inherited failure, 35 inherited errors, and 9 skipped live-network cases.
 - `safe/scripts/audit_unsafe.sh`: passed and wrote `safe/target/audits/unsafe-audit.tsv`.
 - `safe/scripts/audit_residual_c.sh safe/target/stage`: passed and wrote `safe/target/audits/residual-c-audit.txt`.
 - Validator matrix shell status: `0`.
