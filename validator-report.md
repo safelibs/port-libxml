@@ -453,15 +453,17 @@ Phase: `impl_06_safety_timeout_crash_failures`
 
 ## Commits
 
-- Source/test changes: none; the latest phase input artifacts had no failures assigned to `impl_06_safety_timeout_crash_failures`.
-- Package tree commit used for rebuilt `.deb` files and validator lock: `d7514982dbfc13e8ba374089b18dae509ab8af60`
+- Upstream safety verifier fix: `d200c88cce023969954ef6607068e3d29eacd7fa` (`impl_06 isolate xinclude upstream scratch file`)
+- Earlier phase-6 evidence-only report commit: `2a79e71ff8c98df43fc71c772998a10c4cf56372`
+- Package tree commit used for rebuilt `.deb` files and validator lock: `d200c88cce023969954ef6607068e3d29eacd7fa`
 - Validator commit: `1319bb0374ef66428a42dd71e49553c6d057feaf`
 
 ## Scope
 
 - No safety, timeout, crash, panic, hang, resource, network/entity, or decompressor validator failures were assigned to this phase.
 - No Rust budget/resource/parser/tree/schema/XPath/I/O/FFI changes were needed.
-- No new `safe/tests/regressions/validator/safety/` or `safe/tests/security/validator/` tests were needed.
+- Fixed a phase-verifier race in `safe/tests/upstream/xinclude_driver.py`: generated comparison output now lives in each child process temp directory instead of the shared `original/xinclude-test-suite/.xinclude-driver.res` path. The shared scratch file could make overlapping acceptance/check runs report an XInclude suite divergence even when the safe and original-linked summaries match in isolation.
+- Added `safe/tests/regressions/validator/safety/xinclude-driver-scratch-isolation.sh` to run concurrent XInclude driver instances and verify both report the original-linked baseline match.
 - Rebuilt the canonical local packages and regenerated the local validator override lock from the committed package tree for phase-6 acceptance evidence.
 
 ## Commands
@@ -514,11 +516,11 @@ PY
 
 ## Artifacts
 
-- Acceptance log: `safe/target/impl_06_acceptance.log`
+- Acceptance log: `safe/target/impl_06_acceptance_rerun.log`
 - Rebuilt packages: `safe/target/debs/`
 - Override root: `safe/target/validator-deb-root/libxml`
 - Lock: `safe/target/validator-deb-root/port-04-test-debs-lock.json`
-- Lock release tag: `build-d7514982dbfc`
+- Lock release tag: `build-d200c88cce02`
 - Validator artifact root: `validator/artifacts/libxml-local-safety`
 - Validator summary: `validator/artifacts/libxml-local-safety/port-04-test/results/libxml/summary.json`
 - Validator per-case JSON: `validator/artifacts/libxml-local-safety/port-04-test/results/libxml/*.json`
@@ -528,9 +530,9 @@ PY
 ## Results
 
 - Full phase-6 acceptance block passed.
-- `safe/scripts/verify-validator-regressions.sh safety`: no local safety validator regression tests found, matching the no-assigned-failure scope.
+- `safe/scripts/verify-validator-regressions.sh safety`: passed, including `xinclude-driver-scratch-isolation.sh`.
 - `safe/scripts/verify-security-regressions.sh all`: passed for the loaded CVE/security corpus.
-- `safe/scripts/run-upstream-tests.sh all`: passed.
+- `safe/scripts/run-upstream-tests.sh all`: passed; XInclude reported `XInclude suite matched original-linked baseline` with 174 tests, 136 succeeded, 1 inherited failure, and 37 inherited errors.
 - `safe/scripts/audit_unsafe.sh`: passed and wrote `safe/target/audits/unsafe-audit.tsv`.
 - `safe/scripts/audit_residual_c.sh safe/target/stage`: passed and wrote `safe/target/audits/residual-c-audit.txt`.
 - Validator matrix shell status: `0`.
