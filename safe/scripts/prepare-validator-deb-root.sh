@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)"
 DEB_ROOT="$ROOT/safe/target/validator-deb-root"
 LIB_ROOT="$DEB_ROOT/libxml"
-LOCK_PATH="$DEB_ROOT/port-04-test-debs-lock.json"
+LOCK_PATH="$DEB_ROOT/port-debs-lock.json"
 DEB_OUT="$ROOT/safe/target/debs"
 CANONICAL_PACKAGES=(libxml2 libxml2-dev libxml2-utils python3-libxml2)
 
@@ -121,7 +121,7 @@ for package in packages:
 
 payload = {
     "schema_version": 1,
-    "mode": "port-04-test",
+    "mode": "port",
     "libraries": [
         {
             "library": "libxml",
